@@ -1,0 +1,107 @@
+<!-- app/templates/pdf_template.html -->
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <style>
+    body { font-family: DejaVu Sans, Arial, sans-serif; font-size:12px; margin:20px; }
+    .header { text-align:center; margin-bottom:8px; font-weight:bold; }
+    .meta { font-size:11px; margin-bottom:10px;}
+    table { width:100%; border-collapse: collapse; }
+    .table, .table td, .table th { border: 1px solid #333; padding:4px; }
+    .no-border { border: none; }
+    .small { font-size:11px; }
+    .firma { margin-top:12px; }
+  </style>
+</head>
+<body>
+  <div class="header">INSPECCIÓN PRE OPERACIONAL MOTOCICLETA</div>
+  <div class="meta">Código: {{ codigo }} &nbsp;&nbsp; Fecha: {{ fecha }} &nbsp;&nbsp; Versión: {{ version }}</div>
+
+  <table>
+    <tr>
+      <td><strong>Nombre Conductor:</strong> {{ registro.nombre_conductor }}</td>
+      <td><strong>Placa:</strong> {{ registro.placa }}</td>
+    </tr>
+    <tr>
+      <td><strong>Proceso:</strong> {{ registro.proceso }}</td>
+      <td><strong>Desde - Hasta:</strong> {{ registro.desde }} - {{ registro.hasta }}</td>
+    </tr>
+    <tr>
+      <td><strong>Marca:</strong> {{ registro.marca }}</td>
+      <td><strong>Gasolina:</strong> {{ registro.gasolina }}</td>
+    </tr>
+    <tr>
+      <td><strong>Modelo:</strong> {{ registro.modelo }}</td>
+      <td><strong>Motor:</strong> {{ registro.motor }}</td>
+    </tr>
+    <tr>
+      <td><strong>Tipo Vehículo:</strong> {{ registro.tipo_vehiculo }}</td>
+      <td><strong>Línea:</strong> {{ registro.linea }}</td>
+    </tr>
+  </table>
+
+  <h3 style="margin-top:8px;">Revisión de Documentos</h3>
+  <table>
+    <tr>
+      <td><strong>Licencia:</strong> {{ registro.licencia_num }}</td>
+      <td><strong>Vencimiento:</strong> {{ registro.licencia_venc }}</td>
+    </tr>
+    <tr>
+      <td><strong>Porte tarjeta propiedad:</strong> {{ registro.porte_propiedad }}</td>
+      <td><strong>SOAT:</strong> {{ registro.soat }}</td>
+    </tr>
+    <tr>
+      <td><strong>Certificado emisión:</strong> {{ registro.certificado_emision }}</td>
+      <td><strong>Póliza:</strong> {{ registro.poliza_seguro }}</td>
+    </tr>
+  </table>
+
+  <h3 style="margin-top:8px;">Aspectos a Revisar</h3>
+  <table class="table">
+    <tr>
+      <th>N°</th><th>Aspecto</th><th>Estado (B/M)</th>
+    </tr>
+    {% set nombres = [
+      "Estado de llantas y presion de aire",
+      "Encendido electrico y de Cran",
+      "Luces y Pito",
+      "Espejos retrovisores",
+      "Manijas de freno y clutch",
+      "Sistema de frenos",
+      "Estado de freno de disco",
+      "Nivel de líquido de freno",
+      "Revisión sistema tablero",
+      "Fugas de combustible y/o aceites",
+      "Kit de arrastre",
+      "Estado de suspensión",
+      "Nivel de aceites"
+    ] %}
+    {% for i, nombre in enumerate(nombres) %}
+      <tr>
+        <td style="width:6%;">{{ i+1 }}</td>
+        <td style="width:70%;">{{ nombre }}</td>
+        <td style="width:24%;">{{ registro.aspectos.get((i+1)|string, "B") }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+
+  <div class="firma">
+    <strong>Observaciones:</strong>
+    <div style="border:1px solid #333; min-height:80px; padding:6px; margin-top:6px;">{{ registro.observaciones }}</div>
+    <div style="margin-top:6px;">
+      <strong>Firma conductor:</strong><br/>
+      {% if registro.firma_file %}
+        <img src="{{ registro.firma_file }}" alt="firma" style="max-width:400px; border:1px solid #000;"/>
+      {% else %}
+        <div style="color:#999;">(sin firma)</div>
+      {% endif %}
+    </div>
+    <div style="margin-top:8px;"><strong>¿El vehículo se encuentra en óptimas condiciones?</strong> {{ registro.condiciones_optimas }}</div>
+  </div>
+
+  <div style="font-size:10px; margin-top:12px;">
+    Nota: Inspeccione todos los elementos que apliquen. Detenga todos los funcionamientos cuando observe alguna condición insegura...
+  </div>
+</body>
+</html>

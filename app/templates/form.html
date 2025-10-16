@@ -1,0 +1,181 @@
+<!-- app/templates/form.html -->
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Inspección Preoperacional - Misionales</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/js/firma.css">
+</head>
+<body class="bg-gray-50 p-4">
+  <div class="max-w-4xl mx-auto bg-white p-6 rounded shadow">
+    <h1 class="text-2xl font-semibold mb-2">INSPECCIÓN PRE OPERACIONAL MOTOCICLETA</h1>
+    <div class="text-sm text-gray-600 mb-4">Código: <strong>FO-SST-063</strong> — Fecha: <strong>{{ fecha }}</strong> — Versión: <strong>01</strong></div>
+
+    <form id="inspeccionForm" method="post" action="/submit">
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm">Nombre Conductor</label>
+          <input name="nombre_conductor" required class="w-full border rounded p-2" />
+        </div>
+        <div>
+          <label class="block text-sm">Placa</label>
+          <input name="placa" class="w-full border rounded p-2" />
+        </div>
+        <div>
+          <label class="block text-sm">Proceso</label>
+          <input name="proceso" class="w-full border rounded p-2" />
+        </div>
+        <div>
+          <label class="block text-sm">Desde</label>
+          <input name="desde" class="w-full border rounded p-2" />
+        </div>
+        <div>
+          <label class="block text-sm">Hasta</label>
+          <input name="hasta" class="w-full border rounded p-2" />
+        </div>
+        <div>
+          <label class="block text-sm">Marca</label>
+          <input name="marca" class="w-full border rounded p-2" />
+        </div>
+        <div>
+          <label class="block text-sm">Gasolina</label>
+          <input name="gasolina" class="w-full border rounded p-2" />
+        </div>
+        <div>
+          <label class="block text-sm">Modelo</label>
+          <input name="modelo" class="w-full border rounded p-2" />
+        </div>
+        <div>
+          <label class="block text-sm">Motor</label>
+          <input name="motor" class="w-full border rounded p-2" />
+        </div>
+        <div>
+          <label class="block text-sm">Línea</label>
+          <input name="linea" class="w-full border rounded p-2" />
+        </div>
+      </div>
+
+      <hr class="my-4" />
+
+      <h2 class="font-medium">Revisión de Documentos</h2>
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="block text-sm">Licencia de Conducción - No.</label>
+          <input name="licencia_num" class="w-full border rounded p-2" />
+          <label class="block text-sm mt-1">Fecha de vencimiento</label>
+          <input name="licencia_venc" type="date" class="w-full border rounded p-2" />
+        </div>
+        <div>
+          <label class="block text-sm">Porte Tarjeta Propiedad</label>
+          <input name="porte_propiedad" class="w-full border rounded p-2" />
+          <label class="block text-sm mt-1">SOAT</label>
+          <input name="soat" class="w-full border rounded p-2" />
+        </div>
+        <div>
+          <label class="block text-sm">Certificado Emisión Gases</label>
+          <input name="certificado_emision" class="w-full border rounded p-2" />
+        </div>
+        <div>
+          <label class="block text-sm">Póliza Seguro</label>
+          <input name="poliza_seguro" class="w-full border rounded p-2" />
+        </div>
+      </div>
+
+      <hr class="my-4" />
+      <h2 class="font-medium">Aspectos a Revisar (marcar B o M)</h2>
+
+      <div id="aspectosContainer" class="grid grid-cols-1 gap-2">
+        <!-- Para facilitar recoger los datos, usaremos un pequeño script que construye un JSON con las respuestas -->
+        {% set aspectos_lista = [
+          "Estado de llantas y presion de aire",
+          "Encendido electrico y de Cran",
+          "Luces y Pito",
+          "Espejos retrovisores",
+          "Manijas de freno y clutch",
+          "Sistema de frenos",
+          "Estado de freno de disco",
+          "Nivel de líquido de freno",
+          "Revisión sistema tablero",
+          "Fugas de combustible y/o aceites",
+          "Kit de arrastre",
+          "Estado de suspensión",
+          "Nivel de aceites"
+        ] %}
+        {% for idx, aspecto in enumerate(aspectos_lista) %}
+        <div class="flex items-center gap-4 p-2 border rounded">
+          <div class="w-3/4 text-sm">{{ idx + 1 }}. {{ aspecto }}</div>
+          <div class="flex gap-2 items-center">
+            <label class="flex items-center gap-1"><input type="radio" name="aspecto_{{ idx }}" value="B" checked> B</label>
+            <label class="flex items-center gap-1"><input type="radio" name="aspecto_{{ idx }}" value="M"> M</label>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <hr class="my-4" />
+      <h2 class="font-medium">Firma del conductor</h2>
+      <p class="text-sm text-gray-500">Firme aquí con el dedo o el mouse. Presiona "Limpiar" para reintentar.</p>
+
+      <div class="border rounded p-2 bg-gray-50">
+        <canvas id="firmaCanvas" width="800" height="200" class="w-full border"></canvas>
+        <div class="mt-2 flex gap-2">
+          <button type="button" id="limpiarBtn" class="px-3 py-1 bg-gray-300 rounded">Limpiar</button>
+          <button type="button" id="guardarBtn" class="px-3 py-1 bg-blue-600 text-white rounded">Guardar firma (preview)</button>
+        </div>
+        <div id="firmaPreview" class="mt-2"></div>
+      </div>
+
+      <div class="mt-4">
+        <label class="block text-sm">Observaciones</label>
+        <textarea name="observaciones" class="w-full border rounded p-2" rows="3"></textarea>
+      </div>
+
+      <div class="mt-4 flex gap-3">
+        <label class="flex items-center gap-2">
+          <input type="radio" name="condiciones_optimas" value="SI" checked> Sí
+        </label>
+        <label class="flex items-center gap-2">
+          <input type="radio" name="condiciones_optimas" value="NO"> No
+        </label>
+      </div>
+
+      <!-- hidden input para enviar JSON con aspectos y dataURL de la firma -->
+      <input type="hidden" name="aspectos" id="aspectosInput" />
+      <input type="hidden" name="firma_dataurl" id="firmaDataInput" />
+
+      <div class="mt-6 flex gap-3">
+        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Enviar y generar PDF</button>
+        <button type="reset" class="bg-gray-200 px-4 py-2 rounded">Limpiar formulario</button>
+      </div>
+    </form>
+  </div>
+
+  <script src="/static/js/firma.js"></script>
+  <script>
+    // Antes de enviar el formulario, recogemos los aspectos en JSON y la firma como dataURL
+    document.getElementById("inspeccionForm").addEventListener("submit", function (e) {
+      // construir JSON de aspectos
+      const aspectos = {};
+      const aspectoElements = document.querySelectorAll('[name^="aspecto_"]');
+      // hay varios radio groups; recorre por índice
+      const maxIdx = 13; // coincidencia con template
+      for (let i = 0; i < maxIdx; i++) {
+        const radios = document.getElementsByName("aspecto_" + i);
+        let val = null;
+        for (const r of radios) {
+          if (r.checked) { val = r.value; break; }
+        }
+        aspectos[i+1] = val || "B";
+      }
+      document.getElementById("aspectosInput").value = JSON.stringify(aspectos);
+
+      // obtener firma
+      const dataUrl = window.firmaApp && window.firmaApp.getDataURL ? window.firmaApp.getDataURL() : "";
+      document.getElementById("firmaDataInput").value = dataUrl;
+      // continúa el envío
+    });
+  </script>
+</body>
+</html>
