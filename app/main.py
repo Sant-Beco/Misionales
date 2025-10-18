@@ -5,6 +5,8 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from app.database import SessionLocal
+from app.models import Inspeccion
 
 # SQLAlchemy
 from app.database import Base, engine
@@ -31,7 +33,17 @@ templates = Jinja2Templates(directory=BASE_DIR / "templates")
 @app.get("/", response_class=HTMLResponse)
 async def form_get(request: Request):
     hoy = datetime.now().strftime("%d - %m - %Y")
-    return templates.TemplateResponse("form.html", {"request": request, "fecha": hoy})
+
+    # Consultar cantidad actual de inspecciones
+    db = SessionLocal()
+    total_inspecciones = db.query(Inspeccion).count()
+    db.close()
+
+    return templates.TemplateResponse(
+        "form.html",
+        {"request": request, "fecha": hoy, "mostrar_reporte": total_inspecciones >= 15}
+    )
+
 
 # Incluir rutas del módulo de inspecciones
 from app.routes_inspecciones import router as inspecciones_router

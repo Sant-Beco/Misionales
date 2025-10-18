@@ -158,9 +158,21 @@
 
       <!-- BOTONES -->
       <div class="mt-6 flex flex-wrap gap-3 justify-center">
-        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Enviar y generar PDF</button>
-        <button type="reset" class="bg-gray-200 px-4 py-2 rounded">Limpiar formulario</button>
+        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">
+          Enviar y generar PDF
+        </button>
+        <button type="reset" class="bg-gray-200 px-4 py-2 rounded">
+          Limpiar formulario
+        </button>
+
+        {% if mostrar_reporte %}
+        <a href="/inspecciones/reporte" target="_blank"
+           class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+          🧾 Generar Reporte Consolidado (últimas 15)
+        </a>
+        {% endif %}
       </div>
+
     </form>
   </div>
 

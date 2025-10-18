@@ -13,6 +13,7 @@ router = APIRouter()
 PDF_DIR = Path("app/data/generated_pdfs")
 PDF_DIR.mkdir(parents=True, exist_ok=True)
 
+
 @router.post("/submit")
 async def submit_inspeccion(
     nombre_conductor: str = Form(...),
@@ -76,13 +77,15 @@ async def submit_inspeccion(
         firma_file=firma_filename
     )
 
-    # Guardar en base de datos
     db.add(inspeccion)
     db.commit()
     db.refresh(inspeccion)
+
+    # Contar inspecciones del conductor
+    total = db.query(models.Inspeccion).filter(models.Inspeccion.nombre_conductor == nombre_conductor).count()
     db.close()
 
-    # Generar PDF
+    # Generar PDF individual
     html_context = {
         "registro": inspeccion,
         "fecha": datetime.now().strftime("%d - %m - %Y"),
@@ -94,6 +97,28 @@ async def submit_inspeccion(
     pdf_path = PDF_DIR / pdf_filename
     render_pdf_from_template("pdf_template.html", html_context, output_path=str(pdf_path))
 
+    # Si ya tiene 15 inspecciones, generar el reporte consolidado automáticamente
+    if total >= 15:
+        reporte_filename = f"reporte15_{nombre_conductor}_{datetime.now().strftime('%Y%m%d%H%M')}.pdf"
+        reporte_path = PDF_DIR / reporte_filename
+
+        db2 = SessionLocal()
+        registros = db2.query(models.Inspeccion).filter(
+            models.Inspeccion.nombre_conductor == nombre_conductor
+        ).order_by(models.Inspeccion.fecha.desc()).limit(15).all()
+        db2.close()
+
+        html_context_multi = {
+            "registros": registros,
+            "fecha": datetime.now().strftime("%d - %m - %Y"),
+            "codigo": "FO-SST-063",
+            "version": "01",
+        }
+
+        render_pdf_from_template("pdf_template_multiple.html", html_context_multi, str(reporte_path))
+        return FileResponse(reporte_path, media_type="application/pdf", filename=reporte_filename)
+
+    # Si no llega a 15, retorna el PDF individual
     return FileResponse(path=str(pdf_path), media_type="application/pdf", filename=pdf_filename)
 
 
@@ -119,3 +144,4 @@ async def generar_pdf15(nombre_conductor: str):
 
     render_pdf_from_template("pdf_template_multiple.html", html_context, str(pdf_path))
     return FileResponse(pdf_path, media_type="application/pdf", filename=pdf_filename)
+
