@@ -63,9 +63,9 @@
       <th>N°</th><th>Aspecto</th><th>Estado (B/M)</th>
     </tr>
     {% set nombres = [
-      "Estado de llantas y presion de aire",
-      "Encendido electrico y de Cran",
-      "Luces y Pito",
+      "Estado de llantas y presión de aire",
+      "Encendido eléctrico y de crank",
+      "Luces y pito",
       "Espejos retrovisores",
       "Manijas de freno y clutch",
       "Sistema de frenos",
@@ -77,11 +77,11 @@
       "Estado de suspensión",
       "Nivel de aceites"
     ] %}
-    {% for i, nombre in enumerate(nombres) %}
+    {% for nombre in nombres %}
       <tr>
-        <td style="width:6%;">{{ i+1 }}</td>
-        <td style="width:70%;">{{ nombre }}</td>
-        <td style="width:24%;">{{ registro.aspectos.get((i+1)|string, "B") }}</td>
+        <td>{{ loop.index }}</td>
+        <td>{{ nombre }}</td>
+        <td>{{ (registro.aspectos or {}).get(loop.index|string, "B") }}</td>
       </tr>
     {% endfor %}
   </table>
@@ -89,6 +89,7 @@
   <div class="firma">
     <strong>Observaciones:</strong>
     <div style="border:1px solid #333; min-height:80px; padding:6px; margin-top:6px;">{{ registro.observaciones }}</div>
+
     <div style="margin-top:6px;">
       <strong>Firma conductor:</strong><br/>
       {% if registro.firma_file %}
@@ -97,11 +98,17 @@
         <div style="color:#999;">(sin firma)</div>
       {% endif %}
     </div>
-    <div style="margin-top:8px;"><strong>¿El vehículo se encuentra en óptimas condiciones?</strong> {{ registro.condiciones_optimas }}</div>
+
+    <div style="margin-top:8px;">
+      <strong>¿El vehículo se encuentra en óptimas condiciones?</strong>
+      {{ registro.condiciones_optimas }}
+    </div>
   </div>
 
   <div style="font-size:10px; margin-top:12px;">
-    Nota: Inspeccione todos los elementos que apliquen. Detenga todos los funcionamientos cuando observe alguna condición insegura...
+    Nota: Inspeccione todos los elementos que apliquen. Detenga todos los funcionamientos cuando observe alguna condición insegura. Informe inmediatamente al responsable del área o supervisor.
   </div>
 </body>
 </html>
+
+

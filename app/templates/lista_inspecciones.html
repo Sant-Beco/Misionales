@@ -1,0 +1,35 @@
+<!-- app/templates/lista_inspecciones.html -->
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Historial de Inspecciones</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="p-6 bg-gray-50">
+  <div class="max-w-4xl mx-auto bg-white p-6 rounded shadow">
+    <h1 class="text-xl font-bold mb-4">Historial de {{ nombre_conductor }}</h1>
+    <table class="w-full border-collapse">
+      <thead class="bg-gray-100">
+        <tr><th class="border p-2">Fecha</th><th class="border p-2">Placa</th><th class="border p-2">Proceso</th></tr>
+      </thead>
+      <tbody>
+        {% for r in registros %}
+        <tr>
+          <td class="border p-2">{{ r.fecha.strftime("%d-%m-%Y") }}</td>
+          <td class="border p-2">{{ r.placa }}</td>
+          <td class="border p-2">{{ r.proceso }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    {% if puede_generar_pdf15 %}
+    <div class="mt-4 text-center">
+      <a href="/inspecciones/{{ nombre_conductor }}/reporte15"
+         class="bg-green-600 text-white px-4 py-2 rounded">Generar PDF de 15</a>
+    </div>
+    {% endif %}
+  </div>
+</body>
+</html>
