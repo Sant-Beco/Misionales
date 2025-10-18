@@ -14,8 +14,10 @@
     <div class="text-sm text-gray-600 mb-4 text-center">
       Código: <strong>FO-SST-063</strong> — Fecha: <strong>{{ fecha }}</strong> — Versión: <strong>01</strong>
     </div>
-      <form id="inspeccionForm" method="post" action="/inspecciones/submit">
 
+    <form id="inspeccionForm" method="post" action="/inspecciones/submit">
+
+      <!-- DATOS BÁSICOS -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label class="block text-sm font-medium">Nombre Conductor</label>
@@ -61,6 +63,7 @@
 
       <hr class="my-4" />
 
+      <!-- REVISIÓN DE DOCUMENTOS -->
       <h2 class="font-medium">Revisión de Documentos</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <div>
@@ -87,6 +90,7 @@
 
       <hr class="my-4" />
 
+      <!-- ASPECTOS A REVISAR -->
       <h2 class="font-medium">Aspectos a Revisar (marcar B o M)</h2>
       <div id="aspectosContainer" class="grid grid-cols-1 gap-2">
         {% set aspectos_lista = [
@@ -117,9 +121,22 @@
 
       <hr class="my-4" />
 
+      <!-- NUEVA SECCIÓN: CONDICIONES ÓPTIMAS -->
+      <h2 class="font-medium">¿El vehículo se encuentra en óptimas condiciones?</h2>
+      <div class="mt-2 flex gap-3">
+        <label class="flex items-center gap-2">
+          <input type="radio" name="condiciones_optimas" value="SI" checked> Sí
+        </label>
+        <label class="flex items-center gap-2">
+          <input type="radio" name="condiciones_optimas" value="NO"> No
+        </label>
+      </div>
+
+      <hr class="my-4" />
+
+      <!-- FIRMA -->
       <h2 class="font-medium">Firma del conductor</h2>
       <p class="text-sm text-gray-500">Firme aquí con el dedo o el mouse. Presiona "Limpiar" para reintentar.</p>
-
       <div class="border rounded p-2 bg-gray-50">
         <canvas id="firmaCanvas" width="800" height="200" class="w-full border"></canvas>
         <div class="mt-2 flex flex-wrap gap-2">
@@ -129,23 +146,17 @@
         <div id="firmaPreview" class="mt-2"></div>
       </div>
 
+      <!-- OBSERVACIONES -->
       <div class="mt-4">
         <label class="block text-sm font-medium">Observaciones</label>
         <textarea name="observaciones" class="w-full border rounded p-2" rows="3"></textarea>
       </div>
 
-      <div class="mt-4 flex gap-3">
-        <label class="flex items-center gap-2">
-          <input type="radio" name="condiciones_optimas" value="SI" checked> Sí
-        </label>
-        <label class="flex items-center gap-2">
-          <input type="radio" name="condiciones_optimas" value="NO"> No
-        </label>
-      </div>
-
+      <!-- CAMPOS OCULTOS -->
       <input type="hidden" name="aspectos" id="aspectosInput" />
       <input type="hidden" name="firma_dataurl" id="firmaDataInput" />
 
+      <!-- BOTONES -->
       <div class="mt-6 flex flex-wrap gap-3 justify-center">
         <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Enviar y generar PDF</button>
         <button type="reset" class="bg-gray-200 px-4 py-2 rounded">Limpiar formulario</button>
@@ -157,7 +168,7 @@
   <script>
     document.getElementById("inspeccionForm").addEventListener("submit", function () {
       const aspectos = {};
-      const total = document.querySelectorAll('[name^="aspecto_"]').length / 2; // dos radios por aspecto
+      const total = document.querySelectorAll('[name^="aspecto_"]').length / 2;
       for (let i = 0; i < total; i++) {
         const radios = document.getElementsByName("aspecto_" + i);
         let val = "B";
@@ -171,4 +182,5 @@
   </script>
 </body>
 </html>
+
 

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <style>
+    body { font-family: DejaVu Sans, Arial, sans-serif; font-size:11px; margin:25px; }
+    .titulo { text-align:center; font-size:16px; font-weight:bold; margin-bottom:10px; }
+    .bloque { margin-bottom:20px; border-bottom:1px solid #ccc; padding-bottom:10px; }
+    .subtitulo { font-weight:bold; margin-top:8px; }
+    table { width:100%; border-collapse: collapse; margin-top:5px; }
+    th, td { border: 1px solid #333; padding:3px; font-size:10px; }
+  </style>
+</head>
+<body>
+  <div class="titulo">REPORTE DE INSPECCIONES - ÚLTIMAS 15</div>
+  <div>Código: {{ codigo }} — Fecha: {{ fecha }} — Versión: {{ version }}</div>
+
+  {% for r in registros %}
+  <div class="bloque">
+    <div><strong>Conductor:</strong> {{ r.nombre_conductor }} — <strong>Placa:</strong> {{ r.placa }}</div>
+    <div><strong>Fecha:</strong> {{ r.fecha.strftime("%d/%m/%Y %H:%M") }}</div>
+    <div><strong>Proceso:</strong> {{ r.proceso }} | <strong>Desde:</strong> {{ r.desde }} → <strong>Hasta:</strong> {{ r.hasta }}</div>
+    <div><strong>Marca:</strong> {{ r.marca }} | <strong>Modelo:</strong> {{ r.modelo }} | <strong>Motor:</strong> {{ r.motor }}</div>
+    <div><strong>Observaciones:</strong> {{ r.observaciones or "N/A" }}</div>
+    <div><strong>Condiciones óptimas:</strong> {{ r.condiciones_optimas }}</div>
+  </div>
+  {% endfor %}
+</body>
+</html>

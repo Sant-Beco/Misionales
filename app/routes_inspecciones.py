@@ -95,3 +95,27 @@ async def submit_inspeccion(
     render_pdf_from_template("pdf_template.html", html_context, output_path=str(pdf_path))
 
     return FileResponse(path=str(pdf_path), media_type="application/pdf", filename=pdf_filename)
+
+
+@router.get("/reporte15/{nombre_conductor}")
+async def generar_pdf15(nombre_conductor: str):
+    db = SessionLocal()
+    registros = db.query(models.Inspeccion).filter(
+        models.Inspeccion.nombre_conductor == nombre_conductor
+    ).order_by(models.Inspeccion.fecha.desc()).limit(15).all()
+    db.close()
+
+    if not registros:
+        return {"mensaje": "No hay inspecciones para este conductor"}
+
+    html_context = {
+        "registros": registros,
+        "fecha": datetime.now().strftime("%d - %m - %Y"),
+        "codigo": "FO-SST-063",
+        "version": "01",
+    }
+    pdf_filename = f"reporte15_{nombre_conductor}_{datetime.now().strftime('%Y%m%d%H%M')}.pdf"
+    pdf_path = PDF_DIR / pdf_filename
+
+    render_pdf_from_template("pdf_template_multiple.html", html_context, str(pdf_path))
+    return FileResponse(pdf_path, media_type="application/pdf", filename=pdf_filename)

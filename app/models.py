@@ -1,31 +1,29 @@
-# app/models.py
 from sqlalchemy import Column, Integer, String, DateTime, Text
-from datetime import datetime
 from app.database import Base
+from datetime import datetime
 
 class Inspeccion(Base):
     __tablename__ = "inspecciones"
 
     id = Column(Integer, primary_key=True, index=True)
-    nombre_conductor = Column(String)
-    placa = Column(String)
-    proceso = Column(String)
-    desde = Column(String)
-    hasta = Column(String)
-    marca = Column(String)
-    gasolina = Column(String)
-    modelo = Column(String)
-    motor = Column(String)
-    tipo_vehiculo = Column(String)
-    linea = Column(String)
-    licencia_num = Column(String)
-    licencia_venc = Column(String)
-    porte_propiedad = Column(String)
-    soat = Column(String)
-    certificado_emision = Column(String)
-    poliza_seguro = Column(String)
-    aspectos = Column(Text)
+    fecha = Column(DateTime, default=datetime.now)
+    nombre_conductor = Column(String(100))
+    placa = Column(String(20))
+    proceso = Column(String(50))
+    desde = Column(String(50))
+    hasta = Column(String(50))
+    marca = Column(String(50))
+    gasolina = Column(String(50))
+    modelo = Column(String(20))
+    motor = Column(String(50))
+    tipo_vehiculo = Column(String(20))
+    linea = Column(String(50))
+    licencia_num = Column(String(50))
+    licencia_venc = Column(String(50))
+    porte_propiedad = Column(String(50))
+    soat = Column(String(50))
+    certificado_emision = Column(String(50))
+    poliza_seguro = Column(String(50))
     observaciones = Column(Text)
-    condiciones_optimas = Column(String)
-    firma_file = Column(String)
-    fecha = Column(DateTime, default=datetime.utcnow)
+    condiciones_optimas = Column(String(5))
+    firma_file = Column(String(200))
