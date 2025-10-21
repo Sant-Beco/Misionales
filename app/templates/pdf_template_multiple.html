@@ -1,29 +1,190 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8"/>
+  <meta charset="utf-8" />
   <style>
-    body { font-family: DejaVu Sans, Arial, sans-serif; font-size:11px; margin:25px; }
-    .titulo { text-align:center; font-size:16px; font-weight:bold; margin-bottom:10px; }
-    .bloque { margin-bottom:20px; border-bottom:1px solid #ccc; padding-bottom:10px; }
-    .subtitulo { font-weight:bold; margin-top:8px; }
-    table { width:100%; border-collapse: collapse; margin-top:5px; }
-    th, td { border: 1px solid #333; padding:3px; font-size:10px; }
+    body {
+      font-family: DejaVu Sans, Arial, sans-serif;
+      font-size: 10px;
+      margin: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid #000;
+    }
+    th, td {
+      border: 1px solid #000;
+      padding: 3px;
+      text-align: center;
+    }
+    .no-border {
+      border: none;
+    }
+    .header-table td {
+      border: 1px solid #000;
+      font-size: 10px;
+    }
+    .titulo {
+      font-weight: bold;
+      text-align: center;
+      font-size: 13px;
+    }
+    .logo {
+      width: 120px;
+    }
+    .small {
+      font-size: 9px;
+    }
   </style>
 </head>
 <body>
-  <div class="titulo">REPORTE DE INSPECCIONES - ÚLTIMAS 15</div>
-  <div>Código: {{ codigo }} — Fecha: {{ fecha }} — Versión: {{ version }}</div>
 
-  {% for r in registros %}
-  <div class="bloque">
-    <div><strong>Conductor:</strong> {{ r.nombre_conductor }} — <strong>Placa:</strong> {{ r.placa }}</div>
-    <div><strong>Fecha:</strong> {{ r.fecha.strftime("%d/%m/%Y %H:%M") }}</div>
-    <div><strong>Proceso:</strong> {{ r.proceso }} | <strong>Desde:</strong> {{ r.desde }} → <strong>Hasta:</strong> {{ r.hasta }}</div>
-    <div><strong>Marca:</strong> {{ r.marca }} | <strong>Modelo:</strong> {{ r.modelo }} | <strong>Motor:</strong> {{ r.motor }}</div>
-    <div><strong>Observaciones:</strong> {{ r.observaciones or "N/A" }}</div>
-    <div><strong>Condiciones óptimas:</strong> {{ r.condiciones_optimas }}</div>
-  </div>
-  {% endfor %}
+  <!-- ENCABEZADO -->
+  <table class="header-table">
+    <tr>
+      <td rowspan="3" style="width:25%; text-align:center;">
+        <img src="app/static/incubant.jpg" class="logo" alt="Incubant Logo">
+      </td>
+      <td rowspan="3" class="titulo">INSPECCIÓN PRE OPERACIONAL MOTOCICLETA</td>
+      <td><strong>Código:</strong> {{ codigo }}</td>
+    </tr>
+    <tr>
+      <td><strong>Fecha:</strong> {{ fecha }}</td>
+    </tr>
+    <tr>
+      <td><strong>Versión:</strong> {{ version }}</td>
+    </tr>
+  </table>
+
+  <br>
+
+  <!-- DATOS GENERALES -->
+  {% set registro = registros[0] %}
+  <table>
+    <tr>
+      <td><strong>Nombre Conductor:</strong> {{ registro.nombre_conductor }}</td>
+      <td><strong>Placa:</strong> {{ registro.placa }}</td>
+      <td><strong>Proceso:</strong> {{ registro.proceso }}</td>
+      <td><strong>Desde:</strong> {{ registro.desde }}</td>
+      <td><strong>Hasta:</strong> {{ registro.hasta }}</td>
+    </tr>
+    <tr>
+      <td><strong>Marca:</strong> {{ registro.marca }}</td>
+      <td><strong>Gasolina:</strong> {{ registro.gasolina }}</td>
+      <td><strong>Modelo:</strong> {{ registro.modelo }}</td>
+      <td><strong>Motor:</strong> {{ registro.motor }}</td>
+      <td><strong>Línea:</strong> {{ registro.linea }}</td>
+    </tr>
+  </table>
+
+  <br>
+
+  <!-- REVISION DE DOCUMENTOS -->
+  <table>
+    <tr>
+      <th colspan="2">REVISIÓN DE DOCUMENTOS</th>
+      <th>No.</th>
+      <th>FECHA DE VENCIMIENTO</th>
+      <th>OBSERVACIONES</th>
+    </tr>
+    <tr>
+      <td colspan="2">Licencia de Conducción</td>
+      <td>{{ registro.licencia_num }}</td>
+      <td>{{ registro.licencia_venc }}</td>
+      <td rowspan="5"></td>
+    </tr>
+    <tr>
+      <td colspan="2">Porte Tarjeta Propiedad</td>
+      <td colspan="2">{{ registro.porte_propiedad }}</td>
+    </tr>
+    <tr>
+      <td colspan="2">Seguro Obligatorio SOAT</td>
+      <td colspan="2">{{ registro.soat }}</td>
+    </tr>
+    <tr>
+      <td colspan="2">Certificado Emisión Gases</td>
+      <td colspan="2">{{ registro.certificado_emision }}</td>
+    </tr>
+    <tr>
+      <td colspan="2">Póliza Seguro del Vehículo</td>
+      <td colspan="2">{{ registro.poliza_seguro }}</td>
+    </tr>
+  </table>
+
+  <p class="small">
+    De acuerdo a la revisión realizada, en cada aspecto califique con una X en B: si el estado del vehículo es Bueno o en M: si el estado del vehículo es malo.
+  </p>
+
+  <!-- TABLA DE 15 DÍAS -->
+  <table>
+    <tr>
+      <th rowspan="2">ASPECTOS A REVISAR</th>
+      <th colspan="30">FECHA (15 DÍAS)</th>
+    </tr>
+    <tr>
+      {% for i in range(1, 16) %}
+        <th>B</th>
+        <th>M</th>
+      {% endfor %}
+    </tr>
+
+    {% set aspectos = [
+      "Estado de llantas y presión de aire",
+      "Encendido eléctrico y de crank",
+      "Luces y pito",
+      "Espejos retrovisores",
+      "Manijas de freno y clutch",
+      "Sistema de frenos",
+      "Estado de freno de disco",
+      "Nivel de líquido de freno",
+      "Revisión sistema tablero",
+      "Fugas de combustible y/o aceites",
+      "Kit de arrastre",
+      "Estado de suspensión",
+      "Nivel de aceites"
+    ] %}
+
+    {% for aspecto in aspectos %}
+    <tr>
+      <td style="text-align:left;">{{ aspecto }}</td>
+      {% for r in registros %}
+        {% set aspectos_data = r.aspectos if r.aspectos is mapping else {} %}
+        <td>{% if aspectos_data.get(loop.parentloop.index|string, '') == 'B' %}X{% endif %}</td>
+        <td>{% if aspectos_data.get(loop.parentloop.index|string, '') == 'M' %}X{% endif %}</td>
+      {% endfor %}
+      {% for _ in range(15 - registros|length) %}
+        <td></td><td></td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </table>
+
+  <!-- FIRMAS Y CONDICIONES -->
+  <table style="margin-top:10px;">
+    <tr>
+      <th>Firma Conductor</th>
+      {% for i in range(1, 16) %}
+        <th colspan="2"></th>
+      {% endfor %}
+    </tr>
+    <tr>
+      <th>¿El vehículo se encuentra en óptimas condiciones?</th>
+      {% for r in registros %}
+        <td>{% if r.condiciones_optimas == 'SI' %}X{% endif %}</td>
+        <td>{% if r.condiciones_optimas == 'NO' %}X{% endif %}</td>
+      {% endfor %}
+      {% for _ in range(15 - registros|length) %}
+        <td></td><td></td>
+      {% endfor %}
+    </tr>
+  </table>
+
+  <p class="small" style="margin-top:10px;">
+    Nota: Inspeccione todos los elementos que apliquen. Detenga todos los funcionamientos cuando observe alguna condición insegura y pueda causar algún peligro.
+    Informe inmediatamente al responsable del área o supervisor.
+  </p>
+
 </body>
 </html>
+
