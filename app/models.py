@@ -27,3 +27,13 @@ class Inspeccion(Base):
     observaciones = Column(Text)
     condiciones_optimas = Column(String(5))
     firma_file = Column(String(200))
+
+class ReporteInspeccion(Base):
+    __tablename__ = "reporte_inspeccion"
+
+    id = Column(Integer, primary_key=True, index=True)
+    nombre_conductor = Column(String, index=True)
+    fecha_reporte = Column(DateTime, default=datetime.utcnow)
+    archivo_pdf = Column(String)
+    total_incluidas = Column(Integer, default=15)
+

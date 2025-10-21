@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Form
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from sqlalchemy.orm import Session
 from app.database import SessionLocal
 from app import models
@@ -41,7 +41,7 @@ async def submit_inspeccion(
     db = SessionLocal()
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
-    # Guardar firma (si existe)
+    # 🖊️ Guardar firma si existe
     firma_filename = None
     if firma_dataurl:
         try:
@@ -50,9 +50,9 @@ async def submit_inspeccion(
             firma_filename = f"firma_{timestamp}.png"
             (PDF_DIR / firma_filename).write_bytes(data)
         except Exception as e:
-            print("Error al guardar firma:", e)
+            print("⚠️ Error al guardar firma:", e)
 
-    # Crear objeto de inspección
+    # 🧾 Crear nueva inspección
     inspeccion = models.Inspeccion(
         fecha=datetime.now(),
         nombre_conductor=nombre_conductor,
@@ -81,47 +81,70 @@ async def submit_inspeccion(
     db.commit()
     db.refresh(inspeccion)
 
-    # Contar inspecciones del conductor
-    total = db.query(models.Inspeccion).filter(models.Inspeccion.nombre_conductor == nombre_conductor).count()
-    db.close()
+    # 📊 Contar inspecciones de ese conductor
+    total_inspecciones = db.query(models.Inspeccion).filter(
+        models.Inspeccion.nombre_conductor == nombre_conductor
+    ).count()
 
-    # Generar PDF individual
+    # 🧩 Generar PDF individual
+    pdf_filename = f"inspeccion_{timestamp}.pdf"
+    pdf_path = PDF_DIR / pdf_filename
     html_context = {
         "registro": inspeccion,
         "fecha": datetime.now().strftime("%d - %m - %Y"),
         "codigo": "FO-SST-063",
         "version": "01",
     }
-
-    pdf_filename = f"inspeccion_{timestamp}.pdf"
-    pdf_path = PDF_DIR / pdf_filename
     render_pdf_from_template("pdf_template.html", html_context, output_path=str(pdf_path))
+    print(f"✅ PDF individual generado: {pdf_filename}")
 
-    # Si ya tiene 15 inspecciones, generar el reporte consolidado automáticamente
-    if total >= 15:
-        reporte_filename = f"reporte15_{nombre_conductor}_{datetime.now().strftime('%Y%m%d%H%M')}.pdf"
-        reporte_path = PDF_DIR / reporte_filename
-
-        db2 = SessionLocal()
-        registros = db2.query(models.Inspeccion).filter(
+    # ✅ Si ya tiene 15 inspecciones, generar consolidado
+    if total_inspecciones >= 15:
+        registros = db.query(models.Inspeccion).filter(
             models.Inspeccion.nombre_conductor == nombre_conductor
-        ).order_by(models.Inspeccion.fecha.desc()).limit(15).all()
-        db2.close()
+        ).order_by(models.Inspeccion.fecha.asc()).limit(15).all()
 
-        html_context_multi = {
-            "registros": registros,
-            "fecha": datetime.now().strftime("%d - %m - %Y"),
-            "codigo": "FO-SST-063",
-            "version": "01",
-        }
+        if registros:
+            reporte_filename = f"reporte15_{nombre_conductor}_{datetime.now().strftime('%Y%m%d%H%M')}.pdf"
+            reporte_path = PDF_DIR / reporte_filename
 
-        render_pdf_from_template("pdf_template_multiple.html", html_context_multi, str(reporte_path))
-        return FileResponse(reporte_path, media_type="application/pdf", filename=reporte_filename)
+            html_context_multi = {
+                "registros": registros,
+                "fecha": datetime.now().strftime("%d - %m - %Y"),
+                "codigo": "FO-SST-063",
+                "version": "01",
+            }
 
-    # Si no llega a 15, retorna el PDF individual
+            render_pdf_from_template("pdf_template_multiple.html", html_context_multi, str(reporte_path))
+            print(f"📘 Reporte consolidado generado: {reporte_filename}")
+
+            # 🧾 Registrar el reporte consolidado
+            reporte = models.ReporteInspeccion(
+                nombre_conductor=nombre_conductor,
+                fecha_reporte=datetime.now(),
+                archivo_pdf=str(reporte_path),
+                total_incluidas=15
+            )
+            db.add(reporte)
+            db.commit()
+
+            # 🧹 Eliminar las 15 inspecciones ya consolidadas
+            for r in registros:
+                db.delete(r)
+            db.commit()
+            db.close()
+
+            return FileResponse(
+                reporte_path, 
+                media_type="application/pdf", 
+                filename=reporte_filename
+            )
+
+    db.close()
     return FileResponse(path=str(pdf_path), media_type="application/pdf", filename=pdf_filename)
 
 
+# 🕒 Generar manualmente un reporte consolidado (últimas 15)
 @router.get("/reporte15/{nombre_conductor}")
 async def generar_pdf15(nombre_conductor: str):
     db = SessionLocal()
@@ -131,7 +154,7 @@ async def generar_pdf15(nombre_conductor: str):
     db.close()
 
     if not registros:
-        return {"mensaje": "No hay inspecciones para este conductor"}
+        return JSONResponse({"mensaje": "No hay inspecciones para este conductor"}, status_code=404)
 
     html_context = {
         "registros": registros,
@@ -141,7 +164,30 @@ async def generar_pdf15(nombre_conductor: str):
     }
     pdf_filename = f"reporte15_{nombre_conductor}_{datetime.now().strftime('%Y%m%d%H%M')}.pdf"
     pdf_path = PDF_DIR / pdf_filename
-
     render_pdf_from_template("pdf_template_multiple.html", html_context, str(pdf_path))
+
     return FileResponse(pdf_path, media_type="application/pdf", filename=pdf_filename)
+
+
+# # 🗂️ Historial de reportes generados
+# @router.get("/historial/{nombre_conductor}")
+# async def historial_reportes(nombre_conductor: str):
+#     db = SessionLocal()
+#     reportes = db.query(models.ReporteInspeccion).filter(
+#         models.ReporteInspeccion.nombre_conductor == nombre_conductor
+#     ).order_by(models.ReporteInspeccion.fecha_reporte.desc()).all()
+#     db.close()
+
+#     if not reportes:
+#         return JSONResponse({"mensaje": "No hay reportes registrados"}, status_code=404)
+
+#     return [
+#         {
+#             "id": r.id,
+#             "fecha_reporte": r.fecha_reporte.strftime("%Y-%m-%d %H:%M"),
+#             "archivo_pdf": r.archivo_pdf,
+#             "total_incluidas": r.total_incluidas
+#         }
+#         for r in reportes
+#     ]
 
