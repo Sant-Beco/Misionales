@@ -1,189 +1,157 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
   <style>
     body {
-      font-family: DejaVu Sans, Arial, sans-serif;
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      margin: 25px;
+      color: #000;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #000;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+    }
+    .header img {
+      height: 60px;
+    }
+    .titulo {
+      text-align: center;
+      font-weight: bold;
+      font-size: 13px;
+      margin-top: 5px;
+      text-transform: uppercase;
+    }
+    .subtitulo {
+      text-align: center;
       font-size: 10px;
-      margin: 20px;
+      margin-bottom: 10px;
     }
     table {
-      width: 100%;
       border-collapse: collapse;
-      border: 1px solid #000;
+      width: 100%;
+      font-size: 10px;
     }
     th, td {
       border: 1px solid #000;
-      padding: 3px;
       text-align: center;
+      padding: 4px;
     }
-    .no-border {
-      border: none;
-    }
-    .header-table td {
-      border: 1px solid #000;
-      font-size: 10px;
-    }
-    .titulo {
+    th {
+      background-color: #f0f0f0;
       font-weight: bold;
-      text-align: center;
-      font-size: 13px;
     }
-    .logo {
-      width: 120px;
+    .aspecto {
+      text-align: left;
+      width: 38%;
     }
-    .small {
-      font-size: 9px;
+    .firma {
+      margin-top: 25px;
+      text-align: left;
+    }
+    .firma img {
+      width: 60px;
+      height: 60px;
+      border: 1px solid #000;
+    }
+    .footer {
+      margin-top: 15px;
+      font-size: 10px;
+      border-top: 1px solid #000;
+      padding-top: 5px;
     }
   </style>
 </head>
 <body>
 
-  <!-- ENCABEZADO -->
-  <table class="header-table">
-    <tr>
-      <td rowspan="3" style="width:25%; text-align:center;">
-        <img src="app/static/incubant.jpg" class="logo" alt="Incubant Logo">
-      </td>
-      <td rowspan="3" class="titulo">INSPECCIÓN PRE OPERACIONAL MOTOCICLETA</td>
-      <td><strong>Código:</strong> {{ codigo }}</td>
-    </tr>
-    <tr>
-      <td><strong>Fecha:</strong> {{ fecha }}</td>
-    </tr>
-    <tr>
-      <td><strong>Versión:</strong> {{ version }}</td>
-    </tr>
-  </table>
+  <!-- Encabezado -->
+  <div class="header">
+    <img src="app/static/img/incubant.jpg" alt="Logo Incubant" />
+    <div>
+      <div class="titulo">INSPECCIÓN PRE OPERACIONAL MOTOCICLETA</div>
+      <div class="subtitulo">
+        Código: {{ codigo }} — Fecha: {{ fecha }} — Versión: {{ version }}
+      </div>
+    </div>
+  </div>
 
-  <br>
-
-  <!-- DATOS GENERALES -->
-  {% set registro = registros[0] %}
+  <!-- Tabla principal -->
   <table>
-    <tr>
-      <td><strong>Nombre Conductor:</strong> {{ registro.nombre_conductor }}</td>
-      <td><strong>Placa:</strong> {{ registro.placa }}</td>
-      <td><strong>Proceso:</strong> {{ registro.proceso }}</td>
-      <td><strong>Desde:</strong> {{ registro.desde }}</td>
-      <td><strong>Hasta:</strong> {{ registro.hasta }}</td>
-    </tr>
-    <tr>
-      <td><strong>Marca:</strong> {{ registro.marca }}</td>
-      <td><strong>Gasolina:</strong> {{ registro.gasolina }}</td>
-      <td><strong>Modelo:</strong> {{ registro.modelo }}</td>
-      <td><strong>Motor:</strong> {{ registro.motor }}</td>
-      <td><strong>Línea:</strong> {{ registro.linea }}</td>
-    </tr>
-  </table>
-
-  <br>
-
-  <!-- REVISION DE DOCUMENTOS -->
-  <table>
-    <tr>
-      <th colspan="2">REVISIÓN DE DOCUMENTOS</th>
-      <th>No.</th>
-      <th>FECHA DE VENCIMIENTO</th>
-      <th>OBSERVACIONES</th>
-    </tr>
-    <tr>
-      <td colspan="2">Licencia de Conducción</td>
-      <td>{{ registro.licencia_num }}</td>
-      <td>{{ registro.licencia_venc }}</td>
-      <td rowspan="5"></td>
-    </tr>
-    <tr>
-      <td colspan="2">Porte Tarjeta Propiedad</td>
-      <td colspan="2">{{ registro.porte_propiedad }}</td>
-    </tr>
-    <tr>
-      <td colspan="2">Seguro Obligatorio SOAT</td>
-      <td colspan="2">{{ registro.soat }}</td>
-    </tr>
-    <tr>
-      <td colspan="2">Certificado Emisión Gases</td>
-      <td colspan="2">{{ registro.certificado_emision }}</td>
-    </tr>
-    <tr>
-      <td colspan="2">Póliza Seguro del Vehículo</td>
-      <td colspan="2">{{ registro.poliza_seguro }}</td>
-    </tr>
-  </table>
-
-  <p class="small">
-    De acuerdo a la revisión realizada, en cada aspecto califique con una X en B: si el estado del vehículo es Bueno o en M: si el estado del vehículo es malo.
-  </p>
-
-  <!-- TABLA DE 15 DÍAS -->
-  <table>
-    <tr>
-      <th rowspan="2">ASPECTOS A REVISAR</th>
-      <th colspan="30">FECHA (15 DÍAS)</th>
-    </tr>
-    <tr>
-      {% for i in range(1, 16) %}
+    <thead>
+      <tr>
+        <th rowspan="2">Aspectos a Revisar</th>
+        {% for i in range(1,16) %}
+        <th colspan="2">Día {{ i }}</th>
+        {% endfor %}
+      </tr>
+      <tr>
+        {% for i in range(1,16) %}
         <th>B</th>
         <th>M</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% set aspectos_lista = [
+        "1. Estado de llantas y presión de aire",
+        "2. Encendido eléctrico y de crank",
+        "3. Luces y pito",
+        "4. Espejos retrovisores",
+        "5. Manijas de freno y clutch",
+        "6. Sistema de frenos",
+        "7. Estado de freno de disco",
+        "8. Nivel de líquido de freno",
+        "9. Revisión sistema tablero",
+        "10. Fugas de combustible y/o aceites",
+        "11. Kit de arrastre",
+        "12. Estado de suspensión",
+        "13. Nivel de aceites",
+        "14. Otros aspectos observados"
+      ] %}
+      
+      {% for aspecto in aspectos_lista %}
+      <tr>
+        <td class="aspecto">{{ aspecto }}</td>
+        {% for registro in registros %}
+          {% set aspectos_data = registro.aspectos|default('{}')|safe|loads %}
+          <td>{% if aspectos_data.get(loop.index|string, '') == 'B' %}X{% endif %}</td>
+          <td>{% if aspectos_data.get(loop.index|string, '') == 'M' %}X{% endif %}</td>
+        {% endfor %}
+        {% for i in range(15 - registros|length) %}
+          <td></td><td></td>
+        {% endfor %}
+      </tr>
       {% endfor %}
-    </tr>
-
-    {% set aspectos = [
-      "Estado de llantas y presión de aire",
-      "Encendido eléctrico y de crank",
-      "Luces y pito",
-      "Espejos retrovisores",
-      "Manijas de freno y clutch",
-      "Sistema de frenos",
-      "Estado de freno de disco",
-      "Nivel de líquido de freno",
-      "Revisión sistema tablero",
-      "Fugas de combustible y/o aceites",
-      "Kit de arrastre",
-      "Estado de suspensión",
-      "Nivel de aceites"
-    ] %}
-
-    {% for aspecto in aspectos %}
-    <tr>
-      <td style="text-align:left;">{{ aspecto }}</td>
-      {% for r in registros %}
-        {% set aspectos_data = r.aspectos if r.aspectos is mapping else {} %}
-        <td>{% if aspectos_data.get(loop.parentloop.index|string, '') == 'B' %}X{% endif %}</td>
-        <td>{% if aspectos_data.get(loop.parentloop.index|string, '') == 'M' %}X{% endif %}</td>
-      {% endfor %}
-      {% for _ in range(15 - registros|length) %}
-        <td></td><td></td>
-      {% endfor %}
-    </tr>
-    {% endfor %}
+    </tbody>
   </table>
 
-  <!-- FIRMAS Y CONDICIONES -->
-  <table style="margin-top:10px;">
-    <tr>
-      <th>Firma Conductor</th>
-      {% for i in range(1, 16) %}
-        <th colspan="2"></th>
-      {% endfor %}
-    </tr>
-    <tr>
-      <th>¿El vehículo se encuentra en óptimas condiciones?</th>
-      {% for r in registros %}
-        <td>{% if r.condiciones_optimas == 'SI' %}X{% endif %}</td>
-        <td>{% if r.condiciones_optimas == 'NO' %}X{% endif %}</td>
-      {% endfor %}
-      {% for _ in range(15 - registros|length) %}
-        <td></td><td></td>
-      {% endfor %}
-    </tr>
-  </table>
+  <!-- Pregunta final -->
+  <div style="margin-top:10px; font-size:11px;">
+    <strong>¿El vehículo se encuentra en óptimas condiciones para su operación?</strong>
+    {% if registros and registros[-1].condiciones_optimas == "SI" %}
+      Sí ☑️  No ☐
+    {% else %}
+      Sí ☐  No ☑️
+    {% endif %}
+  </div>
 
-  <p class="small" style="margin-top:10px;">
-    Nota: Inspeccione todos los elementos que apliquen. Detenga todos los funcionamientos cuando observe alguna condición insegura y pueda causar algún peligro.
-    Informe inmediatamente al responsable del área o supervisor.
-  </p>
+  <!-- Firma -->
+  {% if registros and registros[-1].firma_file %}
+  <div class="firma">
+    <p><strong>Firma del conductor:</strong></p>
+    <img src="app/data/generated_pdfs/{{ registros[-1].firma_file }}" alt="Firma" />
+  </div>
+  {% endif %}
+
+  <!-- Footer -->
+  <div class="footer">
+    <em>Este formato es de uso exclusivo de INCUBANT SAS - Sistema de Gestión de Seguridad y Salud en el Trabajo (SST)</em>
+  </div>
 
 </body>
 </html>

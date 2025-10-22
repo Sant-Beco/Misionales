@@ -72,6 +72,7 @@ async def submit_inspeccion(
         soat=soat,
         certificado_emision=certificado_emision,
         poliza_seguro=poliza_seguro,
+        aspectos=aspectos,
         observaciones=observaciones,
         condiciones_optimas=condiciones_optimas,
         firma_file=firma_filename
@@ -105,6 +106,13 @@ async def submit_inspeccion(
         ).order_by(models.Inspeccion.fecha.asc()).limit(15).all()
 
         if registros:
+            # 🔍 Decodificar JSON de aspectos antes de pasarlo al template
+            for r in registros:
+                try:
+                    r.aspectos_dict = json.loads(r.aspectos or "{}")
+                except Exception:
+                    r.aspectos_dict = {}
+
             reporte_filename = f"reporte15_{nombre_conductor}_{datetime.now().strftime('%Y%m%d%H%M')}.pdf"
             reporte_path = PDF_DIR / reporte_filename
 
@@ -135,8 +143,8 @@ async def submit_inspeccion(
             db.close()
 
             return FileResponse(
-                reporte_path, 
-                media_type="application/pdf", 
+                reporte_path,
+                media_type="application/pdf",
                 filename=reporte_filename
             )
 
@@ -156,38 +164,23 @@ async def generar_pdf15(nombre_conductor: str):
     if not registros:
         return JSONResponse({"mensaje": "No hay inspecciones para este conductor"}, status_code=404)
 
+    # Decodificar JSON
+    for r in registros:
+        try:
+            r.aspectos_dict = json.loads(r.aspectos or "{}")
+        except Exception:
+            r.aspectos_dict = {}
+
     html_context = {
         "registros": registros,
         "fecha": datetime.now().strftime("%d - %m - %Y"),
         "codigo": "FO-SST-063",
         "version": "01",
     }
+
     pdf_filename = f"reporte15_{nombre_conductor}_{datetime.now().strftime('%Y%m%d%H%M')}.pdf"
     pdf_path = PDF_DIR / pdf_filename
     render_pdf_from_template("pdf_template_multiple.html", html_context, str(pdf_path))
 
     return FileResponse(pdf_path, media_type="application/pdf", filename=pdf_filename)
-
-
-# # 🗂️ Historial de reportes generados
-# @router.get("/historial/{nombre_conductor}")
-# async def historial_reportes(nombre_conductor: str):
-#     db = SessionLocal()
-#     reportes = db.query(models.ReporteInspeccion).filter(
-#         models.ReporteInspeccion.nombre_conductor == nombre_conductor
-#     ).order_by(models.ReporteInspeccion.fecha_reporte.desc()).all()
-#     db.close()
-
-#     if not reportes:
-#         return JSONResponse({"mensaje": "No hay reportes registrados"}, status_code=404)
-
-#     return [
-#         {
-#             "id": r.id,
-#             "fecha_reporte": r.fecha_reporte.strftime("%Y-%m-%d %H:%M"),
-#             "archivo_pdf": r.archivo_pdf,
-#             "total_incluidas": r.total_incluidas
-#         }
-#         for r in reportes
-#     ]
 
