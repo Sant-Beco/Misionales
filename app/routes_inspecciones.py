@@ -1,3 +1,4 @@
+
 from fastapi import APIRouter, Form
 from fastapi.responses import FileResponse, JSONResponse
 from sqlalchemy.orm import Session
@@ -7,7 +8,6 @@ from app.utils_pdf import render_pdf_from_template
 from pathlib import Path
 from datetime import datetime
 import base64
-import json
 
 router = APIRouter()
 PDF_DIR = Path("app/data/generated_pdfs")
@@ -82,7 +82,7 @@ async def submit_inspeccion(
     db.commit()
     db.refresh(inspeccion)
 
-    # 📊 Contar inspecciones de ese conductor
+    # 📊 Contar inspecciones del conductor
     total_inspecciones = db.query(models.Inspeccion).filter(
         models.Inspeccion.nombre_conductor == nombre_conductor
     ).count()
@@ -106,13 +106,6 @@ async def submit_inspeccion(
         ).order_by(models.Inspeccion.fecha.asc()).limit(15).all()
 
         if registros:
-            # 🔍 Decodificar JSON de aspectos antes de pasarlo al template
-            for r in registros:
-                try:
-                    r.aspectos_dict = json.loads(r.aspectos or "{}")
-                except Exception:
-                    r.aspectos_dict = {}
-
             reporte_filename = f"reporte15_{nombre_conductor}_{datetime.now().strftime('%Y%m%d%H%M')}.pdf"
             reporte_path = PDF_DIR / reporte_filename
 
@@ -164,13 +157,6 @@ async def generar_pdf15(nombre_conductor: str):
     if not registros:
         return JSONResponse({"mensaje": "No hay inspecciones para este conductor"}, status_code=404)
 
-    # Decodificar JSON
-    for r in registros:
-        try:
-            r.aspectos_dict = json.loads(r.aspectos or "{}")
-        except Exception:
-            r.aspectos_dict = {}
-
     html_context = {
         "registros": registros,
         "fecha": datetime.now().strftime("%d - %m - %Y"),
@@ -183,4 +169,3 @@ async def generar_pdf15(nombre_conductor: str):
     render_pdf_from_template("pdf_template_multiple.html", html_context, str(pdf_path))
 
     return FileResponse(pdf_path, media_type="application/pdf", filename=pdf_filename)
-

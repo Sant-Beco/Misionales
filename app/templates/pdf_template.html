@@ -77,11 +77,21 @@
       "Estado de suspensión",
       "Nivel de aceites"
     ] %}
+
+    {% set aspectos_data = registro.aspectos_dict %}
     {% for nombre in nombres %}
       <tr>
         <td>{{ loop.index }}</td>
         <td>{{ nombre }}</td>
-        <td>{{ (registro.aspectos or {}).get(loop.index|string, "B") }}</td>
+        <td>
+          {% if aspectos_data.get(loop.index|string, '') == 'B' %}
+            B
+          {% elif aspectos_data.get(loop.index|string, '') == 'M' %}
+            M
+          {% else %}
+            -
+          {% endif %}
+        </td>
       </tr>
     {% endfor %}
   </table>
@@ -110,3 +120,4 @@
   </div>
 </body>
 </html>
+
