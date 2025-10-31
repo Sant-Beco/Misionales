@@ -3,10 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <style>
+
+    @page {
+      size: A4 landscape;
+      margin: 12mm;
+    }
+
     body {
       font-family: Arial, sans-serif;
-      font-size: 11px;
-      margin: 20px;
+      font-size: 10px;
     }
 
     .encabezado {
@@ -15,7 +20,7 @@
       align-items: center;
       border-bottom: 2px solid #000;
       padding-bottom: 5px;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     .encabezado img {
@@ -25,54 +30,54 @@
     .titulo {
       text-align: center;
       font-weight: bold;
-      font-size: 14px;
-      margin-bottom: 5px;
+      font-size: 15px;
       text-transform: uppercase;
     }
 
     .subinfo {
-      text-align: right;
+      text-align: center;
+      margin-top: 3px;
+      margin-bottom: 8px;
       font-size: 10px;
-      margin-bottom: 5px;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     th, td {
       border: 1px solid black;
       text-align: center;
       padding: 2px;
+      font-size: 9px;
     }
 
     th {
-      background-color: #f0f0f0;
-      font-weight: bold;
-      font-size: 10px;
+      background: #f1f1f1;
       text-transform: uppercase;
     }
 
-    td {
-      font-size: 10px;
-    }
-
-    .aspectos th {
-      background-color: #ddd;
-    }
-
-    .firma {
-      margin-top: 10px;
+    td.txt-left {
       text-align: left;
     }
 
-    .firma img {
-      width: 50px;
-      height: 50px;
+    .cuadro {
+      width: 12px;
+      height: 12px;
       border: 1px solid #000;
-      margin-left: 5px;
+      display: inline-block;
+      line-height: 12px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 10px;
+    }
+
+    .firma img {
+      width: 55px;
+      border: 1px solid #000;
+      margin-top: 2px;
     }
 
     .nota {
@@ -82,121 +87,150 @@
       padding-top: 4px;
       text-align: justify;
     }
+
   </style>
 </head>
 
 <body>
+
+  <!-- ✅ ENCABEZADO -->
   <div class="encabezado">
-    <img src="app/static/img/incubant.jpg" alt="Logo Incubant">
-    <div>
-      <div class="titulo">INSPECCIÓN PRE OPERACIONAL MOTOCICLETA</div>
-      <div class="subinfo">
-        Código: FO-SST-063 — Fecha: {{ fecha }} — Versión: {{ version }}
-      </div>
-    </div>
+    <img src="app/static/img/incubant.jpg" alt="Logo">
+    <div class="titulo">INSPECCIÓN PRE OPERACIONAL MOTOCICLETA</div>
   </div>
 
+  <div class="subinfo">
+    Código: {{ codigo }} — Versión: {{ version }} — Fecha consolidado: {{ fecha }} <br>
+    Registros desde <strong>{{ desde }}</strong> hasta <strong>{{ hasta }}</strong>
+  </div>
+
+  <!-- ✅ DATOS GENERALES (DEL 1er REGISTRO) -->
   <table>
     <tr>
       <th>Nombre Conductor</th>
       <td colspan="3">{{ registros[0].nombre_conductor }}</td>
+
       <th>Placa</th>
       <td colspan="3">{{ registros[0].placa }}</td>
     </tr>
+
     <tr>
       <th>Proceso</th>
       <td colspan="3">{{ registros[0].proceso }}</td>
-      <th>Desde</th>
-      <td colspan="3">{{ registros[0].desde }}</td>
-    </tr>
-    <tr>
-      <th>Hasta</th>
-      <td colspan="3">{{ registros[0].hasta }}</td>
+
       <th>Marca</th>
       <td colspan="3">{{ registros[0].marca }}</td>
     </tr>
+
     <tr>
       <th>Gasolina</th>
       <td colspan="3">{{ registros[0].gasolina }}</td>
+
       <th>Modelo</th>
       <td colspan="3">{{ registros[0].modelo }}</td>
     </tr>
+
     <tr>
       <th>Motor</th>
       <td colspan="3">{{ registros[0].motor }}</td>
+
       <th>Línea</th>
       <td colspan="3">{{ registros[0].linea }}</td>
     </tr>
+
   </table>
 
-  <table class="aspectos">
+
+  <!-- ✅ LISTA DE ASPECTOS -->
+  {% set aspectos_lista = [
+    "Estado de llantas y presión de aire",
+    "Encendido eléctrico y de crank",
+    "Luces y pito",
+    "Espejos retrovisores",
+    "Manijas de freno y clutch",
+    "Sistema de frenos",
+    "Estado de freno de disco",
+    "Nivel de líquido de freno",
+    "Revisión sistema tablero",
+    "Fugas de combustible y/o aceites",
+    "Kit de arrastre",
+    "Estado de suspensión",
+    "Nivel de aceites"
+  ] %}
+
+  <!-- ✅ TABLA PRINCIPAL (ASPECTOS × 15 COLUMNAS) -->
+  <table>
     <tr>
-      <th rowspan="2">ASPECTOS A REVISAR</th>
-      {% for i in range(1, 16) %}
-      <th colspan="2">{{ i }}</th>
-      {% endfor %}
-    </tr>
-    <tr>
-      {% for i in range(1, 16) %}
-      <th>B</th><th>M</th>
+      <th rowspan="2">Aspectos</th>
+
+      {% for i in range(1,16) %}
+        <th colspan="2">{{ i }}</th>
       {% endfor %}
     </tr>
 
-    {% set aspectos_lista = [
-      "Estado de llantas y presión de aire",
-      "Encendido eléctrico y de crank",
-      "Luces y pito",
-      "Espejos retrovisores",
-      "Manijas de freno y clutch",
-      "Sistema de frenos",
-      "Estado de freno de disco",
-      "Nivel de líquido de freno",
-      "Revisión sistema tablero",
-      "Fugas de combustible y/o aceites",
-      "Kit de arrastre",
-      "Estado de suspensión",
-      "Nivel de aceites"
-    ] %}
+    <tr>
+      {% for i in range(1,16) %}
+        <th>B</th><th>M</th>
+      {% endfor %}
+    </tr>
 
+    <!-- ✅ FILAS DE ASPECTOS -->
     {% for aspecto in aspectos_lista %}
     <tr>
-      <td style="text-align: left;">{{ aspecto }}</td>
+      <td class="txt-left">{{ aspecto }}</td>
+
+      {% set aspecto_index = loop.index|string %}
+
       {% for i in range(15) %}
         {% set registro = registros[i] if i < registros|length else None %}
+
         {% if registro %}
-          {% set aspectos_data = registro.aspectos_dict %}
-          <td>{% if aspectos_data.get(loop.index0|string, '') == 'B' %}X{% endif %}</td>
-          <td>{% if aspectos_data.get(loop.index0|string, '') == 'M' %}X{% endif %}</td>
+          {% set val = registro.aspectos_parsed.get(aspecto_index, '') %}
+          <td><div class="cuadro">{% if val == 'B' %}X{% endif %}</div></td>
+          <td><div class="cuadro">{% if val == 'M' %}X{% endif %}</div></td>
         {% else %}
           <td></td><td></td>
         {% endif %}
+
       {% endfor %}
     </tr>
     {% endfor %}
   </table>
 
+
+  <!-- ✅ OPTIMAS CONDICIONES -->
   <table>
     <tr>
-      <th>¿El vehículo se encuentra en óptimas condiciones?</th>
+      <th>¿Óptimas condiciones?</th>
+
       {% for i in range(15) %}
         {% set registro = registros[i] if i < registros|length else None %}
-        <td>{% if registro and registro.condiciones_optimas == "SI" %}X{% endif %}</td>
-        <td>{% if registro and registro.condiciones_optimas == "NO" %}X{% endif %}</td>
+
+        <td>
+          <div class="cuadro">{% if registro and registro.condiciones_optimas == "SI" %}X{% endif %}</div>
+        </td>
+        <td>
+          <div class="cuadro">{% if registro and registro.condiciones_optimas == "NO" %}X{% endif %}</div>
+        </td>
       {% endfor %}
     </tr>
   </table>
 
+
+  <!-- ✅ FIRMA -->
   <div class="firma">
-    <strong>FIRMA DEL CONDUCTOR:</strong>
-    {% if registros[0].firma_file %}
-      <img src="{{ registros[0].firma_file }}" alt="Firma">
+    <strong>FIRMA DEL CONDUCTOR:</strong><br>
+
+    {% if registros[0].firma_path %}
+      <img src="{{ registros[0].firma_path }}">
+    {% else %}
+      (sin firma)
     {% endif %}
   </div>
 
   <div class="nota">
-    <strong>Nota:</strong> Inspeccione todos los elementos que apliquen. Detenga los funcionamientos cuando observe alguna condición insegura y pueda causar algún peligro. Además, notifique a su jefe inmediato si surge esta situación.
+    <strong>Nota:</strong> Inspeccione todos los elementos que apliquen. Detenga los funcionamientos cuando observe alguna condición insegura.
   </div>
+
 </body>
 </html>
-
-

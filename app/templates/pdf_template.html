@@ -1,123 +1,230 @@
-<!-- app/templates/pdf_template.html -->
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8"/>
+  <meta charset="UTF-8">
   <style>
-    body { font-family: DejaVu Sans, Arial, sans-serif; font-size:12px; margin:20px; }
-    .header { text-align:center; margin-bottom:8px; font-weight:bold; }
-    .meta { font-size:11px; margin-bottom:10px;}
-    table { width:100%; border-collapse: collapse; }
-    .table, .table td, .table th { border: 1px solid #333; padding:4px; }
-    .no-border { border: none; }
-    .small { font-size:11px; }
-    .firma { margin-top:12px; }
+    @page {
+      size: A4 landscape;
+      margin: 15mm;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+    }
+
+    .encabezado {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #000;
+      padding-bottom: 5px;
+      margin-bottom: 10px;
+    }
+
+    .encabezado img {
+      height: 55px;
+    }
+
+    .titulo {
+      text-align: center;
+      font-weight: bold;
+      font-size: 16px;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+
+    .subinfo {
+      text-align: center;
+      font-size: 11px;
+      margin-top: 3px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 8px;
+    }
+
+    th, td {
+      border: 1px solid black;
+      padding: 4px;
+      font-size: 10px;
+    }
+
+    th {
+      background-color: #f0f0f0;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    /* Checkbox estilo formulario */
+    .cuadro {
+      width: 14px;
+      height: 14px;
+      border: 1px solid #000;
+      display: inline-block;
+      line-height: 14px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    .firma img {
+      width: 140px;
+      border: 1px solid #000;
+      margin-top: 5px;
+    }
+
+    .nota {
+      font-size: 10px;
+      margin-top: 12px;
+      border-top: 1px solid #000;
+      padding-top: 6px;
+      text-align: justify;
+    }
   </style>
 </head>
+
 <body>
-  <div class="header">INSPECCIÓN PRE OPERACIONAL MOTOCICLETA</div>
-  <div class="meta">Código: {{ codigo }} &nbsp;&nbsp; Fecha: {{ fecha }} &nbsp;&nbsp; Versión: {{ version }}</div>
 
+  <!-- ✅ Encabezado -->
+  <div class="encabezado">
+    <img src="app/static/img/incubant.jpg" alt="Logo">
+    <div style="flex:1; text-align:center;">
+      <div class="titulo">INSPECCIÓN PRE OPERACIONAL MOTOCICLETA</div>
+      <div class="subinfo">Código: {{ codigo }} — Fecha: {{ fecha }} — Versión: {{ version }}</div>
+    </div>
+  </div>
+
+  <!-- ✅ Datos generales -->
   <table>
     <tr>
-      <td><strong>Nombre Conductor:</strong> {{ registro.nombre_conductor }}</td>
-      <td><strong>Placa:</strong> {{ registro.placa }}</td>
+      <th>Nombre Conductor</th>
+      <td>{{ registro.nombre_conductor }}</td>
+      <th>Placa</th>
+      <td>{{ registro.placa }}</td>
+      <th>Proceso</th>
+      <td>{{ registro.proceso }}</td>
     </tr>
     <tr>
-      <td><strong>Proceso:</strong> {{ registro.proceso }}</td>
-      <td><strong>Desde - Hasta:</strong> {{ registro.desde }} - {{ registro.hasta }}</td>
+      <th>Desde</th>
+      <td>{{ registro.desde }}</td>
+      <th>Hasta</th>
+      <td>{{ registro.hasta }}</td>
+      <th>Marca</th>
+      <td>{{ registro.marca }}</td>
     </tr>
     <tr>
-      <td><strong>Marca:</strong> {{ registro.marca }}</td>
-      <td><strong>Gasolina:</strong> {{ registro.gasolina }}</td>
+      <th>Gasolina</th>
+      <td>{{ registro.gasolina }}</td>
+      <th>Modelo</th>
+      <td>{{ registro.modelo }}</td>
+      <th>Motor</th>
+      <td>{{ registro.motor }}</td>
     </tr>
     <tr>
-      <td><strong>Modelo:</strong> {{ registro.modelo }}</td>
-      <td><strong>Motor:</strong> {{ registro.motor }}</td>
-    </tr>
-    <tr>
-      <td><strong>Tipo Vehículo:</strong> {{ registro.tipo_vehiculo }}</td>
-      <td><strong>Línea:</strong> {{ registro.linea }}</td>
+      <th>Línea</th>
+      <td>{{ registro.linea }}</td>
+      <th>Licencia</th>
+      <td>{{ registro.licencia_num }}</td>
+      <th>Vencimiento</th>
+      <td>{{ registro.licencia_venc }}</td>
     </tr>
   </table>
 
-  <h3 style="margin-top:8px;">Revisión de Documentos</h3>
+  <!-- ✅ Documentos -->
   <table>
     <tr>
-      <td><strong>Licencia:</strong> {{ registro.licencia_num }}</td>
-      <td><strong>Vencimiento:</strong> {{ registro.licencia_venc }}</td>
-    </tr>
-    <tr>
-      <td><strong>Porte tarjeta propiedad:</strong> {{ registro.porte_propiedad }}</td>
-      <td><strong>SOAT:</strong> {{ registro.soat }}</td>
-    </tr>
-    <tr>
-      <td><strong>Certificado emisión:</strong> {{ registro.certificado_emision }}</td>
-      <td><strong>Póliza:</strong> {{ registro.poliza_seguro }}</td>
+      <th>Porte Tarjeta</th>
+      <td>{{ registro.porte_propiedad }}</td>
+      <th>SOAT</th>
+      <td>{{ registro.soat }}</td>
+      <th>Cert. Emisiones</th>
+      <td>{{ registro.certificado_emision }}</td>
+      <th>Póliza</th>
+      <td>{{ registro.poliza_seguro }}</td>
     </tr>
   </table>
 
-  <h3 style="margin-top:8px;">Aspectos a Revisar</h3>
-  <table class="table">
-    <tr>
-      <th>N°</th><th>Aspecto</th><th>Estado (B/M)</th>
-    </tr>
-    {% set nombres = [
-      "Estado de llantas y presión de aire",
-      "Encendido eléctrico y de crank",
-      "Luces y pito",
-      "Espejos retrovisores",
-      "Manijas de freno y clutch",
-      "Sistema de frenos",
-      "Estado de freno de disco",
-      "Nivel de líquido de freno",
-      "Revisión sistema tablero",
-      "Fugas de combustible y/o aceites",
-      "Kit de arrastre",
-      "Estado de suspensión",
-      "Nivel de aceites"
-    ] %}
+  <!-- ✅ Aspectos revisados -->
+  {% set aspectos_lista = [
+    "Estado de llantas y presión de aire",
+    "Encendido eléctrico y de crank",
+    "Luces y pito",
+    "Espejos retrovisores",
+    "Manijas de freno y clutch",
+    "Sistema de frenos",
+    "Estado de freno de disco",
+    "Nivel de líquido de freno",
+    "Revisión sistema tablero",
+    "Fugas de combustible y/o aceites",
+    "Kit de arrastre",
+    "Estado de suspensión",
+    "Nivel de aceites"
+  ] %}
 
-    {% set aspectos_data = registro.aspectos_dict %}
-    {% for nombre in nombres %}
-      <tr>
-        <td>{{ loop.index }}</td>
-        <td>{{ nombre }}</td>
-        <td>
-          {% if aspectos_data.get(loop.index|string, '') == 'B' %}
-            B
-          {% elif aspectos_data.get(loop.index|string, '') == 'M' %}
-            M
-          {% else %}
-            -
-          {% endif %}
-        </td>
-      </tr>
+  {% set aspectos_data = registro.aspectos_parsed %}
+
+  <table>
+    <tr>
+      <th>N°</th>
+      <th>Aspecto</th>
+      <th style="text-align:center;">B</th>
+      <th style="text-align:center;">M</th>
+    </tr>
+
+    {% for aspecto in aspectos_lista %}
+    {% set val = aspectos_data.get(loop.index|string, '') %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ aspecto }}</td>
+
+      <td style="text-align:center;">
+        <div class="cuadro">{% if val == 'B' %}X{% endif %}</div>
+      </td>
+
+      <td style="text-align:center;">
+        <div class="cuadro">{% if val == 'M' %}X{% endif %}</div>
+      </td>
+    </tr>
     {% endfor %}
   </table>
 
+  <!-- ✅ Observaciones y firma -->
   <div class="firma">
     <strong>Observaciones:</strong>
-    <div style="border:1px solid #333; min-height:80px; padding:6px; margin-top:6px;">{{ registro.observaciones }}</div>
-
-    <div style="margin-top:6px;">
-      <strong>Firma conductor:</strong><br/>
-      {% if registro.firma_file %}
-        <img src="{{ registro.firma_file }}" alt="firma" style="max-width:400px; border:1px solid #000;"/>
-      {% else %}
-        <div style="color:#999;">(sin firma)</div>
-      {% endif %}
+    <div style="border:1px solid #333; min-height:60px; padding:6px; margin-top:4px;">
+      {{ registro.observaciones }}
     </div>
 
-    <div style="margin-top:8px;">
-      <strong>¿El vehículo se encuentra en óptimas condiciones?</strong>
-      {{ registro.condiciones_optimas }}
-    </div>
+    <br>
+    <strong>Firma Conductor:</strong><br>
+    {% if registro.firma_path %}
+      <img src="{{ registro.firma_path }}" alt="Firma">
+    {% else %}
+      <span>(sin firma)</span>
+    {% endif %}
   </div>
 
-  <div style="font-size:10px; margin-top:12px;">
-    Nota: Inspeccione todos los elementos que apliquen. Detenga todos los funcionamientos cuando observe alguna condición insegura. Informe inmediatamente al responsable del área o supervisor.
+  <!-- ✅ Estado -->
+  <div style="margin-top:10px; font-size:12px;">
+    <strong>¿Vehículo en óptimas condiciones?</strong>
+    <div class="cuadro" style="display:inline-block; margin-left:5px;">
+      {% if registro.condiciones_optimas == "SI" %}X{% endif %}
+    </div> SI
+    <div class="cuadro" style="display:inline-block; margin-left:10px;">
+      {% if registro.condiciones_optimas == "NO" %}X{% endif %}
+    </div> NO
   </div>
+
+  <!-- ✅ Nota -->
+  <div class="nota">
+    <strong>Nota:</strong> Inspeccione todos los elementos que apliquen. Detenga los funcionamientos cuando observe alguna condición insegura. Informe a su jefe inmediato.
+  </div>
+
 </body>
 </html>
+
+
 
