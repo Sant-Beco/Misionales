@@ -3,145 +3,58 @@
 <head>
   <meta charset="UTF-8">
   <style>
+    @page { size: A4 landscape; margin: 8mm; }
+    body { font-family: DejaVu Sans, Arial, sans-serif; font-size:10px; margin:0; color:#000; }
+    .encabezado { display:flex; align-items:center; gap:12px; padding:6px 0; border-bottom:2px solid #000; }
+    .logo { width:90px; }
+    .titulo { flex:1; text-align:center; font-weight:700; font-size:18px; text-transform:uppercase; }
+    .subinfo { text-align:center; font-size:11px; margin:6px 0; }
 
-    @page {
-      size: A4 landscape;
-      margin: 12mm;
-    }
+    table { width:100%; border-collapse: collapse; margin-top:6px; }
+    th, td { border:1px solid #222; padding:4px; vertical-align:middle; }
+    th { background:#eee; font-weight:700; font-size:10px; text-transform:uppercase; }
 
-    body {
-      font-family: Arial, sans-serif;
-      font-size: 10px;
-    }
+    .aspectos td { text-align:center; }
+    .aspectos .left { text-align:left; padding-left:8px; }
 
-    .encabezado {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 2px solid #000;
-      padding-bottom: 5px;
-      margin-bottom: 8px;
-    }
+    .box { display:inline-block; width:18px; height:18px; border:1px solid #222; text-align:center; line-height:18px; font-weight:700; font-size:12px; }
 
-    .encabezado img {
-      height: 50px;
-    }
-
-    .titulo {
-      text-align: center;
-      font-weight: bold;
-      font-size: 15px;
-      text-transform: uppercase;
-    }
-
-    .subinfo {
-      text-align: center;
-      margin-top: 3px;
-      margin-bottom: 8px;
-      font-size: 10px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 8px;
-    }
-
-    th, td {
-      border: 1px solid black;
-      text-align: center;
-      padding: 2px;
-      font-size: 9px;
-    }
-
-    th {
-      background: #f1f1f1;
-      text-transform: uppercase;
-    }
-
-    td.txt-left {
-      text-align: left;
-    }
-
-    .cuadro {
-      width: 12px;
-      height: 12px;
-      border: 1px solid #000;
-      display: inline-block;
-      line-height: 12px;
-      text-align: center;
-      font-weight: bold;
-      font-size: 10px;
-    }
-
-    .firma img {
-      width: 55px;
-      border: 1px solid #000;
-      margin-top: 2px;
-    }
-
-    .nota {
-      font-size: 9px;
-      margin-top: 8px;
-      border-top: 1px solid #000;
-      padding-top: 4px;
-      text-align: justify;
-    }
-
+    .firma { margin-top:10px; }
+    .firma img { width:70px; height:auto; border:1px solid #222; display:block; margin-top:6px; }
+    .nota { font-size:9px; margin-top:8px; border-top:1px solid #ddd; padding-top:6px; }
   </style>
 </head>
-
 <body>
-
-  <!-- ✅ ENCABEZADO -->
   <div class="encabezado">
-    <img src="app/static/img/incubant.jpg" alt="Logo">
+    <img class="logo" src="app/static/img/incubant.jpg" alt="Logo">
     <div class="titulo">INSPECCIÓN PRE OPERACIONAL MOTOCICLETA</div>
   </div>
 
   <div class="subinfo">
-    Código: {{ codigo }} — Versión: {{ version }} — Fecha consolidado: {{ fecha }} <br>
-    Registros desde <strong>{{ desde }}</strong> hasta <strong>{{ hasta }}</strong>
+    Código: {{ codigo }} — Versión: {{ version }} — Fecha consolidado: {{ fecha }}<br>
+    Registros desde: <strong>{{ desde }}</strong> hasta <strong>{{ hasta }}</strong>
   </div>
 
-  <!-- ✅ DATOS GENERALES (DEL 1er REGISTRO) -->
+  <!-- DATOS (primer registro) -->
   <table>
     <tr>
-      <th>Nombre Conductor</th>
-      <td colspan="3">{{ registros[0].nombre_conductor }}</td>
-
-      <th>Placa</th>
-      <td colspan="3">{{ registros[0].placa }}</td>
+      <th>NOMBRE CONDUCTOR</th><td colspan="3">{{ registros[0].nombre_conductor }}</td>
+      <th>PLACA</th><td colspan="3">{{ registros[0].placa }}</td>
     </tr>
-
     <tr>
-      <th>Proceso</th>
-      <td colspan="3">{{ registros[0].proceso }}</td>
-
-      <th>Marca</th>
-      <td colspan="3">{{ registros[0].marca }}</td>
+      <th>PROCESO</th><td colspan="3">{{ registros[0].proceso }}</td>
+      <th>MARCA</th><td colspan="3">{{ registros[0].marca }}</td>
     </tr>
-
     <tr>
-      <th>Gasolina</th>
-      <td colspan="3">{{ registros[0].gasolina }}</td>
-
-      <th>Modelo</th>
-      <td colspan="3">{{ registros[0].modelo }}</td>
+      <th>GASOLINA</th><td colspan="3">{{ registros[0].gasolina }}</td>
+      <th>MODELO</th><td colspan="3">{{ registros[0].modelo }}</td>
     </tr>
-
     <tr>
-      <th>Motor</th>
-      <td colspan="3">{{ registros[0].motor }}</td>
-
-      <th>Línea</th>
-      <td colspan="3">{{ registros[0].linea }}</td>
+      <th>MOTOR</th><td colspan="3">{{ registros[0].motor }}</td>
+      <th>LÍNEA</th><td colspan="3">{{ registros[0].linea }}</td>
     </tr>
-
   </table>
 
-
-  <!-- ✅ LISTA DE ASPECTOS -->
   {% set aspectos_lista = [
     "Estado de llantas y presión de aire",
     "Encendido eléctrico y de crank",
@@ -158,79 +71,65 @@
     "Nivel de aceites"
   ] %}
 
-  <!-- ✅ TABLA PRINCIPAL (ASPECTOS × 15 COLUMNAS) -->
-  <table>
+  <!-- TABLA ASPECTOS -->
+  <table class="aspectos">
     <tr>
-      <th rowspan="2">Aspectos</th>
-
+      <th rowspan="2" style="width:22%;">Aspectos a revisar</th>
       {% for i in range(1,16) %}
         <th colspan="2">{{ i }}</th>
       {% endfor %}
     </tr>
-
     <tr>
       {% for i in range(1,16) %}
         <th>B</th><th>M</th>
       {% endfor %}
     </tr>
 
-    <!-- ✅ FILAS DE ASPECTOS -->
     {% for aspecto in aspectos_lista %}
+    {% set aspecto_idx = loop.index %}
     <tr>
-      <td class="txt-left">{{ aspecto }}</td>
-
-      {% set aspecto_index = loop.index|string %}
+      <td class="left">{{ aspecto }}</td>
 
       {% for i in range(15) %}
         {% set registro = registros[i] if i < registros|length else None %}
-
         {% if registro %}
-          {% set val = registro.aspectos_parsed.get(aspecto_index, '') %}
-          <td><div class="cuadro">{% if val == 'B' %}X{% endif %}</div></td>
-          <td><div class="cuadro">{% if val == 'M' %}X{% endif %}</div></td>
+          {% set val = (registro.aspectos_parsed or {}).get(aspecto_idx|string, '') %}
+          <td>{% if val == 'B' %}<span class="box">✔</span>{% else %}<span class="box"></span>{% endif %}</td>
+          <td>{% if val == 'M' %}<span class="box">✖</span>{% else %}<span class="box"></span>{% endif %}</td>
         {% else %}
-          <td></td><td></td>
+          <td><span class="box"></span></td><td><span class="box"></span></td>
         {% endif %}
-
       {% endfor %}
     </tr>
     {% endfor %}
   </table>
 
-
-  <!-- ✅ OPTIMAS CONDICIONES -->
-  <table>
+  <!-- CONDICIONES -->
+  <table style="margin-top:6px;">
     <tr>
-      <th>¿Óptimas condiciones?</th>
-
+      <th>¿ÓPTIMAS CONDICIONES?</th>
       {% for i in range(15) %}
         {% set registro = registros[i] if i < registros|length else None %}
-
-        <td>
-          <div class="cuadro">{% if registro and registro.condiciones_optimas == "SI" %}X{% endif %}</div>
-        </td>
-        <td>
-          <div class="cuadro">{% if registro and registro.condiciones_optimas == "NO" %}X{% endif %}</div>
-        </td>
+        <td>{% if registro and registro.condiciones_optimas == "SI" %}<span class="box">✔</span>{% else %}<span class="box"></span>{% endif %}</td>
+        <td>{% if registro and registro.condiciones_optimas == "NO" %}<span class="box">✖</span>{% else %}<span class="box"></span>{% endif %}</td>
       {% endfor %}
     </tr>
   </table>
 
-
-  <!-- ✅ FIRMA -->
+  <!-- FIRMA -->
   <div class="firma">
     <strong>FIRMA DEL CONDUCTOR:</strong><br>
-
     {% if registros[0].firma_path %}
-      <img src="{{ registros[0].firma_path }}">
+      <img src="{{ registros[0].firma_path }}" alt="Firma">
     {% else %}
-      (sin firma)
+      <span>(sin firma)</span>
     {% endif %}
   </div>
 
   <div class="nota">
-    <strong>Nota:</strong> Inspeccione todos los elementos que apliquen. Detenga los funcionamientos cuando observe alguna condición insegura.
+    <strong>Nota:</strong> Inspeccione todos los elementos que apliquen. Detenga los funcionamientos cuando observe alguna condición insegura o que pueda causar algún peligro. Informe al responsable.
   </div>
 
 </body>
 </html>
+
