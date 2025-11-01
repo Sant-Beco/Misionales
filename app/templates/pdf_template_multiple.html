@@ -4,29 +4,85 @@
   <meta charset="UTF-8">
   <style>
     @page { size: A4 landscape; margin: 8mm; }
-    body { font-family: DejaVu Sans, Arial, sans-serif; font-size:10px; margin:0; color:#000; }
-    .encabezado { display:flex; align-items:center; gap:12px; padding:6px 0; border-bottom:2px solid #000; }
+    body {
+      font-family: DejaVu Sans, Arial, sans-serif;
+      font-size:10px;
+      margin:0;
+      color:#000;
+    }
+
+    .encabezado {
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:6px 0;
+      border-bottom:2px solid #000;
+    }
+
     .logo { width:90px; }
-    .titulo { flex:1; text-align:center; font-weight:700; font-size:18px; text-transform:uppercase; }
-    .subinfo { text-align:center; font-size:11px; margin:6px 0; }
+    .titulo {
+      flex:1;
+      text-align:center;
+      font-weight:700;
+      font-size:18px;
+      text-transform:uppercase;
+    }
+
+    .subinfo {
+      text-align:center;
+      font-size:11px;
+      margin:6px 0;
+    }
 
     table { width:100%; border-collapse: collapse; margin-top:6px; }
-    th, td { border:1px solid #222; padding:4px; vertical-align:middle; }
-    th { background:#eee; font-weight:700; font-size:10px; text-transform:uppercase; }
+    th, td {
+      border:1px solid #222;
+      padding:4px;
+      vertical-align:middle;
+    }
+    th {
+      background:#eee;
+      font-weight:700;
+      font-size:10px;
+      text-transform:uppercase;
+    }
 
     .aspectos td { text-align:center; }
     .aspectos .left { text-align:left; padding-left:8px; }
 
-    .box { display:inline-block; width:18px; height:18px; border:1px solid #222; text-align:center; line-height:18px; font-weight:700; font-size:12px; }
+    .box {
+      display:inline-block;
+      width:18px;
+      height:18px;
+      border:1px solid #222;
+      text-align:center;
+      line-height:18px;
+      font-weight:700;
+      font-size:12px;
+    }
 
     .firma { margin-top:10px; }
-    .firma img { width:70px; height:auto; border:1px solid #222; display:block; margin-top:6px; }
-    .nota { font-size:9px; margin-top:8px; border-top:1px solid #ddd; padding-top:6px; }
+    .firma img {
+      width:70px;
+      height:auto;
+      border:1px solid #222;
+      display:block;
+      margin-top:6px;
+    }
+
+    .nota {
+      font-size:9px;
+      margin-top:8px;
+      border-top:1px solid #ddd;
+      padding-top:6px;
+    }
   </style>
 </head>
 <body>
+
+  <!-- ✅ Logo en ruta absoluta -->
   <div class="encabezado">
-    <img class="logo" src="app/static/img/incubant.jpg" alt="Logo">
+    <img class="logo" src="{{ logo_path }}" alt="Logo">
     <div class="titulo">INSPECCIÓN PRE OPERACIONAL MOTOCICLETA</div>
   </div>
 
@@ -35,7 +91,7 @@
     Registros desde: <strong>{{ desde }}</strong> hasta <strong>{{ hasta }}</strong>
   </div>
 
-  <!-- DATOS (primer registro) -->
+  <!-- ✅ DATOS (primer registro) -->
   <table>
     <tr>
       <th>NOMBRE CONDUCTOR</th><td colspan="3">{{ registros[0].nombre_conductor }}</td>
@@ -71,7 +127,7 @@
     "Nivel de aceites"
   ] %}
 
-  <!-- TABLA ASPECTOS -->
+  <!-- ✅ TABLA ASPECTOS -->
   <table class="aspectos">
     <tr>
       <th rowspan="2" style="width:22%;">Aspectos a revisar</th>
@@ -79,6 +135,7 @@
         <th colspan="2">{{ i }}</th>
       {% endfor %}
     </tr>
+
     <tr>
       {% for i in range(1,16) %}
         <th>B</th><th>M</th>
@@ -86,41 +143,64 @@
     </tr>
 
     {% for aspecto in aspectos_lista %}
-    {% set aspecto_idx = loop.index %}
-    <tr>
-      <td class="left">{{ aspecto }}</td>
+      {% set aspecto_idx = loop.index %}
+      <tr>
+        <td class="left">{{ aspecto }}</td>
 
-      {% for i in range(15) %}
-        {% set registro = registros[i] if i < registros|length else None %}
-        {% if registro %}
-          {% set val = (registro.aspectos_parsed or {}).get(aspecto_idx|string, '') %}
-          <td>{% if val == 'B' %}<span class="box">✔</span>{% else %}<span class="box"></span>{% endif %}</td>
-          <td>{% if val == 'M' %}<span class="box">✖</span>{% else %}<span class="box"></span>{% endif %}</td>
-        {% else %}
-          <td><span class="box"></span></td><td><span class="box"></span></td>
-        {% endif %}
-      {% endfor %}
-    </tr>
+        {% for i in range(15) %}
+          {% set registro = registros[i] if i < registros|length else None %}
+
+          {% if registro %}
+              {% set val = (registro.aspectos_parsed or {}).get(aspecto_idx|string, '') %}
+              <td>{% if val == 'B' %}<span class="box">✔</span>{% else %}<span class="box"></span>{% endif %}</td>
+              <td>{% if val == 'M' %}<span class="box">✖</span>{% else %}<span class="box"></span>{% endif %}</td>
+          {% else %}
+              <td><span class="box"></span></td>
+              <td><span class="box"></span></td>
+          {% endif %}
+        {% endfor %}
+      </tr>
     {% endfor %}
   </table>
 
-  <!-- CONDICIONES -->
+  <!-- ✅ CONDICIONES ÓPTIMAS -->
   <table style="margin-top:6px;">
     <tr>
       <th>¿ÓPTIMAS CONDICIONES?</th>
+
       {% for i in range(15) %}
         {% set registro = registros[i] if i < registros|length else None %}
-        <td>{% if registro and registro.condiciones_optimas == "SI" %}<span class="box">✔</span>{% else %}<span class="box"></span>{% endif %}</td>
-        <td>{% if registro and registro.condiciones_optimas == "NO" %}<span class="box">✖</span>{% else %}<span class="box"></span>{% endif %}</td>
+
+        <td>
+          {% if registro and registro.condiciones_optimas == "SI" %}
+            <span class="box">✔</span>
+          {% else %}
+            <span class="box"></span>
+          {% endif %}
+        </td>
+
+        <td>
+          {% if registro and registro.condiciones_optimas == "NO" %}
+            <span class="box">✖</span>
+          {% else %}
+            <span class="box"></span>
+          {% endif %}
+        </td>
+
       {% endfor %}
     </tr>
   </table>
 
-  <!-- FIRMA -->
+  <!-- ✅ FIRMA -->
   <div class="firma">
     <strong>FIRMA DEL CONDUCTOR:</strong><br>
+
     {% if registros[0].firma_path %}
       <img src="{{ registros[0].firma_path }}" alt="Firma">
+
+    {% elif registros[0].firma_dataurl %}
+      <img src="{{ registros[0].firma_dataurl }}" alt="Firma">
+
     {% else %}
       <span>(sin firma)</span>
     {% endif %}
@@ -132,4 +212,5 @@
 
 </body>
 </html>
+
 

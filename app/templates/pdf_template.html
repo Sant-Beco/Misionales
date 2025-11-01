@@ -22,13 +22,11 @@
     .aspectos td { text-align:center; }
     .aspectos .left { text-align:left; padding-left:10px; }
 
-    /* casilla con simbolo centrado */
     .box {
       display:inline-block;
       width:20px;
       height:20px;
       border:1px solid #222;
-      vertical-align:middle;
       text-align:center;
       line-height:20px;
       font-weight:700;
@@ -41,8 +39,10 @@
   </style>
 </head>
 <body>
+
+  <!-- ✅ Logo con ruta absoluta -->
   <div class="encabezado">
-    <img class="logo" src="app/static/img/incubant.jpg" alt="Logo">
+    <img class="logo" src="{{ logo_path }}" alt="Logo">
     <div class="titulo">INSPECCIÓN PRE OPERACIONAL MOTOCICLETA</div>
   </div>
 
@@ -71,7 +71,7 @@
     </tr>
   </table>
 
-  <!-- Documentos -->
+  <!-- DOCUMENTOS -->
   <table>
     <tr>
       <th>Licencia Nº</th><td>{{ registro.licencia_num }}</td>
@@ -87,7 +87,7 @@
     </tr>
   </table>
 
-  <!-- Aspectos -->
+  <!-- ASPECTOS -->
   {% set aspectos_lista = [
     "Estado de llantas y presión de aire",
     "Encendido eléctrico y de crank",
@@ -114,38 +114,51 @@
     </tr>
 
     {% for aspecto in aspectos_lista %}
+    {% set val = aspectos_data.get(loop.index|string, '') %}
     <tr>
       <td>{{ loop.index }}</td>
       <td class="left">{{ aspecto }}</td>
 
-      {% set val = aspectos_data.get(loop.index|string, '') %}
       <td>{% if val == 'B' %}<span class="box">✔</span>{% else %}<span class="box"></span>{% endif %}</td>
       <td>{% if val == 'M' %}<span class="box">✖</span>{% else %}<span class="box"></span>{% endif %}</td>
     </tr>
     {% endfor %}
   </table>
 
+  <!-- FIRMA -->
   <div class="firma">
     <strong>Observaciones:</strong>
-    <div style="border:1px solid #ddd; min-height:80px; padding:6px; margin-top:6px;">{{ registro.observaciones }}</div>
+    <div style="border:1px solid #ddd; min-height:80px; padding:6px; margin-top:6px;">
+      {{ registro.observaciones }}
+    </div>
 
     <div style="margin-top:8px;">
       <strong>Firma Conductor:</strong><br>
+
       {% if registro.firma_path %}
         <img src="{{ registro.firma_path }}" alt="firma">
+      {% elif registro.firma_dataurl %}
+        <img src="{{ registro.firma_dataurl }}" alt="firma">
       {% else %}
         <div style="color:#777;">(sin firma)</div>
       {% endif %}
+
     </div>
   </div>
 
   <div style="margin-top:10px;">
     <strong>¿El vehículo se encuentra en óptimas condiciones?</strong>
-    {% if registro.condiciones_optimas == "SI" %} <span class="box">✔</span> SI {% else %} <span class="box">✖</span> NO {% endif %}
+    {% if registro.condiciones_optimas == "SI" %}
+      <span class="box">✔</span> SI
+    {% else %}
+      <span class="box">✖</span> NO
+    {% endif %}
   </div>
 
   <div class="nota">
     <strong>Nota:</strong> Inspeccione todos los elementos que apliquen. Detenga los funcionamientos cuando observe alguna condición insegura y notifique al responsable.
   </div>
+
 </body>
 </html>
+

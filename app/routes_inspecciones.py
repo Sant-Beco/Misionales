@@ -13,40 +13,47 @@ import json
 
 router = APIRouter()
 
+# 📌 Directorios
 PDF_DIR = Path("app/data/generated_pdfs")
 PDF_DIR.mkdir(parents=True, exist_ok=True)
 
-# Cambia a False si deseas conservar las inspecciones después de generar el consolidado
+# 📌 Ruta absoluta del logo
+LOGO_PATH = Path("app/static/img/incubant.jpg").resolve()
+
+# 📌 True = elimina inspecciones luego de consolidar
 DELETE_AFTER_CONSOLIDATION = True
 
 
-# ✅ Crea ruta absoluta tipo file:/// para WeasyPrint
+# ✅ Convierte una ruta a file:/// absoluto (WeasyPrint lo necesita)
 def build_file_uri(path: Path):
     return "file:///" + path.as_posix()
 
 
-# ✅ Limpia y prepara un registro para el PDF
+# ✅ Prepara cada registro (firma, aspectos, rutas)
 def prepare_registro(r):
-    # 1️⃣ Parsear JSON de aspectos
+    # Parseo seguro del JSON de aspectos
     try:
-        if not r.aspectos or r.aspectos in ["null", "None", None]:
-            r.aspectos_parsed = {}
-        else:
+        if r.aspectos and r.aspectos not in ["null", "None"]:
             r.aspectos_parsed = json.loads(r.aspectos)
+        else:
+            r.aspectos_parsed = {}
     except:
         r.aspectos_parsed = {}
 
-    # 2️⃣ Validar existencia de firma
+    # Rutas de firma
     if r.firma_file:
         firma_path = PDF_DIR / r.firma_file
         r.firma_path = build_file_uri(firma_path) if firma_path.exists() else None
     else:
         r.firma_path = None
 
+    # Se añade dataURL por si no carga la ruta
+    r.firma_dataurl = getattr(r, "firma_dataurl", None)
+
     return r
 
 
-# ✅ SUBMIT DE INSPECCIÓN (SE GENERA EL INDIVIDUAL + ACUMULA PARA CONSOLIDADO)
+# ✅ SUBMIT — Genera PDF individual y acumula para consolidado
 @router.post("/submit")
 async def submit_inspeccion(
     nombre_conductor: str = Form(...),
@@ -75,7 +82,7 @@ async def submit_inspeccion(
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
     try:
-        # ✅ GUARDAR FIRMA
+        # ✅ Guardar firma PNG en disco
         firma_filename = None
         if firma_dataurl:
             try:
@@ -86,11 +93,11 @@ async def submit_inspeccion(
             except Exception as e:
                 print("⚠️ Error guardando firma:", e)
 
-        # ✅ Validar JSON básico
+        # ✅ Asegurar JSON válido
         if not isinstance(aspectos, str):
             aspectos = "{}"
 
-        # ✅ GUARDAR EN BD
+        # ✅ Crear registro
         inspeccion = models.Inspeccion(
             fecha=datetime.now(),
             nombre_conductor=nombre_conductor,
@@ -120,38 +127,45 @@ async def submit_inspeccion(
         db.commit()
         db.refresh(inspeccion)
 
-        # ✅ Preparar datos para PDF individual
+        # ✅ Adjuntar firma_dataurl temporalmente
+        inspeccion.firma_dataurl = firma_dataurl
+
+        # ✅ Preparar datos PDF
         inspeccion = prepare_registro(inspeccion)
 
-        # ✅ Contar inspecciones del conductor
-        total_inspecciones = db.query(models.Inspeccion).filter(
-            models.Inspeccion.nombre_conductor == nombre_conductor
-        ).count()
+        # ✅ Contar inspecciones acumuladas
+        total_inspecciones = (
+            db.query(models.Inspeccion)
+            .filter(models.Inspeccion.nombre_conductor == nombre_conductor)
+            .count()
+        )
 
         # ✅ Generar PDF INDIVIDUAL
         pdf_filename = f"inspeccion_{timestamp}.pdf"
         pdf_path = PDF_DIR / pdf_filename
 
-        try:
-            render_pdf_from_template(
-                "pdf_template.html",
-                {
-                    "registro": inspeccion,
-                    "fecha": datetime.now().strftime("%d - %m - %Y"),
-                    "codigo": "FO-SST-063",
-                    "version": "01",
-                },
-                output_path=str(pdf_path)
-            )
-        except Exception as e:
-            print("❌ Error generando PDF individual:", e)
-            return JSONResponse({"error": "Error generando PDF individual"}, status_code=500)
+        render_pdf_from_template(
+            "pdf_template.html",
+            {
+                "registro": inspeccion,
+                "fecha": datetime.now().strftime("%d - %m - %Y"),
+                "codigo": "FO-SST-063",
+                "version": "01",
+                "logo_path": build_file_uri(LOGO_PATH),
+            },
+            output_path=str(pdf_path),
+        )
 
-        # ✅ SI YA TIENE 15 → GENERAR CONSOLIDADO
+        # ✅ ¿Ya hay 15? → generar consolidado
         if total_inspecciones >= 15:
-            registros = db.query(models.Inspeccion).filter(
-                models.Inspeccion.nombre_conductor == nombre_conductor
-            ).order_by(models.Inspeccion.fecha.asc()).limit(15).all()
+
+            registros = (
+                db.query(models.Inspeccion)
+                .filter(models.Inspeccion.nombre_conductor == nombre_conductor)
+                .order_by(models.Inspeccion.fecha.asc())
+                .limit(15)
+                .all()
+            )
 
             registros = [prepare_registro(r) for r in registros]
 
@@ -161,64 +175,61 @@ async def submit_inspeccion(
             reporte_filename = f"reporte15_{nombre_conductor}_{datetime.now().strftime('%Y%m%d%H%M')}.pdf"
             reporte_path = PDF_DIR / reporte_filename
 
-            try:
-                render_pdf_from_template(
-                    "pdf_template_multiple.html",
-                    {
-                        "registros": registros,
-                        "fecha": datetime.now().strftime("%d - %m - %Y"),
-                        "codigo": "FO-SST-063",
-                        "version": "01",
-                        "desde": fecha_desde,
-                        "hasta": fecha_hasta,
-                    },
-                    output_path=str(reporte_path)
-                )
-            except Exception as e:
-                print("❌ Error generando PDF consolidado:", e)
-                return JSONResponse({"error": "Error generando PDF consolidado"}, status_code=500)
+            render_pdf_from_template(
+                "pdf_template_multiple.html",
+                {
+                    "registros": registros,
+                    "fecha": datetime.now().strftime("%d - %m - %Y"),
+                    "codigo": "FO-SST-063",
+                    "version": "01",
+                    "desde": fecha_desde,
+                    "hasta": fecha_hasta,
+                    "logo_path": build_file_uri(LOGO_PATH),
+                },
+                output_path=str(reporte_path),
+            )
 
-            # ✅ Guardar reporte en BD
+            # ✅ Guardar consolidado
             reporte = models.ReporteInspeccion(
                 nombre_conductor=nombre_conductor,
                 fecha_reporte=datetime.now(),
                 archivo_pdf=str(reporte_path),
-                total_incluidas=15
+                total_incluidas=15,
             )
             db.add(reporte)
             db.commit()
 
-            # ✅ Borrar inspecciones después del consolidado
+            # ✅ Borrar después de consolidar
             if DELETE_AFTER_CONSOLIDATION:
                 for r in registros:
                     db.delete(r)
                 db.commit()
 
-            return FileResponse(
-                reporte_path,
-                media_type="application/pdf",
-                filename=reporte_filename
-            )
+            return FileResponse(reporte_path, media_type="application/pdf", filename=reporte_filename)
 
-        # ✅ Retorno normal
+        # ✅ Retorna PDF individual
         return FileResponse(pdf_path, media_type="application/pdf", filename=pdf_filename)
 
     finally:
         db.close()
 
 
-# ✅ GENERAR CONSOLIDADO MANUALMENTE
+# ✅ CONSOLIDADO MANUAL
 @router.get("/reporte15/{nombre_conductor}")
 async def generar_pdf15(nombre_conductor: str):
 
     db = SessionLocal()
     try:
-        registros = db.query(models.Inspeccion).filter(
-            models.Inspeccion.nombre_conductor == nombre_conductor
-        ).order_by(models.Inspeccion.fecha.asc()).limit(15).all()
+        registros = (
+            db.query(models.Inspeccion)
+            .filter(models.Inspeccion.nombre_conductor == nombre_conductor)
+            .order_by(models.Inspeccion.fecha.asc())
+            .limit(15)
+            .all()
+        )
 
         if not registros:
-            return JSONResponse({"mensaje": "No hay inspecciones para este conductor"}, status_code=404)
+            return JSONResponse({"mensaje": "No hay inspecciones"}, status_code=404)
 
         registros = [prepare_registro(r) for r in registros]
 
@@ -237,12 +248,12 @@ async def generar_pdf15(nombre_conductor: str):
                 "version": "01",
                 "desde": fecha_desde,
                 "hasta": fecha_hasta,
+                "logo_path": build_file_uri(LOGO_PATH),
             },
-            output_path=str(pdf_path)
+            output_path=str(pdf_path),
         )
 
         return FileResponse(pdf_path, media_type="application/pdf", filename=pdf_filename)
 
     finally:
         db.close()
-
