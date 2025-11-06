@@ -73,7 +73,7 @@
 
     .firma { margin-top:10px; }
     .firma img { 
-      width:70px; 
+      width:80px; 
       height:auto; 
       border:1px solid #222; 
       display:block; 
@@ -103,7 +103,7 @@
     Registros desde: <strong>{{ desde }}</strong> hasta <strong>{{ hasta }}</strong>
   </div>
 
-  <!-- INFO DEL PRIMER REGISTRO -->
+  <!-- INFO PRINCIPAL DEL PRIMER REGISTRO -->
   <table>
     <tr>
       <th>NOMBRE CONDUCTOR</th>
@@ -151,18 +151,18 @@
     "Nivel de aceites"
   ] %}
 
-  <!-- TABLA GRANDE DE ASPECTOS -->
+  <!-- TABLA GENERAL 15 DÍAS -->
   <table class="aspectos">
 
-    <!-- ENCABEZADO -->
+    <!-- ENCABEZADO SUPERIOR -->
     <tr>
       <th rowspan="2" style="width:22%;">Aspectos a revisar</th>
-
       {% for i in range(1,16) %}
       <th colspan="2">{{ i }}</th>
       {% endfor %}
     </tr>
 
+    <!-- B / M -->
     <tr>
       {% for i in range(1,16) %}
         <th>B</th>
@@ -170,8 +170,8 @@
       {% endfor %}
     </tr>
 
-    <!-- FILAS DE ASPECTOS -->
-    {% for aspecto in   aspectos_lista %}
+    <!-- FILAS -->
+    {% for aspecto in aspectos_lista %}
     {% set idx = loop.index|string %}
 
     <tr>
@@ -180,7 +180,7 @@
       {% for i in range(15) %}
         {% set reg = registros[i] if i < registros|length else None %}
         {% set val = (reg.aspectos_parsed or {}).get(idx, '') if reg else '' %}
-        
+
         <td>
           {% if val == 'B' %}
             <span class="box">✔</span>
@@ -230,15 +230,17 @@
     </tr>
   </table>
 
-  <!-- ✅ FIRMA DEL PRIMER DÍA -->
+  <!-- FIRMA DEL PRIMER DÍA -->
   <div class="firma">
     <strong>FIRMA DEL PRIMER DÍA:</strong><br>
 
-    {% if firma_primer_dia and firma_primer_dia.firma_path %}
-      <img src="{{ firma_primer_dia.firma_path }}" alt="Firma">
-    
-    {% elif firma_primer_dia and firma_primer_dia.firma_base64 %}
-      <img src="{{ firma_primer_dia.firma_base64 }}" alt="Firma">
+    {% if registros[0].firma_path %}
+      <!-- ✅ Firma desde archivo -->
+      <img src="{{ registros[0].firma_path }}" alt="Firma">
+
+    {% elif registros[0].firma_base64 %}
+      <!-- ✅ Firma Base64 fallback -->
+      <img src="{{ registros[0].firma_base64 }}" alt="Firma">
 
     {% else %}
       <span>(sin firma)</span>
@@ -253,5 +255,6 @@
 
 </body>
 </html>
+
 
 

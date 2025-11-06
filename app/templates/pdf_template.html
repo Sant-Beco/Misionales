@@ -1,100 +1,85 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
+  <meta charset="UTF-8">
+  <style>
+    @page { size: A4 portrait; margin: 12mm; }
+    body {
+      font-family: DejaVu Sans, Arial, sans-serif;
+      font-size: 11px;
+      margin: 0;
+      color: #000;
+    }
+    .encabezado { 
+      display:flex; 
+      align-items:center; 
+      gap:12px; 
+      padding:8px 0; 
+      border-bottom:2px solid #000; 
+    }
+    .logo { width:120px; }
+    .titulo { 
+      text-align:center; 
+      flex:1; 
+      font-weight:700; 
+      font-size:16px; 
+      text-transform:uppercase; 
+    }
+    .meta { 
+      text-align:center; 
+      font-size:11px; 
+      margin-top:4px; 
+      color:#222; 
+    }
 
-<style>
-  @page { size: A4 portrait; margin: 12mm; }
+    table { 
+      width:100%; 
+      border-collapse: collapse; 
+      margin-top:10px; 
+    }
+    th, td { 
+      border:1px solid #222; 
+      padding:6px 8px; 
+      vertical-align:middle; 
+    }
+    th { 
+      background:#efefef; 
+      font-weight:700; 
+      font-size:11px; 
+      text-transform:uppercase; 
+    }
 
-  body {
-    font-family: DejaVu Sans, Arial, sans-serif;
-    font-size: 11px;
-    margin: 0;
-    color: #000;
-  }
+    .aspectos td { text-align:center; }
+    .aspectos .left { text-align:left; padding-left:10px; }
 
-  /* ENCABEZADO */
-  .encabezado {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 6px 0;
-    border-bottom: 2px solid #000;
-  }
-  .logo {
-    width: 110px;
-  }
-  .titulo {
-    flex: 1;
-    text-align: center;
-    font-weight: 700;
-    font-size: 16px;
-    text-transform: uppercase;
-  }
+    .box {
+      display:inline-block;
+      width:20px;
+      height:20px;
+      border:1px solid #222;
+      text-align:center;
+      line-height:20px;
+      font-weight:700;
+      font-size:12px;
+    }
 
-  .meta {
-    text-align: center;
-    font-size: 11px;
-    margin-top: 4px;
-  }
-
-  /* TABLAS */
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-  }
-  th, td {
-    border: 1px solid #222;
-    padding: 6px 8px;
-    vertical-align: middle;
-  }
-  th {
-    background: #efefef;
-    font-weight: 700;
-    text-transform: uppercase;
-  }
-  .left {
-    text-align: left;
-    padding-left: 8px;
-  }
-
-  /* CASILLAS B/M */
-  .box {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    line-height: 20px;
-    margin: 0 auto;
-    border: 1px solid #222;
-    text-align: center;
-    font-weight: 700;
-    font-size: 12px;
-  }
-
-  /* FIRMA */
-  .firma {
-    margin-top: 12px;
-  }
-  .firma img {
-    max-width: 230px;
-    height: auto;
-    border: 1px solid #222;
-    margin-top: 6px;
-    display: block;
-  }
-
-  /* NOTA */
-  .nota {
-    font-size: 10px;
-    margin-top: 12px;
-    border-top: 1px solid #ccc;
-    padding-top: 6px;
-  }
-
-</style>
-
+    .firma { margin-top:12px; }
+    .firma img { 
+      max-width:220px; 
+      border:1px solid #222; 
+      display:block; 
+      margin-top:6px; 
+    }
+    .nota { 
+      font-size:10px; 
+      margin-top:12px; 
+      border-top:1px solid #ddd; 
+      padding-top:6px; 
+      color:#111; 
+    }
+  </style>
 </head>
+
 <body>
 
   <!-- ENCABEZADO -->
@@ -107,7 +92,7 @@
     Código: {{ codigo }} — Fecha: {{ fecha }} — Versión: {{ version }}
   </div>
 
-  <!-- DATOS GENERALES -->
+  <!-- INFORMACIÓN GENERAL -->
   <table>
     <tr>
       <th>Nombre Conductor</th>
@@ -122,38 +107,28 @@
       <td>{{ registro.desde }} - {{ registro.hasta }}</td>
     </tr>
     <tr>
-      <th>Marca</th>
-      <td>{{ registro.marca }}</td>
-      <th>Gasolina</th>
-      <td>{{ registro.gasolina }}</td>
+      <th>Marca</th><td>{{ registro.marca }}</td>
+      <th>Gasolina</th><td>{{ registro.gasolina }}</td>
     </tr>
     <tr>
-      <th>Modelo</th>
-      <td>{{ registro.modelo }}</td>
-      <th>Motor</th>
-      <td>{{ registro.motor }}</td>
+      <th>Modelo</th><td>{{ registro.modelo }}</td>
+      <th>Motor</th><td>{{ registro.motor }}</td>
     </tr>
   </table>
 
   <!-- DOCUMENTOS -->
   <table>
     <tr>
-      <th>Licencia Nº</th>
-      <td>{{ registro.licencia_num }}</td>
-      <th>Vencimiento</th>
-      <td>{{ registro.licencia_venc }}</td>
+      <th>Licencia Nº</th><td>{{ registro.licencia_num }}</td>
+      <th>Vencimiento</th><td>{{ registro.licencia_venc }}</td>
     </tr>
     <tr>
-      <th>Porte Tarjeta Propiedad</th>
-      <td>{{ registro.porte_propiedad }}</td>
-      <th>SOAT</th>
-      <td>{{ registro.soat }}</td>
+      <th>Porte Tarjeta Propiedad</th><td>{{ registro.porte_propiedad }}</td>
+      <th>SOAT</th><td>{{ registro.soat }}</td>
     </tr>
     <tr>
-      <th>Certificado de Emisión</th>
-      <td>{{ registro.certificado_emision }}</td>
-      <th>Póliza</th>
-      <td>{{ registro.poliza_seguro }}</td>
+      <th>Certificado emisión</th><td>{{ registro.certificado_emision }}</td>
+      <th>Póliza</th><td>{{ registro.poliza_seguro }}</td>
     </tr>
   </table>
 
@@ -173,59 +148,60 @@
     "Estado de suspensión",
     "Nivel de aceites"
   ] %}
-
   {% set aspectos_data = registro.aspectos_parsed or {} %}
 
-  <table>
+  <table class="aspectos">
     <tr>
-      <th style="width:4%;">N°</th>
-      <th style="width:60%;">Aspecto</th>
-      <th style="width:18%;">B</th>
-      <th style="width:18%;">M</th>
+      <th style="width:4%">N°</th>
+      <th style="width:60%">Aspecto</th>
+      <th style="width:18%">B</th>
+      <th style="width:18%">M</th>
     </tr>
 
     {% for aspecto in aspectos_lista %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td class="left">{{ aspecto }}</td>
+
       {% set val = aspectos_data.get(loop.index|string, '') %}
-      <tr>
-        <td>{{ loop.index }}</td>
-        <td class="left">{{ aspecto }}</td>
 
-        <!-- BUENO -->
-        <td>
-          {% if val == 'B' %}
-            <span class="box">✔</span>
-          {% else %}
-            <span class="box"></span>
-          {% endif %}
-        </td>
+      <td>
+        {% if val == 'B' %}
+          <span class="box">✔</span>
+        {% else %}
+          <span class="box"></span>
+        {% endif %}
+      </td>
 
-        <!-- MALO -->
-        <td>
-          {% if val == 'M' %}
-            <span class="box">✖</span>
-          {% else %}
-            <span class="box"></span>
-          {% endif %}
-        </td>
-      </tr>
+      <td>
+        {% if val == 'M' %}
+          <span class="box">✖</span>
+        {% else %}
+          <span class="box"></span>
+        {% endif %}
+      </td>
+    </tr>
     {% endfor %}
   </table>
 
-  <!-- OBSERVACIONES -->
+  <!-- OBSERVACIONES Y FIRMA -->
   <div class="firma">
     <strong>Observaciones:</strong>
-    <div style="border: 1px solid #ccc; min-height: 80px; padding: 6px; margin-top: 4px;">
+    <div style="border:1px solid #ddd; min-height:80px; padding:6px; margin-top:6px;">
       {{ registro.observaciones }}
     </div>
 
-    <!-- FIRMA -->
-    <div style="margin-top: 10px;">
+    <div style="margin-top:8px;">
       <strong>Firma Conductor:</strong><br>
 
       {% if registro.firma_path %}
+        <!-- ✅ Firma desde archivo -->
         <img src="{{ registro.firma_path }}" alt="Firma">
+
       {% elif registro.firma_base64 %}
+        <!-- ✅ Firma Base64 fallback -->
         <img src="{{ registro.firma_base64 }}" alt="Firma">
+
       {% else %}
         <div style="color:#777;">(sin firma)</div>
       {% endif %}
@@ -233,7 +209,7 @@
   </div>
 
   <!-- ¿CONDICIONES ÓPTIMAS? -->
-  <div style="margin-top: 10px;">
+  <div style="margin-top:10px;">
     <strong>¿El vehículo se encuentra en óptimas condiciones?</strong>
     {% if registro.condiciones_optimas == "SI" %}
       <span class="box">✔</span> SI
@@ -242,12 +218,12 @@
     {% endif %}
   </div>
 
-  <!-- NOTA -->
   <div class="nota">
-    <strong>Nota:</strong> Inspeccione todos los elementos que apliquen.  
-    Si observa una condición insegura, suspenda la operación y notifique al responsable.
+    <strong>Nota:</strong> Inspeccione todos los elementos que apliquen. 
+    Detenga los funcionamientos cuando observe alguna condición insegura y notifique al responsable.
   </div>
 
 </body>
 </html>
+
 
