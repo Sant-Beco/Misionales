@@ -171,7 +171,7 @@
     </tr>
 
     <!-- FILAS DE ASPECTOS -->
-    {% for aspecto in aspectos_lista %}
+    {% for aspecto in   aspectos_lista %}
     {% set idx = loop.index|string %}
 
     <tr>
@@ -230,17 +230,15 @@
     </tr>
   </table>
 
-  <!-- FIRMA DEL PRIMER DÍA -->
+  <!-- ✅ FIRMA DEL PRIMER DÍA -->
   <div class="firma">
     <strong>FIRMA DEL PRIMER DÍA:</strong><br>
 
-    {% if registros[0].firma_path %}
-      <!-- ✅ Firma desde archivo físico -->
-      <img src="{{ registros[0].firma_path }}" alt="Firma">
+    {% if firma_primer_dia and firma_primer_dia.firma_path %}
+      <img src="{{ firma_primer_dia.firma_path }}" alt="Firma">
     
-    {% elif registros[0].firma_base64 %}
-      <!-- ✅ Firma Base64 fallback -->
-      <img src="{{ registros[0].firma_base64 }}" alt="Firma">
+    {% elif firma_primer_dia and firma_primer_dia.firma_base64 %}
+      <img src="{{ firma_primer_dia.firma_base64 }}" alt="Firma">
 
     {% else %}
       <span>(sin firma)</span>
@@ -255,7 +253,5 @@
 
 </body>
 </html>
-
-
 
 
