@@ -10,14 +10,44 @@
       margin: 0;
       color: #000;
     }
-    .encabezado { display:flex; align-items:center; gap:12px; padding:8px 0; border-bottom:2px solid #000; }
+    .encabezado { 
+      display:flex; 
+      align-items:center; 
+      gap:12px; 
+      padding:8px 0; 
+      border-bottom:2px solid #000; 
+    }
     .logo { width:120px; }
-    .titulo { text-align:center; flex:1; font-weight:700; font-size:16px; text-transform:uppercase; }
-    .meta { text-align:center; font-size:11px; margin-top:4px; color:#222; }
+    .titulo { 
+      text-align:center; 
+      flex:1; 
+      font-weight:700; 
+      font-size:16px; 
+      text-transform:uppercase; 
+    }
+    .meta { 
+      text-align:center; 
+      font-size:11px; 
+      margin-top:4px; 
+      color:#222; 
+    }
 
-    table { width:100%; border-collapse: collapse; margin-top:10px; }
-    th, td { border:1px solid #222; padding:6px 8px; vertical-align:middle; }
-    th { background:#efefef; font-weight:700; font-size:11px; text-transform:uppercase; }
+    table { 
+      width:100%; 
+      border-collapse: collapse; 
+      margin-top:10px; 
+    }
+    th, td { 
+      border:1px solid #222; 
+      padding:6px 8px; 
+      vertical-align:middle; 
+    }
+    th { 
+      background:#efefef; 
+      font-weight:700; 
+      font-size:11px; 
+      text-transform:uppercase; 
+    }
 
     .aspectos td { text-align:center; }
     .aspectos .left { text-align:left; padding-left:10px; }
@@ -34,20 +64,35 @@
     }
 
     .firma { margin-top:12px; }
-    .firma img { max-width:220px; border:1px solid #222; display:block; margin-top:6px; }
-    .nota { font-size:10px; margin-top:12px; border-top:1px solid #ddd; padding-top:6px; color:#111; }
+    .firma img { 
+      max-width:220px; 
+      border:1px solid #222; 
+      display:block; 
+      margin-top:6px; 
+    }
+    .nota { 
+      font-size:10px; 
+      margin-top:12px; 
+      border-top:1px solid #ddd; 
+      padding-top:6px; 
+      color:#111; 
+    }
   </style>
 </head>
+
 <body>
 
-  <!-- ✅ Logo con ruta absoluta -->
+  <!-- ENCABEZADO -->
   <div class="encabezado">
     <img class="logo" src="{{ logo_path }}" alt="Logo">
     <div class="titulo">INSPECCIÓN PRE OPERACIONAL MOTOCICLETA</div>
   </div>
 
-  <div class="meta">Código: {{ codigo }} — Fecha: {{ fecha }} — Versión: {{ version }}</div>
+  <div class="meta">
+    Código: {{ codigo }} — Fecha: {{ fecha }} — Versión: {{ version }}
+  </div>
 
+  <!-- INFORMACIÓN GENERAL -->
   <table>
     <tr>
       <th>Nombre Conductor</th>
@@ -114,18 +159,32 @@
     </tr>
 
     {% for aspecto in aspectos_lista %}
-    {% set val = aspectos_data.get(loop.index|string, '') %}
     <tr>
       <td>{{ loop.index }}</td>
       <td class="left">{{ aspecto }}</td>
 
-      <td>{% if val == 'B' %}<span class="box">✔</span>{% else %}<span class="box"></span>{% endif %}</td>
-      <td>{% if val == 'M' %}<span class="box">✖</span>{% else %}<span class="box"></span>{% endif %}</td>
+      {% set val = aspectos_data.get(loop.index|string, '') %}
+
+      <td>
+        {% if val == 'B' %}
+          <span class="box">✔</span>
+        {% else %}
+          <span class="box"></span>
+        {% endif %}
+      </td>
+
+      <td>
+        {% if val == 'M' %}
+          <span class="box">✖</span>
+        {% else %}
+          <span class="box"></span>
+        {% endif %}
+      </td>
     </tr>
     {% endfor %}
   </table>
 
-  <!-- FIRMA -->
+  <!-- OBSERVACIONES Y FIRMA -->
   <div class="firma">
     <strong>Observaciones:</strong>
     <div style="border:1px solid #ddd; min-height:80px; padding:6px; margin-top:6px;">
@@ -136,16 +195,18 @@
       <strong>Firma Conductor:</strong><br>
 
       {% if registro.firma_path %}
-        <img src="{{ registro.firma_path }}" alt="firma">
-      {% elif registro.firma_dataurl %}
-        <img src="{{ registro.firma_dataurl }}" alt="firma">
+        <!-- ✅ Firma desde archivo físico -->
+        <img src="{{ registro.firma_path }}" alt="Firma">
+      {% elif registro.firma_base64 %}
+        <!-- ✅ Firma Base64 fallback -->
+        <img src="{{ registro.firma_base64 }}" alt="Firma">
       {% else %}
         <div style="color:#777;">(sin firma)</div>
       {% endif %}
-
     </div>
   </div>
 
+  <!-- ¿CONDICIONES ÓPTIMAS? -->
   <div style="margin-top:10px;">
     <strong>¿El vehículo se encuentra en óptimas condiciones?</strong>
     {% if registro.condiciones_optimas == "SI" %}
@@ -156,7 +217,8 @@
   </div>
 
   <div class="nota">
-    <strong>Nota:</strong> Inspeccione todos los elementos que apliquen. Detenga los funcionamientos cuando observe alguna condición insegura y notifique al responsable.
+    <strong>Nota:</strong> Inspeccione todos los elementos que apliquen. 
+    Detenga los funcionamientos cuando observe alguna condición insegura y notifique al responsable.
   </div>
 
 </body>

@@ -4,113 +4,137 @@
   <meta charset="UTF-8">
   <style>
     @page { size: A4 landscape; margin: 8mm; }
-    body {
-      font-family: DejaVu Sans, Arial, sans-serif;
-      font-size:10px;
-      margin:0;
-      color:#000;
+    body { 
+      font-family: DejaVu Sans, Arial, sans-serif; 
+      font-size:10px; 
+      margin:0; 
+      color:#000; 
     }
 
-    .encabezado {
-      display:flex;
-      align-items:center;
-      gap:12px;
-      padding:6px 0;
-      border-bottom:2px solid #000;
+    .encabezado { 
+      display:flex; 
+      align-items:center; 
+      gap:12px; 
+      padding:6px 0; 
+      border-bottom:2px solid #000; 
     }
 
     .logo { width:90px; }
-    .titulo {
-      flex:1;
-      text-align:center;
-      font-weight:700;
-      font-size:18px;
-      text-transform:uppercase;
+
+    .titulo { 
+      flex:1; 
+      text-align:center; 
+      font-weight:700; 
+      font-size:18px; 
+      text-transform:uppercase; 
     }
 
-    .subinfo {
-      text-align:center;
-      font-size:11px;
-      margin:6px 0;
+    .subinfo { 
+      text-align:center; 
+      font-size:11px; 
+      margin:6px 0; 
     }
 
-    table { width:100%; border-collapse: collapse; margin-top:6px; }
-    th, td {
-      border:1px solid #222;
-      padding:4px;
-      vertical-align:middle;
+    table { 
+      width:100%; 
+      border-collapse: collapse; 
+      margin-top:6px; 
     }
-    th {
-      background:#eee;
-      font-weight:700;
-      font-size:10px;
-      text-transform:uppercase;
+
+    th, td { 
+      border:1px solid #222; 
+      padding:4px; 
+      vertical-align:middle; 
+    }
+
+    th { 
+      background:#eee; 
+      font-weight:700; 
+      font-size:10px; 
+      text-transform:uppercase; 
     }
 
     .aspectos td { text-align:center; }
-    .aspectos .left { text-align:left; padding-left:8px; }
+    .aspectos .left { 
+      text-align:left; 
+      padding-left:8px; 
+    }
 
-    .box {
-      display:inline-block;
-      width:18px;
-      height:18px;
-      border:1px solid #222;
-      text-align:center;
-      line-height:18px;
-      font-weight:700;
-      font-size:12px;
+    .box { 
+      display:inline-block; 
+      width:18px; 
+      height:18px; 
+      border:1px solid #222; 
+      text-align:center; 
+      line-height:18px; 
+      font-weight:700; 
+      font-size:12px; 
     }
 
     .firma { margin-top:10px; }
-    .firma img {
-      width:70px;
-      height:auto;
-      border:1px solid #222;
-      display:block;
-      margin-top:6px;
+    .firma img { 
+      width:70px; 
+      height:auto; 
+      border:1px solid #222; 
+      display:block; 
+      margin-top:6px; 
     }
 
-    .nota {
-      font-size:9px;
-      margin-top:8px;
-      border-top:1px solid #ddd;
-      padding-top:6px;
+    .nota { 
+      font-size:9px; 
+      margin-top:8px; 
+      border-top:1px solid #ddd; 
+      padding-top:6px; 
     }
   </style>
 </head>
+
 <body>
 
-  <!-- ✅ Logo en ruta absoluta -->
+  <!-- ENCABEZADO -->
   <div class="encabezado">
     <img class="logo" src="{{ logo_path }}" alt="Logo">
     <div class="titulo">INSPECCIÓN PRE OPERACIONAL MOTOCICLETA</div>
   </div>
 
+  <!-- INFO SUPERIOR -->
   <div class="subinfo">
     Código: {{ codigo }} — Versión: {{ version }} — Fecha consolidado: {{ fecha }}<br>
     Registros desde: <strong>{{ desde }}</strong> hasta <strong>{{ hasta }}</strong>
   </div>
 
-  <!-- ✅ DATOS (primer registro) -->
+  <!-- INFO DEL PRIMER REGISTRO -->
   <table>
     <tr>
-      <th>NOMBRE CONDUCTOR</th><td colspan="3">{{ registros[0].nombre_conductor }}</td>
-      <th>PLACA</th><td colspan="3">{{ registros[0].placa }}</td>
+      <th>NOMBRE CONDUCTOR</th>
+      <td colspan="3">{{ registros[0].nombre_conductor }}</td>
+      <th>PLACA</th>
+      <td colspan="3">{{ registros[0].placa }}</td>
     </tr>
+
     <tr>
-      <th>PROCESO</th><td colspan="3">{{ registros[0].proceso }}</td>
-      <th>MARCA</th><td colspan="3">{{ registros[0].marca }}</td>
+      <th>PROCESO</th>
+      <td colspan="3">{{ registros[0].proceso }}</td>
+      <th>MARCA</th>
+      <td colspan="3">{{ registros[0].marca }}</td>
     </tr>
+
     <tr>
-      <th>GASOLINA</th><td colspan="3">{{ registros[0].gasolina }}</td>
-      <th>MODELO</th><td colspan="3">{{ registros[0].modelo }}</td>
+      <th>GASOLINA</th>
+      <td colspan="3">{{ registros[0].gasolina }}</td>
+      <th>MODELO</th>
+      <td colspan="3">{{ registros[0].modelo }}</td>
     </tr>
+
     <tr>
-      <th>MOTOR</th><td colspan="3">{{ registros[0].motor }}</td>
-      <th>LÍNEA</th><td colspan="3">{{ registros[0].linea }}</td>
+      <th>MOTOR</th>
+      <td colspan="3">{{ registros[0].motor }}</td>
+      <th>LÍNEA</th>
+      <td colspan="3">{{ registros[0].linea }}</td>
     </tr>
   </table>
 
+  <!-- LISTA DE ASPECTOS -->
   {% set aspectos_lista = [
     "Estado de llantas y presión de aire",
     "Encendido eléctrico y de crank",
@@ -127,52 +151,38 @@
     "Nivel de aceites"
   ] %}
 
-  <!-- ✅ TABLA ASPECTOS -->
+  <!-- TABLA GRANDE DE ASPECTOS -->
   <table class="aspectos">
+
+    <!-- ENCABEZADO -->
     <tr>
       <th rowspan="2" style="width:22%;">Aspectos a revisar</th>
+
       {% for i in range(1,16) %}
-        <th colspan="2">{{ i }}</th>
+      <th colspan="2">{{ i }}</th>
       {% endfor %}
     </tr>
 
     <tr>
       {% for i in range(1,16) %}
-        <th>B</th><th>M</th>
+        <th>B</th>
+        <th>M</th>
       {% endfor %}
     </tr>
 
+    <!-- FILAS DE ASPECTOS -->
     {% for aspecto in aspectos_lista %}
-      {% set aspecto_idx = loop.index %}
-      <tr>
-        <td class="left">{{ aspecto }}</td>
+    {% set idx = loop.index|string %}
 
-        {% for i in range(15) %}
-          {% set registro = registros[i] if i < registros|length else None %}
-
-          {% if registro %}
-              {% set val = (registro.aspectos_parsed or {}).get(aspecto_idx|string, '') %}
-              <td>{% if val == 'B' %}<span class="box">✔</span>{% else %}<span class="box"></span>{% endif %}</td>
-              <td>{% if val == 'M' %}<span class="box">✖</span>{% else %}<span class="box"></span>{% endif %}</td>
-          {% else %}
-              <td><span class="box"></span></td>
-              <td><span class="box"></span></td>
-          {% endif %}
-        {% endfor %}
-      </tr>
-    {% endfor %}
-  </table>
-
-  <!-- ✅ CONDICIONES ÓPTIMAS -->
-  <table style="margin-top:6px;">
     <tr>
-      <th>¿ÓPTIMAS CONDICIONES?</th>
+      <td class="left">{{ aspecto }}</td>
 
       {% for i in range(15) %}
-        {% set registro = registros[i] if i < registros|length else None %}
-
+        {% set reg = registros[i] if i < registros|length else None %}
+        {% set val = (reg.aspectos_parsed or {}).get(idx, '') if reg else '' %}
+        
         <td>
-          {% if registro and registro.condiciones_optimas == "SI" %}
+          {% if val == 'B' %}
             <span class="box">✔</span>
           {% else %}
             <span class="box"></span>
@@ -180,7 +190,36 @@
         </td>
 
         <td>
-          {% if registro and registro.condiciones_optimas == "NO" %}
+          {% if val == 'M' %}
+            <span class="box">✖</span>
+          {% else %}
+            <span class="box"></span>
+          {% endif %}
+        </td>
+      {% endfor %}
+    </tr>
+
+    {% endfor %}
+  </table>
+
+  <!-- CONDICIONES ÓPTIMAS -->
+  <table style="margin-top:6px;">
+    <tr>
+      <th>¿ÓPTIMAS CONDICIONES?</th>
+
+      {% for i in range(15) %}
+        {% set reg = registros[i] if i < registros|length else None %}
+
+        <td>
+          {% if reg and reg.condiciones_optimas == "SI" %}
+            <span class="box">✔</span>
+          {% else %}
+            <span class="box"></span>
+          {% endif %}
+        </td>
+
+        <td>
+          {% if reg and reg.condiciones_optimas == "NO" %}
             <span class="box">✖</span>
           {% else %}
             <span class="box"></span>
@@ -191,26 +230,32 @@
     </tr>
   </table>
 
-  <!-- ✅ FIRMA -->
+  <!-- FIRMA DEL PRIMER DÍA -->
   <div class="firma">
-    <strong>FIRMA DEL CONDUCTOR:</strong><br>
+    <strong>FIRMA DEL PRIMER DÍA:</strong><br>
 
     {% if registros[0].firma_path %}
+      <!-- ✅ Firma desde archivo físico -->
       <img src="{{ registros[0].firma_path }}" alt="Firma">
-
-    {% elif registros[0].firma_dataurl %}
-      <img src="{{ registros[0].firma_dataurl }}" alt="Firma">
+    
+    {% elif registros[0].firma_base64 %}
+      <!-- ✅ Firma Base64 fallback -->
+      <img src="{{ registros[0].firma_base64 }}" alt="Firma">
 
     {% else %}
       <span>(sin firma)</span>
     {% endif %}
   </div>
 
+  <!-- NOTA -->
   <div class="nota">
-    <strong>Nota:</strong> Inspeccione todos los elementos que apliquen. Detenga los funcionamientos cuando observe alguna condición insegura o que pueda causar algún peligro. Informe al responsable.
+    <strong>Nota:</strong> Inspeccione todos los elementos que apliquen. 
+    Detenga los funcionamientos cuando observe una condición insegura y notifique al responsable.
   </div>
 
 </body>
 </html>
+
+
 
 
