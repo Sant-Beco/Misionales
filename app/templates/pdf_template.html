@@ -195,15 +195,18 @@
       <strong>Firma Conductor:</strong><br>
 
       {% if registro.firma_path %}
-        <!-- ✅ Firma desde archivo -->
-        <img src="{{ registro.firma_path }}" alt="Firma">
+        <!-- ✅ Firma desde archivo físico -->
+        <img src="{{ registro.firma_path }}" alt="Firma del conductor">
 
       {% elif registro.firma_base64 %}
         <!-- ✅ Firma Base64 fallback -->
-        <img src="{{ registro.firma_base64 }}" alt="Firma">
+        <img src="{{ registro.firma_base64 }}" alt="Firma del conductor">
 
       {% else %}
-        <div style="color:#777;">(sin firma)</div>
+        <!-- ❌ No hay firma -->
+        <div style="color:#777; border:1px dashed #aaa; padding:10px; width:220px; text-align:center; margin-top:6px;">
+          (sin firma)
+        </div>
       {% endif %}
     </div>
   </div>
@@ -225,5 +228,4 @@
 
 </body>
 </html>
-
 

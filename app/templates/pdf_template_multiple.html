@@ -45,6 +45,7 @@
       border:1px solid #222; 
       padding:4px; 
       vertical-align:middle; 
+      text-align:center;
     }
 
     th { 
@@ -69,6 +70,11 @@
       line-height:18px; 
       font-weight:700; 
       font-size:12px; 
+    }
+
+    td[colspan="2"] {
+      text-align: center;
+      width: 36px; /* ajusta según el ancho de tus celdas */
     }
 
     .firma { margin-top:10px; }
@@ -202,46 +208,36 @@
     {% endfor %}
   </table>
 
-  <!-- CONDICIONES ÓPTIMAS -->
-  <table style="margin-top:6px;">
+  <!-- CONDICIONES ÓPTIMAS (CORREGIDO Y ALINEADO) -->
+  <table class="aspectos" style="margin-top:6px;">
     <tr>
       <th>¿ÓPTIMAS CONDICIONES?</th>
 
       {% for i in range(15) %}
         {% set reg = registros[i] if i < registros|length else None %}
-
-        <td>
+        <td colspan="2">
           {% if reg and reg.condiciones_optimas == "SI" %}
             <span class="box">✔</span>
-          {% else %}
-            <span class="box"></span>
-          {% endif %}
-        </td>
-
-        <td>
-          {% if reg and reg.condiciones_optimas == "NO" %}
+          {% elif reg and reg.condiciones_optimas == "NO" %}
             <span class="box">✖</span>
           {% else %}
             <span class="box"></span>
           {% endif %}
         </td>
-
       {% endfor %}
     </tr>
   </table>
 
   <!-- FIRMA DEL PRIMER DÍA -->
   <div class="firma">
-    <strong>FIRMA DEL PRIMER DÍA:</strong><br>
+    <strong>Firma del conductor</strong><br>
 
     {% if registros[0].firma_path %}
       <!-- ✅ Firma desde archivo -->
       <img src="{{ registros[0].firma_path }}" alt="Firma">
-
     {% elif registros[0].firma_base64 %}
       <!-- ✅ Firma Base64 fallback -->
       <img src="{{ registros[0].firma_base64 }}" alt="Firma">
-
     {% else %}
       <span>(sin firma)</span>
     {% endif %}
@@ -255,6 +251,7 @@
 
 </body>
 </html>
+
 
 
 

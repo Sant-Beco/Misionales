@@ -11,6 +11,7 @@ from datetime import datetime
 import base64
 import json
 
+
 router = APIRouter()
 
 # ===============================
@@ -22,7 +23,7 @@ PDF_DIR.mkdir(parents=True, exist_ok=True)
 
 LOGO_PATH = Path("app/static/img/incubant.jpg").resolve()
 
-DELETE_AFTER_CONSOLIDATION = True  # opción B
+DELETE_AFTER_CONSOLIDATION = True  # opción B (borrar firmas al consolidar)
 
 
 
@@ -33,15 +34,17 @@ DELETE_AFTER_CONSOLIDATION = True  # opción B
 def normalize_name(name: str):
     """
     ✅ SOLO PRIMER NOMBRE
-    - Limpia espacios
-    - Convierte "juan carlos pérez" → "Juan"
+    Normaliza:
+      - quita espacios duplicados
+      - toma solo la primera palabra
+      - capitaliza
+        
+    Ejemplo: "juan carlos pérez" → "Juan"
     """
     clean = " ".join(name.strip().split())
     parts = clean.split(" ")
-
     if len(parts) == 0:
         return ""
-
     return parts[0].capitalize()
 
 
@@ -55,7 +58,9 @@ def build_file_uri(path: Path):
 
 
 def prepare_registro(r):
-    # Parseo seguro de aspectos
+    # ---------------------------------------------
+    # ✅ ASPECTOS → diccionario seguro
+    # ---------------------------------------------
     try:
         if r.aspectos and r.aspectos not in ["null", "None"]:
             r.aspectos_parsed = json.loads(r.aspectos)
@@ -64,19 +69,44 @@ def prepare_registro(r):
     except:
         r.aspectos_parsed = {}
 
-    # Firma
+    # ---------------------------------------------
+    # ✅ FIRMA → archivo + base64 fallback
+    # ---------------------------------------------
     if r.firma_file:
-        firma_path = PDF_DIR / r.firma_file
-        r.firma_path = build_file_uri(firma_path) if firma_path.exists() else None
+
+        # ruta real absoluta (Windows-safe)
+        firma_path = (PDF_DIR / r.firma_file).resolve()
+
+        if firma_path.exists():
+            # ✅ RUTA file:// válida para WeasyPrint
+            r.firma_path = build_file_uri(firma_path)
+
+            # ✅ fallback Base64 SIEMPRE generado
+            try:
+                encoded = base64.b64encode(firma_path.read_bytes()).decode("utf-8")
+                r.firma_base64 = f"data:image/png;base64,{encoded}"
+            except:
+                r.firma_base64 = None
+
+        else:
+            # archivo no existe → intentar base64 desde disco "sin verificar"
+            r.firma_path = None
+            try:
+                encoded = base64.b64encode((PDF_DIR / r.firma_file).read_bytes()).decode("utf-8")
+                r.firma_base64 = f"data:image/png;base64,{encoded}"
+            except:
+                r.firma_base64 = None
+
     else:
         r.firma_path = None
+        r.firma_base64 = None
 
     return r
 
 
 
 # ===============================
-#   ENDPOINT: SUBMIT (PDF individual + 15 días)
+#   ENDPOINT: SUBMIT
 # ===============================
 
 @router.post("/submit")
@@ -106,15 +136,14 @@ async def submit_inspeccion(
     db = SessionLocal()
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
-    # ✅ Normalizar a PRIMER NOMBRE
+    # ✅ convertir a PRIMER NOMBRE
     nombre_conductor = normalize_name(nombre_conductor)
 
     try:
-        # ===============================
-        #   GUARDAR FIRMA
-        # ===============================
+        # =========================================================
+        # ✅ GUARDAR FIRMA EN DISCO
+        # =========================================================
         firma_filename = None
-
         if firma_dataurl:
             try:
                 _, encoded = firma_dataurl.split(",", 1)
@@ -124,13 +153,13 @@ async def submit_inspeccion(
             except:
                 firma_filename = None
 
-        # Asegurar JSON
+        # asegurar JSON válido
         if not isinstance(aspectos, str):
             aspectos = "{}"
 
-        # ===============================
-        #   GUARDAR REGISTRO EN BD
-        # ===============================
+        # =========================================================
+        # ✅ GUARDAR EN BASE DE DATOS
+        # =========================================================
         inspeccion = models.Inspeccion(
             fecha=datetime.now(),
             nombre_conductor=nombre_conductor,
@@ -162,19 +191,18 @@ async def submit_inspeccion(
 
         inspeccion = prepare_registro(inspeccion)
 
-        # ===============================
-        #   CONTAR INSPECCIONES
-        # ===============================
+        # =========================================================
+        # ✅ CONTAR REGISTROS DE ESTE CONDUCTOR
+        # =========================================================
         total_inspecciones = (
             db.query(models.Inspeccion)
             .filter(models.Inspeccion.nombre_conductor == nombre_conductor)
             .count()
         )
 
-        # ===============================
-        #   PDF INDIVIDUAL
-        # ===============================
-
+        # =========================================================
+        # ✅ PDF DEL DÍA
+        # =========================================================
         pdf_filename = f"inspeccion_{timestamp}.pdf"
         pdf_path = PDF_DIR / pdf_filename
 
@@ -190,9 +218,9 @@ async def submit_inspeccion(
             output_path=str(pdf_path),
         )
 
-        # ===============================
-        #   GENERAR CONSOLIDADO (15)
-        # ===============================
+        # =========================================================
+        # ✅ CONSOLIDADO DE 15 INSPECCIONES
+        # =========================================================
         if total_inspecciones >= 15:
 
             registros = (
@@ -227,7 +255,7 @@ async def submit_inspeccion(
                 output_path=str(reporte_path),
             )
 
-            # Guardar reporte
+            # guardar historial
             reporte = models.ReporteInspeccion(
                 nombre_conductor=nombre_conductor,
                 fecha_reporte=datetime.now(),
@@ -237,24 +265,31 @@ async def submit_inspeccion(
             db.add(reporte)
             db.commit()
 
-            # ===============================
-            #   BORRAR FIRMAS + BD
-            # ===============================
+            # =====================================================
+            # ✅ BORRAR INSPECCIONES + FIRMAS
+            # =====================================================
             if DELETE_AFTER_CONSOLIDATION:
                 for r in registros:
+
+                    # borrar firma física
                     if r.firma_file:
                         firma_path = PDF_DIR / r.firma_file
                         if firma_path.exists():
                             firma_path.unlink()
 
+                    # borrar de la BD
                     db.delete(r)
 
                 db.commit()
 
-            return FileResponse(reporte_path, media_type="application/pdf", filename=reporte_filename)
+            return FileResponse(
+                reporte_path, media_type="application/pdf", filename=reporte_filename
+            )
 
-        # ✅ Retornar individual
-        return FileResponse(pdf_path, media_type="application/pdf", filename=pdf_filename)
+        # ✅ PDF individual
+        return FileResponse(
+            pdf_path, media_type="application/pdf", filename=pdf_filename
+        )
 
     finally:
         db.close()
@@ -311,4 +346,5 @@ async def generar_pdf15(nombre_conductor: str):
 
     finally:
         db.close()
+
 
