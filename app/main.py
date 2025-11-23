@@ -5,11 +5,9 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from app.database import SessionLocal
-from app.models import Inspeccion
 
 # SQLAlchemy
-from app.database import Base, engine
+from app.database import Base, engine, SessionLocal
 from app import models
 
 # Crear tablas si no existen
@@ -29,22 +27,36 @@ app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 
-# Vista principal (formulario)
+# ==========================================================
+#   RUTA PRINCIPAL (solo HTML, la lógica va en JS)
+# ==========================================================
 @app.get("/", response_class=HTMLResponse)
 async def form_get(request: Request):
-    hoy = datetime.now().strftime("%d - %m - %Y")
+    fecha_hoy = datetime.now().strftime("%d - %m - %Y")
 
-    # Consultar cantidad actual de inspecciones
     db = SessionLocal()
-    total_inspecciones = db.query(Inspeccion).count()
+    total_inspecciones = db.query(models.Inspeccion).count()
     db.close()
 
     return templates.TemplateResponse(
         "form.html",
-        {"request": request, "fecha": hoy, "mostrar_reporte": total_inspecciones >= 15}
+        {
+            "request": request,
+            "fecha": fecha_hoy,
+            "mostrar_reporte": total_inspecciones >= 15
+        }
     )
 
 
-# Incluir rutas del módulo de inspecciones
+# ==========================================================
+#   IMPORTAR E INCLUIR ROUTERS
+# ==========================================================
+
+# 🔒 AUTENTICACIÓN (LOGIN + REGISTER)
+from app.routes_auth import router as auth_router
+app.include_router(auth_router)
+
+# 📄 INSPECCIONES (PDF + DB)
 from app.routes_inspecciones import router as inspecciones_router
 app.include_router(inspecciones_router, prefix="/inspecciones", tags=["Inspecciones"])
+

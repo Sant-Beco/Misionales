@@ -1,13 +1,24 @@
-from sqlalchemy import Column, Integer, String, DateTime, Text
+from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey
+from sqlalchemy.orm import relationship
 from app.database import Base
 from datetime import datetime
 import json
+
+class Usuario(Base):
+    __tablename__ = "usuarios"
+
+    id = Column(Integer, primary_key=True, index=True)
+    nombre = Column(String(100), unique=True)
+    pin_hash = Column(String(255))
+
+    inspecciones = relationship("Inspeccion", back_populates="usuario")
 
 
 class Inspeccion(Base):
     __tablename__ = "inspecciones"
 
     id = Column(Integer, primary_key=True, index=True)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"))
     fecha = Column(DateTime, default=datetime.now)
     nombre_conductor = Column(String(100))
     placa = Column(String(50))
@@ -29,17 +40,15 @@ class Inspeccion(Base):
     observaciones = Column(Text)
     condiciones_optimas = Column(String(5))
     firma_file = Column(String(200))
-    aspectos = Column(Text, nullable=True)  # JSON con valores B/M
+    aspectos = Column(Text, nullable=True)
+
+    usuario = relationship("Usuario", back_populates="inspecciones")
 
     @property
     def aspectos_dict(self):
-        """
-        Devuelve el JSON de aspectos como diccionario.
-        Si no hay datos o el formato es incorrecto, devuelve un diccionario vacío.
-        """
         try:
             return json.loads(self.aspectos) if self.aspectos else {}
-        except Exception:
+        except:
             return {}
 
 
@@ -51,6 +60,7 @@ class ReporteInspeccion(Base):
     fecha_reporte = Column(DateTime, default=datetime.now)
     archivo_pdf = Column(String(255))
     total_incluidas = Column(Integer, default=15)
+
 
 
 

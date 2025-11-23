@@ -1,119 +1,152 @@
-<!-- app/templates/form.html -->
 <!doctype html>
 <html lang="es">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Inspección Preoperacional - Misionales</title>
+
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="/static/js/firma.css">
+
+  <!-- Estilos firma -->
+  <style>
+    #firmaCanvas {
+      pointer-events: auto !important;
+      touch-action: none !important;
+      background: white;
+    }
+  </style>
 </head>
+
 <body class="bg-gray-50 p-4">
-  <div class="max-w-4xl mx-auto bg-white p-6 rounded shadow">
-    <h1 class="text-2xl font-semibold mb-2 text-center">INSPECCIÓN PRE OPERACIONAL MOTOCICLETA</h1>
+
+  <!-- LOGIN -->
+  <div id="loginBox" class="max-w-md mx-auto bg-white p-6 rounded shadow mb-6 hidden">
+    <h2 class="text-xl font-semibold mb-4 text-center">Ingreso al Sistema</h2>
+
+    <div class="flex flex-col gap-3">
+      <input id="loginNombre" class="border p-2 rounded" placeholder="Nombre de usuario">
+      <input id="loginPin" type="password" class="border p-2 rounded" placeholder="PIN">
+
+      <button id="loginBtn"
+        class="bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+        Iniciar sesión
+      </button>
+
+      <p id="loginError" class="text-red-500 text-sm hidden">Usuario o PIN incorrecto</p>
+    </div>
+  </div>
+
+  <!-- FORMULARIO -->
+  <div id="formBox" class="max-w-4xl mx-auto bg-white p-6 rounded shadow hidden">
+
+    <h1 class="text-2xl font-semibold mb-2 text-center">
+      INSPECCIÓN PRE OPERACIONAL MOTOCICLETA
+    </h1>
+
     <div class="text-sm text-gray-600 mb-4 text-center">
       Código: <strong>FO-SST-063</strong> — Fecha: <strong>{{ fecha }}</strong> — Versión: <strong>01</strong>
     </div>
 
     <form id="inspeccionForm" method="post" action="/inspecciones/submit">
 
-      <!-- DATOS BÁSICOS -->
+      <input type="hidden" id="usuarioIdInput" name="usuario_id">
+      <input type="hidden" id="nombreConductorInput" name="nombre_conductor">
+
+      <!-- DATOS -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium">Nombre Conductor</label>
-          <input name="nombre_conductor" required class="w-full border rounded p-2" />
-        </div>
+
         <div>
           <label class="block text-sm font-medium">Placa</label>
           <input name="placa" class="w-full border rounded p-2" />
         </div>
+
         <div>
           <label class="block text-sm font-medium">Proceso</label>
           <input name="proceso" class="w-full border rounded p-2" />
         </div>
+
         <div>
           <label class="block text-sm font-medium">Desde</label>
           <input name="desde" class="w-full border rounded p-2" />
         </div>
+
         <div>
           <label class="block text-sm font-medium">Hasta</label>
           <input name="hasta" class="w-full border rounded p-2" />
         </div>
+
         <div>
           <label class="block text-sm font-medium">Marca</label>
           <input name="marca" class="w-full border rounded p-2" />
         </div>
+
         <div>
           <label class="block text-sm font-medium">Gasolina</label>
           <input name="gasolina" class="w-full border rounded p-2" />
         </div>
+
         <div>
           <label class="block text-sm font-medium">Modelo</label>
           <input name="modelo" class="w-full border rounded p-2" />
         </div>
+
         <div>
           <label class="block text-sm font-medium">Motor</label>
           <input name="motor" class="w-full border rounded p-2" />
         </div>
+
         <div>
           <label class="block text-sm font-medium">Línea</label>
           <input name="linea" class="w-full border rounded p-2" />
         </div>
+
       </div>
 
       <hr class="my-4" />
 
-      <!-- REVISIÓN DE DOCUMENTOS -->
+      <!-- DOCUMENTOS -->
       <h2 class="font-medium">Revisión de Documentos</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+
         <div>
-          <label class="block text-sm">Licencia de Conducción - No.</label>
+          <label class="block text-sm">Licencia No.</label>
           <input name="licencia_num" class="w-full border rounded p-2" />
           <label class="block text-sm mt-1">Fecha de vencimiento</label>
           <input name="licencia_venc" type="date" class="w-full border rounded p-2" />
         </div>
+
         <div>
-          <label class="block text-sm">Porte Tarjeta Propiedad</label>
+          <label class="block text-sm">Tarjeta Propiedad</label>
           <input name="porte_propiedad" class="w-full border rounded p-2" />
           <label class="block text-sm mt-1">SOAT</label>
           <input name="soat" class="w-full border rounded p-2" />
         </div>
+
         <div>
-          <label class="block text-sm">Certificado Emisión Gases</label>
+          <label class="block text-sm">Emisión de Gases</label>
           <input name="certificado_emision" class="w-full border rounded p-2" />
         </div>
+
         <div>
           <label class="block text-sm">Póliza Seguro</label>
           <input name="poliza_seguro" class="w-full border rounded p-2" />
         </div>
+
       </div>
 
       <hr class="my-4" />
 
-      <!-- ASPECTOS A REVISAR -->
-      <h2 class="font-medium">Aspectos a Revisar (marcar B o M)</h2>
+      <!-- ASPECTOS -->
+      <h2 class="font-medium">Aspectos a Revisar (B / M)</h2>
       <div id="aspectosContainer" class="grid grid-cols-1 gap-2">
-        {% set aspectos_lista = [
-          "Estado de llantas y presión de aire",
-          "Encendido eléctrico y de crank",
-          "Luces y pito",
-          "Espejos retrovisores",
-          "Manijas de freno y clutch",
-          "Sistema de frenos",
-          "Estado de freno de disco",
-          "Nivel de líquido de freno",
-          "Revisión sistema tablero",
-          "Fugas de combustible y/o aceites",
-          "Kit de arrastre",
-          "Estado de suspensión",
-          "Nivel de aceites"
-        ] %}
         {% for aspecto in aspectos_lista %}
         <div class="flex items-center justify-between p-2 border rounded">
           <div class="w-3/4 text-sm">{{ loop.index }}. {{ aspecto }}</div>
           <div class="flex gap-3 items-center">
-            <label class="flex items-center gap-1"><input type="radio" name="aspecto_{{ loop.index0 }}" value="B" checked> B</label>
-            <label class="flex items-center gap-1"><input type="radio" name="aspecto_{{ loop.index0 }}" value="M"> M</label>
+            <label><input type="radio" name="aspecto_{{ loop.index0 }}" value="B" checked> B</label>
+            <label><input type="radio" name="aspecto_{{ loop.index0 }}" value="M"> M</label>
           </div>
         </div>
         {% endfor %}
@@ -121,28 +154,28 @@
 
       <hr class="my-4" />
 
-      <!-- NUEVA SECCIÓN: CONDICIONES ÓPTIMAS -->
-      <h2 class="font-medium">¿El vehículo se encuentra en óptimas condiciones?</h2>
+      <!-- CONDICIONES -->
+      <h2 class="font-medium">¿El vehículo está en óptimas condiciones?</h2>
       <div class="mt-2 flex gap-3">
-        <label class="flex items-center gap-2">
-          <input type="radio" name="condiciones_optimas" value="SI" checked> Sí
-        </label>
-        <label class="flex items-center gap-2">
-          <input type="radio" name="condiciones_optimas" value="NO"> No
-        </label>
+        <label><input type="radio" name="condiciones_optimas" value="SI" checked> Sí</label>
+        <label><input type="radio" name="condiciones_optimas" value="NO"> No</label>
       </div>
 
       <hr class="my-4" />
 
       <!-- FIRMA -->
       <h2 class="font-medium">Firma del conductor</h2>
-      <p class="text-sm text-gray-500">Firme aquí con el dedo o el mouse. Presiona "Limpiar" para reintentar.</p>
+      <p class="text-sm text-gray-500">Firme con el dedo o mouse.</p>
+
+      <!-- CANVAS CORREGIDO -->
       <div class="border rounded p-2 bg-gray-50">
-        <canvas id="firmaCanvas" width="800" height="200" class="w-full border"></canvas>
-        <div class="mt-2 flex flex-wrap gap-2">
+        <canvas id="firmaCanvas" class="w-full h-40 border"></canvas>
+
+        <div class="mt-2 flex gap-2">
           <button type="button" id="limpiarBtn" class="px-3 py-1 bg-gray-300 rounded">Limpiar</button>
-          <button type="button" id="guardarBtn" class="px-3 py-1 bg-blue-600 text-white rounded">Guardar firma (preview)</button>
+          <button type="button" id="guardarBtn" class="px-3 py-1 bg-blue-600 text-white rounded">Guardar firma</button>
         </div>
+
         <div id="firmaPreview" class="mt-2"></div>
       </div>
 
@@ -152,47 +185,51 @@
         <textarea name="observaciones" class="w-full border rounded p-2" rows="3"></textarea>
       </div>
 
-      <!-- CAMPOS OCULTOS -->
       <input type="hidden" name="aspectos" id="aspectosInput" />
       <input type="hidden" name="firma_dataurl" id="firmaDataInput" />
 
-      <!-- BOTONES -->
       <div class="mt-6 flex flex-wrap gap-3 justify-center">
-        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">
-          Enviar y generar PDF
-        </button>
-        <button type="reset" class="bg-gray-200 px-4 py-2 rounded">
-          Limpiar formulario
-        </button>
-
-        {% if mostrar_reporte %}
-        <a href="/inspecciones/reporte" target="_blank"
-           class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-          🧾 Generar Reporte Consolidado (últimas 15)
-        </a>
-        {% endif %}
+        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Enviar y generar PDF</button>
+        <button type="reset" class="bg-gray-200 px-4 py-2 rounded">Limpiar formulario</button>
       </div>
 
     </form>
   </div>
 
-  <script src="/static/js/firma.js"></script>
+  <!-- SCRIPTS CORREGIDOS -->
+  <script src="/static/js/firma.js?v=7" defer></script>
+
   <script>
+    // LOGIN
+    const token = localStorage.getItem("token");
+    const nombre = localStorage.getItem("nombre");
+    const usuario_id = localStorage.getItem("usuario_id");
+
+    if (!token) {
+      document.getElementById("loginBox").classList.remove("hidden");
+    } else {
+      document.getElementById("formBox").classList.remove("hidden");
+      document.getElementById("usuarioIdInput").value = usuario_id;
+      document.getElementById("nombreConductorInput").value = nombre;
+    }
+
+    // GUARDAR DATOS DEL FORMULARIO
     document.getElementById("inspeccionForm").addEventListener("submit", function () {
       const aspectos = {};
       const total = document.querySelectorAll('[name^="aspecto_"]').length / 2;
+
       for (let i = 0; i < total; i++) {
         const radios = document.getElementsByName("aspecto_" + i);
         let val = "B";
         for (const r of radios) if (r.checked) val = r.value;
         aspectos[i + 1] = val;
       }
+
       document.getElementById("aspectosInput").value = JSON.stringify(aspectos);
-      const dataUrl = window.firmaApp?.getDataURL?.() || "";
-      document.getElementById("firmaDataInput").value = dataUrl;
+      document.getElementById("firmaDataInput").value = window.firmaApp?.getDataURL?.() || "";
     });
   </script>
+
 </body>
+
 </html>
-
-

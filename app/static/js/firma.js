@@ -1,39 +1,50 @@
 // app/static/js/firma.js
-(function(){
-  const canvas = document.getElementById('firmaCanvas');
-  const ctx = canvas.getContext('2d');
+(function () {
+  const canvas = document.getElementById("firmaCanvas");
+  const ctx = canvas.getContext("2d");
+
+  // === FIX: configurar resolución solo UNA VEZ ===
+  function setupCanvas() {
+    const dpi = window.devicePixelRatio || 1;
+
+    const width = canvas.clientWidth;
+    const height = 200; // altura fija en px
+
+    canvas.width = width * dpi;
+    canvas.height = height * dpi;
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform antes de escalar
+    ctx.scale(dpi, dpi);
+
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#000";
+  }
+
+  setupCanvas();
+  window.addEventListener("resize", setupCanvas);
+
   let drawing = false;
   let last = { x: 0, y: 0 };
 
-  function resizeCanvas() {
-    // Mantener tamaño CSS vs canvas pixels
-    const style = getComputedStyle(canvas);
-    const w = canvas.clientWidth;
-    canvas.width = w * (window.devicePixelRatio || 1);
-    canvas.height = 200 * (window.devicePixelRatio || 1);
-    ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-  }
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
-
   function getPos(e) {
-    if (e.touches && e.touches.length > 0) {
-      const rect = canvas.getBoundingClientRect();
-      return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
-    } else {
-      const rect = canvas.getBoundingClientRect();
-      return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-    }
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+    return {
+      x: clientX - rect.left,
+      y: clientY - rect.top,
+    };
   }
 
-  canvas.addEventListener('mousedown', function(e){
-    drawing = true; last = getPos(e);
+  // Mouse
+  canvas.addEventListener("mousedown", (e) => {
+    drawing = true;
+    last = getPos(e);
   });
-  canvas.addEventListener('touchstart', function(e){ drawing = true; last = getPos(e); e.preventDefault(); });
 
-  canvas.addEventListener('mousemove', function(e){
+  canvas.addEventListener("mousemove", (e) => {
     if (!drawing) return;
     const p = getPos(e);
     ctx.beginPath();
@@ -42,29 +53,50 @@
     ctx.stroke();
     last = p;
   });
-  canvas.addEventListener('touchmove', function(e){ if (!drawing) return; const p = getPos(e); ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(p.x,p.y); ctx.stroke(); last = p; e.preventDefault(); });
 
-  document.addEventListener('mouseup', function(){ drawing = false; });
-  document.addEventListener('touchend', function(){ drawing = false; });
+  document.addEventListener("mouseup", () => (drawing = false));
 
-  document.getElementById('limpiarBtn').addEventListener('click', function(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+  // Touch
+  canvas.addEventListener("touchstart", (e) => {
+    drawing = true;
+    last = getPos(e);
+    e.preventDefault();
   });
 
-  window.firmaApp = {
-    getDataURL: function(){
-      // devolver dataURL en tamaño razonable
-      return canvas.toDataURL('image/png');
-    }
+  canvas.addEventListener("touchmove", (e) => {
+    if (!drawing) return;
+    const p = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(last.x, last.y);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    last = p;
+    e.preventDefault();
+  });
+
+  document.addEventListener("touchend", () => (drawing = false));
+
+  // Limpiar
+  document.getElementById("limpiarBtn").onclick = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
   };
 
-  document.getElementById('guardarBtn').addEventListener('click', function(){
-    const data = window.firmaApp.getDataURL();
-    const img = document.createElement('img');
+  // Preview de firma
+  document.getElementById("guardarBtn").onclick = () => {
+    const data = canvas.toDataURL("image/png");
+    const img = document.createElement("img");
     img.src = data;
-    img.style.maxWidth = '300px';
-    const preview = document.getElementById('firmaPreview');
-    preview.innerHTML = '';
+    img.style.maxWidth = "300px";
+
+    const preview = document.getElementById("firmaPreview");
+    preview.innerHTML = "";
     preview.appendChild(img);
-  });
+  };
+
+  // Export para enviar en formulario
+  window.firmaApp = {
+    getDataURL: () => canvas.toDataURL("image/png"),
+  };
 })();
+
+
