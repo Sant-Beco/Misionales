@@ -6,46 +6,38 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Inspección Preoperacional - Misionales</title>
 
-  <!-- Tailwind -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/css/style.css?v=1">
 
-  <!-- Estilos firma -->
-  <style>
-    #firmaCanvas {
-      pointer-events: auto !important;
-      touch-action: none !important;
-      background: white;
-    }
-  </style>
 </head>
 
-<body class="bg-gray-50 p-4">
+<body>
 
-  <!-- LOGIN -->
-  <div id="loginBox" class="max-w-md mx-auto bg-white p-6 rounded shadow mb-6 hidden">
-    <h2 class="text-xl font-semibold mb-4 text-center">Ingreso al Sistema</h2>
+  <!-- ============================= -->
+  <!--       BLOQUE LOGIN           -->
+  <!-- ============================= -->
+  <div id="loginBox" class="login-card hidden">
 
-    <div class="flex flex-col gap-3">
-      <input id="loginNombre" class="border p-2 rounded" placeholder="Nombre de usuario">
-      <input id="loginPin" type="password" class="border p-2 rounded" placeholder="PIN">
+    <h2 class="title">Ingreso al Sistema</h2>
 
-      <button id="loginBtn"
-        class="bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
-        Iniciar sesión
-      </button>
+    <div class="login-fields">
+      <input id="loginNombre" class="input" placeholder="Nombre de usuario">
+      <input id="loginPin" type="password" class="input" placeholder="PIN">
 
-      <p id="loginError" class="text-red-500 text-sm hidden">Usuario o PIN incorrecto</p>
+      <button id="loginBtn" class="btn-primary">Iniciar sesión</button>
+
+      <p id="loginError" class="error-text hidden">Usuario o PIN incorrecto</p>
     </div>
   </div>
 
-  <!-- FORMULARIO -->
-  <div id="formBox" class="max-w-4xl mx-auto bg-white p-6 rounded shadow hidden">
 
-    <h1 class="text-2xl font-semibold mb-2 text-center">
-      INSPECCIÓN PRE OPERACIONAL MOTOCICLETA
-    </h1>
+  <!-- ============================= -->
+  <!--   FORMULARIO DE INSPECCIÓN    -->
+  <!-- ============================= -->
+  <div id="formBox" class="form-card hidden">
 
-    <div class="text-sm text-gray-600 mb-4 text-center">
+    <h1 class="form-title">INSPECCIÓN PRE OPERACIONAL MOTOCICLETA</h1>
+
+    <div class="form-meta">
       Código: <strong>FO-SST-063</strong> — Fecha: <strong>{{ fecha }}</strong> — Versión: <strong>01</strong>
     </div>
 
@@ -54,182 +46,266 @@
       <input type="hidden" id="usuarioIdInput" name="usuario_id">
       <input type="hidden" id="nombreConductorInput" name="nombre_conductor">
 
-      <!-- DATOS -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <!-- DATOS BÁSICOS -->
+      <div class="section-title">Datos del vehículo</div>
 
-        <div>
-          <label class="block text-sm font-medium">Placa</label>
-          <input name="placa" class="w-full border rounded p-2" />
+      <div class="grid-2">
+
+        <div class="field">
+          <label>Placa</label>
+          <input name="placa" class="input">
         </div>
 
-        <div>
-          <label class="block text-sm font-medium">Proceso</label>
-          <input name="proceso" class="w-full border rounded p-2" />
+        <div class="field">
+          <label>Proceso</label>
+          <input name="proceso" class="input">
         </div>
 
-        <div>
-          <label class="block text-sm font-medium">Desde</label>
-          <input name="desde" class="w-full border rounded p-2" />
+        <div class="field">
+          <label>Desde</label>
+          <input name="desde" class="input">
         </div>
 
-        <div>
-          <label class="block text-sm font-medium">Hasta</label>
-          <input name="hasta" class="w-full border rounded p-2" />
+        <div class="field">
+          <label>Hasta</label>
+          <input name="hasta" class="input">
         </div>
 
-        <div>
-          <label class="block text-sm font-medium">Marca</label>
-          <input name="marca" class="w-full border rounded p-2" />
+        <div class="field">
+          <label>Marca</label>
+          <input name="marca" class="input">
         </div>
 
-        <div>
-          <label class="block text-sm font-medium">Gasolina</label>
-          <input name="gasolina" class="w-full border rounded p-2" />
+        <div class="field">
+          <label>Gasolina</label>
+          <input name="gasolina" class="input">
         </div>
 
-        <div>
-          <label class="block text-sm font-medium">Modelo</label>
-          <input name="modelo" class="w-full border rounded p-2" />
+        <div class="field">
+          <label>Modelo</label>
+          <input name="modelo" class="input">
         </div>
 
-        <div>
-          <label class="block text-sm font-medium">Motor</label>
-          <input name="motor" class="w-full border rounded p-2" />
+        <div class="field">
+          <label>Motor</label>
+          <input name="motor" class="input">
         </div>
 
-        <div>
-          <label class="block text-sm font-medium">Línea</label>
-          <input name="linea" class="w-full border rounded p-2" />
+        <div class="field">
+          <label>Línea</label>
+          <input name="linea" class="input">
         </div>
 
       </div>
 
-      <hr class="my-4" />
+      <div class="separator"></div>
 
       <!-- DOCUMENTOS -->
-      <h2 class="font-medium">Revisión de Documentos</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      <div class="section-title">Revisión de Documentos</div>
 
-        <div>
-          <label class="block text-sm">Licencia No.</label>
-          <input name="licencia_num" class="w-full border rounded p-2" />
-          <label class="block text-sm mt-1">Fecha de vencimiento</label>
-          <input name="licencia_venc" type="date" class="w-full border rounded p-2" />
+      <div class="grid-2">
+
+        <div class="field">
+          <label>Licencia No.</label>
+          <input name="licencia_num" class="input">
+
+          <label class="mt">Fecha de vencimiento</label>
+          <input name="licencia_venc" type="date" class="input">
         </div>
 
-        <div>
-          <label class="block text-sm">Tarjeta Propiedad</label>
-          <input name="porte_propiedad" class="w-full border rounded p-2" />
-          <label class="block text-sm mt-1">SOAT</label>
-          <input name="soat" class="w-full border rounded p-2" />
+        <div class="field">
+          <label>Tarjeta Propiedad</label>
+          <input name="porte_propiedad" class="input">
+
+          <label class="mt">SOAT</label>
+          <input name="soat" class="input">
         </div>
 
-        <div>
-          <label class="block text-sm">Emisión de Gases</label>
-          <input name="certificado_emision" class="w-full border rounded p-2" />
+        <div class="field">
+          <label>Emisión de Gases</label>
+          <input name="certificado_emision" class="input">
         </div>
 
-        <div>
-          <label class="block text-sm">Póliza Seguro</label>
-          <input name="poliza_seguro" class="w-full border rounded p-2" />
+        <div class="field">
+          <label>Póliza Seguro</label>
+          <input name="poliza_seguro" class="input">
         </div>
 
       </div>
 
-      <hr class="my-4" />
+      <div class="separator"></div>
 
       <!-- ASPECTOS -->
-      <h2 class="font-medium">Aspectos a Revisar (B / M)</h2>
-      <div id="aspectosContainer" class="grid grid-cols-1 gap-2">
+      <div class="section-title">Aspectos a Revisar (B / M)</div>
+
+      <div id="aspectosContainer" class="aspectos-list">
+        {% set aspectos_lista = [
+          "Estado de llantas y presión de aire",
+          "Encendido eléctrico y de crank",
+          "Luces y pito",
+          "Espejos retrovisores",
+          "Manijas de freno y clutch",
+          "Sistema de frenos",
+          "Estado de freno de disco",
+          "Nivel de líquido de freno",
+          "Revisión sistema tablero",
+          "Fugas de combustible y/o aceites",
+          "Kit de arrastre",
+          "Estado de suspensión",
+          "Nivel de aceites"
+        ] %}
+
         {% for aspecto in aspectos_lista %}
-        <div class="flex items-center justify-between p-2 border rounded">
-          <div class="w-3/4 text-sm">{{ loop.index }}. {{ aspecto }}</div>
-          <div class="flex gap-3 items-center">
-            <label><input type="radio" name="aspecto_{{ loop.index0 }}" value="B" checked> B</label>
-            <label><input type="radio" name="aspecto_{{ loop.index0 }}" value="M"> M</label>
+        <div class="aspecto-item">
+          <div class="aspecto-text">{{ loop.index }}. {{ aspecto }}</div>
+
+          <div class="switch-wrapper">
+
+            <label class="switch-group">
+              <input type="radio" name="aspecto_{{ loop.index0 }}" value="B" checked>
+              <span class="switch-btn">B</span>
+            </label>
+
+            <label class="switch-group malo">
+              <input type="radio" name="aspecto_{{ loop.index0 }}" value="M">
+              <span class="switch-btn">M</span>
+            </label>
+
           </div>
+
         </div>
         {% endfor %}
       </div>
 
-      <hr class="my-4" />
+      <div class="separator"></div>
 
       <!-- CONDICIONES -->
-      <h2 class="font-medium">¿El vehículo está en óptimas condiciones?</h2>
-      <div class="mt-2 flex gap-3">
-        <label><input type="radio" name="condiciones_optimas" value="SI" checked> Sí</label>
-        <label><input type="radio" name="condiciones_optimas" value="NO"> No</label>
+      <div class="section-title">¿El vehículo está en óptimas condiciones?</div>
+
+      <div class="switch-wrapper mt-small">
+
+        <label class="switch-group">
+          <input type="radio" name="condiciones_optimas" value="SI" checked>
+          <span class="switch-btn">Sí</span>
+        </label>
+
+        <label class="switch-group malo">
+          <input type="radio" name="condiciones_optimas" value="NO">
+          <span class="switch-btn">No</span>
+        </label>
+
       </div>
 
-      <hr class="my-4" />
+      <div class="separator"></div>
 
       <!-- FIRMA -->
-      <h2 class="font-medium">Firma del conductor</h2>
-      <p class="text-sm text-gray-500">Firme con el dedo o mouse.</p>
+      <div class="section-title">Firma del conductor</div>
+      <p class="text-muted">Firme con el dedo o mouse.</p>
 
-      <!-- CANVAS CORREGIDO -->
-      <div class="border rounded p-2 bg-gray-50">
-        <canvas id="firmaCanvas" class="w-full h-40 border"></canvas>
+      <div class="firma-box">
+        <canvas id="firmaCanvas"></canvas>
 
-        <div class="mt-2 flex gap-2">
-          <button type="button" id="limpiarBtn" class="px-3 py-1 bg-gray-300 rounded">Limpiar</button>
-          <button type="button" id="guardarBtn" class="px-3 py-1 bg-blue-600 text-white rounded">Guardar firma</button>
+        <div class="firma-actions">
+          <button type="button" id="limpiarBtn" class="btn-secondary">Limpiar</button>
+          <button type="button" id="guardarBtn" class="btn-primary">Guardar firma</button>
         </div>
 
-        <div id="firmaPreview" class="mt-2"></div>
+        <div id="firmaPreview" class="mt-small"></div>
       </div>
 
       <!-- OBSERVACIONES -->
-      <div class="mt-4">
-        <label class="block text-sm font-medium">Observaciones</label>
-        <textarea name="observaciones" class="w-full border rounded p-2" rows="3"></textarea>
-      </div>
+      <div class="section-title">Observaciones</div>
+      <textarea name="observaciones" class="input" rows="3"></textarea>
 
-      <input type="hidden" name="aspectos" id="aspectosInput" />
-      <input type="hidden" name="firma_dataurl" id="firmaDataInput" />
+      <input type="hidden" name="aspectos" id="aspectosInput">
+      <input type="hidden" name="firma_dataurl" id="firmaDataInput">
 
-      <div class="mt-6 flex flex-wrap gap-3 justify-center">
-        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Enviar y generar PDF</button>
-        <button type="reset" class="bg-gray-200 px-4 py-2 rounded">Limpiar formulario</button>
+      <div class="button-group">
+        <button type="submit" class="btn-primary">Enviar y generar PDF</button>
+        <button type="reset" class="btn-secondary">Limpiar formulario</button>
       </div>
 
     </form>
   </div>
 
-  <!-- SCRIPTS CORREGIDOS -->
-  <script src="/static/js/firma.js?v=7" defer></script>
+  <!-- ============================= -->
+  <!--  SCRIPTS FINALES              -->
+  <!-- ============================= -->
+  <script src="/static/js/firma.js"></script>
 
-  <script>
-    // LOGIN
-    const token = localStorage.getItem("token");
-    const nombre = localStorage.getItem("nombre");
-    const usuario_id = localStorage.getItem("usuario_id");
 
-    if (!token) {
-      document.getElementById("loginBox").classList.remove("hidden");
-    } else {
-      document.getElementById("formBox").classList.remove("hidden");
-      document.getElementById("usuarioIdInput").value = usuario_id;
-      document.getElementById("nombreConductorInput").value = nombre;
+<script>
+  // ============================
+  //   MOSTRAR LOGIN O FORMULARIO
+  // ============================
+
+  const token = localStorage.getItem("token");
+  const nombre = localStorage.getItem("nombre");
+  const usuario_id = localStorage.getItem("usuario_id");
+
+  if (!token) {
+    // Usuario NO logueado → mostrar login
+    document.getElementById("loginBox").classList.remove("hidden");
+    document.getElementById("formBox").classList.add("hidden");
+  } else {
+    // Usuario logueado → mostrar formulario
+    document.getElementById("formBox").classList.remove("hidden");
+    document.getElementById("loginBox").classList.add("hidden");
+
+    document.getElementById("usuarioIdInput").value = usuario_id;
+    document.getElementById("nombreConductorInput").value = nombre;
+  }
+
+  // ============================
+  //           LOGIN
+  // ============================
+
+  document.getElementById("loginBtn").onclick = async () => {
+
+    const nombre = document.getElementById("loginNombre").value;
+    const pin = document.getElementById("loginPin").value;
+
+    const formData = new FormData();
+    formData.append("nombre", nombre);
+    formData.append("pin", pin);
+
+    const res = await fetch("/auth/login", {
+      method: "POST",
+      body: formData
+    });
+
+    if (!res.ok) {
+      document.getElementById("loginError").classList.remove("hidden");
+      return;
     }
 
-    // GUARDAR DATOS DEL FORMULARIO
-    document.getElementById("inspeccionForm").addEventListener("submit", function () {
-      const aspectos = {};
-      const total = document.querySelectorAll('[name^="aspecto_"]').length / 2;
+    const data = await res.json();
 
-      for (let i = 0; i < total; i++) {
-        const radios = document.getElementsByName("aspecto_" + i);
-        let val = "B";
-        for (const r of radios) if (r.checked) val = r.value;
-        aspectos[i + 1] = val;
-      }
+    // Guardar datos de sesión
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("usuario_id", data.usuario_id);
+    localStorage.setItem("nombre", data.nombre);
 
-      document.getElementById("aspectosInput").value = JSON.stringify(aspectos);
-      document.getElementById("firmaDataInput").value = window.firmaApp?.getDataURL?.() || "";
-    });
-  </script>
+    // Recargar para cargar el formulario
+    location.reload();
+  };
 
-</body>
+  // ============================
+  //      GUARDAR ASPECTOS+FIRMA
+  // ============================
 
-</html>
+  document.getElementById("inspeccionForm").addEventListener("submit", function () {
+    const aspectos = {};
+    const total = document.querySelectorAll('[name^="aspecto_"]').length / 2;
+
+    for (let i = 0; i < total; i++) {
+      const radios = document.getElementsByName("aspecto_" + i);
+      let val = "B";
+      for (const r of radios) if (r.checked) val = r.value;
+      aspectos[i + 1] = val;
+    }
+
+    document.getElementById("aspectosInput").value = JSON.stringify(aspectos);
+    document.getElementById("firmaDataInput").value = window.firmaApp?.getDataURL?.() || "";
+  });
+</script>

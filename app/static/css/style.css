@@ -1,0 +1,295 @@
+/* -----------------------------------------------------
+   PALETA CORPORATIVA SUAVE (INCUBANT)
+----------------------------------------------------- */
+:root {
+  --amarillo: #F7D154;      /* acentos suaves */
+  --verde: #5B8F5B;         /* verde corporativo principal */
+  --verde-light: #7FB587;   /* hover suave */
+  --gris-bg: #F6F6F6;       /* fondo general */
+  --gris-borde: #D8D8D8;    /* bordes */
+  --gris-texto: #555;       /* textos secundarios */
+  --blanco: #FFFFFF;
+  --rojo-error: #d9534f;
+}
+
+/* -----------------------------------------------------
+   FONDO GENERAL Y BODY
+----------------------------------------------------- */
+body {
+  margin: 0;
+  padding: 16px;
+  background: var(--gris-bg);
+  font-family: Inter, Arial, sans-serif;
+  color: #333;
+}
+
+/* -----------------------------------------------------
+   LOGIN
+----------------------------------------------------- */
+.login-card {
+  max-width: 380px;
+  margin: 60px auto;
+  background: var(--blanco);
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  text-align: center;
+  transition: 0.3s;
+}
+
+.login-card.hidden { display: none; }
+
+.login-card h2.title {
+  color: var(--verde);
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.login-card .input {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  border: 1px solid var(--gris-borde);
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+.login-card .btn-primary {
+  width: 100%;
+  margin-top: 8px;
+}
+
+/* Error login */
+.error-text {
+  color: var(--rojo-error);
+  font-size: 0.9rem;
+  margin-top: 6px;
+}
+.error-text.hidden { display: none; }
+
+/* -----------------------------------------------------
+   TARJETAS / CONTENEDORES
+----------------------------------------------------- */
+.form-card {
+  background: var(--blanco);
+  padding: 24px;
+  border-radius: 12px;
+  max-width: 900px;
+  margin: 20px auto;
+  border: 1px solid var(--gris-borde);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+/* Títulos principales */
+.form-title {
+  margin: 0 0 12px 0;
+  font-size: 1.6rem;
+  text-align: center;
+  color: var(--verde);
+  font-weight: 700;
+}
+
+/* Metadata */
+.form-meta {
+  font-size: 0.9rem;
+  color: var(--gris-texto);
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+/* Subtítulos secciones */
+.section-title {
+  background: #F8F8F8;
+  padding: 6px 14px;
+  border-left: 5px solid var(--verde);
+  border-radius: 4px;
+  display: block;
+  font-weight: 600;
+  margin: 24px 0 12px 0;
+  color: #4a4a4a;
+}
+
+/* -----------------------------------------------------
+   FORM GROUPS
+----------------------------------------------------- */
+.form-group,
+.field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+label {
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+  color: #333;
+  font-weight: 500;
+}
+
+input,
+textarea,
+select {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid var(--gris-borde);
+  background: var(--blanco);
+  font-size: 0.95rem;
+  transition: 0.25s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--verde);
+  box-shadow: 0 0 0 2px rgba(91,143,91,0.2);
+  outline: none;
+}
+
+/* Validación */
+.input-valid { border-color: #4CAF50 !important; }
+.input-invalid { border-color: var(--rojo-error) !important; }
+
+/* -----------------------------------------------------
+   GRID RESPONSIVE
+----------------------------------------------------- */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 640px) {
+  .grid-2 { grid-template-columns: 1fr; }
+}
+
+/* -----------------------------------------------------
+   SWITCHES (B/M modernos)
+----------------------------------------------------- */
+.switch-wrapper {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.switch-wrapper input[type="radio"] { display: none; }
+
+.switch-btn {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--gris-borde);
+  cursor: pointer;
+  font-size: 0.88rem;
+  background: var(--blanco);
+  color: #333;
+  transition: 0.25s;
+  min-width: 40px;
+  text-align: center;
+}
+
+.switch-wrapper input[type="radio"]:checked + .switch-btn {
+  background: var(--verde);
+  border-color: var(--verde);
+  color: white;
+  box-shadow: 0 0 6px rgba(0,0,0,0.15);
+}
+
+.switch-wrapper .malo input[type="radio"]:checked + .switch-btn {
+  background: var(--rojo-error);
+  border-color: var(--rojo-error);
+}
+
+/* -----------------------------------------------------
+   ASPECTOS LISTA
+----------------------------------------------------- */
+.aspectos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.aspecto-item {
+  background: var(--blanco);
+  border: 1px solid var(--gris-borde);
+  padding: 14px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: 0.2s;
+}
+.aspecto-item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+
+.aspecto-text { flex: 1; font-size: 0.95rem; }
+
+/* -----------------------------------------------------
+   CANVAS DE FIRMA
+----------------------------------------------------- */
+.firma-box {
+  margin-top: 12px;
+}
+#firmaCanvas {
+  width: 100%;
+  height: 150px;
+  background: var(--blanco);
+  border: 2px dashed var(--gris-borde);
+  border-radius: 6px;
+  touch-action: none;
+}
+
+.firma-actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 12px;
+}
+
+/* -----------------------------------------------------
+   BOTONES
+----------------------------------------------------- */
+.btn-row,
+.button-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.btn-row.center { justify-content: center; }
+
+.btn-primary {
+  background: var(--verde);
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  font-size: 0.95rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.25s;
+}
+.btn-primary:hover { background: var(--verde-light); }
+
+.btn-secondary {
+  background: var(--amarillo);
+  color: #333;
+  border: none;
+  padding: 10px 18px;
+  font-size: 0.95rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.25s;
+}
+.btn-secondary:hover { filter: brightness(1.07); }
+
+/* -----------------------------------------------------
+   MENSAJES Y NOTAS
+----------------------------------------------------- */
+.error-msg { color: var(--rojo-error); font-size: 0.9rem; margin-top: 6px; }
+.note { margin-top: -4px; font-size: 0.85rem; color: var(--gris-texto); }
+
+/* -----------------------------------------------------
+   SEPARADORES
+----------------------------------------------------- */
+.separator { margin: 24px 0; border-bottom: 1px solid var(--gris-borde); }
+.mt { margin-top: 8px; }
+.mt-small { margin-top: 6px; }
+
+
+
+

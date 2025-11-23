@@ -1,83 +1,118 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <style>
-    @page { size: A4 portrait; margin: 12mm; }
-    body {
-      font-family: DejaVu Sans, Arial, sans-serif;
-      font-size: 11px;
-      margin: 0;
-      color: #000;
-    }
-    .encabezado { 
-      display:flex; 
-      align-items:center; 
-      gap:12px; 
-      padding:8px 0; 
-      border-bottom:2px solid #000; 
-    }
-    .logo { width:120px; }
-    .titulo { 
-      text-align:center; 
-      flex:1; 
-      font-weight:700; 
-      font-size:16px; 
-      text-transform:uppercase; 
-    }
-    .meta { 
-      text-align:center; 
-      font-size:11px; 
-      margin-top:4px; 
-      color:#222; 
-    }
+<meta charset="UTF-8">
+<style>
+  /* --- CONFIGURACIÓN PDF --- */
+  @page {
+    size: A4 portrait;
+    margin: 10mm 10mm 12mm 10mm;
+  }
 
-    table { 
-      width:100%; 
-      border-collapse: collapse; 
-      margin-top:10px; 
-    }
-    th, td { 
-      border:1px solid #222; 
-      padding:6px 8px; 
-      vertical-align:middle; 
-    }
-    th { 
-      background:#efefef; 
-      font-weight:700; 
-      font-size:11px; 
-      text-transform:uppercase; 
-    }
+  body {
+    font-family: DejaVu Sans, Arial, sans-serif;
+    font-size: 10px;
+    margin: 0;
+    color: #000;
+  }
 
-    .aspectos td { text-align:center; }
-    .aspectos .left { text-align:left; padding-left:10px; }
+  /* --- COLORES CORPORATIVOS INCUBANT --- */
+  :root {
+    --azul: #003366;
+    --gris: #f4f4f4;
+    --gris-borde: #999;
+  }
 
-    .box {
-      display:inline-block;
-      width:20px;
-      height:20px;
-      border:1px solid #222;
-      text-align:center;
-      line-height:20px;
-      font-weight:700;
-      font-size:12px;
-    }
+  /* --- ENCABEZADO --- */
+  .encabezado {
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid var(--azul);
+    padding-bottom: 6px;
+  }
 
-    .firma { margin-top:12px; }
-    .firma img { 
-      max-width:220px; 
-      border:1px solid #222; 
-      display:block; 
-      margin-top:6px; 
-    }
-    .nota { 
-      font-size:10px; 
-      margin-top:12px; 
-      border-top:1px solid #ddd; 
-      padding-top:6px; 
-      color:#111; 
-    }
-  </style>
+  .logo { width: 90px; }
+
+  .titulo {
+    flex: 1;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--azul);
+    text-transform: uppercase;
+  }
+
+  .meta {
+    text-align: center;
+    font-size: 10px;
+    margin: 4px 0 8px 0;
+    color: #333;
+  }
+
+  /* --- TABLAS --- */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 5px;
+  }
+
+  th, td {
+    border: 1px solid var(--gris-borde);
+    padding: 3px 5px;
+  }
+
+  th {
+    background: var(--gris);
+    text-transform: uppercase;
+    font-size: 9.5px;
+    color: var(--azul);
+  }
+
+  .aspectos td {
+    text-align: center;
+    font-size: 9.5px;
+  }
+
+  .aspectos .left {
+    text-align: left;
+  }
+
+  .box {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 1px solid #444;
+    line-height: 13px;
+    margin-top: 1px;
+    font-size: 10px;
+    font-weight: bold;
+  }
+
+  /* --- SECCIONES --- */
+  .seccion { margin-top: 6px; }
+
+  .observ-box {
+    border: 1px solid #bbb;
+    min-height: 40px;
+    padding: 5px;
+    font-size: 9.5px;
+  }
+
+  .firma img {
+    max-width: 140px;
+    border: 1px solid #333;
+    margin-top: 4px;
+  }
+
+  /* --- NOTA --- */
+  .nota {
+    margin-top: 8px;
+    font-size: 9px;
+    border-top: 1px solid #ccc;
+    padding-top: 4px;
+    color: #444;
+  }
+</style>
 </head>
 
 <body>
@@ -85,7 +120,7 @@
   <!-- ENCABEZADO -->
   <div class="encabezado">
     <img class="logo" src="{{ logo_path }}" alt="Logo">
-    <div class="titulo">INSPECCIÓN PRE OPERACIONAL MOTOCICLETA</div>
+    <div class="titulo">Inspección Preoperacional Motocicleta</div>
   </div>
 
   <div class="meta">
@@ -95,40 +130,36 @@
   <!-- INFORMACIÓN GENERAL -->
   <table>
     <tr>
-      <th>Nombre Conductor</th>
-      <td>{{ registro.nombre_conductor }}</td>
-      <th>Placa</th>
-      <td>{{ registro.placa }}</td>
+      <th>Conductor</th> <td>{{ registro.nombre_conductor }}</td>
+      <th>Placa</th> <td>{{ registro.placa }}</td>
     </tr>
     <tr>
-      <th>Proceso</th>
-      <td>{{ registro.proceso }}</td>
-      <th>Desde - Hasta</th>
-      <td>{{ registro.desde }} - {{ registro.hasta }}</td>
+      <th>Proceso</th> <td>{{ registro.proceso }}</td>
+      <th>Desde / Hasta</th> <td>{{ registro.desde }} - {{ registro.hasta }}</td>
     </tr>
     <tr>
-      <th>Marca</th><td>{{ registro.marca }}</td>
-      <th>Gasolina</th><td>{{ registro.gasolina }}</td>
+      <th>Marca</th> <td>{{ registro.marca }}</td>
+      <th>Gasolina</th> <td>{{ registro.gasolina }}</td>
     </tr>
     <tr>
-      <th>Modelo</th><td>{{ registro.modelo }}</td>
-      <th>Motor</th><td>{{ registro.motor }}</td>
+      <th>Modelo</th> <td>{{ registro.modelo }}</td>
+      <th>Motor</th> <td>{{ registro.motor }}</td>
     </tr>
   </table>
 
   <!-- DOCUMENTOS -->
   <table>
     <tr>
-      <th>Licencia Nº</th><td>{{ registro.licencia_num }}</td>
-      <th>Vencimiento</th><td>{{ registro.licencia_venc }}</td>
+      <th>Licencia Nº</th> <td>{{ registro.licencia_num }}</td>
+      <th>Vencimiento</th> <td>{{ registro.licencia_venc }}</td>
     </tr>
     <tr>
-      <th>Porte Tarjeta Propiedad</th><td>{{ registro.porte_propiedad }}</td>
-      <th>SOAT</th><td>{{ registro.soat }}</td>
+      <th>Tarjeta Propiedad</th> <td>{{ registro.porte_propiedad }}</td>
+      <th>SOAT</th> <td>{{ registro.soat }}</td>
     </tr>
     <tr>
-      <th>Certificado emisión</th><td>{{ registro.certificado_emision }}</td>
-      <th>Póliza</th><td>{{ registro.poliza_seguro }}</td>
+      <th>Emisión</th> <td>{{ registro.certificado_emision }}</td>
+      <th>Póliza</th> <td>{{ registro.poliza_seguro }}</td>
     </tr>
   </table>
 
@@ -185,47 +216,40 @@
   </table>
 
   <!-- OBSERVACIONES Y FIRMA -->
-  <div class="firma">
+  <div class="seccion">
     <strong>Observaciones:</strong>
-    <div style="border:1px solid #ddd; min-height:80px; padding:6px; margin-top:6px;">
-      {{ registro.observaciones }}
-    </div>
+    <div class="observ-box">{{ registro.observaciones }}</div>
 
-    <div style="margin-top:8px;">
+    <div class="firma">
       <strong>Firma Conductor:</strong><br>
-
       {% if registro.firma_path %}
-        <!-- ✅ Firma desde archivo físico -->
         <img src="{{ registro.firma_path }}" alt="Firma del conductor">
-
       {% elif registro.firma_base64 %}
-        <!-- ✅ Firma Base64 fallback -->
         <img src="{{ registro.firma_base64 }}" alt="Firma del conductor">
-
       {% else %}
-        <!-- ❌ No hay firma -->
-        <div style="color:#777; border:1px dashed #aaa; padding:10px; width:220px; text-align:center; margin-top:6px;">
+        <div style="color:#777; border:1px dashed #aaa; padding:8px; width:140px; margin-top:4px; text-align:center;">
           (sin firma)
         </div>
       {% endif %}
     </div>
   </div>
 
-  <!-- ¿CONDICIONES ÓPTIMAS? -->
-  <div style="margin-top:10px;">
-    <strong>¿El vehículo se encuentra en óptimas condiciones?</strong>
+  <!-- CONDICIONES -->
+  <div class="seccion">
+    <strong>¿El vehículo está en óptimas condiciones?</strong>
     {% if registro.condiciones_optimas == "SI" %}
-      <span class="box">✔</span> SI
+      <span class="box">✔</span> Sí
     {% else %}
-      <span class="box">✖</span> NO
+      <span class="box">✖</span> No
     {% endif %}
   </div>
 
+  <!-- NOTA -->
   <div class="nota">
-    <strong>Nota:</strong> Inspeccione todos los elementos que apliquen. 
-    Detenga los funcionamientos cuando observe alguna condición insegura y notifique al responsable.
+    <strong>Nota:</strong> Antes de iniciar el recorrido verifique que el vehículo cuente con todos los elementos en buen estado. Reporte cualquier condición insegura.
   </div>
 
 </body>
 </html>
+
 
