@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ingreso al Sistema</title>
+  <link rel="stylesheet" href="/static/css/style.css?v=1">
+</head>
+<body>
+  <div id="loginBox" class="login-card">
+    <h2 class="title">Ingreso al Sistema</h2>
+
+    <div class="login-fields">
+      <input id="loginNombre" class="input" placeholder="Nombre de usuario" autocomplete="off">
+      <input id="loginPin" type="password" class="input" placeholder="PIN">
+
+      <button id="loginBtn" class="btn-primary">Iniciar sesión</button>
+
+      <p id="loginError" class="error-text hidden">Usuario o PIN incorrecto</p>
+      <p id="serverError" class="error-text hidden">Error en el servidor</p>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("loginBtn").onclick = async () => {
+      const nombre = document.getElementById("loginNombre").value.trim();
+      const pin = document.getElementById("loginPin").value.trim();
+
+      // Ocultar mensajes previos
+      document.getElementById("loginError").classList.add("hidden");
+      document.getElementById("serverError").classList.add("hidden");
+
+      if (!nombre || !pin) {
+        document.getElementById("loginError").textContent = "Complete todos los campos";
+        document.getElementById("loginError").classList.remove("hidden");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("nombre", nombre);
+      formData.append("pin", pin);
+
+      try {
+        const res = await fetch("/auth/login", {
+          method: "POST",
+          body: formData
+        });
+
+        if (!res.ok) {
+          // Error de usuario o PIN
+          if (res.status === 400 || res.status === 401) {
+            document.getElementById("loginError").textContent = "Usuario o PIN incorrecto";
+            document.getElementById("loginError").classList.remove("hidden");
+          } else {
+            // Error inesperado o 404
+            document.getElementById("serverError").textContent = "Error del servidor (ruta /auth/login)";
+            document.getElementById("serverError").classList.remove("hidden");
+          }
+          return;
+        }
+
+        const data = await res.json();
+
+        // Guardar sesión
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("usuario_id", data.usuario_id);
+        localStorage.setItem("nombre", data.nombre);
+
+        // Redirigir al formulario principal
+        window.location.href = "/";
+      } catch (err) {
+        document.getElementById("serverError").textContent = "Error de conexión con el servidor";
+        document.getElementById("serverError").classList.remove("hidden");
+      }
+    };
+  </script>
+</body>
+</html>
+

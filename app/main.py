@@ -28,10 +28,18 @@ templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 
 # ==========================================================
-#   RUTA PRINCIPAL (solo HTML, la lógica va en JS)
+#   RUTA: LOGIN (NUEVA)
+# ==========================================================
+@app.get("/login", response_class=HTMLResponse)
+async def login_page(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
+
+
+# ==========================================================
+#   RUTA PRINCIPAL (FORMULARIO)
 # ==========================================================
 @app.get("/", response_class=HTMLResponse)
-async def form_get(request: Request):
+async def form_page(request: Request):
     fecha_hoy = datetime.now().strftime("%d - %m - %Y")
 
     db = SessionLocal()
@@ -54,9 +62,11 @@ async def form_get(request: Request):
 
 # 🔒 AUTENTICACIÓN (LOGIN + REGISTER)
 from app.routes_auth import router as auth_router
-app.include_router(auth_router)
+app.include_router(auth_router, prefix="/auth", tags=["Auth"])
 
 # 📄 INSPECCIONES (PDF + DB)
 from app.routes_inspecciones import router as inspecciones_router
 app.include_router(inspecciones_router, prefix="/inspecciones", tags=["Inspecciones"])
+
+
 

@@ -1,141 +1,56 @@
 <!doctype html>
 <html lang="es">
-
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Inspección Preoperacional - Misionales</title>
-
   <link rel="stylesheet" href="/static/css/style.css?v=1">
-
 </head>
-
 <body>
-
-  <!-- ============================= -->
-  <!--       BLOQUE LOGIN           -->
-  <!-- ============================= -->
-  <div id="loginBox" class="login-card hidden">
-
-    <h2 class="title">Ingreso al Sistema</h2>
-
-    <div class="login-fields">
-      <input id="loginNombre" class="input" placeholder="Nombre de usuario">
-      <input id="loginPin" type="password" class="input" placeholder="PIN">
-
-      <button id="loginBtn" class="btn-primary">Iniciar sesión</button>
-
-      <p id="loginError" class="error-text hidden">Usuario o PIN incorrecto</p>
-    </div>
-  </div>
-
-
-  <!-- ============================= -->
-  <!--   FORMULARIO DE INSPECCIÓN    -->
-  <!-- ============================= -->
-  <div id="formBox" class="form-card hidden">
-
+  <div id="formBox" class="form-card">
     <h1 class="form-title">INSPECCIÓN PRE OPERACIONAL MOTOCICLETA</h1>
-
     <div class="form-meta">
       Código: <strong>FO-SST-063</strong> — Fecha: <strong>{{ fecha }}</strong> — Versión: <strong>01</strong>
     </div>
 
     <form id="inspeccionForm" method="post" action="/inspecciones/submit">
-
       <input type="hidden" id="usuarioIdInput" name="usuario_id">
       <input type="hidden" id="nombreConductorInput" name="nombre_conductor">
 
-      <!-- DATOS BÁSICOS -->
       <div class="section-title">Datos del vehículo</div>
-
       <div class="grid-2">
-
-        <div class="field">
-          <label>Placa</label>
-          <input name="placa" class="input">
-        </div>
-
-        <div class="field">
-          <label>Proceso</label>
-          <input name="proceso" class="input">
-        </div>
-
-        <div class="field">
-          <label>Desde</label>
-          <input name="desde" class="input">
-        </div>
-
-        <div class="field">
-          <label>Hasta</label>
-          <input name="hasta" class="input">
-        </div>
-
-        <div class="field">
-          <label>Marca</label>
-          <input name="marca" class="input">
-        </div>
-
-        <div class="field">
-          <label>Gasolina</label>
-          <input name="gasolina" class="input">
-        </div>
-
-        <div class="field">
-          <label>Modelo</label>
-          <input name="modelo" class="input">
-        </div>
-
-        <div class="field">
-          <label>Motor</label>
-          <input name="motor" class="input">
-        </div>
-
-        <div class="field">
-          <label>Línea</label>
-          <input name="linea" class="input">
-        </div>
-
+        <div class="field"><label>Placa</label><input name="placa" class="input"></div>
+        <div class="field"><label>Proceso</label><input name="proceso" class="input"></div>
+        <div class="field"><label>Desde</label><input name="desde" class="input"></div>
+        <div class="field"><label>Hasta</label><input name="hasta" class="input"></div>
+        <div class="field"><label>Marca</label><input name="marca" class="input"></div>
+        <div class="field"><label>Gasolina</label><input name="gasolina" class="input"></div>
+        <div class="field"><label>Modelo</label><input name="modelo" class="input"></div>
+        <div class="field"><label>Motor</label><input name="motor" class="input"></div>
+        <div class="field"><label>Línea</label><input name="linea" class="input"></div>
       </div>
 
       <div class="separator"></div>
-
-      <!-- DOCUMENTOS -->
       <div class="section-title">Revisión de Documentos</div>
 
       <div class="grid-2">
-
         <div class="field">
-          <label>Licencia No.</label>
-          <input name="licencia_num" class="input">
-
-          <label class="mt">Fecha de vencimiento</label>
-          <input name="licencia_venc" type="date" class="input">
+          <label>Licencia No.</label><input name="licencia_num" class="input">
+          <label class="mt">Fecha de vencimiento</label><input name="licencia_venc" type="date" class="input">
         </div>
-
         <div class="field">
-          <label>Tarjeta Propiedad</label>
-          <input name="porte_propiedad" class="input">
-
-          <label class="mt">SOAT</label>
-          <input name="soat" class="input">
+          <label>Tarjeta Propiedad</label><input name="porte_propiedad" class="input">
+          <label class="mt">SOAT</label><input name="soat" class="input">
         </div>
-
         <div class="field">
-          <label>Emisión de Gases</label>
-          <input name="certificado_emision" class="input">
+          <label>Emisión de Gases</label><input name="certificado_emision" class="input">
         </div>
-
         <div class="field">
-          <label>Póliza Seguro</label>
-          <input name="poliza_seguro" class="input">
+          <label>Póliza Seguro</label><input name="poliza_seguro" class="input">
         </div>
-
       </div>
 
       <div class="separator"></div>
-
-      <!-- ASPECTOS -->
       <div class="section-title">Aspectos a Revisar (B / M)</div>
 
       <div id="aspectosContainer" class="aspectos-list">
@@ -158,62 +73,34 @@
         {% for aspecto in aspectos_lista %}
         <div class="aspecto-item">
           <div class="aspecto-text">{{ loop.index }}. {{ aspecto }}</div>
-
           <div class="switch-wrapper">
-
-            <label class="switch-group">
-              <input type="radio" name="aspecto_{{ loop.index0 }}" value="B" checked>
-              <span class="switch-btn">B</span>
-            </label>
-
-            <label class="switch-group malo">
-              <input type="radio" name="aspecto_{{ loop.index0 }}" value="M">
-              <span class="switch-btn">M</span>
-            </label>
-
+            <label class="switch-group"><input type="radio" name="aspecto_{{ loop.index0 }}" value="B" checked><span class="switch-btn">B</span></label>
+            <label class="switch-group malo"><input type="radio" name="aspecto_{{ loop.index0 }}" value="M"><span class="switch-btn">M</span></label>
           </div>
-
         </div>
         {% endfor %}
       </div>
 
       <div class="separator"></div>
-
-      <!-- CONDICIONES -->
       <div class="section-title">¿El vehículo está en óptimas condiciones?</div>
-
       <div class="switch-wrapper mt-small">
-
-        <label class="switch-group">
-          <input type="radio" name="condiciones_optimas" value="SI" checked>
-          <span class="switch-btn">Sí</span>
-        </label>
-
-        <label class="switch-group malo">
-          <input type="radio" name="condiciones_optimas" value="NO">
-          <span class="switch-btn">No</span>
-        </label>
-
+        <label class="switch-group"><input type="radio" name="condiciones_optimas" value="SI" checked><span class="switch-btn">Sí</span></label>
+        <label class="switch-group malo"><input type="radio" name="condiciones_optimas" value="NO"><span class="switch-btn">No</span></label>
       </div>
 
       <div class="separator"></div>
-
-      <!-- FIRMA -->
       <div class="section-title">Firma del conductor</div>
       <p class="text-muted">Firme con el dedo o mouse.</p>
 
       <div class="firma-box">
         <canvas id="firmaCanvas"></canvas>
-
         <div class="firma-actions">
           <button type="button" id="limpiarBtn" class="btn-secondary">Limpiar</button>
           <button type="button" id="guardarBtn" class="btn-primary">Guardar firma</button>
         </div>
-
         <div id="firmaPreview" class="mt-small"></div>
       </div>
 
-      <!-- OBSERVACIONES -->
       <div class="section-title">Observaciones</div>
       <textarea name="observaciones" class="input" rows="3"></textarea>
 
@@ -224,88 +111,31 @@
         <button type="submit" class="btn-primary">Enviar y generar PDF</button>
         <button type="reset" class="btn-secondary">Limpiar formulario</button>
       </div>
-
     </form>
   </div>
 
-  <!-- ============================= -->
-  <!--  SCRIPTS FINALES              -->
-  <!-- ============================= -->
   <script src="/static/js/firma.js"></script>
 
+  <script>
+    const token = localStorage.getItem("token");
+    if (!token) window.location.href = "/login";
+    document.getElementById("usuarioIdInput").value = localStorage.getItem("usuario_id");
+    document.getElementById("nombreConductorInput").value = localStorage.getItem("nombre");
 
-<script>
-  // ============================
-  //   MOSTRAR LOGIN O FORMULARIO
-  // ============================
+    document.getElementById("inspeccionForm").addEventListener("submit", function () {
+      const aspectos = {};
+      const total = document.querySelectorAll('[name^="aspecto_"]').length / 2;
+      for (let i = 0; i < total; i++) {
+        const radios = document.getElementsByName("aspecto_" + i);
+        let val = "B";
+        for (const r of radios) if (r.checked) val = r.value;
+        aspectos[i + 1] = val;
+      }
 
-  const token = localStorage.getItem("token");
-  const nombre = localStorage.getItem("nombre");
-  const usuario_id = localStorage.getItem("usuario_id");
-
-  if (!token) {
-    // Usuario NO logueado → mostrar login
-    document.getElementById("loginBox").classList.remove("hidden");
-    document.getElementById("formBox").classList.add("hidden");
-  } else {
-    // Usuario logueado → mostrar formulario
-    document.getElementById("formBox").classList.remove("hidden");
-    document.getElementById("loginBox").classList.add("hidden");
-
-    document.getElementById("usuarioIdInput").value = usuario_id;
-    document.getElementById("nombreConductorInput").value = nombre;
-  }
-
-  // ============================
-  //           LOGIN
-  // ============================
-
-  document.getElementById("loginBtn").onclick = async () => {
-
-    const nombre = document.getElementById("loginNombre").value;
-    const pin = document.getElementById("loginPin").value;
-
-    const formData = new FormData();
-    formData.append("nombre", nombre);
-    formData.append("pin", pin);
-
-    const res = await fetch("/auth/login", {
-      method: "POST",
-      body: formData
+      document.getElementById("aspectosInput").value = JSON.stringify(aspectos);
+      document.getElementById("firmaDataInput").value = window.firmaApp?.getDataURL?.() || "";
     });
+  </script>
+</body>
+</html>
 
-    if (!res.ok) {
-      document.getElementById("loginError").classList.remove("hidden");
-      return;
-    }
-
-    const data = await res.json();
-
-    // Guardar datos de sesión
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("usuario_id", data.usuario_id);
-    localStorage.setItem("nombre", data.nombre);
-
-    // Recargar para cargar el formulario
-    location.reload();
-  };
-
-  // ============================
-  //      GUARDAR ASPECTOS+FIRMA
-  // ============================
-
-  document.getElementById("inspeccionForm").addEventListener("submit", function () {
-    const aspectos = {};
-    const total = document.querySelectorAll('[name^="aspecto_"]').length / 2;
-
-    for (let i = 0; i < total; i++) {
-      const radios = document.getElementsByName("aspecto_" + i);
-      let val = "B";
-      for (const r of radios) if (r.checked) val = r.value;
-      aspectos[i + 1] = val;
-    }
-
-    document.getElementById("aspectosInput").value = JSON.stringify(aspectos);
-    document.getElementById("firmaDataInput").value = window.firmaApp?.getDataURL?.() || "";
-  });
-</script>
