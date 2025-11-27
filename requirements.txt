@@ -1,6 +1,38 @@
-fastapi
-uvicorn
-jinja2
-weasyprint
-pillow
-bcrypt
+fastapi==0.122.0
+uvicorn==0.38.0
+
+jinja2==3.1.6
+
+# Seguridad
+bcrypt==5.0.0
+
+# SQLAlchemy + DB
+sqlalchemy==2.0.36
+pydantic==2.12.5
+pydantic-core==2.41.5
+
+# Generación de PDFs
+weasyprint==66.0
+tinycss2==1.5.1
+cssselect2==0.8.0
+pydyf==0.11.0
+pyphen==0.17.2
+fonttools==4.60.1
+brotli==1.2.0
+zopfli==0.4.0
+
+# Utilidades
+typing-extensions==4.15.0
+typing-inspection==0.4.2
+annotated-doc==0.0.4
+annotated-types==0.7.0
+
+# Necesarios para CFFI
+cffi==2.0.0
+pycparser==2.23
+
+# Para manejar HTML5
+tinyhtml5==2.0.0
+
+# WeasyPrint en Windows requiere esto instalado externamente:
+# GTK 3 Runtime (NO va en requirements, se instala por MSI).
