@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Inspección Preoperacional - Misionales</title>
   <link rel="stylesheet" href="/static/css/style.css?v=1">
+  <style>
+    /* pequeño ajuste para mensajes de error inline */
+    .error-text-inline { color: var(--rojo-error); font-size: 0.85rem; margin-top:6px; display:block; }
+    .hint-text { color: #666; font-size:0.82rem; margin-top:4px; }
+  </style>
 </head>
 <body>
   <div id="formBox" class="form-card">
@@ -13,21 +18,37 @@
       Código: <strong>FO-SST-063</strong> — Fecha: <strong>{{ fecha }}</strong> — Versión: <strong>01</strong>
     </div>
 
-    <form id="inspeccionForm" method="post" action="/inspecciones/submit">
+    <form id="inspeccionForm" method="post" action="/inspecciones/submit" novalidate>
       <input type="hidden" id="usuarioIdInput" name="usuario_id">
       <input type="hidden" id="nombreConductorInput" name="nombre_conductor">
 
       <div class="section-title">Datos del vehículo</div>
       <div class="grid-2">
-        <div class="field"><label>Placa</label><input name="placa" class="input"></div>
-        <div class="field"><label>Proceso</label><input name="proceso" class="input"></div>
-        <div class="field"><label>Desde</label><input name="desde" class="input"></div>
-        <div class="field"><label>Hasta</label><input name="hasta" class="input"></div>
-        <div class="field"><label>Marca</label><input name="marca" class="input"></div>
-        <div class="field"><label>Gasolina</label><input name="gasolina" class="input"></div>
-        <div class="field"><label>Modelo</label><input name="modelo" class="input"></div>
-        <div class="field"><label>Motor</label><input name="motor" class="input"></div>
-        <div class="field"><label>Línea</label><input name="linea" class="input"></div>
+        <div class="field">
+          <label>Placa <span class="hint-text">(ej: ABC123)</span></label>
+          <input id="placa" name="placa" class="input" autocomplete="off">
+          <span id="error_placa" class="error-text-inline" style="display:none"></span>
+        </div>
+
+        <div class="field">
+          <label>Proceso</label>
+          <input id="proceso" name="proceso" class="input">
+          <span id="error_proceso" class="error-text-inline" style="display:none"></span>
+        </div>
+
+        <div class="field"><label>Desde</label><input id="desde" name="desde" class="input"></div>
+        <div class="field"><label>Hasta</label><input id="hasta" name="hasta" class="input"></div>
+
+        <div class="field">
+          <label>Marca</label>
+          <input id="marca" name="marca" class="input">
+          <span id="error_marca" class="error-text-inline" style="display:none"></span>
+        </div>
+
+        <div class="field"><label>Gasolina</label><input id="gasolina" name="gasolina" class="input"></div>
+        <div class="field"><label>Modelo</label><input id="modelo" name="modelo" class="input"></div>
+        <div class="field"><label>Motor</label><input id="motor" name="motor" class="input"></div>
+        <div class="field"><label>Línea</label><input id="linea" name="linea" class="input"></div>
       </div>
 
       <div class="separator"></div>
@@ -35,18 +56,22 @@
 
       <div class="grid-2">
         <div class="field">
-          <label>Licencia No.</label><input name="licencia_num" class="input">
-          <label class="mt">Fecha de vencimiento</label><input name="licencia_venc" type="date" class="input">
+          <label>Licencia No.</label><input id="licencia_num" name="licencia_num" class="input">
+          <label class="mt">Fecha de vencimiento</label><input id="licencia_venc" name="licencia_venc" type="date" class="input">
+          <span id="error_licencia_venc" class="error-text-inline" style="display:none"></span>
         </div>
+
         <div class="field">
-          <label>Tarjeta Propiedad</label><input name="porte_propiedad" class="input">
-          <label class="mt">SOAT</label><input name="soat" class="input">
+          <label>Tarjeta Propiedad</label><input id="porte_propiedad" name="porte_propiedad" class="input">
+          <label class="mt">SOAT</label><input id="soat" name="soat" class="input">
         </div>
+
         <div class="field">
-          <label>Emisión de Gases</label><input name="certificado_emision" class="input">
+          <label>Emisión de Gases</label><input id="certificado_emision" name="certificado_emision" class="input">
         </div>
+
         <div class="field">
-          <label>Póliza Seguro</label><input name="poliza_seguro" class="input">
+          <label>Póliza Seguro</label><input id="poliza_seguro" name="poliza_seguro" class="input">
         </div>
       </div>
 
@@ -99,30 +124,120 @@
           <button type="button" id="guardarBtn" class="btn-primary">Guardar firma</button>
         </div>
         <div id="firmaPreview" class="mt-small"></div>
+        <span id="error_firma" class="error-text-inline" style="display:none"></span>
       </div>
 
       <div class="section-title">Observaciones</div>
-      <textarea name="observaciones" class="input" rows="3"></textarea>
+      <textarea id="observaciones" name="observaciones" class="input" rows="3"></textarea>
+      <span id="error_observaciones" class="error-text-inline" style="display:none"></span>
 
       <input type="hidden" name="aspectos" id="aspectosInput">
       <input type="hidden" name="firma_dataurl" id="firmaDataInput">
 
       <div class="button-group">
-        <button type="submit" class="btn-primary">Enviar y generar PDF</button>
-        <button type="reset" class="btn-secondary">Limpiar formulario</button>
+        <button id="submitBtn" type="submit" class="btn-primary">Enviar y generar PDF</button>
+        <button type="reset" id="resetBtn" class="btn-secondary">Limpiar formulario</button>
       </div>
+
+      <div id="globalMessage" style="margin-top:12px;"></div>
     </form>
   </div>
 
   <script src="/static/js/firma.js"></script>
 
   <script>
+    // --- Inicialización de datos usuario ---
     const token = localStorage.getItem("token");
-    if (!token) window.location.href = "/login";
+    if (!token) {
+      // si no hay token, te mando a /login
+      window.location.href = "/login";
+    }
     document.getElementById("usuarioIdInput").value = localStorage.getItem("usuario_id");
     document.getElementById("nombreConductorInput").value = localStorage.getItem("nombre");
 
-    document.getElementById("inspeccionForm").addEventListener("submit", function () {
+    // --- Helpers visuales ---
+    function showFieldError(id, msg) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.style.display = "block";
+      el.textContent = msg;
+      const input = el.previousElementSibling && el.previousElementSibling.tagName === 'INPUT' ? el.previousElementSibling : null;
+      if (input) {
+        input.classList.remove("input-valid");
+        input.classList.add("input-invalid");
+      }
+    }
+    function clearFieldError(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.style.display = "none";
+      el.textContent = "";
+      const input = el.previousElementSibling && el.previousElementSibling.tagName === 'INPUT' ? el.previousElementSibling : null;
+      if (input) {
+        input.classList.remove("input-invalid");
+        input.classList.add("input-valid");
+      }
+    }
+    function clearAllErrors() {
+      ["error_placa","error_proceso","error_marca","error_licencia_venc","error_firma","error_observaciones"].forEach(clearFieldError);
+      const msg = document.getElementById("globalMessage");
+      msg.innerHTML = "";
+    }
+
+    // --- Reglas de validación ---
+    function validatePlacaFormat(value) {
+      if (!value) return false;
+      const v = value.trim().toUpperCase().replace(/[-\s]/g,"");
+      // Colombia: formato común de placas: 3 letras + 3 números (ABC123).
+      return /^[A-Z]{3}\d{3}$/.test(v);
+    }
+
+    function hasSignature() {
+      const data = window.firmaApp?.getDataURL?.() || "";
+      // si el canvas está vacío muchas implementaciones devuelven un PNG con solo header,
+      // here we check that length is > minimal threshold
+      return data && data.length > 2000;
+    }
+
+    function anyAspectMarkedM() {
+      const radios = document.querySelectorAll('[name^="aspecto_"]');
+      // cada aspecto tiene 2 radios; si alguno tiene valor M y está seleccionado -> true
+      const names = new Set(Array.from(radios).map(r => r.name));
+      for (const name of names) {
+        const checked = document.querySelector('[name="'+name+'"]:checked');
+        if (checked && checked.value === "M") return true;
+      }
+      return false;
+    }
+
+    // validación en tiempo real para algunos campos
+    document.getElementById("placa").addEventListener("input", (e) => {
+      const v = e.target.value;
+      if (!v) { clearFieldError("error_placa"); e.target.classList.remove("input-valid"); return; }
+      if (!validatePlacaFormat(v)) showFieldError("error_placa","Formato placa inválido (ej: ABC123).");
+      else clearFieldError("error_placa");
+    });
+
+    document.getElementById("proceso").addEventListener("input", (e) => {
+      if (e.target.value.trim().length < 2) showFieldError("error_proceso","Campo obligatorio.");
+      else clearFieldError("error_proceso");
+    });
+
+    document.getElementById("marca").addEventListener("input", (e) => {
+      if (e.target.value.trim().length < 1) showFieldError("error_marca","Campo obligatorio.");
+      else clearFieldError("error_marca");
+    });
+
+    // --- Submit por fetch (interceptamos) ---
+    document.getElementById("inspeccionForm").addEventListener("submit", async function (ev) {
+      ev.preventDefault();
+      clearAllErrors();
+
+      // recoger datos
+      const form = ev.target;
+      const formData = new FormData(form);
+
+      // armar aspectos JSON
       const aspectos = {};
       const total = document.querySelectorAll('[name^="aspecto_"]').length / 2;
       for (let i = 0; i < total; i++) {
@@ -131,11 +246,110 @@
         for (const r of radios) if (r.checked) val = r.value;
         aspectos[i + 1] = val;
       }
+      formData.set("aspectos", JSON.stringify(aspectos));
 
-      document.getElementById("aspectosInput").value = JSON.stringify(aspectos);
-      document.getElementById("firmaDataInput").value = window.firmaApp?.getDataURL?.() || "";
+      // firma
+      const firmaData = window.firmaApp?.getDataURL?.() || "";
+      formData.set("firma_dataurl", firmaData);
+
+      // VALIDACIONES CLIENTE (las mismas lógicas que backend)
+      let hasError = false;
+
+      // placa
+      const placaVal = formData.get("placa") || "";
+      if (!validatePlacaFormat(placaVal)) { showFieldError("error_placa","Placa inválida (ej: ABC123)."); hasError = true; }
+
+      // campos requeridos mínimos
+      if (!formData.get("proceso") || formData.get("proceso").trim().length < 2) { showFieldError("error_proceso","Proceso obligatorio."); hasError = true; }
+      if (!formData.get("marca") || formData.get("marca").trim().length < 1) { showFieldError("error_marca","Marca obligatoria."); hasError = true; }
+
+      // firma obligatoria
+      if (!hasSignature()) { showFieldError("error_firma", "Firma requerida. Firma con el dedo o mouse y pulsa 'Guardar firma'."); hasError = true; }
+
+      // si algún aspecto es M => observaciones requeridas
+      const observ = (formData.get("observaciones") || "").trim();
+      if (anyAspectMarkedM() && observ.length < 6) { showFieldError("error_observaciones","Si hay algún aspecto 'M' se requiere una observación mínima de 6 caracteres."); hasError = true; }
+
+      if (hasError) {
+        const gm = document.getElementById("globalMessage");
+        gm.innerHTML = '<div class="error-msg">Corrige los campos en rojo y vuelve a intentar.</div>';
+        return;
+      }
+
+      // enviar al backend por fetch (esperamos PDF o JSON error)
+      const submitBtn = document.getElementById("submitBtn");
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Generando...";
+
+      try {
+        const resp = await fetch(form.action, {
+          method: "POST",
+          body: formData,
+          headers: {
+            // no incluyo Accept for pdf because server returns application/pdf
+          }
+        });
+
+        if (!resp.ok) {
+          // intentar parsear JSON con errores
+          const json = await resp.json().catch(()=>null);
+          if (json && json.errors) {
+            // mostrar errores individuales si vienen
+            for (const [key,msg] of Object.entries(json.errors)) {
+              // fijarse si existe un span con id "error_{key}"
+              const id = `error_${key}`;
+              const el = document.getElementById(id);
+              if (el) showFieldError(id, msg);
+            }
+            const gm = document.getElementById("globalMessage");
+            gm.innerHTML = '<div class="error-msg">Corrige los errores y vuelve a intentar.</div>';
+          } else {
+            const gm = document.getElementById("globalMessage");
+            gm.innerHTML = '<div class="error-msg">Error del servidor. Revisa la consola.</div>';
+            console.error("Server error", json || await resp.text());
+          }
+          return;
+        }
+
+        // Si está OK y es PDF -> descargar blob
+        const contentType = resp.headers.get("content-type") || "";
+        if (contentType.includes("application/pdf")) {
+          const blob = await resp.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          // intentar obtener filename desde header
+          const cd = resp.headers.get("content-disposition") || "";
+          let filename = "inspeccion.pdf";
+          const m = cd.match(/filename="?(.+)"?/);
+          if (m) filename = m[1];
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+
+          // limpiar form (si quieres)
+          form.reset();
+          document.getElementById("firmaPreview").innerHTML = "";
+          window.firmaApp.refresh?.();
+        } else {
+          // otro tipo de respuesta
+          const text = await resp.text();
+          console.log("Respuesta inesperada:", text);
+          const gm = document.getElementById("globalMessage");
+          gm.innerHTML = '<div class="error-msg">Respuesta inesperada del servidor.</div>';
+        }
+
+      } catch (err) {
+        console.error(err);
+        const gm = document.getElementById("globalMessage");
+        gm.innerHTML = '<div class="error-msg">Error de red. Reintenta.</div>';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Enviar y generar PDF";
+      }
     });
   </script>
 </body>
 </html>
-
