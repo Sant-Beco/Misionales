@@ -5,15 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Inspección Preoperacional - Misionales</title>
   <link rel="stylesheet" href="/static/css/style.css?v=1">
+
   <style>
-    /* pequeño ajuste para mensajes de error inline */
     .error-text-inline { color: var(--rojo-error); font-size: 0.85rem; margin-top:6px; display:block; }
     .hint-text { color: #666; font-size:0.82rem; margin-top:4px; }
   </style>
 </head>
+
 <body>
   <div id="formBox" class="form-card">
     <h1 class="form-title">INSPECCIÓN PRE OPERACIONAL MOTOCICLETA</h1>
+
     <div class="form-meta">
       Código: <strong>FO-SST-063</strong> — Fecha: <strong>{{ fecha }}</strong> — Versión: <strong>01</strong>
     </div>
@@ -22,10 +24,12 @@
       <input type="hidden" id="usuarioIdInput" name="usuario_id">
       <input type="hidden" id="nombreConductorInput" name="nombre_conductor">
 
+      <!-- DATOS VEHÍCULO -->
       <div class="section-title">Datos del vehículo</div>
+
       <div class="grid-2">
         <div class="field">
-          <label>Placa <span class="hint-text">(ej: ABC123)</span></label>
+          <label>Placa <span class="hint-text">(ej: GSZ34F)</span></label>
           <input id="placa" name="placa" class="input" autocomplete="off">
           <span id="error_placa" class="error-text-inline" style="display:none"></span>
         </div>
@@ -52,12 +56,15 @@
       </div>
 
       <div class="separator"></div>
+
+      <!-- DOCUMENTOS -->
       <div class="section-title">Revisión de Documentos</div>
 
       <div class="grid-2">
         <div class="field">
           <label>Licencia No.</label><input id="licencia_num" name="licencia_num" class="input">
-          <label class="mt">Fecha de vencimiento</label><input id="licencia_venc" name="licencia_venc" type="date" class="input">
+          <label class="mt">Fecha de vencimiento</label>
+          <input id="licencia_venc" name="licencia_venc" type="date" class="input">
           <span id="error_licencia_venc" class="error-text-inline" style="display:none"></span>
         </div>
 
@@ -76,6 +83,8 @@
       </div>
 
       <div class="separator"></div>
+
+      <!-- ASPECTOS -->
       <div class="section-title">Aspectos a Revisar (B / M)</div>
 
       <div id="aspectosContainer" class="aspectos-list">
@@ -107,6 +116,8 @@
       </div>
 
       <div class="separator"></div>
+
+      <!-- CONDICIONES ÓPTIMAS -->
       <div class="section-title">¿El vehículo está en óptimas condiciones?</div>
       <div class="switch-wrapper mt-small">
         <label class="switch-group"><input type="radio" name="condiciones_optimas" value="SI" checked><span class="switch-btn">Sí</span></label>
@@ -114,6 +125,8 @@
       </div>
 
       <div class="separator"></div>
+
+      <!-- FIRMA -->
       <div class="section-title">Firma del conductor</div>
       <p class="text-muted">Firme con el dedo o mouse.</p>
 
@@ -123,6 +136,7 @@
           <button type="button" id="limpiarBtn" class="btn-secondary">Limpiar</button>
           <button type="button" id="guardarBtn" class="btn-primary">Guardar firma</button>
         </div>
+
         <div id="firmaPreview" class="mt-small"></div>
         <span id="error_firma" class="error-text-inline" style="display:none"></span>
       </div>
@@ -146,210 +160,156 @@
   <script src="/static/js/firma.js"></script>
 
   <script>
-    // --- Inicialización de datos usuario ---
+    /* === Inicialización === */
     const token = localStorage.getItem("token");
-    if (!token) {
-      // si no hay token, te mando a /login
-      window.location.href = "/login";
-    }
+    if (!token) window.location.href = "/login";
+
     document.getElementById("usuarioIdInput").value = localStorage.getItem("usuario_id");
     document.getElementById("nombreConductorInput").value = localStorage.getItem("nombre");
 
-    // --- Helpers visuales ---
+    /* === Helper mensajes === */
     function showFieldError(id, msg) {
       const el = document.getElementById(id);
       if (!el) return;
       el.style.display = "block";
       el.textContent = msg;
-      const input = el.previousElementSibling && el.previousElementSibling.tagName === 'INPUT' ? el.previousElementSibling : null;
-      if (input) {
-        input.classList.remove("input-valid");
-        input.classList.add("input-invalid");
-      }
+      const input = el.previousElementSibling?.tagName === 'INPUT' ? el.previousElementSibling : null;
+      if (input) { input.classList.add("input-invalid"); input.classList.remove("input-valid"); }
     }
+
     function clearFieldError(id) {
       const el = document.getElementById(id);
       if (!el) return;
       el.style.display = "none";
       el.textContent = "";
-      const input = el.previousElementSibling && el.previousElementSibling.tagName === 'INPUT' ? el.previousElementSibling : null;
-      if (input) {
-        input.classList.remove("input-invalid");
-        input.classList.add("input-valid");
-      }
+      const input = el.previousElementSibling?.tagName === 'INPUT' ? el.previousElementSibling : null;
+      if (input) { input.classList.remove("input-invalid"); input.classList.add("input-valid"); }
     }
+
     function clearAllErrors() {
-      ["error_placa","error_proceso","error_marca","error_licencia_venc","error_firma","error_observaciones"].forEach(clearFieldError);
-      const msg = document.getElementById("globalMessage");
-      msg.innerHTML = "";
+      ["error_placa","error_proceso","error_marca","error_firma","error_observaciones"]
+        .forEach(clearFieldError);
+      document.getElementById("globalMessage").innerHTML = "";
     }
 
-    // --- Reglas de validación ---
-    function validatePlacaFormat(value) {
-      if (!value) return false;
-      const v = value.trim().toUpperCase().replace(/[-\s]/g,"");
-      // Colombia: formato común de placas: 3 letras + 3 números (ABC123).
-      return /^[A-Z]{3}\d{3}$/.test(v);
+    /* === VALIDACIÓN LAX DE PLACA (no estricta) === */
+    function validatePlacaFlexible(v) {
+      if (!v) return false;
+      v = v.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+      return v.length >= 5 && v.length <= 7;
     }
 
-    function hasSignature() {
-      const data = window.firmaApp?.getDataURL?.() || "";
-      // si el canvas está vacío muchas implementaciones devuelven un PNG con solo header,
-      // here we check that length is > minimal threshold
-      return data && data.length > 2000;
-    }
-
-    function anyAspectMarkedM() {
-      const radios = document.querySelectorAll('[name^="aspecto_"]');
-      // cada aspecto tiene 2 radios; si alguno tiene valor M y está seleccionado -> true
-      const names = new Set(Array.from(radios).map(r => r.name));
-      for (const name of names) {
-        const checked = document.querySelector('[name="'+name+'"]:checked');
-        if (checked && checked.value === "M") return true;
-      }
-      return false;
-    }
-
-    // validación en tiempo real para algunos campos
     document.getElementById("placa").addEventListener("input", (e) => {
       const v = e.target.value;
-      if (!v) { clearFieldError("error_placa"); e.target.classList.remove("input-valid"); return; }
-      if (!validatePlacaFormat(v)) showFieldError("error_placa","Formato placa inválido (ej: ABC123).");
+      if (!validatePlacaFlexible(v))
+        showFieldError("error_placa", "Placa inválida. Solo letras y números.");
       else clearFieldError("error_placa");
     });
 
-    document.getElementById("proceso").addEventListener("input", (e) => {
-      if (e.target.value.trim().length < 2) showFieldError("error_proceso","Campo obligatorio.");
-      else clearFieldError("error_proceso");
-    });
-
-    document.getElementById("marca").addEventListener("input", (e) => {
-      if (e.target.value.trim().length < 1) showFieldError("error_marca","Campo obligatorio.");
-      else clearFieldError("error_marca");
-    });
-
-    // --- Submit por fetch (interceptamos) ---
-    document.getElementById("inspeccionForm").addEventListener("submit", async function (ev) {
+    /* === Submit === */
+    document.getElementById("inspeccionForm").addEventListener("submit", async (ev) => {
       ev.preventDefault();
       clearAllErrors();
 
-      // recoger datos
       const form = ev.target;
       const formData = new FormData(form);
 
-      // armar aspectos JSON
+      // Aspectos JSON
       const aspectos = {};
       const total = document.querySelectorAll('[name^="aspecto_"]').length / 2;
       for (let i = 0; i < total; i++) {
         const radios = document.getElementsByName("aspecto_" + i);
-        let val = "B";
-        for (const r of radios) if (r.checked) val = r.value;
-        aspectos[i + 1] = val;
+        for (const r of radios) if (r.checked) aspectos[i + 1] = r.value;
       }
       formData.set("aspectos", JSON.stringify(aspectos));
 
-      // firma
+      // Firma
       const firmaData = window.firmaApp?.getDataURL?.() || "";
       formData.set("firma_dataurl", firmaData);
 
-      // VALIDACIONES CLIENTE (las mismas lógicas que backend)
+      // Validaciones esenciales
       let hasError = false;
 
-      // placa
-      const placaVal = formData.get("placa") || "";
-      if (!validatePlacaFormat(placaVal)) { showFieldError("error_placa","Placa inválida (ej: ABC123)."); hasError = true; }
+      if (!validatePlacaFlexible(formData.get("placa")))
+        { showFieldError("error_placa","Placa inválida."); hasError = true; }
 
-      // campos requeridos mínimos
-      if (!formData.get("proceso") || formData.get("proceso").trim().length < 2) { showFieldError("error_proceso","Proceso obligatorio."); hasError = true; }
-      if (!formData.get("marca") || formData.get("marca").trim().length < 1) { showFieldError("error_marca","Marca obligatoria."); hasError = true; }
+      if (!formData.get("proceso")?.trim())
+        { showFieldError("error_proceso","Proceso requerido."); hasError = true; }
 
-      // firma obligatoria
-      if (!hasSignature()) { showFieldError("error_firma", "Firma requerida. Firma con el dedo o mouse y pulsa 'Guardar firma'."); hasError = true; }
+      if (!formData.get("marca")?.trim())
+        { showFieldError("error_marca","Marca requerida."); hasError = true; }
 
-      // si algún aspecto es M => observaciones requeridas
-      const observ = (formData.get("observaciones") || "").trim();
-      if (anyAspectMarkedM() && observ.length < 6) { showFieldError("error_observaciones","Si hay algún aspecto 'M' se requiere una observación mínima de 6 caracteres."); hasError = true; }
+      if (firmaData.length < 1500)
+        { showFieldError("error_firma","Debes firmar antes de enviar."); hasError = true; }
+
+      const anyM = Object.values(aspectos).includes("M");
+      if (anyM && formData.get("observaciones").trim().length < 6)
+        { showFieldError("error_observaciones","Observación requerida si hay M."); hasError = true; }
 
       if (hasError) {
-        const gm = document.getElementById("globalMessage");
-        gm.innerHTML = '<div class="error-msg">Corrige los campos en rojo y vuelve a intentar.</div>';
+        document.getElementById("globalMessage").innerHTML =
+          '<div class="error-msg">Corrige los campos marcados.</div>';
         return;
       }
 
-      // enviar al backend por fetch (esperamos PDF o JSON error)
-      const submitBtn = document.getElementById("submitBtn");
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Generando...";
+      // Submit
+      const btn = document.getElementById("submitBtn");
+      btn.disabled = true;
+      btn.textContent = "Generando...";
 
       try {
-        const resp = await fetch(form.action, {
-          method: "POST",
-          body: formData,
-          headers: {
-            // no incluyo Accept for pdf because server returns application/pdf
-          }
-        });
+        const resp = await fetch(form.action, { method:"POST", body:formData });
 
         if (!resp.ok) {
-          // intentar parsear JSON con errores
-          const json = await resp.json().catch(()=>null);
-          if (json && json.errors) {
-            // mostrar errores individuales si vienen
-            for (const [key,msg] of Object.entries(json.errors)) {
-              // fijarse si existe un span con id "error_{key}"
-              const id = `error_${key}`;
-              const el = document.getElementById(id);
-              if (el) showFieldError(id, msg);
-            }
-            const gm = document.getElementById("globalMessage");
-            gm.innerHTML = '<div class="error-msg">Corrige los errores y vuelve a intentar.</div>';
-          } else {
-            const gm = document.getElementById("globalMessage");
-            gm.innerHTML = '<div class="error-msg">Error del servidor. Revisa la consola.</div>';
-            console.error("Server error", json || await resp.text());
-          }
+          const msg = await resp.text();
+          document.getElementById("globalMessage").innerHTML =
+            '<div class="error-msg">Error del servidor.</div>';
+          console.error(msg);
           return;
         }
 
-        // Si está OK y es PDF -> descargar blob
         const contentType = resp.headers.get("content-type") || "";
         if (contentType.includes("application/pdf")) {
           const blob = await resp.blob();
           const url = URL.createObjectURL(blob);
           const a = document.createElement("a");
-          a.href = url;
-          // intentar obtener filename desde header
-          const cd = resp.headers.get("content-disposition") || "";
+
           let filename = "inspeccion.pdf";
-          const m = cd.match(/filename="?(.+)"?/);
+
+          const cd = resp.headers.get("content-disposition") || "";
+          const m = cd.match(/filename="?(.+?)"?$/);
           if (m) filename = m[1];
+
+          /* 🔥 FIX .pdf_ */
+          filename = filename.replace(/\.pdf_?$/, ".pdf");
+          if (!filename.toLowerCase().endsWith(".pdf"))
+            filename += ".pdf";
+
+          a.href = url;
           a.download = filename;
           document.body.appendChild(a);
           a.click();
           a.remove();
           URL.revokeObjectURL(url);
 
-          // limpiar form (si quieres)
           form.reset();
+          window.firmaApp?.refresh?.();
           document.getElementById("firmaPreview").innerHTML = "";
-          window.firmaApp.refresh?.();
-        } else {
-          // otro tipo de respuesta
-          const text = await resp.text();
-          console.log("Respuesta inesperada:", text);
-          const gm = document.getElementById("globalMessage");
-          gm.innerHTML = '<div class="error-msg">Respuesta inesperada del servidor.</div>';
         }
 
-      } catch (err) {
-        console.error(err);
-        const gm = document.getElementById("globalMessage");
-        gm.innerHTML = '<div class="error-msg">Error de red. Reintenta.</div>';
+      } catch (e) {
+        console.error(e);
+        document.getElementById("globalMessage").innerHTML =
+          '<div class="error-msg">Error de red.</div>';
+
       } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Enviar y generar PDF";
+        btn.disabled = false;
+        btn.textContent = "Enviar y generar PDF";
       }
+
     });
   </script>
+
 </body>
 </html>
+

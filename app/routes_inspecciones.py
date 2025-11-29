@@ -1,7 +1,7 @@
-# app/routes/routes_inspecciones.py
+# app/routes_inspecciones.py
 
 from fastapi import APIRouter, Form
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 from sqlalchemy.orm import Session
 from app.database import SessionLocal
 from app import models
@@ -10,6 +10,7 @@ from pathlib import Path
 from datetime import datetime
 import base64
 import json
+import mimetypes
 
 router = APIRouter()
 
@@ -25,6 +26,35 @@ LOGO_PATH = Path("app/static/img/incubant.jpg").resolve()
 DELETE_AFTER_CONSOLIDATION = True  # borrar inspecciones al consolidar
 
 
+# ===============================
+#   FIX — RETORNAR PDF CORRECTO
+# ===============================
+
+def safe_return_pdf(path: Path, filename: str):
+    """
+    Retorna un PDF siempre con la extensión correcta,
+    evitando que el navegador renombre como .pdf_ u otros.
+    """
+    path = path.resolve()
+
+    if not path.exists():
+        return Response("PDF no encontrado", status_code=500)
+
+    mime = mimetypes.guess_type(path)[0] or "application/pdf"
+
+    headers = {
+        "Content-Disposition": f'attachment; filename="{filename}"',
+        "Content-Type": mime,
+        "X-Content-Type-Options": "nosniff"
+    }
+
+    return FileResponse(
+        path,
+        media_type=mime,
+        filename=filename,
+        headers=headers
+    )
+
 
 # ===============================
 #   NORMALIZACIÓN DE NOMBRE
@@ -36,7 +66,6 @@ def normalize_name(name: str):
     if len(parts) == 0:
         return ""
     return parts[0].capitalize()
-
 
 
 # ===============================
@@ -76,7 +105,6 @@ def prepare_registro(r):
         r.firma_base64 = None
 
     return r
-
 
 
 # ===============================
@@ -196,19 +224,17 @@ async def submit_inspeccion(
         )
 
         # =======================================
-        # CONSOLIDADO EXACTAMENTE A LOS 15
+        # CONSOLIDADO EXACTAMENTE A 15
         # =======================================
         if total_inspecciones == 15:
-
             registros = (
                 db.query(models.Inspeccion)
                 .filter(models.Inspeccion.usuario_id == usuario_id)
-                .order_by(models.Inspeccion.fecha.desc())   # últimas
+                .order_by(models.Inspeccion.fecha.desc())
                 .limit(15)
                 .all()
             )
 
-            # invertimos para que salgan en orden cronológico
             registros = list(reversed([prepare_registro(r) for r in registros]))
 
             fecha_desde = registros[0].fecha.strftime("%d - %m - %Y")
@@ -233,7 +259,7 @@ async def submit_inspeccion(
                 output_path=str(reporte_path),
             )
 
-            # guardar historial del reporte
+            # GUARDAR HISTORIAL
             reporte = models.ReporteInspeccion(
                 nombre_conductor=nombre_conductor,
                 fecha_reporte=datetime.now(),
@@ -243,7 +269,7 @@ async def submit_inspeccion(
             db.add(reporte)
             db.commit()
 
-            # borrar las inspecciones usadas
+            # BORRAR INSPECCIONES
             if DELETE_AFTER_CONSOLIDATION:
                 for r in registros:
                     if r.firma_file:
@@ -253,20 +279,15 @@ async def submit_inspeccion(
                     db.delete(r)
                 db.commit()
 
-            return FileResponse(
-                reporte_path, media_type="application/pdf", filename=reporte_filename
-            )
+            return safe_return_pdf(reporte_path, reporte_filename)
 
         # =======================================
         # RETORNAR PDF INDIVIDUAL
         # =======================================
-        return FileResponse(
-            pdf_path, media_type="application/pdf", filename=pdf_filename
-        )
+        return safe_return_pdf(pdf_path, pdf_filename)
 
     finally:
         db.close()
-
 
 
 # ===============================
@@ -315,11 +336,7 @@ async def generar_pdf15(nombre_conductor: str):
             output_path=str(pdf_path),
         )
 
-        return FileResponse(pdf_path, media_type="application/pdf", filename=pdf_filename)
+        return safe_return_pdf(pdf_path, pdf_filename)
 
     finally:
         db.close()
-
-
-
-
