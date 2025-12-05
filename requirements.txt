@@ -1,38 +1,37 @@
-fastapi==0.122.0
-uvicorn==0.38.0
+# --- FastAPI + Server ---
+fastapi==0.110.0
+uvicorn[standard]==0.30.1
 
-jinja2==3.1.6
+# --- Templates ---
+jinja2==3.1.3
 
-# Seguridad
-bcrypt==3.2.2
+# --- Seguridad ---
+bcrypt==4.1.2
+passlib==1.7.4
+python-multipart==0.0.20
 
-# SQLAlchemy + DB
-sqlalchemy==2.0.36
-pydantic==2.12.5
-pydantic-core==2.41.5
+# --- Base de datos ---
+sqlalchemy==2.0.29
+pydantic==2.7.1
+pydantic-core==2.18.2
+pymysql==1.1.2
 
-# Generación de PDFs
-weasyprint==66.0
-tinycss2==1.5.1
-cssselect2==0.8.0
-pydyf==0.11.0
-pyphen==0.17.2
-fonttools==4.60.1
-brotli==1.2.0
-zopfli==0.4.0
+# --- Utilidades ---
+python-dotenv==1.0.1
+typing-extensions==4.10.0
+annotated-types==0.6.0
 
-# Utilidades
-typing-extensions==4.15.0
-typing-inspection==0.4.2
-annotated-doc==0.0.4
-annotated-types==0.7.0
+# --- PDF / WeasyPrint (100% compatibles con py 3.11)---
+weasyprint==62.3
+tinycss2==1.3.0
+cssselect2==0.7.0
+pydyf==0.10.0
+pyphen==0.14.0
+fonttools==4.49.0
+brotli==1.1.0
+zopfli==0.2.2
+html5lib==1.1
 
-# Necesarios para CFFI
-cffi==2.0.0
-pycparser==2.23
-
-# Para manejar HTML5
-tinyhtml5==2.0.0
-
-# WeasyPrint en Windows requiere esto instalado externamente:
-# GTK 3 Runtime (NO va en requirements, se instala por MSI).
+# --- CFFI (bcrypt dependency) ---
+cffi==1.16.0
+pycparser==2.22

@@ -1,0 +1,80 @@
+# ==============================
+#        PYTHON
+# ==============================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.pytest_cache/
+*.sqlite3
+*.db
+
+# ==============================
+#   ENTORNOS VIRTUALES
+# ==============================
+venv/
+.env/
+env/
+ENV/
+
+# ==============================
+#      CONFIGURACIÓN
+# ==============================
+.env                  # Archivo de variables de entorno (NO subir)
+*.ini
+*.cfg
+
+# ==============================
+#    FASTAPI / UVICORN
+# ==============================
+*.log
+
+# ==============================
+#    OUTPUT DEL PROYECTO
+# ==============================
+app/data/generated_pdfs/
+*.pdf                  # Opcional: ignora PDFs generados
+
+# ==============================
+#     ARCHIVOS TEMPORALES
+# ==============================
+*.tmp
+*.temp
+Thumbs.db
+.DS_Store
+*.bak
+*.old
+
+# ==============================
+#       VSCODE / EDITORES
+# ==============================
+.vscode/
+.history/
+*.code-workspace
+
+# ==============================
+#    PYINSTALLER / BUILDS
+# ==============================
+build/
+dist/
+*.spec
+
+# ==============================
+#      ANACONDA (Opcional)
+# ==============================
+.conda/
+.conda_env/
+
+# ==============================
+#      NODE (si aplica)
+# ==============================
+node_modules/
+
+# ==============================
+#  ONEDRIVE WINDOWS SHADOW FILES
+# ==============================
+*.lnk
+~$*
+*_conflict*
+* - Copy.*
