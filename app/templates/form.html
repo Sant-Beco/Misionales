@@ -21,294 +21,413 @@
     </div>
 
     <form id="inspeccionForm" method="post" action="/inspecciones/submit" novalidate>
-      <input type="hidden" id="usuarioIdInput" name="usuario_id">
-      <input type="hidden" id="nombreConductorInput" name="nombre_conductor">
+  <input type="hidden" id="usuarioIdInput" name="usuario_id">
+  <input type="hidden" id="nombreConductorInput" name="nombre_conductor">
 
-      <!-- DATOS VEHÍCULO -->
-      <div class="section-title">Datos del vehículo</div>
+  <!-- DATOS VEHÍCULO -->
+  <div class="section-title">Datos del vehículo</div>
 
-      <div class="grid-2">
-        <div class="field">
-          <label>Placa <span class="hint-text">(ej: GSZ34F)</span></label>
-          <input id="placa" name="placa" class="input" autocomplete="off">
-          <span id="error_placa" class="error-text-inline" style="display:none"></span>
-        </div>
+  <div class="grid-2">
 
-        <div class="field">
-          <label>Proceso</label>
-          <input id="proceso" name="proceso" class="input">
-          <span id="error_proceso" class="error-text-inline" style="display:none"></span>
-        </div>
+    <!-- Placa -->
+    <div class="field">
+      <label>Placa <span class="hint-text">(ej: GSZ34F)</span></label>
+      <input id="placa" name="placa" class="input" autocomplete="off">
+      <span id="error_placa" class="error-text-inline" style="display:none"></span>
+    </div>
 
-        <div class="field"><label>Desde</label><input id="desde" name="desde" class="input"></div>
-        <div class="field"><label>Hasta</label><input id="hasta" name="hasta" class="input"></div>
+    <!-- Proceso -->
+    <div class="field">
+      <label>Proceso</label>
+      <select id="proceso" name="proceso" class="input">
+        <option value="">Seleccione...</option>
+        <option value="Traslado">Traslado</option>
+        <option value="Mandado">Mandado</option>
+        <option value="Actividad misional">Actividad misional</option>
+      </select>
+      <span id="error_proceso" class="error-text-inline" style="display:none"></span>
+    </div>
 
-        <div class="field">
-          <label>Marca</label>
-          <input id="marca" name="marca" class="input">
-          <span id="error_marca" class="error-text-inline" style="display:none"></span>
-        </div>
+    <!-- Desde -->
+    <div class="field">
+      <label>Desde</label>
+      <select id="desde" name="desde" class="input">
+        <option value="">Seleccione...</option>
+        <option value="La Esperanza">La Esperanza</option>
+        <option value="La Fe">La Fe</option>
+        <option value="La Planta">La Planta</option>
+        <option value="Municipio">Municipio</option>
+      </select>
+      <span id="error_desde" class="error-text-inline" style="display:none"></span>
+    </div>
 
-        <div class="field"><label>Gasolina</label><input id="gasolina" name="gasolina" class="input"></div>
-        <div class="field"><label>Modelo</label><input id="modelo" name="modelo" class="input"></div>
-        <div class="field"><label>Motor</label><input id="motor" name="motor" class="input"></div>
-        <div class="field"><label>Línea</label><input id="linea" name="linea" class="input"></div>
+    <!-- Hasta -->
+    <div class="field">
+      <label>Hasta</label>
+      <select id="hasta" name="hasta" class="input">
+        <option value="">Seleccione...</option>
+        <option value="La Esperanza">La Esperanza</option>
+        <option value="La Fe">La Fe</option>
+        <option value="La Planta">La Planta</option>
+        <option value="Municipio">Municipio</option>
+      </select>
+      <span id="error_hasta" class="error-text-inline" style="display:none"></span>
+    </div>
+
+    <!-- Marca -->
+    <div class="field">
+      <label>Marca</label>
+      <input id="marca" name="marca" class="input">
+      <span id="error_marca" class="error-text-inline" style="display:none"></span>
+    </div>
+
+    <!-- Gasolina -->
+    <div class="field">
+      <label>Gasolina</label>
+      <input id="gasolina" name="gasolina" class="input">
+      <span id="error_gasolina" class="error-text-inline" style="display:none"></span>
+    </div>
+
+    <!-- Modelo -->
+    <div class="field">
+      <label>Modelo</label>
+      <input id="modelo" name="modelo" class="input">
+      <span id="error_modelo" class="error-text-inline" style="display:none"></span>
+    </div>
+
+    <!-- Motor -->
+    <div class="field">
+      <label>Motor</label>
+      <input id="motor" name="motor" class="input">
+      <span id="error_motor" class="error-text-inline" style="display:none"></span>
+    </div>
+
+    <!-- Línea -->
+    <div class="field">
+      <label>Línea</label>
+      <input id="linea" name="linea" class="input">
+      <span id="error_linea" class="error-text-inline" style="display:none"></span>
+    </div>
+
+  </div>
+
+  <div class="separator"></div>
+
+  <!-- DOCUMENTOS -->
+  <div class="section-title">Revisión de Documentos</div>
+
+  <div class="grid-2">
+
+    <!-- Licencia -->
+    <div class="field">
+      <label>Licencia No.</label>
+      <input id="licencia_num" name="licencia_num" class="input">
+      <span id="error_licencianum" class="error-text-inline" style="display:none"></span>
+
+      <label class="mt">Fecha de vencimiento</label>
+      <input id="licencia_venc" name="licencia_venc" type="date" class="input">
+      <span id="error_licencia_venc" class="error-text-inline" style="display:none"></span>
+    </div>
+
+    <!-- Tarjeta Propiedad & SOAT -->
+    <div class="field">
+      <label>Tarjeta Propiedad</label>
+      <input id="porte_propiedad" name="porte_propiedad" class="input">
+      <span id="error_porte" class="error-text-inline" style="display:none"></span>
+
+      <label class="mt">SOAT</label>
+      <input id="soat" name="soat" class="input">
+      <span id="error_soat" class="error-text-inline" style="display:none"></span>
+    </div>
+
+    <!-- Emisión -->
+    <div class="field">
+      <label>Emisión de Gases</label>
+      <input id="certificado_emision" name="certificado_emision" class="input">
+      <span id="error_emision" class="error-text-inline" style="display:none"></span>
+    </div>
+
+    <!-- Póliza -->
+    <div class="field">
+      <label>Póliza Seguro</label>
+      <input id="poliza_seguro" name="poliza_seguro" class="input">
+      <span id="error_poliza" class="error-text-inline" style="display:none"></span>
+    </div>
+
+  </div>
+
+  <div class="separator"></div>
+
+  <!-- ASPECTOS -->
+  <div class="section-title">Aspectos a Revisar (B / M)</div>
+
+  <div id="aspectosContainer" class="aspectos-list">
+    {% set aspectos_lista = [
+      "Estado de llantas y presión de aire",
+      "Encendido eléctrico y de crank",
+      "Luces y pito",
+      "Espejos retrovisores",
+      "Manijas de freno y clutch",
+      "Sistema de frenos",
+      "Estado de freno de disco",
+      "Nivel de líquido de freno",
+      "Revisión sistema tablero",
+      "Fugas de combustible y/o aceites",
+      "Kit de arrastre",
+      "Estado de suspensión",
+      "Nivel de aceites"
+    ] %}
+
+    {% for aspecto in aspectos_lista %}
+    <div class="aspecto-item">
+      <div class="aspecto-text">{{ loop.index }}. {{ aspecto }}</div>
+      <div class="switch-wrapper">
+        <label class="switch-group"><input type="radio" name="aspecto_{{ loop.index0 }}" value="B" checked><span class="switch-btn">B</span></label>
+        <label class="switch-group malo"><input type="radio" name="aspecto_{{ loop.index0 }}" value="M"><span class="switch-btn">M</span></label>
       </div>
+    </div>
+    {% endfor %}
+  </div>
 
-      <div class="separator"></div>
+  <div class="separator"></div>
 
-      <!-- DOCUMENTOS -->
-      <div class="section-title">Revisión de Documentos</div>
+  <!-- CONDICIONES ÓPTIMAS -->
+  <div class="section-title">¿El vehículo está en óptimas condiciones?</div>
+  <div class="switch-wrapper mt-small">
+    <label class="switch-group"><input type="radio" name="condiciones_optimas" value="SI" checked><span class="switch-btn">Sí</span></label>
+    <label class="switch-group malo"><input type="radio" name="condiciones_optimas" value="NO"><span class="switch-btn">No</span></label>
+  </div>
 
-      <div class="grid-2">
-        <div class="field">
-          <label>Licencia No.</label><input id="licencia_num" name="licencia_num" class="input">
-          <label class="mt">Fecha de vencimiento</label>
-          <input id="licencia_venc" name="licencia_venc" type="date" class="input">
-          <span id="error_licencia_venc" class="error-text-inline" style="display:none"></span>
-        </div>
+  <div class="separator"></div>
 
-        <div class="field">
-          <label>Tarjeta Propiedad</label><input id="porte_propiedad" name="porte_propiedad" class="input">
-          <label class="mt">SOAT</label><input id="soat" name="soat" class="input">
-        </div>
+  <!-- FIRMA -->
+  <div class="section-title">Firma del conductor</div>
+  <p class="text-muted">Firme con el dedo o mouse.</p>
 
-        <div class="field">
-          <label>Emisión de Gases</label><input id="certificado_emision" name="certificado_emision" class="input">
-        </div>
+  <div class="firma-box">
+    <canvas id="firmaCanvas"></canvas>
+    <div class="firma-actions">
+      <button type="button" id="limpiarBtn" class="btn-secondary">Limpiar</button>
+      <button type="button" id="guardarBtn" class="btn-primary">Guardar firma</button>
+    </div>
 
-        <div class="field">
-          <label>Póliza Seguro</label><input id="poliza_seguro" name="poliza_seguro" class="input">
-        </div>
-      </div>
+    <div id="firmaPreview" class="mt-small"></div>
+    <span id="error_firma" class="error-text-inline" style="display:none"></span>
+  </div>
 
-      <div class="separator"></div>
+  <!-- Observaciones -->
+  <div class="section-title">Observaciones</div>
+  <textarea id="observaciones" name="observaciones" class="input" rows="3"></textarea>
+  <span id="error_observaciones" class="error-text-inline" style="display:none"></span>
 
-      <!-- ASPECTOS -->
-      <div class="section-title">Aspectos a Revisar (B / M)</div>
+  <input type="hidden" name="aspectos" id="aspectosInput">
+  <input type="hidden" name="firma_dataurl" id="firmaDataInput">
 
-      <div id="aspectosContainer" class="aspectos-list">
-        {% set aspectos_lista = [
-          "Estado de llantas y presión de aire",
-          "Encendido eléctrico y de crank",
-          "Luces y pito",
-          "Espejos retrovisores",
-          "Manijas de freno y clutch",
-          "Sistema de frenos",
-          "Estado de freno de disco",
-          "Nivel de líquido de freno",
-          "Revisión sistema tablero",
-          "Fugas de combustible y/o aceites",
-          "Kit de arrastre",
-          "Estado de suspensión",
-          "Nivel de aceites"
-        ] %}
+  <div class="button-group">
+    <button id="submitBtn" type="submit" class="btn-primary">Enviar y generar PDF</button>
+    <button type="reset" id="resetBtn" class="btn-secondary">Limpiar formulario</button>
+  </div>
 
-        {% for aspecto in aspectos_lista %}
-        <div class="aspecto-item">
-          <div class="aspecto-text">{{ loop.index }}. {{ aspecto }}</div>
-          <div class="switch-wrapper">
-            <label class="switch-group"><input type="radio" name="aspecto_{{ loop.index0 }}" value="B" checked><span class="switch-btn">B</span></label>
-            <label class="switch-group malo"><input type="radio" name="aspecto_{{ loop.index0 }}" value="M"><span class="switch-btn">M</span></label>
-          </div>
-        </div>
-        {% endfor %}
-      </div>
+  <div id="globalMessage" style="margin-top:12px;"></div>
+</form>
 
-      <div class="separator"></div>
-
-      <!-- CONDICIONES ÓPTIMAS -->
-      <div class="section-title">¿El vehículo está en óptimas condiciones?</div>
-      <div class="switch-wrapper mt-small">
-        <label class="switch-group"><input type="radio" name="condiciones_optimas" value="SI" checked><span class="switch-btn">Sí</span></label>
-        <label class="switch-group malo"><input type="radio" name="condiciones_optimas" value="NO"><span class="switch-btn">No</span></label>
-      </div>
-
-      <div class="separator"></div>
-
-      <!-- FIRMA -->
-      <div class="section-title">Firma del conductor</div>
-      <p class="text-muted">Firme con el dedo o mouse.</p>
-
-      <div class="firma-box">
-        <canvas id="firmaCanvas"></canvas>
-        <div class="firma-actions">
-          <button type="button" id="limpiarBtn" class="btn-secondary">Limpiar</button>
-          <button type="button" id="guardarBtn" class="btn-primary">Guardar firma</button>
-        </div>
-
-        <div id="firmaPreview" class="mt-small"></div>
-        <span id="error_firma" class="error-text-inline" style="display:none"></span>
-      </div>
-
-      <div class="section-title">Observaciones</div>
-      <textarea id="observaciones" name="observaciones" class="input" rows="3"></textarea>
-      <span id="error_observaciones" class="error-text-inline" style="display:none"></span>
-
-      <input type="hidden" name="aspectos" id="aspectosInput">
-      <input type="hidden" name="firma_dataurl" id="firmaDataInput">
-
-      <div class="button-group">
-        <button id="submitBtn" type="submit" class="btn-primary">Enviar y generar PDF</button>
-        <button type="reset" id="resetBtn" class="btn-secondary">Limpiar formulario</button>
-      </div>
-
-      <div id="globalMessage" style="margin-top:12px;"></div>
-    </form>
   </div>
 
   <script src="/static/js/firma.js"></script>
 
-  <script>
-    /* === Inicialización === */
-    const token = localStorage.getItem("token");
-    if (!token) window.location.href = "/login";
+<script>
+/* === Inicialización === */
+const token = localStorage.getItem("token");
+if (!token) window.location.href = "/login";
 
-    document.getElementById("usuarioIdInput").value = localStorage.getItem("usuario_id");
-    document.getElementById("nombreConductorInput").value = localStorage.getItem("nombre");
+document.getElementById("usuarioIdInput").value = localStorage.getItem("usuario_id");
+document.getElementById("nombreConductorInput").value = localStorage.getItem("nombre");
 
-    /* === Helper mensajes === */
-    function showFieldError(id, msg) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.style.display = "block";
-      el.textContent = msg;
-      const input = el.previousElementSibling?.tagName === 'INPUT' ? el.previousElementSibling : null;
-      if (input) { input.classList.add("input-invalid"); input.classList.remove("input-valid"); }
+/* === Helpers mensajes === */
+function showFieldError(id, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  el.style.display = "block";
+  el.textContent = msg;
+
+  // Buscar input/select previo
+  const field = el.previousElementSibling;
+  if (field && (field.tagName === "INPUT" || field.tagName === "SELECT")) {
+    field.classList.add("input-invalid");
+    field.classList.remove("input-valid");
+  }
+}
+
+function clearFieldError(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  el.style.display = "none";
+  el.textContent = "";
+
+  const field = el.previousElementSibling;
+  if (field && (field.tagName === "INPUT" || field.tagName === "SELECT")) {
+    field.classList.remove("input-invalid");
+    field.classList.add("input-valid");
+  }
+}
+
+function clearAllErrors() {
+  [
+    "error_placa","error_proceso","error_desde","error_hasta",
+    "error_marca","error_gasolina","error_modelo","error_motor",
+    "error_linea","error_licencianum","error_licencia_venc",
+    "error_porte","error_soat","error_emision","error_poliza",
+    "error_firma","error_observaciones"
+  ].forEach(clearFieldError);
+
+  document.getElementById("globalMessage").innerHTML = "";
+}
+
+/* === Validación: PLACA === */
+function validatePlacaFlexible(v) {
+  if (!v) return false;
+  v = v.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+  return v.length >= 5 && v.length <= 7;
+}
+
+document.getElementById("placa").addEventListener("input", (e) => {
+  const v = e.target.value;
+  if (!validatePlacaFlexible(v))
+    showFieldError("error_placa", "Placa inválida. Solo letras y números.");
+  else clearFieldError("error_placa");
+});
+
+/* === SUBMIT === */
+document.getElementById("inspeccionForm").addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  clearAllErrors();
+
+  const form = ev.target;
+  const formData = new FormData(form);
+
+  /* === ASPECTOS JSON === */
+  const aspectos = {};
+  const total = document.querySelectorAll('[name^="aspecto_"]').length / 2;
+  for (let i = 0; i < total; i++) {
+    const radios = document.getElementsByName("aspecto_" + i);
+    for (const r of radios) if (r.checked) aspectos[i + 1] = r.value;
+  }
+  formData.set("aspectos", JSON.stringify(aspectos));
+
+  /* === FIRMA === */
+  const firmaData = window.firmaApp?.getDataURL?.() || "";
+  formData.set("firma_dataurl", firmaData);
+
+  /* === VALIDACIONES === */
+  let hasError = false;
+
+  const requiredFields = [
+    ["placa",            validatePlacaFlexible, "Placa inválida"],
+    ["proceso",          (v)=>v.trim() !== "", "Seleccione un proceso"],
+    ["desde",            (v)=>v.trim() !== "", "Seleccione origen"],
+    ["hasta",            (v)=>v.trim() !== "", "Seleccione destino"],
+    ["marca",            (v)=>v.trim().length >= 2, "Marca requerida (mínimo 2 letras)"],
+    ["gasolina",         (v)=>v.trim() !== "", "Campo requerido"],
+    ["modelo",           (v)=>/^\d{4}$/.test(v), "Modelo inválido (use un año)"],
+    ["motor",            (v)=>/^\d{2,4}$/.test(v), "Motor inválido"],
+    ["linea",            (v)=>v.trim() !== "", "Campo requerido"],
+    ["licencia_num",     (v)=>v.trim().length >= 6, "Número de licencia inválido"],
+    ["licencia_venc",    (v)=>v.trim() !== "", "Ingrese fecha de vencimiento"],
+    ["porte_propiedad",  (v)=>v.trim() !== "", "Campo requerido"],
+    ["soat",             (v)=>v.trim() !== "", "Campo requerido"],
+    ["certificado_emision",(v)=>v.trim() !== "", "Campo requerido"],
+    ["poliza_seguro",    (v)=>v.trim() !== "", "Campo requerido"]
+  ];
+
+  for (const [name, validator, msg] of requiredFields) {
+    const val = formData.get(name);
+
+    const errorId = "error_" + name
+      .replace("licencia_num","licencianum")
+      .replace("porte_propiedad","porte")
+      .replace("certificado_emision","emision")
+      .replace("poliza_seguro","poliza");
+
+    if (!validator(val)) {
+      showFieldError(errorId, msg);
+      hasError = true;
+    }
+  }
+
+  /* === Firma obligatoria === */
+  if (firmaData.length < 1500) {
+    showFieldError("error_firma","Debes firmar antes de enviar.");
+    hasError = true;
+  }
+
+  /* === Observaciones si hay M === */
+  const anyM = Object.values(aspectos).includes("M");
+  if (anyM && formData.get("observaciones").trim().length < 6) {
+    showFieldError("error_observaciones","Obligatorio si hay M.");
+    hasError = true;
+  }
+
+  if (hasError) {
+    document.getElementById("globalMessage").innerHTML =
+      '<div class="error-msg">Corrige los campos marcados.</div>';
+    return;
+  }
+
+  /* === Submit backend === */
+  const btn = document.getElementById("submitBtn");
+  btn.disabled = true;
+  btn.textContent = "Generando...";
+
+  try {
+    const resp = await fetch(form.action, { method:"POST", body:formData });
+
+    if (!resp.ok) {
+      document.getElementById("globalMessage").innerHTML =
+        '<div class="error-msg">Error del servidor.</div>';
+      console.error(await resp.text());
+      return;
     }
 
-    function clearFieldError(id) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.style.display = "none";
-      el.textContent = "";
-      const input = el.previousElementSibling?.tagName === 'INPUT' ? el.previousElementSibling : null;
-      if (input) { input.classList.remove("input-invalid"); input.classList.add("input-valid"); }
+    const contentType = resp.headers.get("content-type") || "";
+    if (contentType.includes("application/pdf")) {
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      let filename = "inspeccion.pdf";
+
+      const cd = resp.headers.get("content-disposition") || "";
+      const m = cd.match(/filename="?(.+?)"?$/);
+      if (m) filename = m[1];
+
+      filename = filename.replace(/\.pdf_?$/, ".pdf");
+      if (!filename.toLowerCase().endsWith(".pdf")) filename += ".pdf";
+
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+      form.reset();
+      window.firmaApp?.refresh?.();
+      document.getElementById("firmaPreview").innerHTML = "";
     }
 
-    function clearAllErrors() {
-      ["error_placa","error_proceso","error_marca","error_firma","error_observaciones"]
-        .forEach(clearFieldError);
-      document.getElementById("globalMessage").innerHTML = "";
-    }
+  } catch (e) {
+    console.error(e);
+    document.getElementById("globalMessage").innerHTML =
+      '<div class="error-msg">Error de red.</div>';
 
-    /* === VALIDACIÓN LAX DE PLACA (no estricta) === */
-    function validatePlacaFlexible(v) {
-      if (!v) return false;
-      v = v.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
-      return v.length >= 5 && v.length <= 7;
-    }
-
-    document.getElementById("placa").addEventListener("input", (e) => {
-      const v = e.target.value;
-      if (!validatePlacaFlexible(v))
-        showFieldError("error_placa", "Placa inválida. Solo letras y números.");
-      else clearFieldError("error_placa");
-    });
-
-    /* === Submit === */
-    document.getElementById("inspeccionForm").addEventListener("submit", async (ev) => {
-      ev.preventDefault();
-      clearAllErrors();
-
-      const form = ev.target;
-      const formData = new FormData(form);
-
-      // Aspectos JSON
-      const aspectos = {};
-      const total = document.querySelectorAll('[name^="aspecto_"]').length / 2;
-      for (let i = 0; i < total; i++) {
-        const radios = document.getElementsByName("aspecto_" + i);
-        for (const r of radios) if (r.checked) aspectos[i + 1] = r.value;
-      }
-      formData.set("aspectos", JSON.stringify(aspectos));
-
-      // Firma
-      const firmaData = window.firmaApp?.getDataURL?.() || "";
-      formData.set("firma_dataurl", firmaData);
-
-      // Validaciones esenciales
-      let hasError = false;
-
-      if (!validatePlacaFlexible(formData.get("placa")))
-        { showFieldError("error_placa","Placa inválida."); hasError = true; }
-
-      if (!formData.get("proceso")?.trim())
-        { showFieldError("error_proceso","Proceso requerido."); hasError = true; }
-
-      if (!formData.get("marca")?.trim())
-        { showFieldError("error_marca","Marca requerida."); hasError = true; }
-
-      if (firmaData.length < 1500)
-        { showFieldError("error_firma","Debes firmar antes de enviar."); hasError = true; }
-
-      const anyM = Object.values(aspectos).includes("M");
-      if (anyM && formData.get("observaciones").trim().length < 6)
-        { showFieldError("error_observaciones","Observación requerida si hay M."); hasError = true; }
-
-      if (hasError) {
-        document.getElementById("globalMessage").innerHTML =
-          '<div class="error-msg">Corrige los campos marcados.</div>';
-        return;
-      }
-
-      // Submit
-      const btn = document.getElementById("submitBtn");
-      btn.disabled = true;
-      btn.textContent = "Generando...";
-
-      try {
-        const resp = await fetch(form.action, { method:"POST", body:formData });
-
-        if (!resp.ok) {
-          const msg = await resp.text();
-          document.getElementById("globalMessage").innerHTML =
-            '<div class="error-msg">Error del servidor.</div>';
-          console.error(msg);
-          return;
-        }
-
-        const contentType = resp.headers.get("content-type") || "";
-        if (contentType.includes("application/pdf")) {
-          const blob = await resp.blob();
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-
-          let filename = "inspeccion.pdf";
-
-          const cd = resp.headers.get("content-disposition") || "";
-          const m = cd.match(/filename="?(.+?)"?$/);
-          if (m) filename = m[1];
-
-          /* 🔥 FIX .pdf_ */
-          filename = filename.replace(/\.pdf_?$/, ".pdf");
-          if (!filename.toLowerCase().endsWith(".pdf"))
-            filename += ".pdf";
-
-          a.href = url;
-          a.download = filename;
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          URL.revokeObjectURL(url);
-
-          form.reset();
-          window.firmaApp?.refresh?.();
-          document.getElementById("firmaPreview").innerHTML = "";
-        }
-
-      } catch (e) {
-        console.error(e);
-        document.getElementById("globalMessage").innerHTML =
-          '<div class="error-msg">Error de red.</div>';
-
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "Enviar y generar PDF";
-      }
-
-    });
-  </script>
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Enviar y generar PDF";
+  }
+});
+</script>
 
 </body>
 </html>
