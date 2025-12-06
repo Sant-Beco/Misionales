@@ -5,13 +5,14 @@ from datetime import datetime
 import json
 
 class Usuario(Base):
-    __tablename__ = "usuarios"
+     __tablename__ = "usuarios"
 
-    id = Column(Integer, primary_key=True, index=True)
-    nombre = Column(String(100), unique=True)
-    pin_hash = Column(String(255))
-
-    inspecciones = relationship("Inspeccion", back_populates="usuario")
+     id = Column(Integer, primary_key=True, index=True)
+     nombre = Column(String(100), unique=True)
+     nombre_visible = Column(String(150), nullable=True)   # ← NUEVA LÍNEA
+     pin_hash = Column(String(255))
+     
+     inspecciones = relationship("Inspeccion", back_populates="usuario")
 
 
 class Inspeccion(Base):

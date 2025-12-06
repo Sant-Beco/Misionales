@@ -5,7 +5,7 @@ from passlib.context import CryptContext
 # Sistema de encriptación usado en tu app
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-def crear_usuario(nombre: str, pin: str):
+def crear_usuario(nombre: str, nombre_visible: str, pin: str):
     db = SessionLocal()
 
     # Encriptar PIN
@@ -13,7 +13,8 @@ def crear_usuario(nombre: str, pin: str):
 
     # Crear usuario
     nuevo = Usuario(
-        nombre=nombre,
+        nombre=nombre,                  
+        nombre_visible=nombre_visible,  
         pin_hash=pin_hash
     )
 
@@ -27,6 +28,11 @@ def crear_usuario(nombre: str, pin: str):
     print(f"Nombre: {nuevo.nombre}")
 
 if __name__ == "__main__":
-    nombre = input("Ingrese nombre de usuario: ")
-    pin = input("Ingrese PIN (4-6 dígitos): ")
-    crear_usuario(nombre, pin)
+    nombre = input("Ingrese usuario (login corto): ").strip()
+    nombre_visible = input("Nombre completo para informes: ").strip()
+    pin = input("Ingrese PIN (4-6 dígitos): ").strip()
+
+    if not nombre_visible:
+        nombre_visible = nombre
+
+    crear_usuario(nombre, nombre_visible, pin)

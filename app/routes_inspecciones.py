@@ -62,10 +62,8 @@ def safe_return_pdf(path: Path, filename: str):
 
 def normalize_name(name: str):
     clean = " ".join(name.strip().split())
-    parts = clean.split(" ")
-    if len(parts) == 0:
-        return ""
-    return parts[0].capitalize()
+    return clean.title()   # Capitaliza cada palabra sin borrar nada
+
 
 
 # ===============================
@@ -142,7 +140,8 @@ async def submit_inspeccion(
     if not usuario:
         return JSONResponse({"error": "Usuario no encontrado"}, status_code=404)
 
-    nombre_conductor = normalize_name(usuario.nombre)
+    nombre_conductor = normalize_name(usuario.nombre_visible or usuario.nombre)
+
 
     try:
         # =======================================
