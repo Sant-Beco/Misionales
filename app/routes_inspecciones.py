@@ -61,8 +61,17 @@ def safe_return_pdf(path: Path, filename: str):
 # ===============================
 
 def normalize_name(name: str):
+    if not name:
+        return ""
     clean = " ".join(name.strip().split())
-    return clean.title()   # Capitaliza cada palabra sin borrar nada
+    return clean.title()
+
+def normalize_placa(s: str):
+    """ Normaliza placa para evitar datos corruptos enviados al backend. """
+    if not s:
+        return ""
+    s = s.upper().strip()
+    return "".join([c for c in s if c.isalnum()])[:7]
 
 
 
@@ -86,14 +95,16 @@ def prepare_registro(r):
 
     # FIRMA
     if r.firma_file:
-        firma_path = (PDF_DIR / r.firma_file).resolve()
+        firma_path = (PDF_DIR / r.firma_file)
 
-        if firma_path.exists():
-            r.firma_path = build_file_uri(firma_path)
+        if firma_path.exists() and firma_path.is_file():
             try:
+                r.firma_path = build_file_uri(firma_path)
                 encoded = base64.b64encode(firma_path.read_bytes()).decode("utf-8")
                 r.firma_base64 = f"data:image/png;base64,{encoded}"
-            except:
+            except Exception as e:
+                print("Error leyendo firma:", e)
+                r.firma_path = None
                 r.firma_base64 = None
         else:
             r.firma_path = None
@@ -141,6 +152,49 @@ async def submit_inspeccion(
         return JSONResponse({"error": "Usuario no encontrado"}, status_code=404)
 
     nombre_conductor = normalize_name(usuario.nombre_visible or usuario.nombre)
+    placa = normalize_placa(placa)
+
+    # ================================
+    # VALIDACIÓN BACKEND (ANTI BYPASS)
+    # ================================
+    if not placa or len(placa) < 5:
+        return JSONResponse({"error": "Placa inválida"}, status_code=400)
+
+    if proceso.strip() == "":
+        return JSONResponse({"error": "Proceso requerido"}, status_code=400)
+
+    if desde.strip() == "" or hasta.strip() == "":
+        return JSONResponse({"error": "Origen/destino requerido"}, status_code=400)
+
+    if not firma_dataurl or len(firma_dataurl) < 40:
+        return JSONResponse({"error": "Firma no válida"}, status_code=400)
+    
+    # ================================
+    # VALIDACIÓN EXTRA — COHERENCIA CON FRONTEND
+    # ================================
+
+    # Modelo debe ser año de 4 dígitos
+    if not modelo.isdigit() or len(modelo) != 4:
+        return JSONResponse({"error": "Modelo inválido (año requerido)"}, status_code=400)
+
+    # Número de licencia mínimo 6 caracteres
+    if len(licencia_num.strip()) < 6:
+        return JSONResponse({"error": "Número de licencia inválido"}, status_code=400)
+
+    # Validar JSON de aspectos
+    try:
+        asp_json = json.loads(aspectos)
+    except:
+        return JSONResponse({"error": "Aspectos inválidos"}, status_code=400)
+
+    # Observaciones obligatorias si hay M
+    if "M" in asp_json.values() and len(observaciones.strip()) < 6:
+        return JSONResponse(
+            {"error": "Debes agregar observaciones si algún aspecto está en M"},
+            status_code=400
+        )
+
+
 
 
     try:
@@ -153,11 +207,18 @@ async def submit_inspeccion(
                 _, encoded = firma_dataurl.split(",", 1)
                 data = base64.b64decode(encoded)
                 firma_filename = f"firma_{timestamp}.png"
-                (PDF_DIR / firma_filename).write_bytes(data)
+                path_firma = (PDF_DIR / firma_filename)
+                path_firma.write_bytes(data)
             except:
                 firma_filename = None
 
+        # Parse seguro de aspectos
         if not isinstance(aspectos, str):
+            aspectos = "{}"
+
+        try:
+            json.loads(aspectos)
+        except:
             aspectos = "{}"
 
         # =======================================
@@ -271,11 +332,17 @@ async def submit_inspeccion(
             # BORRAR INSPECCIONES
             if DELETE_AFTER_CONSOLIDATION:
                 for r in registros:
-                    if r.firma_file:
-                        firma_path = PDF_DIR / r.firma_file
-                        if firma_path.exists():
-                            firma_path.unlink()
-                    db.delete(r)
+                    try:
+                        if r.firma_file:
+                            fpath = PDF_DIR / r.firma_file
+                            if fpath.exists():
+                                fpath.unlink()
+                    except Exception as e:
+                        print("⚠ Error borrando firma:", e)
+                    try:
+                        db.delete(r)
+                    except:
+                        pass
                 db.commit()
 
             return safe_return_pdf(reporte_path, reporte_filename)
