@@ -220,18 +220,29 @@
     <strong>Observaciones:</strong>
     <div class="observ-box">{{ registro.observaciones }}</div>
 
-    <div class="firma">
+    <div class="firma" style="margin-top:6px;">
       <strong>Firma Conductor:</strong><br>
-      {% if registro.firma_path %}
-        <img src="{{ registro.firma_path }}" alt="Firma del conductor">
-      {% elif registro.firma_base64 %}
-        <img src="{{ registro.firma_base64 }}" alt="Firma del conductor">
+
+      {% if registro.firma_base64 %}
+        <!-- Caso recomendado: siempre funciona con WeasyPrint -->
+        <img src="{{ registro.firma_base64 }}" alt="Firma Base64">
+
+      {% elif registro.firma_path %}
+        <!-- Caso alterno si no se generó base64 -->
+        <img src="{{ registro.firma_path }}" alt="Firma archivo">
+
       {% else %}
-        <div style="color:#777; border:1px dashed #aaa; padding:8px; width:140px; margin-top:4px; text-align:center;">
+        <div style="
+          color:#777;
+          border:1px dashed #aaa;
+          padding:8px;
+          width:140px;
+          margin-top:4px;
+          text-align:center;">
           (sin firma)
         </div>
       {% endif %}
-    </div>
+      </div>
   </div>
 
   <!-- CONDICIONES -->

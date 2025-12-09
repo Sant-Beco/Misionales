@@ -4,17 +4,31 @@ document.addEventListener("DOMContentLoaded", function () {
   const ctx = canvas.getContext("2d");
   const formBox = document.getElementById("formBox");
 
-  // === CONFIGURAR CANVAS ===
+  let drawing = false;
+  let last = { x: 0, y: 0 };
+  let hasRealStroke = false; // evitar firmas vacías
+
+  const FIXED_HEIGHT = 160; // altura fija para estabilidad en PDF
+
+  // ======================================================
+  // CONFIGURACIÓN DE CANVAS (con preservación del dibujo)
+  // ======================================================
   function setupCanvas() {
-    // Solo inicializa si el formBox es visible
     if (!formBox || !formBox.offsetParent) return;
 
     const dpi = window.devicePixelRatio || 1;
+
+    // Guardar la firma antes de redimensionar
+    let previous = null;
+    if (canvas.width > 0 && canvas.height > 0) {
+      previous = new Image();
+      previous.src = canvas.toDataURL("image/png");
+    }
+
     const width = canvas.clientWidth;
-    const height = 150; // altura fija
 
     canvas.width = width * dpi;
-    canvas.height = height * dpi;
+    canvas.height = FIXED_HEIGHT * dpi;
 
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.scale(dpi, dpi);
@@ -22,18 +36,19 @@ document.addEventListener("DOMContentLoaded", function () {
     ctx.lineWidth = 2;
     ctx.lineCap = "round";
     ctx.strokeStyle = "#000";
+
+    // Si había firma, restaurarla
+    if (previous) {
+      previous.onload = () => ctx.drawImage(previous, 0, 0, canvas.width / dpi, FIXED_HEIGHT);
+    }
   }
 
-  // Inicializa solo si formBox está visible
   setupCanvas();
-
-  // Re-inicializar en resize si formBox sigue visible
   window.addEventListener("resize", setupCanvas);
 
-  // === DIBUJO ===
-  let drawing = false;
-  let last = { x: 0, y: 0 };
-
+  // ======================================================
+  // COORDENADAS
+  // ======================================================
   function getPos(e) {
     const rect = canvas.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -41,54 +56,77 @@ document.addEventListener("DOMContentLoaded", function () {
     return { x: clientX - rect.left, y: clientY - rect.top };
   }
 
-  canvas.addEventListener("mousedown", (e) => { drawing = true; last = getPos(e); });
-  canvas.addEventListener("mousemove", (e) => {
+  // ======================================================
+  // EVENTOS DE DIBUJO
+  // ======================================================
+  function startDraw(e) {
+    drawing = true;
+    last = getPos(e);
+  }
+
+  function moveDraw(e) {
     if (!drawing) return;
+
     const p = getPos(e);
     ctx.beginPath();
     ctx.moveTo(last.x, last.y);
     ctx.lineTo(p.x, p.y);
     ctx.stroke();
-    last = p;
-  });
-  document.addEventListener("mouseup", () => (drawing = false));
 
-  canvas.addEventListener("touchstart", (e) => { drawing = true; last = getPos(e); e.preventDefault(); });
-  canvas.addEventListener("touchmove", (e) => {
-    if (!drawing) return;
-    const p = getPos(e);
-    ctx.beginPath();
-    ctx.moveTo(last.x, last.y);
-    ctx.lineTo(p.x, p.y);
-    ctx.stroke();
     last = p;
-    e.preventDefault();
-  });
-  document.addEventListener("touchend", () => (drawing = false));
+    hasRealStroke = true; // La firma es real
+  }
 
-  // === BOTONES ===
+  function endDraw() {
+    drawing = false;
+  }
+
+  // Mouse
+  canvas.addEventListener("mousedown", startDraw);
+  canvas.addEventListener("mousemove", moveDraw);
+  document.addEventListener("mouseup", endDraw);
+
+  // Touch
+  canvas.addEventListener("touchstart", (e) => { startDraw(e); e.preventDefault(); });
+  canvas.addEventListener("touchmove", (e) => { moveDraw(e); e.preventDefault(); });
+  document.addEventListener("touchend", endDraw);
+
+  // ======================================================
+  // BOTONES
+  // ======================================================
   document.getElementById("limpiarBtn").onclick = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    hasRealStroke = false;
+    document.getElementById("firmaPreview").innerHTML = "";
   };
 
   document.getElementById("guardarBtn").onclick = () => {
+    if (!hasRealStroke) {
+      alert("Debes realizar una firma válida.");
+      return;
+    }
+
     const data = canvas.toDataURL("image/png");
     const img = document.createElement("img");
     img.src = data;
     img.style.maxWidth = "300px";
+
     const preview = document.getElementById("firmaPreview");
     preview.innerHTML = "";
     preview.appendChild(img);
   };
 
-  // Export para formulario
+  // ======================================================
+  // API PARA FORMULARIO
+  // ======================================================
   window.firmaApp = {
-    getDataURL: () => canvas.toDataURL("image/png"),
-    refresh: setupCanvas, // permite re-inicializar cuando se muestre el formBox dinámicamente
+    getDataURL: () => {
+    if (!hasRealStroke) return "";
+    return canvas.toDataURL("image/png");
+  },
+
+    refresh: setupCanvas,
+    isEmpty: () => !hasRealStroke
   };
 });
-
-
-
-
 

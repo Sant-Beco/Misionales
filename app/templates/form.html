@@ -317,7 +317,9 @@ document.getElementById("inspeccionForm").addEventListener("submit", async (ev) 
   formData.set("aspectos", JSON.stringify(aspectos));
 
   /* === FIRMA === */
-  const firmaData = window.firmaApp?.getDataURL?.() || "";
+  const firmaData = window.firmaApp.getDataURL();
+  formData.set("firma_dataurl", firmaData);
+
   formData.set("firma_dataurl", firmaData);
 
   /* === VALIDACIONES === */

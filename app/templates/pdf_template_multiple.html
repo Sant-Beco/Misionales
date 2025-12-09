@@ -232,14 +232,14 @@
   <div class="firma">
     <strong>Firma del conductor</strong><br>
 
-    {% if registros[0].firma_path %}
-      <!-- ✅ Firma desde archivo -->
-      <img src="{{ registros[0].firma_path }}" alt="Firma">
-    {% elif registros[0].firma_base64 %}
-      <!-- ✅ Firma Base64 fallback -->
-      <img src="{{ registros[0].firma_base64 }}" alt="Firma">
+    {% if registros[0].firma_base64 %}
+        <img src="{{ registros[0].firma_base64 }}" alt="Firma del conductor">
+    {% elif registros[0].firma_path %}
+        <img src="{{ registros[0].firma_path }}" alt="Firma del conductor">
     {% else %}
-      <span>(sin firma)</span>
+        <span style="border:1px dashed #aaa; padding:6px; display:inline-block; width:80px; text-align:center;">
+            (sin firma)
+        </span>
     {% endif %}
   </div>
 

@@ -11,30 +11,30 @@ from datetime import datetime
 import base64
 import json
 import mimetypes
+import secrets
 
 router = APIRouter()
 
 # ===============================
-#   DIRECTORIOS Y CONFIG
+#   DIRECTORIOS PRINCIPALES
 # ===============================
 
-PDF_DIR = Path("app/data/generated_pdfs")
-PDF_DIR.mkdir(parents=True, exist_ok=True)
+BASE_PDF_DIR = Path("app/data/generated_pdfs")
+BASE_PDF_DIR.mkdir(parents=True, exist_ok=True)
+
+LEGACY_DIR = BASE_PDF_DIR     # compatibilidad con archivos antiguos
 
 LOGO_PATH = Path("app/static/img/incubant.jpg").resolve()
 
-DELETE_AFTER_CONSOLIDATION = True  # borrar inspecciones al consolidar
+DELETE_AFTER_CONSOLIDATION = True   # borrar inspecciones después de consolidar
 
 
 # ===============================
-#   FIX — RETORNAR PDF CORRECTO
+#   UTILIDADES PDF
 # ===============================
 
 def safe_return_pdf(path: Path, filename: str):
-    """
-    Retorna un PDF siempre con la extensión correcta,
-    evitando que el navegador renombre como .pdf_ u otros.
-    """
+    """ Retorna un PDF siempre con tipo correcto y evitando .pdf_ """
     path = path.resolve()
 
     if not path.exists():
@@ -45,46 +45,106 @@ def safe_return_pdf(path: Path, filename: str):
     headers = {
         "Content-Disposition": f'attachment; filename="{filename}"',
         "Content-Type": mime,
-        "X-Content-Type-Options": "nosniff"
+        "X-Content-Type-Options": "nosniff",
     }
 
     return FileResponse(
         path,
         media_type=mime,
         filename=filename,
-        headers=headers
+        headers=headers,
     )
 
 
 # ===============================
-#   NORMALIZACIÓN DE NOMBRE
+#  NORMALIZACIÓN
 # ===============================
 
 def normalize_name(name: str):
+    """
+    Capitaliza correctamente nombre completo sin recortar.
+    """
     if not name:
         return ""
     clean = " ".join(name.strip().split())
     return clean.title()
 
+
 def normalize_placa(s: str):
-    """ Normaliza placa para evitar datos corruptos enviados al backend. """
+    """ Limpia placa y evita valores corruptos """
     if not s:
         return ""
     s = s.upper().strip()
     return "".join([c for c in s if c.isalnum()])[:7]
 
 
+# ===============================
+#   RUTAS DE ARCHIVOS POR USUARIO
+# ===============================
 
-# ===============================
-#   UTILIDADES
-# ===============================
+def get_user_paths(usuario_id: int):
+    """
+    Crea y retorna carpetas:
+        generated_pdfs/usuarios/<id>/inspecciones
+        generated_pdfs/usuarios/<id>/firmas
+        generated_pdfs/usuarios/<id>/reportes
+    """
+    user_base = BASE_PDF_DIR / "usuarios" / str(usuario_id)
+    inspecciones_dir = user_base / "inspecciones"
+    firmas_dir = user_base / "firmas"
+    reportes_dir = user_base / "reportes"
+
+    for p in (user_base, inspecciones_dir, firmas_dir, reportes_dir):
+        p.mkdir(parents=True, exist_ok=True)
+
+    return {
+        "base": user_base,
+        "inspecciones": inspecciones_dir,
+        "firmas": firmas_dir,
+        "reportes": reportes_dir,
+    }
+
 
 def build_file_uri(path: Path):
     return "file:///" + path.as_posix()
 
 
+def _guess_firma_path_for_record(r):
+    """
+    Permite 3 estilos de localización:
+    - Nuevo: /usuarios/<id>/firmas/xxx.png
+    - Legacy: generated_pdfs/xxx.png
+    - Ruta absoluta guardada en DB
+    """
+    if not getattr(r, "firma_file", None):
+        return None
+
+    # 1. path por usuario
+    try:
+        u = get_user_paths(r.usuario_id)["firmas"] / r.firma_file
+        if u.exists():
+            return u
+    except:
+        pass
+
+    # 2. legacy root
+    legacy = LEGACY_DIR / r.firma_file
+    if legacy.exists():
+        return legacy
+
+    # 3. ruta directa almacenada
+    direct = Path(r.firma_file)
+    if direct.exists():
+        return direct
+
+    return None
+
+
 def prepare_registro(r):
-    # ASPECTOS
+    """
+    Prepara campos para PDF y templates.
+    """
+    # Aspectos
     try:
         if r.aspectos and r.aspectos not in ["null", "None"]:
             r.aspectos_parsed = json.loads(r.aspectos)
@@ -93,25 +153,21 @@ def prepare_registro(r):
     except:
         r.aspectos_parsed = {}
 
-    # FIRMA
+    # Firma
+    r.firma_path = None
+    r.firma_base64 = None
     if r.firma_file:
-        firma_path = (PDF_DIR / r.firma_file)
-
-        if firma_path.exists() and firma_path.is_file():
-            try:
-                r.firma_path = build_file_uri(firma_path)
-                encoded = base64.b64encode(firma_path.read_bytes()).decode("utf-8")
-                r.firma_base64 = f"data:image/png;base64,{encoded}"
-            except Exception as e:
-                print("Error leyendo firma:", e)
-                r.firma_path = None
-                r.firma_base64 = None
-        else:
-            r.firma_path = None
-            r.firma_base64 = None
-    else:
-        r.firma_path = None
-        r.firma_base64 = None
+        try:
+            path = _guess_firma_path_for_record(r)
+            if path and path.exists():
+                r.firma_path = build_file_uri(path)
+                try:
+                    encoded = base64.b64encode(path.read_bytes()).decode("utf-8")
+                    r.firma_base64 = f"data:image/png;base64,{encoded}"
+                except:
+                    pass
+        except:
+            pass
 
     return r
 
@@ -145,85 +201,75 @@ async def submit_inspeccion(
     condiciones_optimas: str = Form("SI"),
 ):
     db = SessionLocal()
-    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
+    # Obtener usuario
     usuario = db.query(models.Usuario).filter(models.Usuario.id == usuario_id).first()
     if not usuario:
         return JSONResponse({"error": "Usuario no encontrado"}, status_code=404)
 
+    # Nombre conductor (visibilidad configurada)
     nombre_conductor = normalize_name(usuario.nombre_visible or usuario.nombre)
     placa = normalize_placa(placa)
 
-    # ================================
-    # VALIDACIÓN BACKEND (ANTI BYPASS)
-    # ================================
+    # ============================
+    # Validaciones de seguridad
+    # ============================
     if not placa or len(placa) < 5:
         return JSONResponse({"error": "Placa inválida"}, status_code=400)
 
-    if proceso.strip() == "":
+    if not proceso.strip():
         return JSONResponse({"error": "Proceso requerido"}, status_code=400)
 
-    if desde.strip() == "" or hasta.strip() == "":
+    if not desde.strip() or not hasta.strip():
         return JSONResponse({"error": "Origen/destino requerido"}, status_code=400)
 
     if not firma_dataurl or len(firma_dataurl) < 40:
-        return JSONResponse({"error": "Firma no válida"}, status_code=400)
-    
-    # ================================
-    # VALIDACIÓN EXTRA — COHERENCIA CON FRONTEND
-    # ================================
+        return JSONResponse({"error": "Firma inválida"}, status_code=400)
 
-    # Modelo debe ser año de 4 dígitos
-    if not modelo.isdigit() or len(modelo) != 4:
-        return JSONResponse({"error": "Modelo inválido (año requerido)"}, status_code=400)
+    if modelo and (not modelo.isdigit() or len(modelo) != 4):
+        return JSONResponse({"error": "Modelo inválido"}, status_code=400)
 
-    # Número de licencia mínimo 6 caracteres
-    if len(licencia_num.strip()) < 6:
-        return JSONResponse({"error": "Número de licencia inválido"}, status_code=400)
+    if licencia_num and len(licencia_num) < 6:
+        return JSONResponse({"error": "Licencia inválida"}, status_code=400)
 
-    # Validar JSON de aspectos
+    # Aspectos
     try:
         asp_json = json.loads(aspectos)
     except:
         return JSONResponse({"error": "Aspectos inválidos"}, status_code=400)
 
-    # Observaciones obligatorias si hay M
     if "M" in asp_json.values() and len(observaciones.strip()) < 6:
         return JSONResponse(
             {"error": "Debes agregar observaciones si algún aspecto está en M"},
             status_code=400
         )
 
-
-
+    # ============================
+    # Crear carpetas del usuario
+    # ============================
+    user_paths = get_user_paths(usuario_id)
 
     try:
-        # =======================================
-        # GUARDAR FIRMA
-        # =======================================
+        # -----------------------------------
+        # Guardar firma
+        # -----------------------------------
         firma_filename = None
         if firma_dataurl:
             try:
-                _, encoded = firma_dataurl.split(",", 1)
-                data = base64.b64decode(encoded)
-                firma_filename = f"firma_{timestamp}.png"
-                path_firma = (PDF_DIR / firma_filename)
-                path_firma.write_bytes(data)
-            except:
+                _, b64 = firma_dataurl.split(",", 1)
+                data = base64.b64decode(b64)
+                rnd = secrets.token_hex(4)
+                firma_filename = f"firma_{timestamp}_{rnd}.png"
+                firma_path = user_paths["firmas"] / firma_filename
+                firma_path.write_bytes(data)
+            except Exception as e:
+                print("Error guardando firma:", e)
                 firma_filename = None
 
-        # Parse seguro de aspectos
-        if not isinstance(aspectos, str):
-            aspectos = "{}"
-
-        try:
-            json.loads(aspectos)
-        except:
-            aspectos = "{}"
-
-        # =======================================
-        # GUARDAR EN BD
-        # =======================================
+        # -----------------------------------
+        # Guardar registro DB
+        # -----------------------------------
         inspeccion = models.Inspeccion(
             fecha=datetime.now(),
             usuario_id=usuario_id,
@@ -256,20 +302,17 @@ async def submit_inspeccion(
 
         inspeccion = prepare_registro(inspeccion)
 
-        # =======================================
-        # TOTAL INSPECCIONES DEL USUARIO
-        # =======================================
-        total_inspecciones = (
+        total = (
             db.query(models.Inspeccion)
             .filter(models.Inspeccion.usuario_id == usuario_id)
             .count()
         )
 
-        # =======================================
-        # PDF INDIVIDUAL
-        # =======================================
-        pdf_filename = f"inspeccion_{timestamp}.pdf"
-        pdf_path = PDF_DIR / pdf_filename
+        # -----------------------------------
+        # PDF individual
+        # -----------------------------------
+        safe_pdf_name = f"inspeccion_{timestamp}.pdf"
+        pdf_path = user_paths["inspecciones"] / safe_pdf_name
 
         render_pdf_from_template(
             "pdf_template.html",
@@ -283,10 +326,10 @@ async def submit_inspeccion(
             output_path=str(pdf_path),
         )
 
-        # =======================================
-        # CONSOLIDADO EXACTAMENTE A 15
-        # =======================================
-        if total_inspecciones == 15:
+        # -----------------------------------
+        # Consolidado a 15
+        # -----------------------------------
+        if total == 15:
             registros = (
                 db.query(models.Inspeccion)
                 .filter(models.Inspeccion.usuario_id == usuario_id)
@@ -294,22 +337,21 @@ async def submit_inspeccion(
                 .limit(15)
                 .all()
             )
-
             registros = list(reversed([prepare_registro(r) for r in registros]))
 
-            fecha_desde = registros[0].fecha.strftime("%d - %m - %Y")
-            fecha_hasta = registros[-1].fecha.strftime("%d - %m - %Y")
+            fecha_desde = registros[0].fecha.strftime("%d-%m-%Y")
+            fecha_hasta = registros[-1].fecha.strftime("%d-%m-%Y")
 
             reporte_filename = (
-                f"reporte15_{nombre_conductor}_{datetime.now().strftime('%Y%m%d%H%M')}.pdf"
+                f"reporte15_{usuario_id}_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf"
             )
-            reporte_path = PDF_DIR / reporte_filename
+            reporte_path = user_paths["reportes"] / reporte_filename
 
             render_pdf_from_template(
                 "pdf_template_multiple.html",
                 {
                     "registros": registros,
-                    "fecha": datetime.now().strftime("%d - %m - %Y"),
+                    "fecha": datetime.now().strftime("%d-%m-%Y"),
                     "codigo": "FO-SST-063",
                     "version": "01",
                     "desde": fecha_desde,
@@ -319,26 +361,27 @@ async def submit_inspeccion(
                 output_path=str(reporte_path),
             )
 
-            # GUARDAR HISTORIAL
-            reporte = models.ReporteInspeccion(
+            # Guardar en historial
+            hist = models.ReporteInspeccion(
                 nombre_conductor=nombre_conductor,
                 fecha_reporte=datetime.now(),
                 archivo_pdf=str(reporte_path),
                 total_incluidas=15,
             )
-            db.add(reporte)
+            db.add(hist)
             db.commit()
 
-            # BORRAR INSPECCIONES
+            # Borrar inspecciones + firmas
             if DELETE_AFTER_CONSOLIDATION:
                 for r in registros:
                     try:
                         if r.firma_file:
-                            fpath = PDF_DIR / r.firma_file
-                            if fpath.exists():
-                                fpath.unlink()
-                    except Exception as e:
-                        print("⚠ Error borrando firma:", e)
+                            path = user_paths["firmas"] / r.firma_file
+                            if path.exists():
+                                path.unlink()
+                    except:
+                        pass
+
                     try:
                         db.delete(r)
                     except:
@@ -347,17 +390,14 @@ async def submit_inspeccion(
 
             return safe_return_pdf(reporte_path, reporte_filename)
 
-        # =======================================
-        # RETORNAR PDF INDIVIDUAL
-        # =======================================
-        return safe_return_pdf(pdf_path, pdf_filename)
+        return safe_return_pdf(pdf_path, safe_pdf_name)
 
     finally:
         db.close()
 
 
 # ===============================
-#   ENDPOINT MANUAL
+#   ENDPOINT MANUAL REPORTE 15
 # ===============================
 
 @router.get("/reporte15/{nombre_conductor}")
@@ -380,19 +420,25 @@ async def generar_pdf15(nombre_conductor: str):
 
         registros = list(reversed([prepare_registro(r) for r in registros]))
 
-        fecha_desde = registros[0].fecha.strftime("%d - %m - %Y")
-        fecha_hasta = registros[-1].fecha.strftime("%d - %m - %Y")
+        fecha_desde = registros[0].fecha.strftime("%d-%m-%Y")
+        fecha_hasta = registros[-1].fecha.strftime("%d-%m-%Y")
 
         pdf_filename = (
             f"reporte15_{nombre_conductor}_{datetime.now().strftime('%Y%m%d%H%M')}.pdf"
         )
-        pdf_path = PDF_DIR / pdf_filename
+
+        try:
+            uid = registros[0].usuario_id
+            user_paths = get_user_paths(uid)
+            pdf_path = user_paths["reportes"] / pdf_filename
+        except:
+            pdf_path = BASE_PDF_DIR / pdf_filename
 
         render_pdf_from_template(
             "pdf_template_multiple.html",
             {
                 "registros": registros,
-                "fecha": datetime.now().strftime("%d - %m - %Y"),
+                "fecha": datetime.now().strftime("%d-%m-%Y"),
                 "codigo": "FO-SST-063",
                 "version": "01",
                 "desde": fecha_desde,
@@ -406,3 +452,4 @@ async def generar_pdf15(nombre_conductor: str):
 
     finally:
         db.close()
+
