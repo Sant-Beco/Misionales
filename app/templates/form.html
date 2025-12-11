@@ -320,7 +320,6 @@ document.getElementById("inspeccionForm").addEventListener("submit", async (ev) 
   const firmaData = window.firmaApp.getDataURL();
   formData.set("firma_dataurl", firmaData);
 
-  formData.set("firma_dataurl", firmaData);
 
   /* === VALIDACIONES === */
   let hasError = false;
@@ -359,10 +358,10 @@ document.getElementById("inspeccionForm").addEventListener("submit", async (ev) 
   }
 
   /* === Firma obligatoria === */
-  if (firmaData.length < 1500) {
+  if (window.firmaApp.isEmpty()) {
     showFieldError("error_firma","Debes firmar antes de enviar.");
     hasError = true;
-  }
+}
 
   /* === Observaciones si hay M === */
   const anyM = Object.values(aspectos).includes("M");
