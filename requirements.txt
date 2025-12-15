@@ -1,4 +1,5 @@
-# --- FastAPI + Server ---
+
+# --- FastAPI ---
 fastapi==0.110.0
 uvicorn[standard]==0.30.1
 
@@ -6,22 +7,17 @@ uvicorn[standard]==0.30.1
 jinja2==3.1.3
 
 # --- Seguridad ---
-bcrypt==4.1.2
-passlib==1.7.4
+passlib[bcrypt]==1.7.4
 python-multipart==0.0.20
 
 # --- Base de datos ---
 sqlalchemy==2.0.29
-pydantic==2.7.1
-pydantic-core==2.18.2
 pymysql==1.1.2
 
-# --- Utilidades ---
+# --- Config ---
 python-dotenv==1.0.1
-typing-extensions==4.10.0
-annotated-types==0.6.0
 
-# --- PDF / WeasyPrint (100% compatibles con py 3.11)---
+# --- PDF ---
 weasyprint==62.3
 tinycss2==1.3.0
 cssselect2==0.7.0
@@ -32,6 +28,6 @@ brotli==1.1.0
 zopfli==0.2.2
 html5lib==1.1
 
-# --- CFFI (bcrypt dependency) ---
+# --- bcrypt deps ---
 cffi==1.16.0
 pycparser==2.22
