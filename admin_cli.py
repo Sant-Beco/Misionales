@@ -22,19 +22,28 @@ Registra en: app/logs/admin.log
 import os
 import sys
 import logging
+import re
 from getpass import getpass
 from typing import Optional
 
 from passlib.context import CryptContext
 
-# Importar la DB y modelos (script debe estar en paquete app/)
+# Importar la DB y modelos
 from app.database import SessionLocal
 from app.models import Usuario
 
-# Configuración hashing (igual que tu app)
+
+# =======================
+# Configuración seguridad
+# =======================
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# Log file
+
+# =======================
+# Logging
+# =======================
+
 LOG_DIR = os.path.join(os.path.dirname(__file__), "logs")
 os.makedirs(LOG_DIR, exist_ok=True)
 LOG_FILE = os.path.join(LOG_DIR, "admin.log")
@@ -51,25 +60,38 @@ logging.basicConfig(
 logger = logging.getLogger("admin_cli")
 
 
-# -----------------------
+# =======================
 # Helpers DB
-# -----------------------
+# =======================
+
 def create_user_db(nombre: str, nombre_visible: Optional[str], pin: str) -> Optional[Usuario]:
     db = SessionLocal()
     try:
-        # evitar duplicados en 'nombre' (campo unique en modelo)
         existing = db.query(Usuario).filter(Usuario.nombre == nombre).first()
         if existing:
-            logger.warning("No se creó: ya existe un usuario con nombre '%s' (id=%s).", nombre, existing.id)
+            logger.warning(
+                "No se creó usuario duplicado: nombre='%s' (id=%s)",
+                nombre, existing.id
+            )
             return None
 
         pin_hash = pwd_context.hash(pin)
-        nuevo = Usuario(nombre=nombre, nombre_visible=nombre_visible or nombre, pin_hash=pin_hash)
+        nuevo = Usuario(
+            nombre=nombre,
+            nombre_visible=nombre_visible or nombre,
+            pin_hash=pin_hash
+        )
+
         db.add(nuevo)
         db.commit()
         db.refresh(nuevo)
-        logger.info("Usuario creado: id=%s, nombre=%s, nombre_visible=%s", nuevo.id, nuevo.nombre, nuevo.nombre_visible)
+
+        logger.info(
+            "Usuario creado: id=%s, nombre=%s, nombre_visible=%s",
+            nuevo.id, nuevo.nombre, nuevo.nombre_visible
+        )
         return nuevo
+
     except Exception as e:
         db.rollback()
         logger.exception("Error creando usuario: %s", e)
@@ -81,16 +103,7 @@ def create_user_db(nombre: str, nombre_visible: Optional[str], pin: str) -> Opti
 def list_users_db():
     db = SessionLocal()
     try:
-        users = db.query(Usuario).order_by(Usuario.id).all()
-        return users
-    finally:
-        db.close()
-
-
-def find_user_by_name(name: str) -> Optional[Usuario]:
-    db = SessionLocal()
-    try:
-        return db.query(Usuario).filter(Usuario.nombre == name).first()
+        return db.query(Usuario).order_by(Usuario.id).all()
     finally:
         db.close()
 
@@ -100,12 +113,14 @@ def delete_user_db(user_id: int) -> bool:
     try:
         u = db.query(Usuario).filter(Usuario.id == user_id).first()
         if not u:
-            logger.warning("No existe usuario id=%s", user_id)
+            logger.warning("Intento de borrar usuario inexistente id=%s", user_id)
             return False
+
         db.delete(u)
         db.commit()
         logger.info("Usuario borrado: id=%s, nombre=%s", user_id, u.nombre)
         return True
+
     except Exception as e:
         db.rollback()
         logger.exception("Error borrando usuario id=%s: %s", user_id, e)
@@ -119,16 +134,17 @@ def update_pin_db(user_id: int, new_pin: str) -> bool:
     try:
         u = db.query(Usuario).filter(Usuario.id == user_id).first()
         if not u:
-            logger.warning("No existe usuario id=%s", user_id)
+            logger.warning("Usuario no existe para cambio PIN id=%s", user_id)
             return False
+
         u.pin_hash = pwd_context.hash(new_pin)
-        db.add(u)
         db.commit()
         logger.info("PIN actualizado para usuario id=%s", user_id)
         return True
+
     except Exception as e:
         db.rollback()
-        logger.exception("Error actualizando PIN para id=%s: %s", user_id, e)
+        logger.exception("Error actualizando PIN id=%s: %s", user_id, e)
         return False
     finally:
         db.close()
@@ -139,48 +155,84 @@ def update_nombre_visible_db(user_id: int, nombre_visible: str) -> bool:
     try:
         u = db.query(Usuario).filter(Usuario.id == user_id).first()
         if not u:
-            logger.warning("No existe usuario id=%s", user_id)
+            logger.warning("Usuario no existe para nombre_visible id=%s", user_id)
             return False
+
         u.nombre_visible = nombre_visible
-        db.add(u)
         db.commit()
-        logger.info("nombre_visible actualizado para usuario id=%s -> %s", user_id, nombre_visible)
+        logger.info(
+            "nombre_visible actualizado id=%s -> %s",
+            user_id, nombre_visible
+        )
         return True
+
     except Exception as e:
         db.rollback()
-        logger.exception("Error actualizando nombre_visible para id=%s: %s", user_id, e)
+        logger.exception("Error actualizando nombre_visible id=%s: %s", user_id, e)
         return False
     finally:
         db.close()
 
 
-# -----------------------
+# =======================
 # Validadores
-# -----------------------
+# =======================
+
 def validate_pin(pin: str) -> bool:
     return pin.isdigit() and 4 <= len(pin) <= 6
 
 
-# -----------------------
+def validate_nombre_visible(nombre: str) -> bool:
+    """
+    Permite solo letras (incluye acentos) y espacios.
+    """
+    if not nombre:
+        return False
+
+    nombre = nombre.strip()
+    patron = r"^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$"
+    return bool(re.match(patron, nombre))
+
+
+# =======================
 # Interfaz interactiva
-# -----------------------
+# =======================
+
 def prompt_create_user():
     print("\n== Crear usuario ==")
     nombre = input("Usuario (login corto, único): ").strip()
     if not nombre:
-        print("Nombre obligatorio.")
+        print("❌ Nombre obligatorio.")
         return
-    nombre_visible = input("Nombre completo para informes (enter = mismo que login): ").strip() or nombre
+
+    while True:
+        nombre_visible = input(
+            "Nombre completo para informes (solo letras, enter = mismo que login): "
+        ).strip() or nombre
+
+        if not validate_nombre_visible(nombre_visible):
+            print("❌ nombre_visible inválido. Usa solo letras y espacios.")
+            logger.warning(
+                "Intento nombre_visible inválido al crear usuario: '%s'",
+                nombre_visible
+            )
+            continue
+
+        nombre_visible = nombre_visible.title()  # opcional recomendado
+        break
 
     while True:
         pin = getpass("PIN (4-6 dígitos): ").strip()
         pin2 = getpass("Confirmar PIN: ").strip()
+
         if pin != pin2:
-            print("Los PIN no coinciden. Intentar de nuevo.")
+            print("❌ Los PIN no coinciden.")
             continue
+
         if not validate_pin(pin):
-            print("PIN inválido. Debe ser sólo dígitos y 4-6 caracteres.")
+            print("❌ PIN inválido. Debe ser solo dígitos (4-6).")
             continue
+
         break
 
     created = create_user_db(nombre, nombre_visible, pin)
@@ -193,9 +245,11 @@ def prompt_create_user():
 def prompt_list_users():
     print("\n== Lista de usuarios ==")
     users = list_users_db()
+
     if not users:
         print("(No hay usuarios registrados)")
         return
+
     print(f"{'ID':>4}  {'login':20}  {'nombre_visible'}")
     print("-" * 60)
     for u in users:
@@ -207,14 +261,16 @@ def prompt_delete_user():
     try:
         uid = int(input("ID del usuario a borrar: ").strip())
     except Exception:
-        print("ID inválido.")
+        print("❌ ID inválido.")
         return
-    confirm = input(f"Confirma borrar usuario id={uid}? (type 'SI' to confirm): ").strip()
+
+    confirm = input(f"Confirma borrar usuario id={uid}? (escribe 'SI'): ").strip()
     if confirm != "SI":
         print("Operación cancelada.")
         return
+
     ok = delete_user_db(uid)
-    print("Borrado." if ok else "No borrado.")
+    print("✔ Usuario borrado." if ok else "✖ No se pudo borrar.")
 
 
 def prompt_change_pin():
@@ -222,20 +278,25 @@ def prompt_change_pin():
     try:
         uid = int(input("ID del usuario: ").strip())
     except Exception:
-        print("ID inválido.")
+        print("❌ ID inválido.")
         return
+
     while True:
         pin = getpass("Nuevo PIN (4-6 dígitos): ").strip()
         pin2 = getpass("Confirmar PIN: ").strip()
+
         if pin != pin2:
-            print("Los PIN no coinciden. Intentar de nuevo.")
+            print("❌ Los PIN no coinciden.")
             continue
+
         if not validate_pin(pin):
-            print("PIN inválido. Debe ser sólo dígitos y 4-6 caracteres.")
+            print("❌ PIN inválido.")
             continue
+
         break
+
     ok = update_pin_db(uid, pin)
-    print("PIN actualizado." if ok else "No actualizado.")
+    print("✔ PIN actualizado." if ok else "✖ No actualizado.")
 
 
 def prompt_change_nombre_visible():
@@ -243,15 +304,30 @@ def prompt_change_nombre_visible():
     try:
         uid = int(input("ID del usuario: ").strip())
     except Exception:
-        print("ID inválido.")
+        print("❌ ID inválido.")
         return
-    nv = input("Nuevo nombre completo (nombre_visible): ").strip()
-    if not nv:
-        print("nombre_visible vacío. Cancelado.")
-        return
-    ok = update_nombre_visible_db(uid, nv)
-    print("Nombre actualizado." if ok else "No actualizado.")
 
+    nv = input("Nuevo nombre completo (solo letras y espacios): ").strip()
+    if not nv:
+        print("❌ nombre_visible vacío. Cancelado.")
+        return
+
+    if not validate_nombre_visible(nv):
+        print("❌ nombre_visible inválido. Usa solo letras y espacios.")
+        logger.warning(
+            "Intento nombre_visible inválido en edición: '%s'",
+            nv
+        )
+        return
+
+    nv = nv.title()  # opcional recomendado
+    ok = update_nombre_visible_db(uid, nv)
+    print("✔ Nombre actualizado." if ok else "✖ No actualizado.")
+
+
+# =======================
+# Menú principal
+# =======================
 
 def main_menu():
     MENU = {
@@ -267,10 +343,13 @@ def main_menu():
         print("\n=== ADMIN CLI — Usuarios ===")
         for k, (label, _) in MENU.items():
             print(f" {k} ) {label}")
+
         choice = input("Selecciona opción: ").strip()
+
         if choice == "0":
             print("Saliendo.")
             break
+
         if choice in MENU:
             _, action = MENU[choice]
             try:
@@ -278,7 +357,7 @@ def main_menu():
             except Exception as e:
                 logger.exception("Error ejecutando acción del menú: %s", e)
         else:
-            print("Opción inválida.")
+            print("❌ Opción inválida.")
 
 
 if __name__ == "__main__":

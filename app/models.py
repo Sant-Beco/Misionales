@@ -1,18 +1,21 @@
 from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey
 from sqlalchemy.orm import relationship
 from app.database import Base
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 
 class Usuario(Base):
-     __tablename__ = "usuarios"
+    __tablename__ = "usuarios"
 
-     id = Column(Integer, primary_key=True, index=True)
-     nombre = Column(String(100), unique=True)
-     nombre_visible = Column(String(150), nullable=True)   # ← NUEVA LÍNEA
-     pin_hash = Column(String(255))
-     
-     inspecciones = relationship("Inspeccion", back_populates="usuario")
+    id = Column(Integer, primary_key=True, index=True)
+    nombre = Column(String(100), unique=True)
+    nombre_visible = Column(String(150), nullable=True)
+    pin_hash = Column(String(255))
+
+    token = Column(String(255), nullable=True, index=True)
+    token_expira = Column(DateTime, nullable=True)
+
+    inspecciones = relationship("Inspeccion", back_populates="usuario")
 
 
 class Inspeccion(Base):
