@@ -17,6 +17,8 @@ venv/
 .env/
 env/
 ENV/
+.env
+*.pyc
 
 # ==============================
 #      CONFIGURACIÓN
@@ -77,4 +79,4 @@ node_modules/
 *.lnk
 ~$*
 *_conflict*
-* - Copy.*
+* - Copy.*  
