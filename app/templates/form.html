@@ -17,12 +17,16 @@
     <h1 class="form-title">INSPECCIÓN PRE OPERACIONAL MOTOCICLETA</h1>
 
     <div class="form-meta">
-      Código: <strong>FO-SST-063</strong> — Fecha: <strong>{{ fecha }}</strong> — Versión: <strong>01</strong>
+      Código: <strong>FO-SST-063</strong> – Fecha: <strong>{{ fecha }}</strong> – Versión: <strong>01</strong>
     </div>
 
     <form id="inspeccionForm" method="post" action="/inspecciones/submit" novalidate>
-  <input type="hidden" id="usuarioIdInput" name="usuario_id">
-  <input type="hidden" id="nombreConductorInput" name="nombre_conductor">
+  
+  <!-- ❌ ELIMINADO: NO enviar usuario_id desde el cliente -->
+  <!-- <input type="hidden" id="usuarioIdInput" name="usuario_id"> -->
+  <!-- <input type="hidden" id="nombreConductorInput" name="nombre_conductor"> -->
+  
+  <!-- ✅ El backend obtiene el usuario del token -->
 
   <!-- DATOS VEHÍCULO -->
   <div class="section-title">Datos del vehículo</div>
@@ -240,8 +244,9 @@
 const token = localStorage.getItem("token");
 if (!token) window.location.href = "/login";
 
-document.getElementById("usuarioIdInput").value = localStorage.getItem("usuario_id");
-document.getElementById("nombreConductorInput").value = localStorage.getItem("nombre");
+// ❌ ELIMINADO: NO necesitamos enviar usuario_id
+// document.getElementById("usuarioIdInput").value = localStorage.getItem("usuario_id");
+// document.getElementById("nombreConductorInput").value = localStorage.getItem("nombre");
 
 /* === Helpers mensajes === */
 function showFieldError(id, msg) {
@@ -251,7 +256,6 @@ function showFieldError(id, msg) {
   el.style.display = "block";
   el.textContent = msg;
 
-  // Buscar input/select previo
   const field = el.previousElementSibling;
   if (field && (field.tagName === "INPUT" || field.tagName === "SELECT")) {
     field.classList.add("input-invalid");
@@ -320,7 +324,6 @@ document.getElementById("inspeccionForm").addEventListener("submit", async (ev) 
   const firmaData = window.firmaApp.getDataURL();
   formData.set("firma_dataurl", firmaData);
 
-
   /* === VALIDACIONES === */
   let hasError = false;
 
@@ -376,15 +379,29 @@ document.getElementById("inspeccionForm").addEventListener("submit", async (ev) 
     return;
   }
 
-  /* === Submit backend === */
+  /* === Submit backend con TOKEN === */
   const btn = document.getElementById("submitBtn");
   btn.disabled = true;
   btn.textContent = "Generando...";
 
   try {
-    const resp = await fetch(form.action, { method:"POST", body:formData });
+    // ✅ CRÍTICO: Enviar token en el header
+    const resp = await fetch(form.action, { 
+      method: "POST", 
+      body: formData,
+      headers: {
+        "Authorization": `Bearer ${token}`  // ✅ Token aquí
+      }
+    });
 
     if (!resp.ok) {
+      if (resp.status === 401) {
+        // Token expirado o inválido
+        localStorage.clear();
+        window.location.href = "/login";
+        return;
+      }
+      
       document.getElementById("globalMessage").innerHTML =
         '<div class="error-msg">Error del servidor.</div>';
       console.error(await resp.text());
@@ -432,4 +449,3 @@ document.getElementById("inspeccionForm").addEventListener("submit", async (ev) 
 
 </body>
 </html>
-

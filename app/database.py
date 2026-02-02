@@ -34,3 +34,26 @@ SessionLocal = sessionmaker(
 )
 
 Base = declarative_base()
+
+
+# ========================================
+# ✅ FUNCIÓN QUE FALTABA - AGREGAR ESTO
+# ========================================
+
+def get_db():
+    """
+    Generador de dependencia para obtener sesión de base de datos
+    
+    Uso en FastAPI:
+        @router.post("/endpoint")
+        def mi_endpoint(db: Session = Depends(get_db)):
+            # usar db aquí
+            pass
+    
+    La sesión se cierra automáticamente al terminar el request
+    """
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

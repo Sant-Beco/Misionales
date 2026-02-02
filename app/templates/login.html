@@ -53,8 +53,8 @@
             document.getElementById("loginError").textContent = "Usuario o PIN incorrecto";
             document.getElementById("loginError").classList.remove("hidden");
           } else {
-            // Error inesperado o 404
-            document.getElementById("serverError").textContent = "Error del servidor (ruta /auth/login)";
+            // Error inesperado
+            document.getElementById("serverError").textContent = "Error del servidor";
             document.getElementById("serverError").classList.remove("hidden");
           }
           return;
@@ -62,14 +62,19 @@
 
         const data = await res.json();
 
-        // Guardar sesión
-        localStorage.setItem("token", data.token);
+        // ✅ CORREGIDO: Guardar access_token correctamente
+        console.log("Respuesta del login:", data);  // Debug
+        
+        localStorage.setItem("token", data.access_token);  // ✅ access_token, NO token
         localStorage.setItem("usuario_id", data.usuario_id);
         localStorage.setItem("nombre", data.nombre);
+
+        console.log("Token guardado:", localStorage.getItem("token"));  // Debug
 
         // Redirigir al formulario principal
         window.location.href = "/";
       } catch (err) {
+        console.error("Error en login:", err);  // Debug
         document.getElementById("serverError").textContent = "Error de conexión con el servidor";
         document.getElementById("serverError").classList.remove("hidden");
       }
@@ -77,4 +82,3 @@
   </script>
 </body>
 </html>
-

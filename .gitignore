@@ -1,82 +1,62 @@
-# ==============================
-#        PYTHON
-# ==============================
+# ============================================
+# MISONALES - .gitignore
+# ============================================
+
+# ===== ARCHIVOS SENSIBLES =====
+.env
+*.db
+*.sqlite
+*.sqlite3
+
+# ===== PYTHON =====
 __pycache__/
 *.py[cod]
-*.pyo
-*.pyd
-*.pdb
-*.pytest_cache/
-*.sqlite3
-*.db
-
-# ==============================
-#   ENTORNOS VIRTUALES
-# ==============================
+*$py.class
+*.so
+.Python
 venv/
-.env/
-env/
+.venv/
 ENV/
-.env
-*.pyc
+env/
+*.egg-info/
+dist/
+build/
 
-# ==============================
-#      CONFIGURACIÓN
-# ==============================
-.env                  # Archivo de variables de entorno (NO subir)
-*.ini
-*.cfg
+# ===== DATOS GENERADOS =====
+app/data/generated_pdfs/*.pdf
+app/data/firmas/*.png
+app/logs/*.log
 
-# ==============================
-#    FASTAPI / UVICORN
-# ==============================
-*.log
+# Mantener estructura de carpetas pero no contenido
+!app/data/generated_pdfs/.gitkeep
+!app/data/firmas/.gitkeep
+!app/logs/.gitkeep
 
-# ==============================
-#    OUTPUT DEL PROYECTO
-# ==============================
-app/data/generated_pdfs/
-*.pdf                  # Opcional: ignora PDFs generados
+# ===== BACKUPS =====
+*_OLD.py
+*_OLD.html
+*_BACKUP.*
+backup_*/
 
-# ==============================
-#     ARCHIVOS TEMPORALES
-# ==============================
+# ===== IDEs =====
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ===== SISTEMA OPERATIVO =====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== TESTS =====
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# ===== TEMPORALES =====
 *.tmp
 *.temp
-Thumbs.db
-.DS_Store
-*.bak
-*.old
-
-# ==============================
-#       VSCODE / EDITORES
-# ==============================
-.vscode/
-.history/
-*.code-workspace
-
-# ==============================
-#    PYINSTALLER / BUILDS
-# ==============================
-build/
-dist/
-*.spec
-
-# ==============================
-#      ANACONDA (Opcional)
-# ==============================
-.conda/
-.conda_env/
-
-# ==============================
-#      NODE (si aplica)
-# ==============================
-node_modules/
-
-# ==============================
-#  ONEDRIVE WINDOWS SHADOW FILES
-# ==============================
-*.lnk
-~$*
-*_conflict*
-* - Copy.*  
+*.log 

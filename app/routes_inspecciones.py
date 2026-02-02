@@ -1,10 +1,11 @@
-# app/routes_inspecciones.py
+# app/routes_inspecciones.py - VERSIÓN CORREGIDA CON SEGURIDAD
 
-from fastapi import APIRouter, Form
+from fastapi import APIRouter, Form, Depends
 from fastapi.responses import FileResponse, JSONResponse, Response
 from sqlalchemy.orm import Session
 from app.database import SessionLocal
 from app import models
+from app.security import get_current_user  # ✅ IMPORTAR FUNCIÓN DE SEGURIDAD
 from app.utils_pdf import render_pdf_from_template
 from pathlib import Path
 from datetime import datetime
@@ -22,11 +23,11 @@ router = APIRouter()
 BASE_PDF_DIR = Path("app/data/generated_pdfs")
 BASE_PDF_DIR.mkdir(parents=True, exist_ok=True)
 
-LEGACY_DIR = BASE_PDF_DIR     # compatibilidad con archivos antiguos
+LEGACY_DIR = BASE_PDF_DIR
 
 LOGO_PATH = Path("app/static/img/incubant.jpg").resolve()
 
-DELETE_AFTER_CONSOLIDATION = True   # borrar inspecciones después de consolidar
+DELETE_AFTER_CONSOLIDATION = True
 
 
 # ===============================
@@ -119,7 +120,6 @@ def _guess_firma_path_for_record(r):
     if not getattr(r, "firma_file", None):
         return None
 
-    # 1. path por usuario
     try:
         u = get_user_paths(r.usuario_id)["firmas"] / r.firma_file
         if u.exists():
@@ -127,12 +127,10 @@ def _guess_firma_path_for_record(r):
     except:
         pass
 
-    # 2. legacy root
     legacy = LEGACY_DIR / r.firma_file
     if legacy.exists():
         return legacy
 
-    # 3. ruta directa almacenada
     direct = Path(r.firma_file)
     if direct.exists():
         return direct
@@ -144,7 +142,6 @@ def prepare_registro(r):
     """
     Prepara campos para PDF y templates.
     """
-    # Aspectos
     try:
         if r.aspectos and r.aspectos not in ["null", "None"]:
             r.aspectos_parsed = json.loads(r.aspectos)
@@ -153,7 +150,6 @@ def prepare_registro(r):
     except:
         r.aspectos_parsed = {}
 
-    # Firma
     r.firma_path = None
     r.firma_base64 = None
     if r.firma_file:
@@ -173,12 +169,15 @@ def prepare_registro(r):
 
 
 # ===============================
-#   ENDPOINT SUBMIT
+#   ENDPOINT SUBMIT - ✅ CORREGIDO
 # ===============================
 
 @router.post("/submit")
 async def submit_inspeccion(
-    usuario_id: int = Form(...),
+    # ✅ CAMBIO CRÍTICO: Usuario viene del token, NO del Form
+    usuario_actual: models.Usuario = Depends(get_current_user),
+    
+    # Datos del formulario (ya NO incluye usuario_id)
     placa: str = Form(""),
     proceso: str = Form(""),
     desde: str = Form(""),
@@ -200,16 +199,19 @@ async def submit_inspeccion(
     observaciones: str = Form(""),
     condiciones_optimas: str = Form("SI"),
 ):
+    """
+    ✅ SEGURIDAD IMPLEMENTADA:
+    - usuario_actual viene de get_current_user (validación de token)
+    - El cliente NO puede falsificar el usuario_id
+    - Token validado en cada request
+    """
+    
     db = SessionLocal()
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    # Obtener usuario
-    usuario = db.query(models.Usuario).filter(models.Usuario.id == usuario_id).first()
-    if not usuario:
-        return JSONResponse({"error": "Usuario no encontrado"}, status_code=404)
-
-    # Nombre conductor (visibilidad configurada)
-    nombre_conductor = normalize_name(usuario.nombre_visible or usuario.nombre)
+    # ✅ Usuario ya validado por Depends
+    usuario_id = usuario_actual.id
+    nombre_conductor = normalize_name(usuario_actual.nombre_visible or usuario_actual.nombre)
     placa = normalize_placa(placa)
 
     # ============================
@@ -272,7 +274,7 @@ async def submit_inspeccion(
         # -----------------------------------
         inspeccion = models.Inspeccion(
             fecha=datetime.now(),
-            usuario_id=usuario_id,
+            usuario_id=usuario_id,  # ✅ Del token verificado
             nombre_conductor=nombre_conductor,
             placa=placa,
             proceso=proceso,
@@ -398,18 +400,29 @@ async def submit_inspeccion(
 
 # ===============================
 #   ENDPOINT MANUAL REPORTE 15
+#   ✅ PROTEGIDO CON AUTH
 # ===============================
 
 @router.get("/reporte15/{nombre_conductor}")
-async def generar_pdf15(nombre_conductor: str):
-
+async def generar_pdf15(
+    nombre_conductor: str,
+    usuario_actual: models.Usuario = Depends(get_current_user)  # ✅ Requiere auth
+):
+    """
+    Genera reporte de 15 inspecciones
+    ✅ Solo el usuario autenticado puede generar SU reporte
+    """
+    
     db = SessionLocal()
     nombre_conductor = normalize_name(nombre_conductor)
 
     try:
         registros = (
             db.query(models.Inspeccion)
-            .filter(models.Inspeccion.nombre_conductor == nombre_conductor)
+            .filter(
+                models.Inspeccion.nombre_conductor == nombre_conductor,
+                models.Inspeccion.usuario_id == usuario_actual.id  # ✅ Filtro de seguridad
+            )
             .order_by(models.Inspeccion.fecha.desc())
             .limit(15)
             .all()
@@ -427,12 +440,8 @@ async def generar_pdf15(nombre_conductor: str):
             f"reporte15_{nombre_conductor}_{datetime.now().strftime('%Y%m%d%H%M')}.pdf"
         )
 
-        try:
-            uid = registros[0].usuario_id
-            user_paths = get_user_paths(uid)
-            pdf_path = user_paths["reportes"] / pdf_filename
-        except:
-            pdf_path = BASE_PDF_DIR / pdf_filename
+        user_paths = get_user_paths(usuario_actual.id)
+        pdf_path = user_paths["reportes"] / pdf_filename
 
         render_pdf_from_template(
             "pdf_template_multiple.html",
@@ -452,4 +461,3 @@ async def generar_pdf15(nombre_conductor: str):
 
     finally:
         db.close()
-

@@ -19,12 +19,30 @@ from app import models
 Base.metadata.create_all(bind=engine)
 
 # ==========================================================
-#   DIRECTORIOS
+#   DIRECTORIOS - ✅ CORREGIDO
 # ==========================================================
-BASE_DIR = Path(__file__).resolve().parent
-DATA_DIR = BASE_DIR / "app" / "data"
+# Este archivo está en: app/main.py
+# Entonces __file__ = .../app/main.py
+# Y __file__.parent = .../app/
+
+BASE_DIR = Path(__file__).resolve().parent  # .../app/
+
+# Directorios de datos
+DATA_DIR = BASE_DIR / "data"
 PDF_DIR = DATA_DIR / "generated_pdfs"
 os.makedirs(PDF_DIR, exist_ok=True)
+
+# ✅ DIRECTORIO ESTÁTICO (dentro de app/)
+STATIC_DIR = BASE_DIR / "static"
+
+# ✅ DIRECTORIO TEMPLATES (dentro de app/)
+TEMPLATES_DIR = BASE_DIR / "templates"
+
+# Verificar que existen
+if not STATIC_DIR.exists():
+    print(f"⚠️  WARNING: {STATIC_DIR} no existe")
+if not TEMPLATES_DIR.exists():
+    print(f"⚠️  WARNING: {TEMPLATES_DIR} no existe")
 
 # ==========================================================
 #   FASTAPI APP
@@ -36,15 +54,12 @@ app = FastAPI(
 # ==========================================================
 #   CORS (SEGURIDAD BÁSICA)
 # ==========================================================
-# Permite frontend local y evita bloqueos del navegador
-# En producción se debe restringir al dominio real
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost",
         "http://localhost:8000",
         "http://127.0.0.1:8000",
-        # "https://misionales.com"  # Producción
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -52,15 +67,23 @@ app.add_middleware(
 )
 
 # ==========================================================
-#   STATIC FILES & TEMPLATES
+#   STATIC FILES & TEMPLATES - ✅ CORREGIDO
 # ==========================================================
-app.mount(
-    "/static",
-    StaticFiles(directory=BASE_DIR / "static"),
-    name="static"
-)
+try:
+    app.mount(
+        "/static",
+        StaticFiles(directory=str(STATIC_DIR)),
+        name="static"
+    )
+    print(f"✅ Static files montados desde: {STATIC_DIR}")
+except Exception as e:
+    print(f"❌ Error montando static files: {e}")
 
-templates = Jinja2Templates(directory=BASE_DIR / "templates")
+try:
+    templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
+    print(f"✅ Templates cargados desde: {TEMPLATES_DIR}")
+except Exception as e:
+    print(f"❌ Error cargando templates: {e}")
 
 # ==========================================================
 #   RUTA: LOGIN
@@ -107,3 +130,22 @@ app.include_router(
     prefix="/inspecciones",
     tags=["Inspecciones"],
 )
+
+# ==========================================================
+#   DEBUG: Mostrar rutas al iniciar
+# ==========================================================
+@app.on_event("startup")
+async def startup_event():
+    print("\n" + "="*60)
+    print("🚀 MISONALES - Sistema iniciado")
+    print("="*60)
+    print(f"📂 BASE_DIR: {BASE_DIR}")
+    print(f"📂 STATIC_DIR: {STATIC_DIR}")
+    print(f"📂 TEMPLATES_DIR: {TEMPLATES_DIR}")
+    print(f"📂 PDF_DIR: {PDF_DIR}")
+    print("="*60)
+    print("🌐 Rutas disponibles:")
+    print("   http://127.0.0.1:8000/login")
+    print("   http://127.0.0.1:8000/")
+    print("   http://127.0.0.1:8000/docs")
+    print("="*60 + "\n")
