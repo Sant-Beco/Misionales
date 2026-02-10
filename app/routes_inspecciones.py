@@ -1,11 +1,11 @@
-# app/routes_inspecciones.py - VERSIÓN CORREGIDA CON SEGURIDAD
+# app/routes_inspecciones.py - VERSIÓN CORREGIDA CON RUTAS DE FIRMA ARREGLADAS
 
 from fastapi import APIRouter, Form, Depends
 from fastapi.responses import FileResponse, JSONResponse, Response
 from sqlalchemy.orm import Session
 from app.database import SessionLocal
 from app import models
-from app.security import get_current_user  # ✅ IMPORTAR FUNCIÓN DE SEGURIDAD
+from app.security import get_current_user
 from app.utils_pdf import render_pdf_from_template
 from pathlib import Path
 from datetime import datetime
@@ -22,6 +22,10 @@ router = APIRouter()
 
 BASE_PDF_DIR = Path("app/data/generated_pdfs")
 BASE_PDF_DIR.mkdir(parents=True, exist_ok=True)
+
+# ✅ NUEVO: Directorio de firmas separado
+BASE_FIRMAS_DIR = Path("app/data/firmas")
+BASE_FIRMAS_DIR.mkdir(parents=True, exist_ok=True)
 
 LEGACY_DIR = BASE_PDF_DIR
 
@@ -80,28 +84,32 @@ def normalize_placa(s: str):
 
 
 # ===============================
-#   RUTAS DE ARCHIVOS POR USUARIO
+#   RUTAS DE ARCHIVOS POR USUARIO - ✅ CORREGIDO
 # ===============================
 
 def get_user_paths(usuario_id: int):
     """
     Crea y retorna carpetas:
         generated_pdfs/usuarios/<id>/inspecciones
-        generated_pdfs/usuarios/<id>/firmas
         generated_pdfs/usuarios/<id>/reportes
+        firmas/usuarios/<id>/  ← ✅ CORREGIDO: firmas en directorio separado
     """
-    user_base = BASE_PDF_DIR / "usuarios" / str(usuario_id)
-    inspecciones_dir = user_base / "inspecciones"
-    firmas_dir = user_base / "firmas"
-    reportes_dir = user_base / "reportes"
+    # PDFs en generated_pdfs
+    user_pdf_base = BASE_PDF_DIR / "usuarios" / str(usuario_id)
+    inspecciones_dir = user_pdf_base / "inspecciones"
+    reportes_dir = user_pdf_base / "reportes"
+    
+    # ✅ Firmas en directorio separado
+    user_firmas_dir = BASE_FIRMAS_DIR / "usuarios" / str(usuario_id)
 
-    for p in (user_base, inspecciones_dir, firmas_dir, reportes_dir):
+    # Crear directorios
+    for p in (user_pdf_base, inspecciones_dir, reportes_dir, user_firmas_dir):
         p.mkdir(parents=True, exist_ok=True)
 
     return {
-        "base": user_base,
+        "base": user_pdf_base,
         "inspecciones": inspecciones_dir,
-        "firmas": firmas_dir,
+        "firmas": user_firmas_dir,  # ✅ Ahora apunta a app/data/firmas/usuarios/<id>/
         "reportes": reportes_dir,
     }
 
@@ -112,25 +120,41 @@ def build_file_uri(path: Path):
 
 def _guess_firma_path_for_record(r):
     """
-    Permite 3 estilos de localización:
-    - Nuevo: /usuarios/<id>/firmas/xxx.png
-    - Legacy: generated_pdfs/xxx.png
-    - Ruta absoluta guardada en DB
+    Busca firma en múltiples ubicaciones para compatibilidad
     """
     if not getattr(r, "firma_file", None):
         return None
 
+    # ✅ PRIORIDAD 1: Nueva estructura (firmas separadas)
     try:
-        u = get_user_paths(r.usuario_id)["firmas"] / r.firma_file
-        if u.exists():
-            return u
+        nueva = BASE_FIRMAS_DIR / "usuarios" / str(r.usuario_id) / r.firma_file
+        if nueva.exists():
+            return nueva
     except:
         pass
 
+    # PRIORIDAD 2: Estructura con duplicación (legacy de tus firmas actuales)
+    try:
+        duplicada = BASE_FIRMAS_DIR / "usuarios" / str(r.usuario_id) / "firmas" / r.firma_file
+        if duplicada.exists():
+            return duplicada
+    except:
+        pass
+
+    # PRIORIDAD 3: Legacy en generated_pdfs
+    try:
+        legacy_user = BASE_PDF_DIR / "usuarios" / str(r.usuario_id) / "firmas" / r.firma_file
+        if legacy_user.exists():
+            return legacy_user
+    except:
+        pass
+
+    # PRIORIDAD 4: Legacy root
     legacy = LEGACY_DIR / r.firma_file
     if legacy.exists():
         return legacy
 
+    # PRIORIDAD 5: Ruta directa
     direct = Path(r.firma_file)
     if direct.exists():
         return direct
@@ -158,26 +182,26 @@ def prepare_registro(r):
             if path and path.exists():
                 r.firma_path = build_file_uri(path)
                 try:
+                    # ✅ Cargar como base64 para WeasyPrint
                     encoded = base64.b64encode(path.read_bytes()).decode("utf-8")
                     r.firma_base64 = f"data:image/png;base64,{encoded}"
-                except:
+                except Exception as e:
+                    print(f"⚠️ Error codificando firma: {e}")
                     pass
-        except:
+        except Exception as e:
+            print(f"⚠️ Error buscando firma: {e}")
             pass
 
     return r
 
 
 # ===============================
-#   ENDPOINT SUBMIT - ✅ CORREGIDO
+#   ENDPOINT SUBMIT - ✅ SEGURO
 # ===============================
 
 @router.post("/submit")
 async def submit_inspeccion(
-    # ✅ CAMBIO CRÍTICO: Usuario viene del token, NO del Form
     usuario_actual: models.Usuario = Depends(get_current_user),
-    
-    # Datos del formulario (ya NO incluye usuario_id)
     placa: str = Form(""),
     proceso: str = Form(""),
     desde: str = Form(""),
@@ -199,24 +223,14 @@ async def submit_inspeccion(
     observaciones: str = Form(""),
     condiciones_optimas: str = Form("SI"),
 ):
-    """
-    ✅ SEGURIDAD IMPLEMENTADA:
-    - usuario_actual viene de get_current_user (validación de token)
-    - El cliente NO puede falsificar el usuario_id
-    - Token validado en cada request
-    """
-    
     db = SessionLocal()
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    # ✅ Usuario ya validado por Depends
     usuario_id = usuario_actual.id
     nombre_conductor = normalize_name(usuario_actual.nombre_visible or usuario_actual.nombre)
     placa = normalize_placa(placa)
 
-    # ============================
-    # Validaciones de seguridad
-    # ============================
+    # Validaciones
     if not placa or len(placa) < 5:
         return JSONResponse({"error": "Placa inválida"}, status_code=400)
 
@@ -235,7 +249,6 @@ async def submit_inspeccion(
     if licencia_num and len(licencia_num) < 6:
         return JSONResponse({"error": "Licencia inválida"}, status_code=400)
 
-    # Aspectos
     try:
         asp_json = json.loads(aspectos)
     except:
@@ -247,15 +260,10 @@ async def submit_inspeccion(
             status_code=400
         )
 
-    # ============================
-    # Crear carpetas del usuario
-    # ============================
     user_paths = get_user_paths(usuario_id)
 
     try:
-        # -----------------------------------
         # Guardar firma
-        # -----------------------------------
         firma_filename = None
         if firma_dataurl:
             try:
@@ -263,18 +271,17 @@ async def submit_inspeccion(
                 data = base64.b64decode(b64)
                 rnd = secrets.token_hex(4)
                 firma_filename = f"firma_{timestamp}_{rnd}.png"
-                firma_path = user_paths["firmas"] / firma_filename
+                firma_path = user_paths["firmas"] / firma_filename  # ✅ Ruta corregida
                 firma_path.write_bytes(data)
+                print(f"✅ Firma guardada en: {firma_path}")
             except Exception as e:
-                print("Error guardando firma:", e)
+                print(f"❌ Error guardando firma: {e}")
                 firma_filename = None
 
-        # -----------------------------------
         # Guardar registro DB
-        # -----------------------------------
         inspeccion = models.Inspeccion(
             fecha=datetime.now(),
-            usuario_id=usuario_id,  # ✅ Del token verificado
+            usuario_id=usuario_id,
             nombre_conductor=nombre_conductor,
             placa=placa,
             proceso=proceso,
@@ -310,9 +317,7 @@ async def submit_inspeccion(
             .count()
         )
 
-        # -----------------------------------
         # PDF individual
-        # -----------------------------------
         safe_pdf_name = f"inspeccion_{timestamp}.pdf"
         pdf_path = user_paths["inspecciones"] / safe_pdf_name
 
@@ -328,9 +333,7 @@ async def submit_inspeccion(
             output_path=str(pdf_path),
         )
 
-        # -----------------------------------
         # Consolidado a 15
-        # -----------------------------------
         if total == 15:
             registros = (
                 db.query(models.Inspeccion)
@@ -339,6 +342,8 @@ async def submit_inspeccion(
                 .limit(15)
                 .all()
             )
+            
+            # ✅ Preparar TODOS los registros
             registros = list(reversed([prepare_registro(r) for r in registros]))
 
             fecha_desde = registros[0].fecha.strftime("%d-%m-%Y")
@@ -378,16 +383,18 @@ async def submit_inspeccion(
                 for r in registros:
                     try:
                         if r.firma_file:
-                            path = user_paths["firmas"] / r.firma_file
-                            if path.exists():
+                            path = _guess_firma_path_for_record(r)
+                            if path and path.exists():
                                 path.unlink()
-                    except:
-                        pass
+                                print(f"🗑️ Firma eliminada: {path}")
+                    except Exception as e:
+                        print(f"⚠️ Error eliminando firma: {e}")
 
                     try:
                         db.delete(r)
-                    except:
-                        pass
+                    except Exception as e:
+                        print(f"⚠️ Error eliminando registro: {e}")
+                        
                 db.commit()
 
             return safe_return_pdf(reporte_path, reporte_filename)
@@ -400,19 +407,13 @@ async def submit_inspeccion(
 
 # ===============================
 #   ENDPOINT MANUAL REPORTE 15
-#   ✅ PROTEGIDO CON AUTH
 # ===============================
 
 @router.get("/reporte15/{nombre_conductor}")
 async def generar_pdf15(
     nombre_conductor: str,
-    usuario_actual: models.Usuario = Depends(get_current_user)  # ✅ Requiere auth
+    usuario_actual: models.Usuario = Depends(get_current_user)
 ):
-    """
-    Genera reporte de 15 inspecciones
-    ✅ Solo el usuario autenticado puede generar SU reporte
-    """
-    
     db = SessionLocal()
     nombre_conductor = normalize_name(nombre_conductor)
 
@@ -421,7 +422,7 @@ async def generar_pdf15(
             db.query(models.Inspeccion)
             .filter(
                 models.Inspeccion.nombre_conductor == nombre_conductor,
-                models.Inspeccion.usuario_id == usuario_actual.id  # ✅ Filtro de seguridad
+                models.Inspeccion.usuario_id == usuario_actual.id
             )
             .order_by(models.Inspeccion.fecha.desc())
             .limit(15)

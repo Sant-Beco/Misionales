@@ -9,25 +9,68 @@
   <style>
     .error-text-inline { color: var(--rojo-error); font-size: 0.85rem; margin-top:6px; display:block; }
     .hint-text { color: #666; font-size:0.82rem; margin-top:4px; }
+    
+    /* Estilos para header con logout */
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background: linear-gradient(135deg, #5B8F5B 0%, #7FB587 100%);
+      color: white;
+      margin-bottom: 2rem;
+      border-radius: 8px;
+    }
+    
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .user-name {
+      font-weight: 600;
+    }
+    
+    .btn-logout {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 2px solid white;
+      padding: 0.5rem 1.5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-logout:hover {
+      background: white;
+      color: #667eea;
+    }
   </style>
 </head>
 
 <body>
+  <!-- Header con info de usuario y logout -->
+  <div class="app-header">
+    <div class="user-info">
+      <span>👤</span>
+      <span class="user-name" id="userName">Cargando...</span>
+    </div>
+    <button id="logoutBtn" class="btn-logout">Cerrar Sesión</button>
+  </div>
+
   <div id="formBox" class="form-card">
     <h1 class="form-title">INSPECCIÓN PRE OPERACIONAL MOTOCICLETA</h1>
 
     <div class="form-meta">
-      Código: <strong>FO-SST-063</strong> – Fecha: <strong>{{ fecha }}</strong> – Versión: <strong>01</strong>
+      Código: <strong>FO-SST-063</strong> — Fecha: <strong>{{ fecha }}</strong> — Versión: <strong>01</strong>
     </div>
 
     <form id="inspeccionForm" method="post" action="/inspecciones/submit" novalidate>
   
-  <!-- ❌ ELIMINADO: NO enviar usuario_id desde el cliente -->
-  <!-- <input type="hidden" id="usuarioIdInput" name="usuario_id"> -->
-  <!-- <input type="hidden" id="nombreConductorInput" name="nombre_conductor"> -->
+  <!-- ✅ YA NO enviamos usuario_id ni nombre_conductor -->
   
-  <!-- ✅ El backend obtiene el usuario del token -->
-
   <!-- DATOS VEHÍCULO -->
   <div class="section-title">Datos del vehículo</div>
 
@@ -240,13 +283,49 @@
   <script src="/static/js/firma.js"></script>
 
 <script>
-/* === Inicialización === */
+/* === SEGURIDAD: Verificar autenticación === */
 const token = localStorage.getItem("token");
-if (!token) window.location.href = "/login";
+const userName = localStorage.getItem("nombre");
 
-// ❌ ELIMINADO: NO necesitamos enviar usuario_id
-// document.getElementById("usuarioIdInput").value = localStorage.getItem("usuario_id");
-// document.getElementById("nombreConductorInput").value = localStorage.getItem("nombre");
+// ✅ Redirigir a login si no hay token
+if (!token) {
+  console.log("No hay token, redirigiendo a login...");
+  window.location.href = "/login";
+}
+
+// ✅ Mostrar nombre de usuario en header
+if (userName) {
+  document.getElementById("userName").textContent = userName;
+}
+
+/* === LOGOUT === */
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+  if (!confirm("¿Seguro que deseas cerrar sesión?")) {
+    return;
+  }
+
+  try {
+    // Llamar al endpoint de logout
+    const response = await fetch("/auth/logout", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    // Limpiar localStorage independientemente de la respuesta
+    localStorage.clear();
+    
+    // Redirigir a login
+    window.location.href = "/login";
+    
+  } catch (error) {
+    console.error("Error en logout:", error);
+    // Aún así limpiamos y redirigimos
+    localStorage.clear();
+    window.location.href = "/login";
+  }
+});
 
 /* === Helpers mensajes === */
 function showFieldError(id, msg) {
@@ -364,7 +443,7 @@ document.getElementById("inspeccionForm").addEventListener("submit", async (ev) 
   if (window.firmaApp.isEmpty()) {
     showFieldError("error_firma","Debes firmar antes de enviar.");
     hasError = true;
-}
+  }
 
   /* === Observaciones si hay M === */
   const anyM = Object.values(aspectos).includes("M");
@@ -385,18 +464,19 @@ document.getElementById("inspeccionForm").addEventListener("submit", async (ev) 
   btn.textContent = "Generando...";
 
   try {
-    // ✅ CRÍTICO: Enviar token en el header
+    // ✅ Enviar token en header
     const resp = await fetch(form.action, { 
       method: "POST", 
       body: formData,
       headers: {
-        "Authorization": `Bearer ${token}`  // ✅ Token aquí
+        "Authorization": `Bearer ${token}`
       }
     });
 
     if (!resp.ok) {
       if (resp.status === 401) {
         // Token expirado o inválido
+        alert("Tu sesión ha expirado. Por favor inicia sesión nuevamente.");
         localStorage.clear();
         window.location.href = "/login";
         return;
@@ -433,6 +513,10 @@ document.getElementById("inspeccionForm").addEventListener("submit", async (ev) 
       form.reset();
       window.firmaApp?.refresh?.();
       document.getElementById("firmaPreview").innerHTML = "";
+      
+      // Mensaje de éxito
+      document.getElementById("globalMessage").innerHTML =
+        '<div class="success-msg">✅ Inspección creada exitosamente</div>';
     }
 
   } catch (e) {
