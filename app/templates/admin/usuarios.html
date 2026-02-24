@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios - MISONALES</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .admin-sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 1rem;
+        }
+        
+        .admin-sidebar h2 {
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+        }
+        
+        .admin-nav a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+        
+        .admin-nav a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .admin-nav a.active {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .admin-content {
+            flex: 1;
+            padding: 2rem;
+            background: #f5f7fa;
+        }
+        
+        .admin-header {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .content-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .btn-sm {
+            padding: 0.35rem 0.75rem;
+            font-size: 0.85rem;
+        }
+        
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+        }
+        
+        .users-table th {
+            background: #f9fafb;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .users-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .users-table tr:hover {
+            background: #f9fafb;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .badge-admin {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .badge-user {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #3b82f6;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 400px;
+            width: 90%;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            justify-content: flex-end;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <div class="admin-sidebar">
+            <h2>🔧 Admin Panel</h2>
+            <nav class="admin-nav">
+                <a href="/admin">📊 Dashboard</a>
+                <a href="/admin/usuarios" class="active">👥 Usuarios</a>
+                <a href="/admin/logs">📋 Logs</a>
+                <a href="/">🏠 Ir al sistema</a>
+            </nav>
+        </div>
+        
+        <!-- Content -->
+        <div class="admin-content">
+            <!-- Header -->
+            <div class="admin-header">
+                <div>
+                    <h1>Gestión de Usuarios</h1>
+                    <p>Administra los usuarios del sistema</p>
+                </div>
+                <a href="/auth/logout" class="btn btn-danger">Cerrar Sesión</a>
+            </div>
+            
+            <!-- Mensajes -->
+            {% if request.query_params.get('mensaje') %}
+            <div class="alert alert-success">
+                ✅ {{ request.query_params.get('mensaje') }}
+            </div>
+            {% endif %}
+            
+            <!-- Content Card -->
+            <div class="content-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <div>
+                        <h2 style="margin: 0;">Usuarios Registrados</h2>
+                        <p style="color: #6b7280; margin-top: 0.5rem;">
+                            Total: <strong>{{ usuarios|length }}</strong> usuarios
+                        </p>
+                    </div>
+                    <a href="/admin/usuarios/nuevo" class="btn btn-primary">
+                        ➕ Nuevo Usuario
+                    </a>
+                </div>
+                
+                {% if usuarios|length == 0 %}
+                <div class="alert alert-info">
+                    ℹ️ No hay usuarios registrados. Crea el primero.
+                </div>
+                {% else %}
+                
+                <!-- Tabla de usuarios -->
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Usuario</th>
+                            <th>Nombre Visible</th>
+                            <th>Rol</th>
+                            <th>Inspecciones</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for usuario in usuarios %}
+                        <tr>
+                            <td><strong>#{{ usuario.id }}</strong></td>
+                            <td>{{ usuario.nombre }}</td>
+                            <td>{{ usuario.nombre_visible }}</td>
+                            <td>
+                                {% if usuario.rol == 'admin' %}
+                                    <span class="badge badge-admin">👑 Admin</span>
+                                {% else %}
+                                    <span class="badge badge-user">👤 Usuario</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong>{{ stats.get(usuario.id, 0) }}</strong> registros
+                            </td>
+                            <td>
+                                <div class="actions">
+                                    <a href="/admin/usuarios/{{ usuario.id }}/editar" 
+                                       class="btn btn-secondary btn-sm">
+                                        ✏️ Editar
+                                    </a>
+                                    
+                                    {% if usuario.id != admin.id %}
+                                    <button onclick="confirmarEliminar({{ usuario.id }}, '{{ usuario.nombre }}')"
+                                            class="btn btn-danger btn-sm">
+                                        🗑️ Eliminar
+                                    </button>
+                                    {% else %}
+                                    <button class="btn btn-secondary btn-sm" disabled>
+                                        🔒 Tú
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de confirmación -->
+    <div id="modalEliminar" class="modal">
+        <div class="modal-content">
+            <h3>⚠️ Confirmar eliminación</h3>
+            <p>¿Estás seguro de eliminar al usuario <strong id="nombreUsuario"></strong>?</p>
+            <p style="color: #6b7280; font-size: 0.9rem;">
+                Esta acción no se puede deshacer.
+            </p>
+            
+            <form id="formEliminar" method="POST" style="display: none;">
+                <input type="hidden" name="confirmar" value="1">
+            </form>
+            
+            <div class="modal-actions">
+                <button onclick="cerrarModal()" class="btn btn-secondary">
+                    Cancelar
+                </button>
+                <button onclick="eliminarUsuario()" class="btn btn-danger">
+                    Sí, eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let usuarioIdEliminar = null;
+        
+        function confirmarEliminar(id, nombre) {
+            usuarioIdEliminar = id;
+            document.getElementById('nombreUsuario').textContent = nombre;
+            document.getElementById('modalEliminar').classList.add('active');
+        }
+        
+        function cerrarModal() {
+            document.getElementById('modalEliminar').classList.remove('active');
+            usuarioIdEliminar = null;
+        }
+        
+        function eliminarUsuario() {
+            if (usuarioIdEliminar) {
+                const form = document.getElementById('formEliminar');
+                form.action = `/admin/usuarios/${usuarioIdEliminar}/eliminar`;
+                form.submit();
+            }
+        }
+        
+        // Cerrar modal al hacer click fuera
+        document.getElementById('modalEliminar').addEventListener('click', function(e) {
+            if (e.target === this) {
+                cerrarModal();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -143,3 +143,13 @@ misionales-fastapi/
 ├── .gitignore
 ├── README.md
 └── .env (NO subir)
+
+Sistema MISONALES
+├── 🔐 Login de usuarios
+├── 📝 Formulario de inspecciones
+├── ✍️ Firma digital
+├── 📄 PDFs individuales
+├── 📊 PDF consolidado de 15
+├── 👥 Panel de usuarios ← NUEVO
+├── 📋 Logs de auditoría ← NUEVO
+└── 🔧 Gestión profesional ← NUEVO

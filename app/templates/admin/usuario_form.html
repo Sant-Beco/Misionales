@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ 'Crear' if modo == 'crear' else 'Editar' }} Usuario - MISONALES</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .admin-sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 1rem;
+        }
+        
+        .admin-sidebar h2 {
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+        }
+        
+        .admin-nav a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+        
+        .admin-nav a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .admin-nav a.active {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .admin-content {
+            flex: 1;
+            padding: 2rem;
+            background: #f5f7fa;
+        }
+        
+        .admin-header {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .content-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 600px;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .form-group .hint {
+            display: block;
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1rem;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #3b82f6;
+        }
+        
+        .alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #f59e0b;
+        }
+        
+        .required {
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <div class="admin-sidebar">
+            <h2>🔧 Admin Panel</h2>
+            <nav class="admin-nav">
+                <a href="/admin">📊 Dashboard</a>
+                <a href="/admin/usuarios" class="active">👥 Usuarios</a>
+                <a href="/admin/logs">📋 Logs</a>
+                <a href="/">🏠 Ir al sistema</a>
+            </nav>
+        </div>
+        
+        <!-- Content -->
+        <div class="admin-content">
+            <!-- Header -->
+            <div class="admin-header">
+                <div>
+                    <h1>{{ '➕ Crear Nuevo Usuario' if modo == 'crear' else '✏️ Editar Usuario' }}</h1>
+                    <p>{{ 'Completa los datos del nuevo usuario' if modo == 'crear' else 'Modifica los datos del usuario' }}</p>
+                </div>
+                <a href="/admin/usuarios" class="btn btn-secondary">← Volver</a>
+            </div>
+            
+            <!-- Content Card -->
+            <div class="content-card">
+                {% if modo == 'editar' %}
+                <div class="alert alert-info">
+                    ℹ️ Editando usuario: <strong>{{ usuario.nombre }}</strong>
+                </div>
+                {% endif %}
+                
+                {% if modo == 'editar' and usuario.id == admin.id %}
+                <div class="alert alert-warning">
+                    ⚠️ Estás editando tu propio usuario. Ten cuidado de no quitarte permisos de administrador.
+                </div>
+                {% endif %}
+                
+                <form method="POST" 
+                      action="{{ '/admin/usuarios/crear' if modo == 'crear' else '/admin/usuarios/' + usuario.id|string + '/actualizar' }}"
+                      onsubmit="return validarFormulario()">
+                    
+                    {% if modo == 'crear' %}
+                    <!-- Nombre de usuario (solo en crear) -->
+                    <div class="form-group">
+                        <label for="nombre">
+                            Nombre de usuario <span class="required">*</span>
+                        </label>
+                        <input type="text" 
+                               id="nombre" 
+                               name="nombre" 
+                               class="form-input"
+                               placeholder="Ej: santiago"
+                               required
+                               autocomplete="off">
+                        <span class="hint">
+                            Sin espacios, minúsculas. Este será el nombre para login.
+                        </span>
+                    </div>
+                    {% else %}
+                    <!-- Mostrar nombre (no editable) -->
+                    <div class="form-group">
+                        <label>Nombre de usuario</label>
+                        <input type="text" 
+                               class="form-input" 
+                               value="{{ usuario.nombre }}"
+                               disabled>
+                        <span class="hint">
+                            El nombre de usuario no se puede cambiar.
+                        </span>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Nombre visible -->
+                    <div class="form-group">
+                        <label for="nombre_visible">
+                            Nombre completo <span class="required">*</span>
+                        </label>
+                        <input type="text" 
+                               id="nombre_visible" 
+                               name="nombre_visible" 
+                               class="form-input"
+                               placeholder="Ej: Santiago Bedoya Corrales"
+                               value="{{ usuario.nombre_visible if modo == 'editar' else '' }}"
+                               required>
+                        <span class="hint">
+                            Este es el nombre que se mostrará en el sistema.
+                        </span>
+                    </div>
+                    
+                    <!-- PIN -->
+                    <div class="form-group">
+                        <label for="pin">
+                            PIN 
+                            <span class="required">{{ '*' if modo == 'crear' else '' }}</span>
+                        </label>
+                        <input type="password" 
+                               id="pin" 
+                               name="pin" 
+                               class="form-input"
+                               placeholder="Mínimo 4 dígitos"
+                               {% if modo == 'crear' %}required{% endif %}
+                               minlength="4">
+                        <span class="hint">
+                            {% if modo == 'crear' %}
+                                PIN de 4 o más dígitos para login.
+                            {% else %}
+                                Déjalo vacío si no quieres cambiarlo. Solo ingrésalo si quieres actualizarlo.
+                            {% endif %}
+                        </span>
+                    </div>
+                    
+                    <!-- Confirmar PIN (solo si se ingresó PIN) -->
+                    <div class="form-group">
+                        <label for="pin_confirmar">
+                            Confirmar PIN
+                        </label>
+                        <input type="password" 
+                               id="pin_confirmar" 
+                               name="pin_confirmar" 
+                               class="form-input"
+                               placeholder="Confirma el PIN">
+                        <span class="hint">
+                            Debe coincidir con el PIN ingresado arriba.
+                        </span>
+                    </div>
+                    
+                    <!-- Rol -->
+                    <div class="form-group">
+                        <label for="rol">
+                            Rol <span class="required">*</span>
+                        </label>
+                        <select id="rol" 
+                                name="rol" 
+                                class="form-select"
+                                required>
+                            <option value="user" 
+                                    {{ 'selected' if (modo == 'editar' and usuario.rol == 'user') or modo == 'crear' }}>
+                                👤 Usuario - Solo puede crear inspecciones
+                            </option>
+                            <option value="admin" 
+                                    {{ 'selected' if modo == 'editar' and usuario.rol == 'admin' }}>
+                                👑 Administrador - Puede gestionar usuarios
+                            </option>
+                        </select>
+                        <span class="hint">
+                            Los administradores pueden acceder al panel de administración.
+                        </span>
+                    </div>
+                    
+                    <!-- Acciones -->
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            {{ '➕ Crear Usuario' if modo == 'crear' else '💾 Guardar Cambios' }}
+                        </button>
+                        <a href="/admin/usuarios" class="btn btn-secondary">
+                            Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function validarFormulario() {
+            const pin = document.getElementById('pin').value;
+            const pinConfirmar = document.getElementById('pin_confirmar').value;
+            
+            // Solo validar si se ingresó un PIN
+            if (pin) {
+                if (pin !== pinConfirmar) {
+                    alert('❌ Los PINs no coinciden');
+                    return false;
+                }
+                
+                if (pin.length < 4) {
+                    alert('❌ El PIN debe tener al menos 4 caracteres');
+                    return false;
+                }
+            } else if ({{ 'true' if modo == 'crear' else 'false' }}) {
+                // En modo crear, el PIN es obligatorio
+                alert('❌ Debes ingresar un PIN');
+                return false;
+            }
+            
+            // Validar nombre de usuario (solo en crear)
+            {% if modo == 'crear' %}
+            const nombre = document.getElementById('nombre').value;
+            if (!/^[a-z0-9_]+$/.test(nombre)) {
+                alert('❌ El nombre de usuario solo puede contener letras minúsculas, números y guiones bajos');
+                return false;
+            }
+            {% endif %}
+            
+            return true;
+        }
+        
+        // Validar en tiempo real
+        document.getElementById('pin')?.addEventListener('input', function() {
+            const pin = this.value;
+            const confirmar = document.getElementById('pin_confirmar');
+            
+            if (pin.length < 4 && pin.length > 0) {
+                this.style.borderColor = '#ef4444';
+            } else {
+                this.style.borderColor = '#d1d5db';
+            }
+        });
+        
+        document.getElementById('pin_confirmar')?.addEventListener('input', function() {
+            const pin = document.getElementById('pin').value;
+            const confirmar = this.value;
+            
+            if (pin && confirmar && pin !== confirmar) {
+                this.style.borderColor = '#ef4444';
+            } else {
+                this.style.borderColor = '#d1d5db';
+            }
+        });
+    </script>
+</body>
+</html>

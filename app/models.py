@@ -10,6 +10,7 @@ class Usuario(Base):
     id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String(100), unique=True)
     nombre_visible = Column(String(150), nullable=True)
+    rol = Column(String(20), default="user")
     pin_hash = Column(String(255))
 
     token = Column(String(255), nullable=True, index=True)
@@ -66,5 +67,14 @@ class ReporteInspeccion(Base):
     total_incluidas = Column(Integer, default=15)
 
 
+class LogAuditoria(Base):
+    __tablename__ = "logs_auditoria"
 
+    id = Column(Integer, primary_key=True, index=True)
+    admin_id = Column(Integer, ForeignKey("usuarios.id"))
+    accion = Column(String(50))  # CREAR_USUARIO, EDITAR_USUARIO, etc
+    detalles = Column(Text)      # Descripción detallada
+    fecha = Column(DateTime, default=datetime.now)
 
+    # Relación
+    admin = relationship("Usuario", foreign_keys=[admin_id])

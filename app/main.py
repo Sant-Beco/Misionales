@@ -131,6 +131,10 @@ app.include_router(
     tags=["Inspecciones"],
 )
 
+# 🔧 ADMINISTRACIÓN (NUEVO)
+from app.routes_admin import router as admin_router
+app.include_router(admin_router, tags=["Admin"])
+
 # ==========================================================
 #   DEBUG: Mostrar rutas al iniciar
 # ==========================================================
