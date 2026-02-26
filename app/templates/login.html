@@ -1,84 +1,207 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ingreso al Sistema</title>
-  <link rel="stylesheet" href="/static/css/style.css?v=1">
-  <link rel="icon" href="../static/img/Logotipo, Original-01.png" type="image/png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Misionales</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #52b788 0%, #2d6a4f 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    
+    .login-card {
+      background: white;
+      padding: 2.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+    
+    .login-title {
+      text-align: center;
+      color: #1b4332;
+      margin-bottom: 2rem;
+      font-size: 1.8rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #2d6a4f;
+      font-weight: 600;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid #d8f3dc;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: #52b788;
+    }
+    
+    .btn-login {
+      width: 100%;
+      padding: 0.875rem;
+      background: #2d6a4f;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    
+    .btn-login:hover {
+      background: #1b4332;
+    }
+    
+    .btn-login:disabled {
+      background: #95d5b2;
+      cursor: not-allowed;
+    }
+    
+    .error-message {
+      background: #fee2e2;
+      color: #991b1b;
+      padding: 0.75rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    
+    .logo {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .logo-text {
+      font-size: 2.5rem;
+      color: #2d6a4f;
+    }
+  </style>
 </head>
 <body>
-  <div id="loginBox" class="login-card">
-    <h2 class="title">Ingreso al Sistema</h2>
-
-    <div class="login-fields">
-      <input id="loginNombre" class="input" placeholder="Nombre de usuario" autocomplete="off">
-      <input id="loginPin" type="password" class="input" placeholder="PIN">
-
-      <button id="loginBtn" class="btn-primary">Iniciar sesión</button>
-
-      <p id="loginError" class="error-text hidden">Usuario o PIN incorrecto</p>
-      <p id="serverError" class="error-text hidden">Error en el servidor</p>
+  <div class="login-card">
+    <div class="logo">
+      <div class="logo-text">🚗</div>
     </div>
+    
+    <h1 class="login-title">MISONALES</h1>
+    
+    <div id="errorMessage" class="error-message"></div>
+    
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="nombre">Usuario</label>
+        <input 
+          type="text" 
+          id="nombre" 
+          name="nombre" 
+          class="form-input" 
+          placeholder="Ingresa tu usuario"
+          required
+          autocomplete="username"
+        >
+      </div>
+      
+      <div class="form-group">
+        <label for="pin">PIN</label>
+        <input 
+          type="password" 
+          id="pin" 
+          name="pin" 
+          class="form-input" 
+          placeholder="Ingresa tu PIN"
+          required
+          autocomplete="current-password"
+        >
+      </div>
+      
+      <button type="submit" id="btnLogin" class="btn-login">
+        Iniciar Sesión
+      </button>
+    </form>
   </div>
-
+  
   <script>
-    document.getElementById("loginBtn").onclick = async () => {
-      const nombre = document.getElementById("loginNombre").value.trim();
-      const pin = document.getElementById("loginPin").value.trim();
-
-      // Ocultar mensajes previos
-      document.getElementById("loginError").classList.add("hidden");
-      document.getElementById("serverError").classList.add("hidden");
-
-      if (!nombre || !pin) {
-        document.getElementById("loginError").textContent = "Complete todos los campos";
-        document.getElementById("loginError").classList.remove("hidden");
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append("nombre", nombre);
-      formData.append("pin", pin);
-
+    // Limpiar localStorage al cargar login
+    localStorage.clear();
+    
+    const form = document.getElementById('loginForm');
+    const btnLogin = document.getElementById('btnLogin');
+    const errorMessage = document.getElementById('errorMessage');
+    
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.style.display = 'block';
+      setTimeout(() => {
+        errorMessage.style.display = 'none';
+      }, 5000);
+    }
+    
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData(form);
+      
+      btnLogin.disabled = true;
+      btnLogin.textContent = 'Iniciando...';
+      errorMessage.style.display = 'none';
+      
       try {
-        const res = await fetch("/auth/login", {
-          method: "POST",
+        const response = await fetch('/auth/login', {
+          method: 'POST',
           body: formData
         });
-
-        if (!res.ok) {
-          // Error de usuario o PIN
-          if (res.status === 400 || res.status === 401) {
-            document.getElementById("loginError").textContent = "Usuario o PIN incorrecto";
-            document.getElementById("loginError").classList.remove("hidden");
-          } else {
-            // Error inesperado
-            document.getElementById("serverError").textContent = "Error del servidor";
-            document.getElementById("serverError").classList.remove("hidden");
-          }
-          return;
-        }
-
-        const data = await res.json();
-
-        // ✅ CORREGIDO: Guardar access_token correctamente
-        console.log("Respuesta del login:", data);  // Debug
         
-        localStorage.setItem("token", data.access_token);  // ✅ access_token, NO token
-        localStorage.setItem("usuario_id", data.usuario_id);
-        localStorage.setItem("nombre", data.nombre);
-
-        console.log("Token guardado:", localStorage.getItem("token"));  // Debug
-
-        // Redirigir al formulario principal
-        window.location.href = "/";
-      } catch (err) {
-        console.error("Error en login:", err);  // Debug
-        document.getElementById("serverError").textContent = "Error de conexión con el servidor";
-        document.getElementById("serverError").classList.remove("hidden");
+        if (response.ok) {
+          const data = await response.json();
+          
+          // ✅ Guardar datos en localStorage (incluyendo rol)
+          localStorage.setItem('token', data.access_token);
+          localStorage.setItem('usuario_id', data.usuario_id);
+          localStorage.setItem('nombre', data.nombre);
+          localStorage.setItem('rol', data.rol || 'user');  // ← NUEVO
+          
+          // ✅ Redirigir según el rol
+          if (data.rol === 'admin') {
+            // Admins van al panel de admin
+            window.location.href = '/admin';
+          } else {
+            // Usuarios normales van al formulario
+            window.location.href = '/';
+          }
+        } else {
+          const error = await response.json();
+          showError(error.detail || 'Usuario o PIN incorrecto');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showError('Error de conexión. Intenta nuevamente.');
+      } finally {
+        btnLogin.disabled = false;
+        btnLogin.textContent = 'Iniciar Sesión';
       }
-    };
+    });
   </script>
 </body>
 </html>

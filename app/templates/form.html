@@ -7,19 +7,16 @@
   <link rel="stylesheet" href="/static/css/style.css?v=1">
   <link rel="icon" href="../static/img/Logotipo, Original-01.png" type="image/png">
   <style>
-    .error-text-inline { color: var(--rojo-error); font-size: 0.85rem; margin-top:6px; display:block; }
-    .hint-text { color: #666; font-size:0.82rem; margin-top:4px; }
-    
-    /* Estilos para header con logout */
-    .app-header {
+    /* Header con usuario y logout */
+    .user-header {
+      background: linear-gradient(135deg, #52b788 0%, #2d6a4f 100%);
+      color: white;
+      padding: 1rem 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1rem 2rem;
-      background: linear-gradient(135deg, #5B8F5B 0%, #7FB587 100%);
-      color: white;
       margin-bottom: 2rem;
-      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
     .user-info {
@@ -30,34 +27,60 @@
     
     .user-name {
       font-weight: 600;
+      font-size: 1.1rem;
     }
     
-    .btn-logout {
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
-      border: 2px solid white;
-      padding: 0.5rem 1.5rem;
+    .btn-header {
+      padding: 0.5rem 1rem;
+      border: none;
       border-radius: 6px;
       cursor: pointer;
       font-size: 0.9rem;
-      transition: all 0.3s ease;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    
+    .btn-admin {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      margin-right: 0.5rem;
+    }
+    
+    .btn-admin:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .btn-logout {
+      background: #ef4444;
+      color: white;
     }
     
     .btn-logout:hover {
-      background: white;
-      color: #667eea;
+      background: #dc2626;
     }
+    
+    .error-text-inline { color: var(--rojo-error); font-size: 0.85rem; margin-top:6px; display:block; }
+    .hint-text { color: #666; font-size:0.82rem; margin-top:4px; }
   </style>
 </head>
 
 <body>
-  <!-- Header con info de usuario y logout -->
-  <div class="app-header">
+  <!-- Header con usuario -->
+  <div class="user-header">
     <div class="user-info">
       <span>👤</span>
-      <span class="user-name" id="userName">Cargando...</span>
+      <span class="user-name" id="headerNombre">Usuario</span>
     </div>
-    <button id="logoutBtn" class="btn-logout">Cerrar Sesión</button>
+    <div>
+      <!-- Botón Admin (solo si es admin) -->
+      <a href="#" id="btnAdmin" class="btn-header btn-admin" style="display: none;" onclick="irAAdmin(event)">
+        🔧 Panel Admin
+      </a>
+      <button id="btnLogout" class="btn-header btn-logout" onclick="cerrarSesion()">
+        Cerrar Sesión
+      </button>
+    </div>
   </div>
 
   <div id="formBox" class="form-card">
@@ -68,9 +91,9 @@
     </div>
 
     <form id="inspeccionForm" method="post" action="/inspecciones/submit" novalidate>
-  
-  <!-- ✅ YA NO enviamos usuario_id ni nombre_conductor -->
-  
+  <input type="hidden" id="usuarioIdInput" name="usuario_id">
+  <input type="hidden" id="nombreConductorInput" name="nombre_conductor">
+
   <!-- DATOS VEHÍCULO -->
   <div class="section-title">Datos del vehículo</div>
 
@@ -283,49 +306,106 @@
   <script src="/static/js/firma.js"></script>
 
 <script>
-/* === SEGURIDAD: Verificar autenticación === */
+/* === Inicialización === */
 const token = localStorage.getItem("token");
-const userName = localStorage.getItem("nombre");
+if (!token) window.location.href = "/login";
 
-// ✅ Redirigir a login si no hay token
-if (!token) {
-  console.log("No hay token, redirigiendo a login...");
-  window.location.href = "/login";
+// Cargar nombre del usuario en header
+const nombre = localStorage.getItem("nombre") || "Usuario";
+document.getElementById("headerNombre").textContent = nombre;
+
+document.getElementById("usuarioIdInput").value = localStorage.getItem("usuario_id");
+document.getElementById("nombreConductorInput").value = nombre;
+
+// Verificar si es admin para mostrar botón
+async function verificarSiEsAdmin() {
+  try {
+    const resp = await fetch("/auth/verify", {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    
+    if (resp.ok) {
+      const data = await resp.json();
+      // Si el backend retorna rol, verificar
+      // Por ahora, simplemente mostramos el botón a todos los usuarios autenticados
+      // Puedes agregar lógica adicional aquí si necesitas
+    }
+  } catch (e) {
+    console.error("Error verificando usuario:", e);
+  }
 }
 
-// ✅ Mostrar nombre de usuario en header
-if (userName) {
-  document.getElementById("userName").textContent = userName;
-}
+verificarSiEsAdmin();
 
-/* === LOGOUT === */
-document.getElementById("logoutBtn").addEventListener("click", async () => {
-  if (!confirm("¿Seguro que deseas cerrar sesión?")) {
+/* === Función para ir al admin === */
+function irAAdmin(e) {
+  e.preventDefault();
+  const token = localStorage.getItem("token");
+  
+  if (!token) {
+    alert("Debes iniciar sesión primero");
+    window.location.href = "/login";
     return;
   }
+  
+  // Abrir panel de admin usando fetch con el token
+  fetch("/admin", {
+    headers: {
+      "Authorization": `Bearer ${token}`
+    }
+  }).then(r => {
+    if (r.ok) {
+      return r.text();
+    } else if (r.status === 403) {
+      alert("No tienes permisos de administrador");
+      throw new Error("403");
+    } else if (r.status === 401) {
+      alert("Tu sesión ha expirado");
+      localStorage.clear();
+      window.location.href = "/login";
+      throw new Error("401");
+    } else {
+      throw new Error("Error desconocido");
+    }
+  }).then(html => {
+    // Abrir en nueva ventana
+    const win = window.open("", "_blank");
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
+  }).catch(e => {
+    if (e.message !== "403" && e.message !== "401") {
+      console.error("Error abriendo admin:", e);
+    }
+  });
+}
 
+/* === Función para cerrar sesión === */
+async function cerrarSesion() {
+  const token = localStorage.getItem("token");
+  
+  if (!token) {
+    localStorage.clear();
+    window.location.href = "/login";
+    return;
+  }
+  
   try {
     // Llamar al endpoint de logout
-    const response = await fetch("/auth/logout", {
+    await fetch("/auth/logout", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${token}`
       }
     });
-
-    // Limpiar localStorage independientemente de la respuesta
-    localStorage.clear();
-    
-    // Redirigir a login
-    window.location.href = "/login";
-    
-  } catch (error) {
-    console.error("Error en logout:", error);
-    // Aún así limpiamos y redirigimos
+  } catch (e) {
+    console.error("Error cerrando sesión:", e);
+  } finally {
+    // Limpiar localStorage y redirigir
     localStorage.clear();
     window.location.href = "/login";
   }
-});
+}
 
 /* === Helpers mensajes === */
 function showFieldError(id, msg) {
@@ -335,6 +415,7 @@ function showFieldError(id, msg) {
   el.style.display = "block";
   el.textContent = msg;
 
+  // Buscar input/select previo
   const field = el.previousElementSibling;
   if (field && (field.tagName === "INPUT" || field.tagName === "SELECT")) {
     field.classList.add("input-invalid");
@@ -403,6 +484,7 @@ document.getElementById("inspeccionForm").addEventListener("submit", async (ev) 
   const firmaData = window.firmaApp.getDataURL();
   formData.set("firma_dataurl", firmaData);
 
+
   /* === VALIDACIONES === */
   let hasError = false;
 
@@ -443,7 +525,7 @@ document.getElementById("inspeccionForm").addEventListener("submit", async (ev) 
   if (window.firmaApp.isEmpty()) {
     showFieldError("error_firma","Debes firmar antes de enviar.");
     hasError = true;
-  }
+}
 
   /* === Observaciones si hay M === */
   const anyM = Object.values(aspectos).includes("M");
@@ -458,16 +540,15 @@ document.getElementById("inspeccionForm").addEventListener("submit", async (ev) 
     return;
   }
 
-  /* === Submit backend con TOKEN === */
+  /* === Submit backend === */
   const btn = document.getElementById("submitBtn");
   btn.disabled = true;
   btn.textContent = "Generando...";
 
   try {
-    // ✅ Enviar token en header
     const resp = await fetch(form.action, { 
-      method: "POST", 
-      body: formData,
+      method:"POST", 
+      body:formData,
       headers: {
         "Authorization": `Bearer ${token}`
       }
@@ -475,7 +556,7 @@ document.getElementById("inspeccionForm").addEventListener("submit", async (ev) 
 
     if (!resp.ok) {
       if (resp.status === 401) {
-        // Token expirado o inválido
+        // Sesión expirada
         alert("Tu sesión ha expirado. Por favor inicia sesión nuevamente.");
         localStorage.clear();
         window.location.href = "/login";
@@ -513,10 +594,6 @@ document.getElementById("inspeccionForm").addEventListener("submit", async (ev) 
       form.reset();
       window.firmaApp?.refresh?.();
       document.getElementById("firmaPreview").innerHTML = "";
-      
-      // Mensaje de éxito
-      document.getElementById("globalMessage").innerHTML =
-        '<div class="success-msg">✅ Inspección creada exitosamente</div>';
     }
 
   } catch (e) {

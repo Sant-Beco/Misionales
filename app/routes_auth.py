@@ -140,7 +140,8 @@ def login(
             "token_type": "bearer",
             "expires_in": expiracion_horas * 3600,  # En segundos
             "usuario_id": usuario.id,
-            "nombre": usuario.nombre
+            "nombre": usuario.nombre,
+            "rol": usuario.rol  # ← AGREGAR ESTA LÍNEA
         }
 
     except HTTPException:
