@@ -5,25 +5,25 @@
 
 @font-face {
     font-family: 'Futura';
-    src: url('/static/fonts/1__Futura_Md_Bt__negrilla_.ttf') format('truetype');
+    src: url('/static/fonts/1_Futura_Md_Bt_negrilla.ttf') format('truetype');
     font-weight: 700;
     font-style: normal;
 }
 @font-face {
     font-family: 'Futura';
-    src: url('/static/fonts/2__Futura_Md_Bt__light_.ttf') format('truetype');
+    src: url('/static/fonts/2_Futura_M_Bt_light.ttf') format('truetype');
     font-weight: 300;
     font-style: normal;
 }
 @font-face {
     font-family: 'Futura';
-    src: url('/static/fonts/3__Futura-book-bt__Párrafos_.ttf') format('truetype');
+    src: url('/static/fonts/3_Futura_book_bt_parrafos.ttf') format('truetype');
     font-weight: 400;
     font-style: normal;
 }
 @font-face {
     font-family: 'Futura';
-    src: url('/static/fonts/4__Futura-book-italic-bt__Párrafos_.ttf') format('truetype');
+    src: url('/static/fonts/4_Futura_book_italic_bt_parrafoss.ttf') format('truetype');
     font-weight: 400;
     font-style: italic;
 }
