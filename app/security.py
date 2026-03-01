@@ -9,7 +9,8 @@ Incluye:
 - Helpers de autenticación
 """
 
-from fastapi import Header, HTTPException, Depends
+from fastapi import Header, HTTPException, Depends, Request
+from fastapi.security.utils import get_authorization_scheme_param
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from passlib.context import CryptContext
@@ -103,17 +104,14 @@ def get_db():
 
 
 def get_current_user(
-    authorization: str = Header(None),
+    request: Request,
     db: Session = Depends(get_db)
 ) -> Usuario:
     """
-    Valida token y retorna usuario autenticado
-    
-    Uso:
-        @router.post("/endpoint")
-        def mi_endpoint(usuario: Usuario = Depends(get_current_user)):
-            # usuario está verificado y su token no ha expirado
-            print(usuario.nombre)
+    Valida token y retorna usuario autenticado.
+    Acepta token desde:
+      1. Cookie 'access_token' (navegación por URL desde el browser)
+      2. Header 'Authorization: Bearer <token>' (peticiones fetch/axios)
     
     Raises:
         HTTPException(401): Si el token es inválido o ha expirado
@@ -121,28 +119,29 @@ def get_current_user(
     Returns:
         Usuario: Objeto del usuario autenticado
     """
-    
-    # 1. Verificar que existe el header
-    if not authorization:
-        raise HTTPException(
-            status_code=401,
-            detail="Se requiere autenticación. Header 'Authorization' faltante."
-        )
-    
-    # 2. Verificar formato "Bearer <token>"
-    if not authorization.startswith("Bearer "):
-        raise HTTPException(
-            status_code=401,
-            detail="Formato de token inválido. Use: 'Bearer <token>'"
-        )
-    
-    # 3. Extraer token
-    token = authorization.replace("Bearer ", "").strip()
-    
+
+    token = None
+
+    # 1. Intentar obtener token desde cookie (navegación directa por URL)
+    cookie_raw = request.cookies.get("access_token")
+    if cookie_raw:
+        scheme, credentials = get_authorization_scheme_param(cookie_raw)
+        if scheme.lower() == "bearer" and credentials:
+            token = credentials
+
+    # 2. Si no hay cookie, intentar desde header Authorization (fetch/axios)
+    if not token:
+        authorization = request.headers.get("Authorization")
+        if authorization:
+            scheme, credentials = get_authorization_scheme_param(authorization)
+            if scheme.lower() == "bearer" and credentials:
+                token = credentials
+
+    # 3. Si no se encontró token por ninguna vía, rechazar
     if not token:
         raise HTTPException(
             status_code=401,
-            detail="Token vacío"
+            detail="Se requiere autenticación. Inicia sesión para continuar."
         )
     
     # 4. Buscar usuario por token

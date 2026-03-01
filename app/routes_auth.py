@@ -1,6 +1,6 @@
 # app/routes_auth.py - VERSIÓN CORREGIDA
 
-from fastapi import APIRouter, HTTPException, Form, Depends
+from fastapi import APIRouter, HTTPException, Form, Depends, Response
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
@@ -83,6 +83,7 @@ def registrar_usuario(
 
 @router.post("/login")
 def login(
+    response: Response,
     nombre: str = Form(...),
     pin: str = Form(...),
     db: Session = Depends(get_db)
@@ -135,10 +136,19 @@ def login(
         
         db.commit()
 
+        # ✅ Setear cookie para navegación directa por URL (ej: /admin)
+        response.set_cookie(
+            key="access_token",
+            value=f"Bearer {token}",
+            httponly=True,
+            max_age=expiracion_horas * 3600,
+            samesite="lax",
+        )
+
         return {
             "access_token": token,
             "token_type": "bearer",
-            "expires_in": expiracion_horas * 3600,  # En segundos
+            "expires_in": expiracion_horas * 3600,  
             "usuario_id": usuario.id,
             "nombre": usuario.nombre,
             "rol": usuario.rol  # ← AGREGAR ESTA LÍNEA
@@ -161,35 +171,35 @@ def login(
 
 @router.post("/logout")
 def logout(
+    response: Response,
     usuario: models.Usuario = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
-    Cierra la sesión del usuario invalidando su token
-    
-    Requiere:
-        - Header Authorization: Bearer <token>
-    
-    Returns:
-        {"mensaje": "Sesión cerrada exitosamente"}
+    Cierra la sesión del usuario invalidando su token y borrando la cookie
     """
     try:
-        # Invalidar token
         usuario.token = None
         usuario.token_expira = None
-        
         db.commit()
-
-        return {
-            "mensaje": "Sesión cerrada exitosamente"
-        }
+        response.delete_cookie("access_token")
+        return {"mensaje": "Sesión cerrada exitosamente"}
 
     except Exception as e:
         db.rollback()
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error cerrando sesión: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Error cerrando sesión: {str(e)}")
+
+
+@router.get("/logout")
+def logout_get(db: Session = Depends(get_db)):
+    """
+    Cierra sesión desde un link <a href="/auth/logout"> del browser.
+    Borra la cookie y redirige al login.
+    """
+    from fastapi.responses import RedirectResponse
+    resp = RedirectResponse(url="/login", status_code=302)
+    resp.delete_cookie("access_token")
+    return resp
 
 
 # ============================

@@ -310,9 +310,17 @@
 const token = localStorage.getItem("token");
 if (!token) window.location.href = "/login";
 
-// Cargar nombre del usuario en header
+// Cargar datos del usuario
 const nombre = localStorage.getItem("nombre") || "Usuario";
+const rol = localStorage.getItem("rol") || "user";  // ← NUEVO
+
+// Mostrar nombre en header
 document.getElementById("headerNombre").textContent = nombre;
+
+// ✅ Mostrar botón de admin SOLO si el usuario es admin
+if (rol === "admin") {
+  document.getElementById("btnAdmin").style.display = "inline-block";
+}
 
 document.getElementById("usuarioIdInput").value = localStorage.getItem("usuario_id");
 document.getElementById("nombreConductorInput").value = nombre;
