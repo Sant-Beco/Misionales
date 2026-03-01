@@ -4,172 +4,723 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Administración - MISONALES</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <style>
-        .admin-layout {
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:        #0f1117;
+            --surface:   #181c27;
+            --surface2:  #1e2333;
+            --border:    #2a2f45;
+            --accent:    #4f8ef7;
+            --accent2:   #7c5cfc;
+            --green:     #22d3a5;
+            --yellow:    #f5c842;
+            --red:       #f26464;
+            --text:      #e8ecf4;
+            --muted:     #6b7394;
+            --sidebar-w: 230px;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
             display: flex;
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 1.75rem 1rem;
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            z-index: 10;
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0 0.5rem 1.75rem;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+
+        .brand-icon {
+            width: 34px; height: 34px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .brand-name {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1.05rem;
+            letter-spacing: 0.05em;
+            color: var(--text);
+        }
+
+        .nav-label {
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            padding: 0 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            padding: 0.65rem 0.75rem;
+            border-radius: 8px;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 2px;
+            transition: all 0.2s;
+        }
+
+        .nav-link .icon { font-size: 1rem; }
+
+        .nav-link:hover {
+            background: var(--surface2);
+            color: var(--text);
+        }
+
+        .nav-link.active {
+            background: linear-gradient(90deg, rgba(79,142,247,0.15), transparent);
+            color: var(--accent);
+            border-left: 2px solid var(--accent);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.6rem 0.75rem;
+            border-radius: 8px;
+            background: var(--surface2);
+            margin-bottom: 0.75rem;
+        }
+
+        .user-avatar {
+            width: 30px; height: 30px;
+            background: linear-gradient(135deg, var(--green), var(--accent));
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .user-info { overflow: hidden; }
+        .user-name {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .user-role { font-size: 0.7rem; color: var(--green); }
+
+        .btn-logout {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            width: 100%;
+            padding: 0.6rem;
+            background: rgba(242,100,100,0.1);
+            border: 1px solid rgba(242,100,100,0.25);
+            border-radius: 8px;
+            color: var(--red);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover {
+            background: rgba(242,100,100,0.2);
+            border-color: var(--red);
+        }
+
+        /* ── MAIN ── */
+        .main {
+            margin-left: var(--sidebar-w);
+            flex: 1;
+            padding: 2rem 2.5rem;
             min-height: 100vh;
         }
-        
-        .admin-sidebar {
-            width: 250px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2rem 1rem;
-        }
-        
-        .admin-sidebar h2 {
-            margin-bottom: 2rem;
-            font-size: 1.5rem;
-        }
-        
-        .admin-nav a {
-            display: block;
-            color: white;
-            text-decoration: none;
-            padding: 0.75rem 1rem;
-            margin-bottom: 0.5rem;
-            border-radius: 6px;
-            transition: background 0.3s;
-        }
-        
-        .admin-nav a:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        .admin-nav a.active {
-            background: rgba(255, 255, 255, 0.3);
-        }
-        
-        .admin-content {
-            flex: 1;
-            padding: 2rem;
-            background: #f5f7fa;
-        }
-        
-        .admin-header {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+        /* ── TOPBAR ── */
+        .topbar {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
+            margin-bottom: 2.5rem;
         }
-        
-        .stats-grid {
+
+        .page-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text);
+            line-height: 1;
+        }
+
+        .page-subtitle {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-top: 0.35rem;
+        }
+
+        .date-badge {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.82rem;
+            color: var(--muted);
+        }
+
+        /* ── KPI CARDS ── */
+        .kpi-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.25rem;
             margin-bottom: 2rem;
         }
-        
-        .stat-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+        .kpi-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.4rem 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s, border-color 0.2s;
         }
-        
-        .stat-card h3 {
-            color: #666;
-            font-size: 0.9rem;
+
+        .kpi-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+        }
+
+        .kpi-card.blue::before   { background: var(--accent); }
+        .kpi-card.purple::before { background: var(--accent2); }
+        .kpi-card.green::before  { background: var(--green); }
+        .kpi-card.yellow::before { background: var(--yellow); }
+
+        .kpi-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 0.75rem;
+        }
+
+        .kpi-value {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.4rem;
+            font-weight: 800;
+            line-height: 1;
             margin-bottom: 0.5rem;
         }
-        
-        .stat-card .number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #667eea;
+
+        .kpi-card.blue   .kpi-value { color: var(--accent); }
+        .kpi-card.purple .kpi-value { color: var(--accent2); }
+        .kpi-card.green  .kpi-value { color: var(--green); }
+        .kpi-card.yellow .kpi-value { color: var(--yellow); }
+
+        .kpi-sub { font-size: 0.78rem; color: var(--muted); }
+
+        .kpi-icon {
+            position: absolute;
+            bottom: 1rem; right: 1.25rem;
+            font-size: 2rem;
+            opacity: 0.08;
         }
-        
-        .btn-logout {
-            background: #ef4444;
-            color: white;
-            padding: 0.5rem 1.5rem;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            text-decoration: none;
+
+        /* ── CHARTS ── */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 1.25rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .chart-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .chart-desc {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-top: 0.2rem;
+        }
+
+        .chart-badge {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.25rem 0.6rem;
+            border-radius: 20px;
+        }
+
+        .badge-blue   { background: rgba(79,142,247,0.15);  color: var(--accent); }
+        .badge-green  { background: rgba(34,211,165,0.15);  color: var(--green); }
+        .badge-purple { background: rgba(124,92,252,0.15);  color: var(--accent2); }
+
+        /* ── BOTTOM ROW ── */
+        .bottom-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+        }
+
+        /* ── TABLE ── */
+        table.ranking { width: 100%; border-collapse: collapse; }
+
+        table.ranking thead th {
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            color: var(--muted);
+            padding: 0 0 0.75rem;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+        }
+
+        table.ranking thead th:last-child { text-align: right; }
+
+        table.ranking tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background 0.15s;
+        }
+        table.ranking tbody tr:last-child { border-bottom: none; }
+        table.ranking tbody tr:hover { background: var(--surface2); }
+
+        table.ranking tbody td {
+            padding: 0.85rem 0;
+            font-size: 0.88rem;
+        }
+        table.ranking tbody td:last-child { text-align: right; }
+
+        .rank-num {
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 0.7rem; font-weight: 700;
+            margin-right: 0.5rem;
+        }
+        .rank-1 { background: rgba(245,200,66,0.2);  color: var(--yellow); }
+        .rank-2 { background: rgba(79,142,247,0.15); color: var(--accent); }
+        .rank-3 { background: rgba(34,211,165,0.15); color: var(--green); }
+        .rank-n { background: var(--surface2);       color: var(--muted); }
+
+        .bar-inline {
             display: inline-block;
+            height: 4px;
+            border-radius: 2px;
+            margin-left: 0.5rem;
+            vertical-align: middle;
         }
-        
-        .btn-logout:hover {
-            background: #dc2626;
+
+        .pill {
+            display: inline-block;
+            padding: 0.2rem 0.65rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
         }
+        .pill-blue { background: rgba(79,142,247,0.15); color: var(--accent); }
+
+        /* ── ANIMATIONS ── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .kpi-card   { animation: fadeUp 0.45s ease both; }
+        .chart-card { animation: fadeUp 0.5s  ease both; }
+        .kpi-card:nth-child(1) { animation-delay: 0.05s; }
+        .kpi-card:nth-child(2) { animation-delay: 0.10s; }
+        .kpi-card:nth-child(3) { animation-delay: 0.15s; }
+        .kpi-card:nth-child(4) { animation-delay: 0.20s; }
     </style>
 </head>
 <body>
-    <div class="admin-layout">
-        <!-- Sidebar -->
-        <div class="admin-sidebar">
-            <h2>🔧 Admin Panel</h2>
-            <nav class="admin-nav">
-                <a href="/admin" class="active">📊 Dashboard</a>
-                <a href="/admin/usuarios">👥 Usuarios</a>
-                <a href="/admin/logs">📋 Logs</a>
-                <a href="/">🏠 Ir al sistema</a>
-            </nav>
+
+<!-- ══════════════════ SIDEBAR ══════════════════ -->
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-icon">🚗</div>
+        <span class="brand-name">MISONALES</span>
+    </div>
+
+    <div class="nav-label">Menú</div>
+    <a href="/admin"          class="nav-link active"><span class="icon">📊</span> Dashboard</a>
+    <a href="/admin/usuarios" class="nav-link">        <span class="icon">👥</span> Usuarios</a>
+    <a href="/admin/logs"     class="nav-link">        <span class="icon">📋</span> Logs</a>
+    <a href="/"               class="nav-link">        <span class="icon">🏠</span> Ir al sistema</a>
+
+    <div class="sidebar-footer">
+        <div class="user-chip">
+            <div class="user-avatar">
+                {{ admin.nombre_visible[0] | upper if admin.nombre_visible else 'A' }}
+            </div>
+            <div class="user-info">
+                <div class="user-name">{{ admin.nombre_visible or admin.nombre }}</div>
+                <div class="user-role">Administrador</div>
+            </div>
         </div>
-        
-        <!-- Content -->
-        <div class="admin-content">
-            <!-- Header -->
-            <div class="admin-header">
-                <div>
-                    <h1>Dashboard</h1>
-                    <p>Bienvenido, {{ admin.nombre_visible }}</p>
-                </div>
-                <a href="/auth/logout" class="btn-logout">Cerrar Sesión</a>
+        <a href="/auth/logout" class="btn-logout">⏻ Cerrar sesión</a>
+    </div>
+</aside>
+
+<!-- ══════════════════ MAIN ══════════════════ -->
+<main class="main">
+
+    <!-- Topbar -->
+    <div class="topbar">
+        <div>
+            <div class="page-title">Dashboard</div>
+            <div class="page-subtitle">Vista general del sistema de inspecciones</div>
+        </div>
+        <div class="date-badge" id="fechaHoy"></div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+        <div class="kpi-card blue">
+            <div class="kpi-label">Total Usuarios</div>
+            <div class="kpi-value">{{ total_usuarios }}</div>
+            <div class="kpi-sub">Registrados en el sistema</div>
+            <div class="kpi-icon">👥</div>
+        </div>
+        <div class="kpi-card purple">
+            <div class="kpi-label">Total Inspecciones</div>
+            <div class="kpi-value">{{ total_inspecciones }}</div>
+            <div class="kpi-sub">Acumuladas históricamente</div>
+            <div class="kpi-icon">📋</div>
+        </div>
+        <div class="kpi-card green">
+            <div class="kpi-label">Promedio por usuario</div>
+            <div class="kpi-value">
+                {% if total_usuarios > 0 %}{{ (total_inspecciones / total_usuarios) | round(1) }}{% else %}0{% endif %}
             </div>
-            
-            <!-- Stats -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h3>Total Usuarios</h3>
-                    <div class="number">{{ total_usuarios }}</div>
-                </div>
-                
-                <div class="stat-card">
-                    <h3>Total Inspecciones</h3>
-                    <div class="number">{{ total_inspecciones }}</div>
-                </div>
-                
-                <div class="stat-card">
-                    <h3>Promedio</h3>
-                    <div class="number">
-                        {% if total_usuarios > 0 %}
-                            {{ (total_inspecciones / total_usuarios) | round(1) }}
-                        {% else %}
-                            0
-                        {% endif %}
-                    </div>
-                    <small>inspecciones por usuario</small>
-                </div>
-            </div>
-            
-            <!-- Usuarios activos -->
-            <div class="stat-card">
-                <h3>Usuarios más activos</h3>
-                <table style="width: 100%; margin-top: 1rem;">
-                    <thead>
-                        <tr>
-                            <th style="text-align: left;">Usuario</th>
-                            <th style="text-align: right;">Inspecciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for usuario in usuarios_activos %}
-                        <tr>
-                            <td>{{ usuario[0] }}</td>
-                            <td style="text-align: right;"><strong>{{ usuario[1] }}</strong></td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+            <div class="kpi-sub">Inspecciones promedio</div>
+            <div class="kpi-icon">📈</div>
+        </div>
+        <div class="kpi-card yellow">
+            <div class="kpi-label">Usuarios activos</div>
+            <div class="kpi-value">{{ usuarios_activos | length }}</div>
+            <div class="kpi-sub">Con inspecciones registradas</div>
+            <div class="kpi-icon">⭐</div>
         </div>
     </div>
+
+    <!-- Charts Row -->
+    <div class="charts-grid">
+        <div class="chart-card">
+            <div class="chart-header">
+                <div>
+                    <div class="chart-title">Actividad reciente</div>
+                    <div class="chart-desc">Inspecciones registradas — últimos 14 días</div>
+                </div>
+                <span class="chart-badge badge-blue">Línea</span>
+            </div>
+            <canvas id="lineChart" height="180"></canvas>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-header">
+                <div>
+                    <div class="chart-title">Top conductores</div>
+                    <div class="chart-desc">Inspecciones por usuario</div>
+                </div>
+                <span class="chart-badge badge-green">Barras</span>
+            </div>
+            <canvas id="barChart" height="180"></canvas>
+        </div>
+    </div>
+
+    <!-- Bottom Row -->
+    <div class="bottom-grid">
+
+        <!-- Ranking -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <div>
+                    <div class="chart-title">Ranking de conductores</div>
+                    <div class="chart-desc">Más inspecciones registradas</div>
+                </div>
+                <span class="chart-badge badge-purple">Top {{ usuarios_activos | length }}</span>
+            </div>
+            <table class="ranking">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Conductor</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% set max_val = usuarios_activos[0][1] if usuarios_activos else 1 %}
+                    {% for u in usuarios_activos %}
+                    <tr>
+                        <td>
+                            {% if loop.index == 1 %}<span class="rank-num rank-1">1</span>
+                            {% elif loop.index == 2 %}<span class="rank-num rank-2">2</span>
+                            {% elif loop.index == 3 %}<span class="rank-num rank-3">3</span>
+                            {% else %}<span class="rank-num rank-n">{{ loop.index }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ u[0] }}</td>
+                        <td>
+                            <span class="pill pill-blue">{{ u[1] }}</span>
+                            <span class="bar-inline"
+                                  style="width:{{ ((u[1] / max_val) * 60) | int }}px; background: var(--accent); opacity:0.5;">
+                            </span>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3" style="color:var(--muted); text-align:center; padding:1.5rem 0;">
+                            Sin datos aún
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Dona -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <div>
+                    <div class="chart-title">Distribución de inspecciones</div>
+                    <div class="chart-desc">Participación por conductor (top 5)</div>
+                </div>
+                <span class="chart-badge badge-blue">Dona</span>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:center; min-height:200px;">
+                <canvas id="donutChart" width="210" height="210"></canvas>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script>
+// ── FECHA ──
+document.getElementById('fechaHoy').textContent = new Date().toLocaleDateString('es-CO', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+});
+
+// ── PALETA ──
+const C = {
+    blue:   '#4f8ef7',
+    purple: '#7c5cfc',
+    green:  '#22d3a5',
+    yellow: '#f5c842',
+    red:    '#f26464',
+    muted:  '#6b7394',
+    border: '#2a2f45',
+};
+const COLORS = [C.blue, C.green, C.purple, C.yellow, C.red, '#e879f9', '#fb923c'];
+
+Chart.defaults.color       = C.muted;
+Chart.defaults.borderColor = C.border;
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+
+// ── DATOS JINJA2 ──
+const usuariosActivos = [
+    {% for u in usuarios_activos %}
+    { nombre: "{{ u[0] }}", total: {{ u[1] }} },
+    {% endfor %}
+];
+
+const inspecciones14 = [
+    {% for d in inspecciones_por_dia %}
+    { fecha: "{{ d.fecha }}", total: {{ d.total }} },
+    {% endfor %}
+];
+
+// ── GRÁFICA LÍNEA ──
+(function() {
+    const labels = inspecciones14.map(d => d.fecha);
+    const data   = inspecciones14.map(d => d.total);
+    const ctx    = document.getElementById('lineChart').getContext('2d');
+
+    const grad = ctx.createLinearGradient(0, 0, 0, 200);
+    grad.addColorStop(0, 'rgba(79,142,247,0.35)');
+    grad.addColorStop(1, 'rgba(79,142,247,0.01)');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Inspecciones',
+                data,
+                borderColor: C.blue,
+                backgroundColor: grad,
+                borderWidth: 2.5,
+                pointBackgroundColor: C.blue,
+                pointRadius: 4,
+                pointHoverRadius: 7,
+                tension: 0.4,
+                fill: true,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1e2333',
+                    borderColor: C.border,
+                    borderWidth: 1,
+                    padding: 10,
+                    titleColor: C.blue,
+                    bodyColor: '#e8ecf4',
+                }
+            },
+            scales: {
+                x: { grid: { color: C.border }, ticks: { font: { size: 11 } } },
+                y: { grid: { color: C.border }, beginAtZero: true, ticks: { precision: 0, font: { size: 11 } } }
+            }
+        }
+    });
+})();
+
+// ── GRÁFICA BARRAS ──
+(function() {
+    const labels = usuariosActivos.map(u => u.nombre.split(' ')[0]);
+    const data   = usuariosActivos.map(u => u.total);
+
+    new Chart(document.getElementById('barChart'), {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Inspecciones',
+                data,
+                backgroundColor: COLORS.slice(0, data.length).map(c => c + 'bb'),
+                borderColor:     COLORS.slice(0, data.length),
+                borderWidth: 1.5,
+                borderRadius: 6,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1e2333',
+                    borderColor: C.border,
+                    borderWidth: 1,
+                    padding: 10,
+                    titleColor: C.green,
+                    bodyColor: '#e8ecf4',
+                }
+            },
+            scales: {
+                x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+                y: { grid: { color: C.border }, beginAtZero: true, ticks: { precision: 0, font: { size: 11 } } }
+            }
+        }
+    });
+})();
+
+// ── GRÁFICA DONA ──
+(function() {
+    const top5 = usuariosActivos.slice(0, 5);
+    if (!top5.length) {
+        document.getElementById('donutChart').parentElement.innerHTML =
+            '<p style="color:var(--muted);font-size:.85rem;text-align:center;">Sin datos aún</p>';
+        return;
+    }
+
+    new Chart(document.getElementById('donutChart'), {
+        type: 'doughnut',
+        data: {
+            labels: top5.map(u => u.nombre.split(' ')[0]),
+            datasets: [{
+                data: top5.map(u => u.total),
+                backgroundColor: COLORS.slice(0, top5.length).map(c => c + 'cc'),
+                borderColor: '#181c27',
+                borderWidth: 3,
+                hoverOffset: 8,
+            }]
+        },
+        options: {
+            responsive: false,
+            cutout: '68%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { boxWidth: 10, padding: 14, font: { size: 11 } }
+                },
+                tooltip: {
+                    backgroundColor: '#1e2333',
+                    borderColor: C.border,
+                    borderWidth: 1,
+                    padding: 10,
+                    titleColor: C.yellow,
+                    bodyColor: '#e8ecf4',
+                }
+            }
+        }
+    });
+})();
+</script>
 </body>
 </html>

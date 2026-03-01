@@ -84,14 +84,14 @@ async def admin_dashboard(
     Dashboard principal del admin
     """
     from fastapi.templating import Jinja2Templates
+    from sqlalchemy import func, desc, cast, Date
+    from datetime import date, timedelta
+
     templates = Jinja2Templates(directory="app/templates")
-    
-    # Estadísticas
-    total_usuarios = db.query(models.Usuario).count()
+
+    total_usuarios     = db.query(models.Usuario).count()
     total_inspecciones = db.query(models.Inspeccion).count()
-    
-    # Usuarios activos (con inspecciones recientes)
-    from sqlalchemy import func, desc
+
     usuarios_activos = (
         db.query(
             models.Usuario.nombre,
@@ -103,13 +103,38 @@ async def admin_dashboard(
         .limit(5)
         .all()
     )
-    
+
+    # Inspecciones por día — últimos 14 días
+    hoy     = date.today()
+    hace_14 = hoy - timedelta(days=13)
+
+    rows = (
+        db.query(
+            cast(models.Inspeccion.fecha, Date).label("dia"),
+            func.count(models.Inspeccion.id).label("total")
+        )
+        .filter(models.Inspeccion.fecha >= hace_14)
+        .group_by("dia")
+        .order_by("dia")
+        .all()
+    )
+
+    totales_por_dia = {r.dia: r.total for r in rows}
+    inspecciones_por_dia = []
+    for i in range(14):
+        dia = hace_14 + timedelta(days=i)
+        inspecciones_por_dia.append({
+            "fecha": dia.strftime("%d/%m"),
+            "total": totales_por_dia.get(dia, 0),
+        })
+
     return templates.TemplateResponse("admin/dashboard.html", {
         "request": request,
         "admin": usuario_admin,
         "total_usuarios": total_usuarios,
         "total_inspecciones": total_inspecciones,
         "usuarios_activos": usuarios_activos,
+        "inspecciones_por_dia": inspecciones_por_dia,
     })
 
 
