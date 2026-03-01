@@ -1,370 +1,314 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Usuarios - MISONALES</title>
-    <link rel="stylesheet" href="/static/css/style.css">
-    <style>
-        .admin-layout {
-            display: flex;
-            min-height: 100vh;
-        }
-        
-        .admin-sidebar {
-            width: 250px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2rem 1rem;
-        }
-        
-        .admin-sidebar h2 {
-            margin-bottom: 2rem;
-            font-size: 1.5rem;
-        }
-        
-        .admin-nav a {
-            display: block;
-            color: white;
-            text-decoration: none;
-            padding: 0.75rem 1rem;
-            margin-bottom: 0.5rem;
-            border-radius: 6px;
-            transition: background 0.3s;
-        }
-        
-        .admin-nav a:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        .admin-nav a.active {
-            background: rgba(255, 255, 255, 0.3);
-        }
-        
-        .admin-content {
-            flex: 1;
-            padding: 2rem;
-            background: #f5f7fa;
-        }
-        
-        .admin-header {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .content-card {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .btn {
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-        }
-        
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: #5568d3;
-        }
-        
-        .btn-secondary {
-            background: #6b7280;
-            color: white;
-        }
-        
-        .btn-secondary:hover {
-            background: #4b5563;
-        }
-        
-        .btn-danger {
-            background: #ef4444;
-            color: white;
-        }
-        
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-        
-        .btn-sm {
-            padding: 0.35rem 0.75rem;
-            font-size: 0.85rem;
-        }
-        
-        .users-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1.5rem;
-        }
-        
-        .users-table th {
-            background: #f9fafb;
-            padding: 1rem;
-            text-align: left;
-            font-weight: 600;
-            color: #374151;
-            border-bottom: 2px solid #e5e7eb;
-        }
-        
-        .users-table td {
-            padding: 1rem;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        
-        .users-table tr:hover {
-            background: #f9fafb;
-        }
-        
-        .badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-        
-        .badge-admin {
-            background: #fef3c7;
-            color: #92400e;
-        }
-        
-        .badge-user {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-        
-        .actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .alert {
-            padding: 1rem;
-            border-radius: 6px;
-            margin-bottom: 1.5rem;
-        }
-        
-        .alert-success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #10b981;
-        }
-        
-        .alert-info {
-            background: #dbeafe;
-            color: #1e40af;
-            border: 1px solid #3b82f6;
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal.active {
-            display: flex;
-        }
-        
-        .modal-content {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            max-width: 400px;
-            width: 90%;
-        }
-        
-        .modal-actions {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1.5rem;
-            justify-content: flex-end;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Usuarios · Misionales Incubant</title>
+  <link rel="stylesheet" href="/static/css/incubant-theme.css">
+  <link rel="icon" href="../static/img/Logotipo_01.png" type="image/png">
+
+  <style>
+    body { display: flex; min-height: 100vh; }
+
+    /* ── SIDEBAR (mismo en todas las páginas admin) ── */
+    .sidebar {
+      width: 220px; flex-shrink: 0;
+      background: var(--dark1); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      padding: 1.5rem 0.875rem;
+      position: fixed; top: 0; left: 0; bottom: 0; z-index: 20;
+    }
+    .sidebar-brand {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0 0.5rem 1.5rem;
+      border-bottom: 1px solid var(--border); margin-bottom: 1.5rem;
+    }
+    .brand-logo { height: 32px; filter: drop-shadow(0 2px 8px rgba(245,156,0,0.35)); }
+    .brand-name {
+      font-size: 0.95rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      background: var(--grad-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .brand-sub { font-size: 0.62rem; color: var(--text3); letter-spacing: 0.06em; text-transform: uppercase; }
+    .nav-section { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--text3); padding: 0 0.75rem; margin-bottom: 0.4rem; }
+    .nav-link {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.6rem 0.75rem; border-radius: var(--r-md);
+      color: var(--text2); text-decoration: none;
+      font-size: 0.85rem; margin-bottom: 2px; transition: all 0.2s;
+    }
+    .nav-link:hover { background: var(--dark3); color: var(--text); }
+    .nav-link.active { background: rgba(245,156,0,0.1); color: var(--amber); border-left: 2px solid var(--amber); }
+    .nav-icon { font-size: 0.95rem; width: 18px; text-align: center; }
+    .sidebar-footer { margin-top: auto; padding-top: 1.25rem; border-top: 1px solid var(--border); }
+    .user-pill {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.65rem 0.75rem; border-radius: var(--r-md);
+      background: var(--dark3); margin-bottom: 0.75rem;
+    }
+    .user-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--grad-brand);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.72rem; font-weight: 700; color: #1a0f00; flex-shrink: 0;
+    }
+    .user-name { font-size: 0.8rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: 0.65rem; color: var(--amber); letter-spacing: 0.06em; text-transform: uppercase; }
+    .btn-logout {
+      display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+      width: 100%; padding: 0.6rem;
+      background: rgba(220,60,60,0.08); border: 1px solid rgba(220,60,60,0.2);
+      border-radius: var(--r-md); color: #f07070;
+      text-decoration: none; font-size: 0.8rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.2s;
+    }
+    .btn-logout:hover { background: rgba(220,60,60,0.18); border-color: #f07070; }
+
+    /* ── MAIN ── */
+    .main { margin-left: 220px; flex: 1; padding: 2rem 2.25rem; min-height: 100vh; }
+    .topbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; }
+    .page-title {
+      font-size: 1.6rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+      background: var(--grad-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      line-height: 1;
+    }
+    .page-sub { font-size: 0.78rem; color: var(--text3); margin-top: 0.3rem; }
+
+    /* Alert de éxito */
+    .alert-success {
+      background: rgba(40,200,120,0.08);
+      border: 1px solid rgba(40,200,120,0.2);
+      border-radius: var(--r-md);
+      padding: 0.75rem 1rem; font-size: 0.83rem;
+      color: #28c878; margin-bottom: 1.25rem;
+      animation: fadeIn 0.3s ease both;
+    }
+
+    /* Tabla usuarios */
+    .table-card {
+      background: var(--dark2); border: 1px solid var(--border);
+      border-radius: var(--r-lg); overflow: hidden;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .table-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .table-title { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text); }
+    .table-count { font-size: 0.75rem; color: var(--text3); margin-top: 0.15rem; }
+
+    .btn-new {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.6rem 1.2rem;
+      background: var(--grad-brand); border: none;
+      border-radius: var(--r-md); color: #1a0f00;
+      font-family: 'Futura', sans-serif; font-weight: 700;
+      font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase;
+      text-decoration: none; cursor: pointer; transition: all 0.2s;
+      box-shadow: 0 2px 12px rgba(245,156,0,0.2);
+    }
+    .btn-new:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+    table.users { width: 100%; border-collapse: collapse; }
+    table.users thead th {
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text3); padding: 0.75rem 1.5rem;
+      border-bottom: 1px solid var(--border); text-align: left;
+      background: var(--dark1);
+    }
+    table.users tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+    table.users tbody tr:last-child { border-bottom: none; }
+    table.users tbody tr:hover { background: var(--dark3); }
+    table.users tbody td { padding: 0.9rem 1.5rem; font-size: 0.85rem; }
+
+    .rol-badge {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      padding: 0.2rem 0.65rem; border-radius: 20px;
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    }
+    .rol-admin  { background: rgba(245,156,0,0.12);  color: var(--amber); }
+    .rol-user   { background: var(--dark3);           color: var(--text3); border: 1px solid var(--border); }
+
+    .actions { display: flex; gap: 0.4rem; }
+
+    .btn-edit {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      padding: 0.35rem 0.75rem; border-radius: var(--r-sm);
+      background: var(--dark3); border: 1px solid var(--border);
+      color: var(--text2); font-size: 0.75rem; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      text-decoration: none; cursor: pointer; transition: all 0.2s;
+      font-family: 'Futura', sans-serif;
+    }
+    .btn-edit:hover { border-color: var(--amber); color: var(--amber); }
+
+    .btn-del {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      padding: 0.35rem 0.75rem; border-radius: var(--r-sm);
+      background: rgba(220,60,60,0.06);
+      border: 1px solid rgba(220,60,60,0.18);
+      color: #f07070; font-size: 0.75rem; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.2s;
+      font-family: 'Futura', sans-serif;
+    }
+    .btn-del:hover { background: rgba(220,60,60,0.14); border-color: #f07070; }
+
+    .stat-num { font-weight: 700; color: var(--amber); }
+
+    /* Modal */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.65); backdrop-filter: blur(4px);
+      z-index: 100; align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--dark2); border: 1px solid var(--border);
+      border-radius: var(--r-xl); padding: 2rem; max-width: 380px; width: 90%;
+      animation: fadeUp 0.3s ease both;
+      box-shadow: var(--shadow-lg);
+    }
+    .modal h3 { font-size: 1rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.75rem; color: var(--text); }
+    .modal p  { font-size: 0.85rem; color: var(--text2); line-height: 1.5; margin-bottom: 0.5rem; }
+    .modal-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem; }
+    .modal-warn { color: #f07070; font-size: 0.78rem; margin-top: 0.25rem; }
+  </style>
 </head>
 <body>
-    <div class="admin-layout">
-        <!-- Sidebar -->
-        <div class="admin-sidebar">
-            <h2>🔧 Admin Panel</h2>
-            <nav class="admin-nav">
-                <a href="/admin">📊 Dashboard</a>
-                <a href="/admin/usuarios" class="active">👥 Usuarios</a>
-                <a href="/admin/logs">📋 Logs</a>
-                <a href="/">🏠 Ir al sistema</a>
-            </nav>
-        </div>
-        
-        <!-- Content -->
-        <div class="admin-content">
-            <!-- Header -->
-            <div class="admin-header">
-                <div>
-                    <h1>Gestión de Usuarios</h1>
-                    <p>Administra los usuarios del sistema</p>
-                </div>
-                <a href="/auth/logout" class="btn btn-danger">Cerrar Sesión</a>
-            </div>
-            
-            <!-- Mensajes -->
-            {% if request.query_params.get('mensaje') %}
-            <div class="alert alert-success">
-                ✅ {{ request.query_params.get('mensaje') }}
-            </div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <img src="/static/img/logotipo_01.png" alt="Incubant" class="brand-logo">
+    <div><div class="brand-name">Misionales</div><div class="brand-sub">Incubant SST</div></div>
+  </div>
+  <div class="nav-section">Panel</div>
+  <a href="/admin"          class="nav-link"><span class="nav-icon">📊</span> Dashboard</a>
+  <a href="/admin/usuarios" class="nav-link active"><span class="nav-icon">👥</span> Usuarios</a>
+  <a href="/admin/logs"     class="nav-link"><span class="nav-icon">📋</span> Auditoría</a>
+  <div class="nav-section" style="margin-top:1.25rem;">Sistema</div>
+  <a href="/"               class="nav-link"><span class="nav-icon">🚗</span> Formulario</a>
+  <div class="sidebar-footer">
+    <div class="user-pill">
+      <div class="user-avatar">{{ admin.nombre_visible[0]|upper if admin.nombre_visible else 'A' }}</div>
+      <div style="overflow:hidden;">
+        <div class="user-name">{{ admin.nombre_visible or admin.nombre }}</div>
+        <div class="user-role">Administrador</div>
+      </div>
+    </div>
+    <a href="/auth/logout" class="btn-logout">⏻ Cerrar sesión</a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div>
+      <div class="page-title">Usuarios</div>
+      <div class="page-sub">Gestión de conductores y administradores</div>
+    </div>
+  </div>
+
+  {% if request.query_params.get('mensaje') %}
+  <div class="alert-success">✓ {{ request.query_params.get('mensaje') }}</div>
+  {% endif %}
+
+  <div class="table-card">
+    <div class="table-header">
+      <div>
+        <div class="table-title">Usuarios registrados</div>
+        <div class="table-count">{{ usuarios|length }} usuarios en el sistema</div>
+      </div>
+      <a href="/admin/usuarios/nuevo" class="btn-new">+ Nuevo usuario</a>
+    </div>
+
+    {% if usuarios %}
+    <table class="users">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Usuario</th>
+          <th>Nombre</th>
+          <th>Rol</th>
+          <th>Inspecciones</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in usuarios %}
+        <tr>
+          <td style="color:var(--text3);">#{{ u.id }}</td>
+          <td style="font-weight:700;">{{ u.nombre }}</td>
+          <td>{{ u.nombre_visible }}</td>
+          <td>
+            {% if u.rol == 'admin' %}
+              <span class="rol-badge rol-admin">★ Admin</span>
+            {% else %}
+              <span class="rol-badge rol-user">Conductor</span>
             {% endif %}
-            
-            <!-- Content Card -->
-            <div class="content-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                    <div>
-                        <h2 style="margin: 0;">Usuarios Registrados</h2>
-                        <p style="color: #6b7280; margin-top: 0.5rem;">
-                            Total: <strong>{{ usuarios|length }}</strong> usuarios
-                        </p>
-                    </div>
-                    <a href="/admin/usuarios/nuevo" class="btn btn-primary">
-                        ➕ Nuevo Usuario
-                    </a>
-                </div>
-                
-                {% if usuarios|length == 0 %}
-                <div class="alert alert-info">
-                    ℹ️ No hay usuarios registrados. Crea el primero.
-                </div>
-                {% else %}
-                
-                <!-- Tabla de usuarios -->
-                <table class="users-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Usuario</th>
-                            <th>Nombre Visible</th>
-                            <th>Rol</th>
-                            <th>Inspecciones</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for usuario in usuarios %}
-                        <tr>
-                            <td><strong>#{{ usuario.id }}</strong></td>
-                            <td>{{ usuario.nombre }}</td>
-                            <td>{{ usuario.nombre_visible }}</td>
-                            <td>
-                                {% if usuario.rol == 'admin' %}
-                                    <span class="badge badge-admin">👑 Admin</span>
-                                {% else %}
-                                    <span class="badge badge-user">👤 Usuario</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <strong>{{ stats.get(usuario.id, 0) }}</strong> registros
-                            </td>
-                            <td>
-                                <div class="actions">
-                                    <a href="/admin/usuarios/{{ usuario.id }}/editar" 
-                                       class="btn btn-secondary btn-sm">
-                                        ✏️ Editar
-                                    </a>
-                                    
-                                    {% if usuario.id != admin.id %}
-                                    <button onclick="confirmarEliminar({{ usuario.id }}, '{{ usuario.nombre }}')"
-                                            class="btn btn-danger btn-sm">
-                                        🗑️ Eliminar
-                                    </button>
-                                    {% else %}
-                                    <button class="btn btn-secondary btn-sm" disabled>
-                                        🔒 Tú
-                                    </button>
-                                    {% endif %}
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                {% endif %}
+          </td>
+          <td><span class="stat-num">{{ stats.get(u.id, 0) }}</span> registros</td>
+          <td>
+            <div class="actions">
+              <a href="/admin/usuarios/{{ u.id }}/editar" class="btn-edit">✏ Editar</a>
+              {% if u.id != admin.id %}
+              <button onclick="confirmarEliminar({{ u.id }}, '{{ u.nombre }}')" class="btn-del">✕ Eliminar</button>
+              {% else %}
+              <button class="btn-edit" disabled style="opacity:0.4;cursor:default;">🔒 Tú</button>
+              {% endif %}
             </div>
-        </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div style="padding:2.5rem; text-align:center; color:var(--text3);">
+      <div style="font-size:2rem;margin-bottom:0.5rem;">🐣</div>
+      <div>No hay usuarios registrados aún.</div>
     </div>
-    
-    <!-- Modal de confirmación -->
-    <div id="modalEliminar" class="modal">
-        <div class="modal-content">
-            <h3>⚠️ Confirmar eliminación</h3>
-            <p>¿Estás seguro de eliminar al usuario <strong id="nombreUsuario"></strong>?</p>
-            <p style="color: #6b7280; font-size: 0.9rem;">
-                Esta acción no se puede deshacer.
-            </p>
-            
-            <form id="formEliminar" method="POST" style="display: none;">
-                <input type="hidden" name="confirmar" value="1">
-            </form>
-            
-            <div class="modal-actions">
-                <button onclick="cerrarModal()" class="btn btn-secondary">
-                    Cancelar
-                </button>
-                <button onclick="eliminarUsuario()" class="btn btn-danger">
-                    Sí, eliminar
-                </button>
-            </div>
-        </div>
+    {% endif %}
+  </div>
+</main>
+
+<!-- Modal eliminar -->
+<div id="modalOverlay" class="modal-overlay">
+  <div class="modal">
+    <h3>⚠ Confirmar eliminación</h3>
+    <p>¿Eliminar al usuario <strong id="modalNombre" style="color:var(--amber);"></strong>?</p>
+    <p class="modal-warn">Esta acción no se puede deshacer.</p>
+    <form id="formEliminar" method="POST" style="display:none;"><input type="hidden" name="confirmar" value="1"></form>
+    <div class="modal-actions">
+      <button onclick="cerrarModal()" class="btn-edit">Cancelar</button>
+      <button onclick="eliminarUsuario()" class="btn-del">Sí, eliminar</button>
     </div>
-    
-    <script>
-        let usuarioIdEliminar = null;
-        
-        function confirmarEliminar(id, nombre) {
-            usuarioIdEliminar = id;
-            document.getElementById('nombreUsuario').textContent = nombre;
-            document.getElementById('modalEliminar').classList.add('active');
-        }
-        
-        function cerrarModal() {
-            document.getElementById('modalEliminar').classList.remove('active');
-            usuarioIdEliminar = null;
-        }
-        
-        function eliminarUsuario() {
-            if (usuarioIdEliminar) {
-                const form = document.getElementById('formEliminar');
-                form.action = `/admin/usuarios/${usuarioIdEliminar}/eliminar`;
-                form.submit();
-            }
-        }
-        
-        // Cerrar modal al hacer click fuera
-        document.getElementById('modalEliminar').addEventListener('click', function(e) {
-            if (e.target === this) {
-                cerrarModal();
-            }
-        });
-    </script>
+  </div>
+</div>
+
+<script>
+  let idEliminar = null;
+  function confirmarEliminar(id, nombre) {
+    idEliminar = id;
+    document.getElementById('modalNombre').textContent = nombre;
+    document.getElementById('modalOverlay').classList.add('open');
+  }
+  function cerrarModal() {
+    document.getElementById('modalOverlay').classList.remove('open');
+    idEliminar = null;
+  }
+  function eliminarUsuario() {
+    if (!idEliminar) return;
+    const f = document.getElementById('formEliminar');
+    f.action = `/admin/usuarios/${idEliminar}/eliminar`;
+    f.submit();
+  }
+  document.getElementById('modalOverlay').addEventListener('click', e => {
+    if (e.target === e.currentTarget) cerrarModal();
+  });
+</script>
 </body>
 </html>

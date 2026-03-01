@@ -3,203 +3,261 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - Misionales</title>
-  <link rel="stylesheet" href="/static/css/style.css">
+  <title>MISONALES · Incubant</title>
+  <link rel="stylesheet" href="/static/css/incubant-theme.css">
+  <link rel="icon" href="../static/img/Logotipo_01.png" type="image/png">
   <style>
     body {
-      background: linear-gradient(135deg, #52b788 0%, #2d6a4f 100%);
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
-      margin: 0;
-      font-family: system-ui, -apple-system, sans-serif;
+      overflow: hidden;
+      position: relative;
     }
-    
+
+    .bg-layer { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+
+    .bg-egg-1 {
+      width: 520px; height: 620px;
+      right: -140px; top: -80px;
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      background: linear-gradient(135deg, rgba(245,156,0,0.07), rgba(235,102,8,0.04));
+      border: 1px solid rgba(245,156,0,0.06);
+      position: absolute;
+    }
+
+    .bg-egg-2 {
+      width: 280px; height: 330px;
+      left: -80px; bottom: -60px;
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      background: linear-gradient(135deg, rgba(255,204,0,0.05), rgba(245,156,0,0.03));
+      border: 1px solid rgba(255,204,0,0.05);
+      position: absolute;
+    }
+
+    .bg-glow {
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(245,156,0,0.08) 0%, transparent 65%);
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .bg-dots {
+      position: absolute; inset: 0;
+      background-image: radial-gradient(circle, rgba(245,156,0,0.12) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.3;
+    }
+
+    .login-wrap {
+      position: relative; z-index: 10;
+      width: 100%; max-width: 420px; padding: 1rem;
+    }
+
     .login-card {
-      background: white;
-      padding: 2.5rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      width: 100%;
-      max-width: 400px;
+      background: var(--dark2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      padding: 2.75rem 2.5rem 2.5rem;
+      box-shadow: var(--shadow-lg), 0 0 60px rgba(245,156,0,0.06);
+      animation: fadeUp 0.6s ease both;
     }
-    
-    .login-title {
-      text-align: center;
-      color: #1b4332;
-      margin-bottom: 2rem;
-      font-size: 1.8rem;
+
+    .login-logo { text-align: center; margin-bottom: 1.75rem; }
+    .login-logo img {
+      height: 56px;
+      animation: float 3s ease-in-out infinite;
+      filter: drop-shadow(0 4px 16px rgba(245,156,0,0.3));
     }
-    
-    .form-group {
-      margin-bottom: 1.5rem;
+
+    .login-title { text-align: center; margin-bottom: 0.25rem; }
+    .login-title h1 {
+      font-size: 1.5rem; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      background: var(--grad-brand);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
-    
-    .form-group label {
-      display: block;
-      margin-bottom: 0.5rem;
-      color: #2d6a4f;
-      font-weight: 600;
+
+    .login-subtitle {
+      text-align: center; font-size: 0.75rem;
+      letter-spacing: 0.08em; color: var(--text3);
+      text-transform: uppercase; margin-bottom: 1.75rem;
     }
-    
-    .form-input {
-      width: 100%;
-      padding: 0.75rem;
-      border: 2px solid #d8f3dc;
-      border-radius: 8px;
-      font-size: 1rem;
-      transition: border-color 0.3s;
+
+    .sst-badge {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: rgba(245,156,0,0.08);
+      border: 1px solid rgba(245,156,0,0.15);
+      border-radius: 20px; padding: 0.3rem 0.85rem;
+      font-size: 0.7rem; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--amber);
+      margin: 0 auto 1.75rem; width: fit-content;
+      display: flex;
     }
-    
-    .form-input:focus {
-      outline: none;
-      border-color: #52b788;
+
+    .sst-dot {
+      width: 6px; height: 6px;
+      background: var(--amber); border-radius: 50%;
+      animation: pulse-amber 2s infinite;
     }
-    
-    .btn-login {
-      width: 100%;
-      padding: 0.875rem;
-      background: #2d6a4f;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.3s;
+
+    .divider {
+      display: flex; align-items: center;
+      gap: 0.75rem; margin-bottom: 1.5rem;
     }
-    
-    .btn-login:hover {
-      background: #1b4332;
+    .divider-line { flex: 1; height: 1px; background: var(--border); }
+    .divider span { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); }
+
+    .error-box {
+      background: rgba(220,60,60,0.1);
+      border: 1px solid rgba(220,60,60,0.25);
+      border-radius: var(--r-md);
+      padding: 0.75rem 1rem; font-size: 0.83rem;
+      color: #f07070; margin-bottom: 1.25rem; display: none;
     }
-    
-    .btn-login:disabled {
-      background: #95d5b2;
-      cursor: not-allowed;
+
+    .input-wrapper { position: relative; }
+    .input-icon {
+      position: absolute; left: 1rem; top: 50%;
+      transform: translateY(-50%); font-size: 1rem;
+      opacity: 0.45; pointer-events: none;
     }
-    
-    .error-message {
-      background: #fee2e2;
-      color: #991b1b;
-      padding: 0.75rem;
-      border-radius: 6px;
-      margin-bottom: 1rem;
-      display: none;
+    .input-wrapper .form-input { padding-left: 2.75rem; }
+
+    .btn-submit {
+      width: 100%; padding: 0.9rem;
+      background: var(--grad-brand); border: none;
+      border-radius: var(--r-md); color: #1a0f00;
+      font-family: 'Futura', sans-serif; font-weight: 700;
+      font-size: 0.88rem; letter-spacing: 0.12em;
+      text-transform: uppercase; cursor: pointer;
+      transition: all 0.25s;
+      box-shadow: var(--shadow-amber); margin-top: 0.5rem;
     }
-    
-    .logo {
-      text-align: center;
-      margin-bottom: 1.5rem;
+    .btn-submit:hover:not(:disabled) {
+      filter: brightness(1.1); transform: translateY(-1px);
+      box-shadow: 0 6px 28px rgba(245,156,0,0.45);
     }
-    
-    .logo-text {
-      font-size: 2.5rem;
-      color: #2d6a4f;
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .login-footer {
+      margin-top: 1.75rem; text-align: center;
+      font-size: 0.72rem; letter-spacing: 0.06em;
+      color: var(--text3); text-transform: uppercase;
+    }
+    .login-footer em { color: var(--amber); font-style: normal; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      display: inline-block; width: 14px; height: 14px;
+      border: 2px solid rgba(26,15,0,0.3);
+      border-top-color: #1a0f00; border-radius: 50%;
+      animation: spin 0.7s linear infinite; vertical-align: middle;
     }
   </style>
 </head>
 <body>
-  <div class="login-card">
-    <div class="logo">
-      <div class="logo-text">🚗</div>
-    </div>
-    
-    <h1 class="login-title">MISONALES</h1>
-    
-    <div id="errorMessage" class="error-message"></div>
-    
-    <form id="loginForm">
-      <div class="form-group">
-        <label for="nombre">Usuario</label>
-        <input 
-          type="text" 
-          id="nombre" 
-          name="nombre" 
-          class="form-input" 
-          placeholder="Ingresa tu usuario"
-          required
-          autocomplete="username"
-        >
-      </div>
-      
-      <div class="form-group">
-        <label for="pin">PIN</label>
-        <input 
-          type="password" 
-          id="pin" 
-          name="pin" 
-          class="form-input" 
-          placeholder="Ingresa tu PIN"
-          required
-          autocomplete="current-password"
-        >
-      </div>
-      
-      <button type="submit" id="btnLogin" class="btn-login">
-        Iniciar Sesión
-      </button>
-    </form>
+
+  <div class="bg-layer">
+    <div class="bg-dots"></div>
+    <div class="bg-glow"></div>
+    <div class="bg-egg-1"></div>
+    <div class="bg-egg-2"></div>
   </div>
-  
+
+  <div class="login-wrap">
+    <div class="login-card">
+
+      <div class="login-logo">
+        <img src="/static/img/incubant.jpg" alt="Incubant">
+      </div>
+
+      <div class="login-title"><h1>Misionales</h1></div>
+      <p class="login-subtitle">Sistema de Inspección Vehicular</p>
+
+      <div class="sst-badge">
+        <div class="sst-dot"></div>
+        SST · Conductores
+      </div>
+
+      <div class="divider">
+        <div class="divider-line"></div>
+        <span>Acceso</span>
+        <div class="divider-line"></div>
+      </div>
+
+      <div id="errorBox" class="error-box"></div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label class="form-label" for="nombre">Usuario</label>
+          <div class="input-wrapper">
+            <span class="input-icon">👤</span>
+            <input type="text" id="nombre" name="nombre" class="form-input"
+              placeholder="Tu nombre de usuario" required autocomplete="username">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="pin">PIN de acceso</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🔐</span>
+            <input type="password" id="pin" name="pin" class="form-input"
+              placeholder="••••••" required inputmode="numeric" autocomplete="current-password">
+          </div>
+        </div>
+
+        <button type="submit" id="btnLogin" class="btn-submit">
+          Ingresar al sistema
+        </button>
+      </form>
+
+      <div class="login-footer">
+        <em>Incubant</em> · Antioqueña de Incubación S.A.S.
+      </div>
+    </div>
+  </div>
+
   <script>
-    // Limpiar localStorage al cargar login
     localStorage.clear();
-    
     const form = document.getElementById('loginForm');
-    const btnLogin = document.getElementById('btnLogin');
-    const errorMessage = document.getElementById('errorMessage');
-    
-    function showError(message) {
-      errorMessage.textContent = message;
-      errorMessage.style.display = 'block';
-      setTimeout(() => {
-        errorMessage.style.display = 'none';
-      }, 5000);
+    const btn  = document.getElementById('btnLogin');
+    const err  = document.getElementById('errorBox');
+
+    function showError(msg) {
+      err.textContent = '⚠ ' + msg;
+      err.style.display = 'block';
+      setTimeout(() => err.style.display = 'none', 5000);
     }
-    
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      
-      const formData = new FormData(form);
-      
-      btnLogin.disabled = true;
-      btnLogin.textContent = 'Iniciando...';
-      errorMessage.style.display = 'none';
-      
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>&nbsp;Verificando...';
+      err.style.display = 'none';
       try {
-        const response = await fetch('/auth/login', {
-          method: 'POST',
-          body: formData
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          
-          // ✅ Guardar datos en localStorage (incluyendo rol)
+        const res  = await fetch('/auth/login', { method: 'POST', body: new FormData(form) });
+        const data = await res.json();
+        if (res.ok) {
           localStorage.setItem('token', data.access_token);
           localStorage.setItem('usuario_id', data.usuario_id);
           localStorage.setItem('nombre', data.nombre);
-          localStorage.setItem('rol', data.rol || 'user');  // ← NUEVO
-          
-          // ✅ Redirigir según el rol
-          if (data.rol === 'admin') {
-            // Admins van al panel de admin
-            window.location.href = '/admin';
-          } else {
-            // Usuarios normales van al formulario
-            window.location.href = '/';
-          }
+          localStorage.setItem('rol', data.rol || 'user');
+          btn.innerHTML = '✓ Acceso concedido';
+          btn.style.background = 'linear-gradient(135deg,#28c878,#1a9c57)';
+          setTimeout(() => { window.location.href = data.rol === 'admin' ? '/admin' : '/'; }, 600);
         } else {
-          const error = await response.json();
-          showError(error.detail || 'Usuario o PIN incorrecto');
+          showError(data.detail || 'Usuario o PIN incorrecto');
+          btn.disabled = false;
+          btn.innerHTML = 'Ingresar al sistema';
         }
-      } catch (error) {
-        console.error('Error:', error);
-        showError('Error de conexión. Intenta nuevamente.');
-      } finally {
-        btnLogin.disabled = false;
-        btnLogin.textContent = 'Iniciar Sesión';
+      } catch {
+        showError('Error de conexión. Intenta de nuevo.');
+        btn.disabled = false;
+        btn.innerHTML = 'Ingresar al sistema';
       }
     });
   </script>

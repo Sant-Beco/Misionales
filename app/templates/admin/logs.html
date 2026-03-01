@@ -1,349 +1,225 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Logs de Auditoría - MISONALES</title>
-    <link rel="stylesheet" href="/static/css/style.css">
-    <style>
-        .admin-layout {
-            display: flex;
-            min-height: 100vh;
-        }
-        
-        .admin-sidebar {
-            width: 250px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2rem 1rem;
-        }
-        
-        .admin-sidebar h2 {
-            margin-bottom: 2rem;
-            font-size: 1.5rem;
-        }
-        
-        .admin-nav a {
-            display: block;
-            color: white;
-            text-decoration: none;
-            padding: 0.75rem 1rem;
-            margin-bottom: 0.5rem;
-            border-radius: 6px;
-            transition: background 0.3s;
-        }
-        
-        .admin-nav a:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        .admin-nav a.active {
-            background: rgba(255, 255, 255, 0.3);
-        }
-        
-        .admin-content {
-            flex: 1;
-            padding: 2rem;
-            background: #f5f7fa;
-        }
-        
-        .admin-header {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .content-card {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .btn {
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-        }
-        
-        .btn-danger {
-            background: #ef4444;
-            color: white;
-        }
-        
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-        
-        .filters {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-        }
-        
-        .filter-input {
-            padding: 0.5rem 1rem;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 0.9rem;
-        }
-        
-        .logs-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .logs-table th {
-            background: #f9fafb;
-            padding: 0.75rem;
-            text-align: left;
-            font-weight: 600;
-            color: #374151;
-            border-bottom: 2px solid #e5e7eb;
-            font-size: 0.85rem;
-        }
-        
-        .logs-table td {
-            padding: 0.75rem;
-            border-bottom: 1px solid #e5e7eb;
-            font-size: 0.9rem;
-        }
-        
-        .logs-table tr:hover {
-            background: #f9fafb;
-        }
-        
-        .log-fecha {
-            color: #6b7280;
-            font-size: 0.85rem;
-        }
-        
-        .log-accion {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-        
-        .log-crear {
-            background: #d1fae5;
-            color: #065f46;
-        }
-        
-        .log-editar {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-        
-        .log-eliminar {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-        
-        .log-detalles {
-            color: #4b5563;
-            font-size: 0.9rem;
-        }
-        
-        .alert {
-            padding: 1rem;
-            border-radius: 6px;
-            margin-bottom: 1.5rem;
-        }
-        
-        .alert-info {
-            background: #dbeafe;
-            color: #1e40af;
-            border: 1px solid #3b82f6;
-        }
-        
-        .pagination {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1.5rem;
-            justify-content: center;
-        }
-        
-        .pagination button {
-            padding: 0.5rem 1rem;
-            border: 1px solid #d1d5db;
-            background: white;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        
-        .pagination button:hover {
-            background: #f9fafb;
-        }
-        
-        .pagination button.active {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auditoría · Misionales Incubant</title>
+  <link rel="stylesheet" href="/static/css/incubant-theme.css">
+  <link rel="icon" href="../static/img/Logotipo_01.png" type="image/png">
+  <style>
+    body { display: flex; min-height: 100vh; }
+
+    /* Sidebar - idéntico a otras páginas admin */
+    .sidebar {
+      width: 220px; flex-shrink: 0;
+      background: var(--dark1); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      padding: 1.5rem 0.875rem;
+      position: fixed; top: 0; left: 0; bottom: 0; z-index: 20;
+    }
+    .sidebar-brand { display: flex; align-items: center; gap: 0.6rem; padding: 0 0.5rem 1.5rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+    .brand-logo { height: 32px; filter: drop-shadow(0 2px 8px rgba(245,156,0,0.35)); }
+    .brand-name { font-size: 0.95rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; background: var(--grad-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .brand-sub { font-size: 0.62rem; color: var(--text3); letter-spacing: 0.06em; text-transform: uppercase; }
+    .nav-section { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); padding: 0 0.75rem; margin-bottom: 0.4rem; }
+    .nav-link { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.75rem; border-radius: var(--r-md); color: var(--text2); text-decoration: none; font-size: 0.85rem; margin-bottom: 2px; transition: all 0.2s; }
+    .nav-link:hover { background: var(--dark3); color: var(--text); }
+    .nav-link.active { background: rgba(245,156,0,0.1); color: var(--amber); border-left: 2px solid var(--amber); }
+    .nav-icon { font-size: 0.95rem; width: 18px; text-align: center; }
+    .sidebar-footer { margin-top: auto; padding-top: 1.25rem; border-top: 1px solid var(--border); }
+    .user-pill { display: flex; align-items: center; gap: 0.6rem; padding: 0.65rem 0.75rem; border-radius: var(--r-md); background: var(--dark3); margin-bottom: 0.75rem; }
+    .user-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--grad-brand); display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; color: #1a0f00; flex-shrink: 0; }
+    .user-name { font-size: 0.8rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: 0.65rem; color: var(--amber); letter-spacing: 0.06em; text-transform: uppercase; }
+    .btn-logout { display: flex; align-items: center; justify-content: center; gap: 0.4rem; width: 100%; padding: 0.6rem; background: rgba(220,60,60,0.08); border: 1px solid rgba(220,60,60,0.2); border-radius: var(--r-md); color: #f07070; text-decoration: none; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.2s; }
+    .btn-logout:hover { background: rgba(220,60,60,0.18); border-color: #f07070; }
+
+    /* Main */
+    .main { margin-left: 220px; flex: 1; padding: 2rem 2.25rem; min-height: 100vh; }
+    .topbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; }
+    .page-title { font-size: 1.6rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; background: var(--grad-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; }
+    .page-sub { font-size: 0.78rem; color: var(--text3); margin-top: 0.3rem; }
+
+    /* Filtros */
+    .filters {
+      display: flex; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap;
+    }
+    .filter-input {
+      padding: 0.6rem 1rem;
+      background: var(--dark2); border: 1px solid var(--border);
+      border-radius: var(--r-md); color: var(--text);
+      font-family: 'Futura', sans-serif; font-size: 0.82rem;
+      outline: none; transition: border-color 0.2s; min-width: 220px;
+    }
+    .filter-input:focus { border-color: var(--amber); }
+    .filter-input::placeholder { color: var(--text3); }
+
+    /* Tabla logs */
+    .table-card {
+      background: var(--dark2); border: 1px solid var(--border);
+      border-radius: var(--r-lg); overflow: hidden;
+      animation: fadeUp 0.5s ease both;
+    }
+    .table-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border);
+    }
+    .table-title { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+    .table-count { font-size: 0.75rem; color: var(--text3); margin-top: 0.15rem; }
+
+    table.logs { width: 100%; border-collapse: collapse; }
+    table.logs thead th {
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text3); padding: 0.75rem 1.5rem;
+      border-bottom: 1px solid var(--border); text-align: left; background: var(--dark1);
+    }
+    table.logs tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+    table.logs tbody tr:last-child { border-bottom: none; }
+    table.logs tbody tr:hover { background: var(--dark3); }
+    table.logs tbody td { padding: 0.85rem 1.5rem; font-size: 0.83rem; vertical-align: middle; }
+
+    .log-fecha { font-size: 0.75rem; color: var(--text3); line-height: 1.4; }
+
+    .accion-pill {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      padding: 0.2rem 0.65rem; border-radius: 20px;
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    }
+    .accion-crear    { background: rgba(40,200,120,0.1);   color: #28c878; }
+    .accion-editar   { background: rgba(245,156,0,0.1);    color: var(--amber); }
+    .accion-eliminar { background: rgba(220,60,60,0.1);    color: #f07070; }
+    .accion-otro     { background: var(--dark3);            color: var(--text3); }
+
+    .log-detalle { color: var(--text2); line-height: 1.4; }
+
+    .empty-state { padding: 3rem; text-align: center; color: var(--text3); }
+    .empty-icon  { font-size: 2.5rem; margin-bottom: 0.5rem; }
+
+    .footer-note {
+      padding: 1rem 1.5rem; border-top: 1px solid var(--border);
+      font-size: 0.72rem; color: var(--text3);
+    }
+  </style>
 </head>
 <body>
-    <div class="admin-layout">
-        <!-- Sidebar -->
-        <div class="admin-sidebar">
-            <h2>🔧 Admin Panel</h2>
-            <nav class="admin-nav">
-                <a href="/admin">📊 Dashboard</a>
-                <a href="/admin/usuarios">👥 Usuarios</a>
-                <a href="/admin/logs" class="active">📋 Logs</a>
-                <a href="/">🏠 Ir al sistema</a>
-            </nav>
-        </div>
-        
-        <!-- Content -->
-        <div class="admin-content">
-            <!-- Header -->
-            <div class="admin-header">
-                <div>
-                    <h1>Logs de Auditoría</h1>
-                    <p>Registro de todas las acciones administrativas</p>
-                </div>
-                <a href="/auth/logout" class="btn btn-danger">Cerrar Sesión</a>
-            </div>
-            
-            <!-- Content Card -->
-            <div class="content-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                    <div>
-                        <h2 style="margin: 0;">Historial de Acciones</h2>
-                        <p style="color: #6b7280; margin-top: 0.5rem;">
-                            Mostrando los últimos <strong>{{ logs|length }}</strong> registros
-                        </p>
-                    </div>
-                </div>
-                
-                <!-- Filtros -->
-                <div class="filters">
-                    <input type="text" 
-                           id="searchInput" 
-                           class="filter-input" 
-                           placeholder="🔍 Buscar en logs..."
-                           onkeyup="filtrarLogs()">
-                    
-                    <select id="accionFilter" class="filter-input" onchange="filtrarLogs()">
-                        <option value="">Todas las acciones</option>
-                        <option value="CREAR_USUARIO">Crear usuario</option>
-                        <option value="EDITAR_USUARIO">Editar usuario</option>
-                        <option value="ELIMINAR_USUARIO">Eliminar usuario</option>
-                    </select>
-                </div>
-                
-                {% if logs|length == 0 %}
-                <div class="alert alert-info">
-                    ℹ️ No hay logs de auditoría registrados aún.
-                </div>
-                {% else %}
-                
-                <!-- Tabla de logs -->
-                <table class="logs-table" id="logsTable">
-                    <thead>
-                        <tr>
-                            <th style="width: 15%;">Fecha/Hora</th>
-                            <th style="width: 15%;">Admin</th>
-                            <th style="width: 15%;">Acción</th>
-                            <th style="width: 55%;">Detalles</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for log in logs %}
-                        <tr class="log-row" 
-                            data-accion="{{ log.accion }}"
-                            data-admin="{{ log.admin_nombre }}"
-                            data-detalles="{{ log.detalles }}">
-                            <td>
-                                <div class="log-fecha">
-                                    📅 {{ log.fecha.strftime('%d/%m/%Y') }}<br>
-                                    🕐 {{ log.fecha.strftime('%H:%M:%S') }}
-                                </div>
-                            </td>
-                            <td>
-                                <strong>{{ log.admin_nombre }}</strong>
-                            </td>
-                            <td>
-                                {% if log.accion == 'CREAR_USUARIO' %}
-                                    <span class="log-accion log-crear">➕ Crear</span>
-                                {% elif log.accion == 'EDITAR_USUARIO' %}
-                                    <span class="log-accion log-editar">✏️ Editar</span>
-                                {% elif log.accion == 'ELIMINAR_USUARIO' %}
-                                    <span class="log-accion log-eliminar">🗑️ Eliminar</span>
-                                {% else %}
-                                    <span class="log-accion">{{ log.accion }}</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <div class="log-detalles">
-                                    {{ log.detalles }}
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                
-                <!-- Info adicional -->
-                <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 0.85rem;">
-                    💡 <strong>Nota:</strong> Los logs de auditoría se mantienen permanentemente para trazabilidad.
-                    Se muestran los últimos 100 registros.
-                </div>
-                {% endif %}
-            </div>
-        </div>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <img src="/static/img/logotipo_01.png" alt="Incubant" class="brand-logo">
+    <div><div class="brand-name">Misionales</div><div class="brand-sub">Incubant SST</div></div>
+  </div>
+  <div class="nav-section">Panel</div>
+  <a href="/admin"          class="nav-link"><span class="nav-icon">📊</span> Dashboard</a>
+  <a href="/admin/usuarios" class="nav-link"><span class="nav-icon">👥</span> Usuarios</a>
+  <a href="/admin/logs"     class="nav-link active"><span class="nav-icon">📋</span> Auditoría</a>
+  <div class="nav-section" style="margin-top:1.25rem;">Sistema</div>
+  <a href="/"               class="nav-link"><span class="nav-icon">🚗</span> Formulario</a>
+  <div class="sidebar-footer">
+    <div class="user-pill">
+      <div class="user-avatar">{{ admin.nombre_visible[0]|upper if admin.nombre_visible else 'A' }}</div>
+      <div style="overflow:hidden;">
+        <div class="user-name">{{ admin.nombre_visible or admin.nombre }}</div>
+        <div class="user-role">Administrador</div>
+      </div>
     </div>
-    
-    <script>
-        function filtrarLogs() {
-            const searchText = document.getElementById('searchInput').value.toLowerCase();
-            const accionFilter = document.getElementById('accionFilter').value;
-            const rows = document.querySelectorAll('.log-row');
-            
-            let visibleCount = 0;
-            
-            rows.forEach(row => {
-                const accion = row.dataset.accion;
-                const admin = row.dataset.admin.toLowerCase();
-                const detalles = row.dataset.detalles.toLowerCase();
-                
-                const matchesSearch = admin.includes(searchText) || detalles.includes(searchText);
-                const matchesAccion = !accionFilter || accion === accionFilter;
-                
-                if (matchesSearch && matchesAccion) {
-                    row.style.display = '';
-                    visibleCount++;
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-            
-            // Actualizar contador (opcional)
-            console.log(`Mostrando ${visibleCount} de ${rows.length} logs`);
-        }
-        
-        // Resaltar búsqueda en tiempo real
-        document.getElementById('searchInput')?.addEventListener('input', function() {
-            const searchText = this.value;
-            
-            if (searchText.length >= 2) {
-                // Aquí podrías agregar resaltado de texto
-            }
-        });
-    </script>
+    <a href="/auth/logout" class="btn-logout">⏻ Cerrar sesión</a>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div>
+      <div class="page-title">Auditoría</div>
+      <div class="page-sub">Registro de acciones administrativas</div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filters">
+    <input type="text" id="searchInput" class="filter-input"
+      placeholder="🔍 Buscar por admin o detalle..." oninput="filtrar()">
+    <select id="accionFilter" class="filter-input" onchange="filtrar()" style="min-width:180px;">
+      <option value="">Todas las acciones</option>
+      <option value="CREAR_USUARIO">Crear usuario</option>
+      <option value="EDITAR_USUARIO">Editar usuario</option>
+      <option value="ELIMINAR_USUARIO">Eliminar usuario</option>
+    </select>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <div>
+        <div class="table-title">Historial de acciones</div>
+        <div class="table-count">Últimos <strong id="visibleCount">{{ logs|length }}</strong> de {{ logs|length }} registros</div>
+      </div>
+    </div>
+
+    {% if logs %}
+    <table class="logs">
+      <thead>
+        <tr>
+          <th>Fecha / Hora</th>
+          <th>Administrador</th>
+          <th>Acción</th>
+          <th>Detalle</th>
+        </tr>
+      </thead>
+      <tbody id="logsBody">
+        {% for log in logs %}
+        <tr class="log-row"
+            data-accion="{{ log.accion }}"
+            data-admin="{{ log.admin_nombre }}"
+            data-detalle="{{ log.detalles }}">
+          <td>
+            <div class="log-fecha">
+              📅 {{ log.fecha.strftime('%d/%m/%Y') }}<br>
+              🕐 {{ log.fecha.strftime('%H:%M:%S') }}
+            </div>
+          </td>
+          <td><strong>{{ log.admin_nombre }}</strong></td>
+          <td>
+            {% if log.accion == 'CREAR_USUARIO' %}
+              <span class="accion-pill accion-crear">+ Crear</span>
+            {% elif log.accion == 'EDITAR_USUARIO' %}
+              <span class="accion-pill accion-editar">✏ Editar</span>
+            {% elif log.accion == 'ELIMINAR_USUARIO' %}
+              <span class="accion-pill accion-eliminar">✕ Eliminar</span>
+            {% else %}
+              <span class="accion-pill accion-otro">{{ log.accion }}</span>
+            {% endif %}
+          </td>
+          <td><div class="log-detalle">{{ log.detalles }}</div></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="footer-note">
+      ℹ Los logs de auditoría son permanentes. Se muestran los últimos 100 registros.
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">🐣</div>
+      <div>No hay registros de auditoría aún.</div>
+    </div>
+    {% endif %}
+  </div>
+</main>
+
+<script>
+  function filtrar() {
+    const txt    = document.getElementById('searchInput').value.toLowerCase();
+    const accion = document.getElementById('accionFilter').value;
+    const rows   = document.querySelectorAll('.log-row');
+    let visible  = 0;
+    rows.forEach(row => {
+      const matchTxt    = row.dataset.admin.toLowerCase().includes(txt) || row.dataset.detalle.toLowerCase().includes(txt);
+      const matchAccion = !accion || row.dataset.accion === accion;
+      const show        = matchTxt && matchAccion;
+      row.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    document.getElementById('visibleCount').textContent = visible;
+  }
+</script>
 </body>
 </html>

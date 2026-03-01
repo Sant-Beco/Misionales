@@ -1,725 +1,493 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administración - MISONALES</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-    <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard · Misionales Incubant</title>
+  <link rel="stylesheet" href="/static/css/incubant-theme.css">
+  <link rel="icon" href="../static/img/Logotipo_01.png" type="image/png">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    body { display: flex; min-height: 100vh; }
 
-        :root {
-            --bg:        #0f1117;
-            --surface:   #181c27;
-            --surface2:  #1e2333;
-            --border:    #2a2f45;
-            --accent:    #4f8ef7;
-            --accent2:   #7c5cfc;
-            --green:     #22d3a5;
-            --yellow:    #f5c842;
-            --red:       #f26464;
-            --text:      #e8ecf4;
-            --muted:     #6b7394;
-            --sidebar-w: 230px;
-        }
+    /* ══ SIDEBAR ══ */
+    .sidebar {
+      width: 220px; flex-shrink: 0;
+      background: var(--dark1);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      padding: 1.5rem 0.875rem;
+      position: fixed; top: 0; left: 0; bottom: 0;
+      z-index: 20;
+    }
 
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            display: flex;
-        }
+    .sidebar-brand {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0 0.5rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+    }
 
-        /* ── SIDEBAR ── */
-        .sidebar {
-            width: var(--sidebar-w);
-            background: var(--surface);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            padding: 1.75rem 1rem;
-            position: fixed;
-            top: 0; left: 0; bottom: 0;
-            z-index: 10;
-        }
+    .brand-logo {
+      height: 32px;
+      filter: drop-shadow(0 2px 8px rgba(245,156,0,0.35));
+    }
 
-        .sidebar-brand {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            padding: 0 0.5rem 1.75rem;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 1.5rem;
-        }
+    .brand-texts { line-height: 1.2; }
+    .brand-name {
+      font-size: 0.95rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      background: var(--grad-brand);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .brand-sub { font-size: 0.62rem; color: var(--text3); letter-spacing: 0.06em; text-transform: uppercase; }
 
-        .brand-icon {
-            width: 34px; height: 34px;
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.1rem;
-        }
+    .nav-section { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--text3); padding: 0 0.75rem; margin-bottom: 0.4rem; }
 
-        .brand-name {
-            font-family: 'Syne', sans-serif;
-            font-weight: 800;
-            font-size: 1.05rem;
-            letter-spacing: 0.05em;
-            color: var(--text);
-        }
+    .nav-link {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.6rem 0.75rem; border-radius: var(--r-md);
+      color: var(--text2); text-decoration: none;
+      font-size: 0.85rem; font-weight: 400;
+      margin-bottom: 2px; transition: all 0.2s;
+      letter-spacing: 0.02em;
+    }
+    .nav-link:hover { background: var(--dark3); color: var(--text); }
+    .nav-link.active {
+      background: rgba(245,156,0,0.1);
+      color: var(--amber);
+      border-left: 2px solid var(--amber);
+    }
+    .nav-icon { font-size: 0.95rem; width: 18px; text-align: center; }
 
-        .nav-label {
-            font-size: 0.68rem;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: var(--muted);
-            padding: 0 0.75rem;
-            margin-bottom: 0.5rem;
-        }
+    .sidebar-footer {
+      margin-top: auto; padding-top: 1.25rem;
+      border-top: 1px solid var(--border);
+    }
 
-        .nav-link {
-            display: flex;
-            align-items: center;
-            gap: 0.65rem;
-            padding: 0.65rem 0.75rem;
-            border-radius: 8px;
-            color: var(--muted);
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-            margin-bottom: 2px;
-            transition: all 0.2s;
-        }
+    .user-pill {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.65rem 0.75rem; border-radius: var(--r-md);
+      background: var(--dark3); margin-bottom: 0.75rem;
+    }
+    .user-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--grad-brand);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.72rem; font-weight: 700; color: #1a0f00; flex-shrink: 0;
+    }
+    .user-name { font-size: 0.8rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: 0.65rem; color: var(--amber); letter-spacing: 0.06em; text-transform: uppercase; }
 
-        .nav-link .icon { font-size: 1rem; }
+    .btn-logout {
+      display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+      width: 100%; padding: 0.6rem;
+      background: rgba(220,60,60,0.08);
+      border: 1px solid rgba(220,60,60,0.2);
+      border-radius: var(--r-md); color: #f07070;
+      text-decoration: none; font-size: 0.8rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      transition: all 0.2s;
+    }
+    .btn-logout:hover { background: rgba(220,60,60,0.18); border-color: #f07070; }
 
-        .nav-link:hover {
-            background: var(--surface2);
-            color: var(--text);
-        }
+    /* ══ MAIN ══ */
+    .main {
+      margin-left: 220px; flex: 1;
+      padding: 2rem 2.25rem; min-height: 100vh;
+      background: var(--night);
+    }
 
-        .nav-link.active {
-            background: linear-gradient(90deg, rgba(79,142,247,0.15), transparent);
-            color: var(--accent);
-            border-left: 2px solid var(--accent);
-        }
+    /* Topbar */
+    .topbar {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 2rem;
+    }
+    .page-title {
+      font-size: 1.6rem; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      background: var(--grad-brand);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      line-height: 1;
+    }
+    .page-sub { font-size: 0.78rem; color: var(--text3); margin-top: 0.3rem; letter-spacing: 0.04em; }
 
-        .sidebar-footer {
-            margin-top: auto;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--border);
-        }
+    .date-chip {
+      background: var(--dark2); border: 1px solid var(--border);
+      border-radius: var(--r-md); padding: 0.45rem 0.9rem;
+      font-size: 0.75rem; color: var(--text3); letter-spacing: 0.04em;
+    }
 
-        .user-chip {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            padding: 0.6rem 0.75rem;
-            border-radius: 8px;
-            background: var(--surface2);
-            margin-bottom: 0.75rem;
-        }
+    /* KPIs */
+    .kpi-row {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 1rem; margin-bottom: 1.5rem;
+    }
 
-        .user-avatar {
-            width: 30px; height: 30px;
-            background: linear-gradient(135deg, var(--green), var(--accent));
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: #fff;
-            flex-shrink: 0;
-        }
+    .kpi {
+      background: var(--dark2); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: 1.25rem 1.4rem;
+      position: relative; overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s;
+      animation: fadeUp 0.5s ease both;
+    }
+    .kpi:hover { transform: translateY(-2px); }
 
-        .user-info { overflow: hidden; }
-        .user-name {
-            font-size: 0.82rem;
-            font-weight: 600;
-            color: var(--text);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .user-role { font-size: 0.7rem; color: var(--green); }
+    .kpi::after {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    }
+    .kpi.amber::after  { background: var(--amber); }
+    .kpi.golden::after { background: var(--golden); }
+    .kpi.ember::after  { background: var(--ember); }
+    .kpi.orange::after { background: var(--orange); }
 
-        .btn-logout {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.4rem;
-            width: 100%;
-            padding: 0.6rem;
-            background: rgba(242,100,100,0.1);
-            border: 1px solid rgba(242,100,100,0.25);
-            border-radius: 8px;
-            color: var(--red);
-            text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
+    .kpi-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.6rem; }
+    .kpi-val { font-size: 2.2rem; font-weight: 700; line-height: 1; margin-bottom: 0.3rem; }
+    .kpi.amber  .kpi-val { color: var(--amber); }
+    .kpi.golden .kpi-val { color: var(--golden); }
+    .kpi.ember  .kpi-val { color: var(--ember); }
+    .kpi.orange .kpi-val { color: var(--orange); }
 
-        .btn-logout:hover {
-            background: rgba(242,100,100,0.2);
-            border-color: var(--red);
-        }
+    .kpi-sub { font-size: 0.75rem; color: var(--text3); }
+    .kpi-bg-icon { position: absolute; bottom: 0.75rem; right: 1rem; font-size: 2.2rem; opacity: 0.06; }
 
-        /* ── MAIN ── */
-        .main {
-            margin-left: var(--sidebar-w);
-            flex: 1;
-            padding: 2rem 2.5rem;
-            min-height: 100vh;
-        }
+    /* Gráficas */
+    .charts-row {
+      display: grid; grid-template-columns: 1.5fr 1fr;
+      gap: 1rem; margin-bottom: 1rem;
+    }
+    .bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 
-        /* ── TOPBAR ── */
-        .topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 2.5rem;
-        }
+    .chart-card {
+      background: var(--dark2); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: 1.4rem;
+      animation: fadeUp 0.55s ease both;
+    }
 
-        .page-title {
-            font-family: 'Syne', sans-serif;
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: var(--text);
-            line-height: 1;
-        }
+    .chart-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem; }
+    .chart-title { font-size: 0.88rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text); }
+    .chart-desc { font-size: 0.72rem; color: var(--text3); margin-top: 0.2rem; }
 
-        .page-subtitle {
-            font-size: 0.85rem;
-            color: var(--muted);
-            margin-top: 0.35rem;
-        }
+    .chip {
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+    }
+    .chip-amber  { background: rgba(245,156,0,0.12);  color: var(--amber); }
+    .chip-golden { background: rgba(255,204,0,0.12);  color: var(--golden); }
+    .chip-ember  { background: rgba(235,102,8,0.12);  color: var(--ember); }
 
-        .date-badge {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 0.5rem 1rem;
-            font-size: 0.82rem;
-            color: var(--muted);
-        }
+    /* Tabla ranking */
+    table.rk { width: 100%; border-collapse: collapse; }
+    table.rk thead th {
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text3);
+      padding: 0 0 0.65rem; border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+    table.rk thead th:last-child { text-align: right; }
+    table.rk tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+    table.rk tbody tr:last-child { border-bottom: none; }
+    table.rk tbody tr:hover { background: var(--dark3); }
+    table.rk tbody td { padding: 0.75rem 0; font-size: 0.85rem; }
+    table.rk tbody td:last-child { text-align: right; }
 
-        /* ── KPI CARDS ── */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1.25rem;
-            margin-bottom: 2rem;
-        }
+    .medal { width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; margin-right: 0.4rem; }
+    .medal-1 { background: rgba(255,204,0,0.2);  color: var(--golden); }
+    .medal-2 { background: rgba(245,156,0,0.15); color: var(--amber);  }
+    .medal-3 { background: rgba(235,102,8,0.12); color: var(--ember);  }
+    .medal-n { background: var(--dark3); color: var(--text3); }
 
-        .kpi-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.4rem 1.5rem;
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.2s, border-color 0.2s;
-        }
-
-        .kpi-card:hover { transform: translateY(-2px); border-color: var(--accent); }
-
-        .kpi-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
-        }
-
-        .kpi-card.blue::before   { background: var(--accent); }
-        .kpi-card.purple::before { background: var(--accent2); }
-        .kpi-card.green::before  { background: var(--green); }
-        .kpi-card.yellow::before { background: var(--yellow); }
-
-        .kpi-label {
-            font-size: 0.72rem;
-            font-weight: 600;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: var(--muted);
-            margin-bottom: 0.75rem;
-        }
-
-        .kpi-value {
-            font-family: 'Syne', sans-serif;
-            font-size: 2.4rem;
-            font-weight: 800;
-            line-height: 1;
-            margin-bottom: 0.5rem;
-        }
-
-        .kpi-card.blue   .kpi-value { color: var(--accent); }
-        .kpi-card.purple .kpi-value { color: var(--accent2); }
-        .kpi-card.green  .kpi-value { color: var(--green); }
-        .kpi-card.yellow .kpi-value { color: var(--yellow); }
-
-        .kpi-sub { font-size: 0.78rem; color: var(--muted); }
-
-        .kpi-icon {
-            position: absolute;
-            bottom: 1rem; right: 1.25rem;
-            font-size: 2rem;
-            opacity: 0.08;
-        }
-
-        /* ── CHARTS ── */
-        .charts-grid {
-            display: grid;
-            grid-template-columns: 1.4fr 1fr;
-            gap: 1.25rem;
-            margin-bottom: 1.25rem;
-        }
-
-        .chart-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-        }
-
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1.5rem;
-        }
-
-        .chart-title {
-            font-family: 'Syne', sans-serif;
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: var(--text);
-        }
-
-        .chart-desc {
-            font-size: 0.75rem;
-            color: var(--muted);
-            margin-top: 0.2rem;
-        }
-
-        .chart-badge {
-            font-size: 0.7rem;
-            font-weight: 600;
-            padding: 0.25rem 0.6rem;
-            border-radius: 20px;
-        }
-
-        .badge-blue   { background: rgba(79,142,247,0.15);  color: var(--accent); }
-        .badge-green  { background: rgba(34,211,165,0.15);  color: var(--green); }
-        .badge-purple { background: rgba(124,92,252,0.15);  color: var(--accent2); }
-
-        /* ── BOTTOM ROW ── */
-        .bottom-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.25rem;
-        }
-
-        /* ── TABLE ── */
-        table.ranking { width: 100%; border-collapse: collapse; }
-
-        table.ranking thead th {
-            font-size: 0.72rem;
-            font-weight: 600;
-            letter-spacing: 0.07em;
-            text-transform: uppercase;
-            color: var(--muted);
-            padding: 0 0 0.75rem;
-            border-bottom: 1px solid var(--border);
-            text-align: left;
-        }
-
-        table.ranking thead th:last-child { text-align: right; }
-
-        table.ranking tbody tr {
-            border-bottom: 1px solid var(--border);
-            transition: background 0.15s;
-        }
-        table.ranking tbody tr:last-child { border-bottom: none; }
-        table.ranking tbody tr:hover { background: var(--surface2); }
-
-        table.ranking tbody td {
-            padding: 0.85rem 0;
-            font-size: 0.88rem;
-        }
-        table.ranking tbody td:last-child { text-align: right; }
-
-        .rank-num {
-            width: 22px; height: 22px;
-            border-radius: 50%;
-            display: inline-flex; align-items: center; justify-content: center;
-            font-size: 0.7rem; font-weight: 700;
-            margin-right: 0.5rem;
-        }
-        .rank-1 { background: rgba(245,200,66,0.2);  color: var(--yellow); }
-        .rank-2 { background: rgba(79,142,247,0.15); color: var(--accent); }
-        .rank-3 { background: rgba(34,211,165,0.15); color: var(--green); }
-        .rank-n { background: var(--surface2);       color: var(--muted); }
-
-        .bar-inline {
-            display: inline-block;
-            height: 4px;
-            border-radius: 2px;
-            margin-left: 0.5rem;
-            vertical-align: middle;
-        }
-
-        .pill {
-            display: inline-block;
-            padding: 0.2rem 0.65rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-        .pill-blue { background: rgba(79,142,247,0.15); color: var(--accent); }
-
-        /* ── ANIMATIONS ── */
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(14px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        .kpi-card   { animation: fadeUp 0.45s ease both; }
-        .chart-card { animation: fadeUp 0.5s  ease both; }
-        .kpi-card:nth-child(1) { animation-delay: 0.05s; }
-        .kpi-card:nth-child(2) { animation-delay: 0.10s; }
-        .kpi-card:nth-child(3) { animation-delay: 0.15s; }
-        .kpi-card:nth-child(4) { animation-delay: 0.20s; }
-    </style>
+    .mini-bar { display: inline-block; height: 4px; border-radius: 2px; margin-left: 0.4rem; vertical-align: middle; background: var(--amber); opacity: 0.45; }
+    .count-pill { background: rgba(245,156,0,0.1); color: var(--amber); padding: 0.15rem 0.55rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700; }
+  </style>
 </head>
 <body>
 
-<!-- ══════════════════ SIDEBAR ══════════════════ -->
+<!-- SIDEBAR -->
 <aside class="sidebar">
-    <div class="sidebar-brand">
-        <div class="brand-icon">🚗</div>
-        <span class="brand-name">MISONALES</span>
+  <div class="sidebar-brand">
+    <img src="/static/img/logotipo_01.png" alt="Incubant" class="brand-logo">
+    <div class="brand-texts">
+      <div class="brand-name">Misionales</div>
+      <div class="brand-sub">Incubant SST</div>
     </div>
+  </div>
 
-    <div class="nav-label">Menú</div>
-    <a href="/admin"          class="nav-link active"><span class="icon">📊</span> Dashboard</a>
-    <a href="/admin/usuarios" class="nav-link">        <span class="icon">👥</span> Usuarios</a>
-    <a href="/admin/logs"     class="nav-link">        <span class="icon">📋</span> Logs</a>
-    <a href="/"               class="nav-link">        <span class="icon">🏠</span> Ir al sistema</a>
+  <div class="nav-section" style="margin-top:0.25rem;">Panel</div>
+  <a href="/admin"          class="nav-link active"><span class="nav-icon">📊</span> Dashboard</a>
+  <a href="/admin/usuarios" class="nav-link">        <span class="nav-icon">👥</span> Usuarios</a>
+  <a href="/admin/logs"     class="nav-link">        <span class="nav-icon">📋</span> Auditoría</a>
 
-    <div class="sidebar-footer">
-        <div class="user-chip">
-            <div class="user-avatar">
-                {{ admin.nombre_visible[0] | upper if admin.nombre_visible else 'A' }}
-            </div>
-            <div class="user-info">
-                <div class="user-name">{{ admin.nombre_visible or admin.nombre }}</div>
-                <div class="user-role">Administrador</div>
-            </div>
-        </div>
-        <a href="/auth/logout" class="btn-logout">⏻ Cerrar sesión</a>
+  <div class="nav-section" style="margin-top:1.25rem;">Sistema</div>
+  <a href="/"               class="nav-link">        <span class="nav-icon">🚗</span> Formulario</a>
+
+  <div class="sidebar-footer">
+    <div class="user-pill">
+      <div class="user-avatar">{{ admin.nombre_visible[0] | upper if admin.nombre_visible else 'A' }}</div>
+      <div style="overflow:hidden;">
+        <div class="user-name">{{ admin.nombre_visible or admin.nombre }}</div>
+        <div class="user-role">Administrador</div>
+      </div>
     </div>
+    <a href="/auth/logout" class="btn-logout">⏻ Cerrar sesión</a>
+  </div>
 </aside>
 
-<!-- ══════════════════ MAIN ══════════════════ -->
+<!-- MAIN -->
 <main class="main">
 
-    <!-- Topbar -->
-    <div class="topbar">
+  <!-- Topbar -->
+  <div class="topbar">
+    <div>
+      <div class="page-title">Dashboard</div>
+      <div class="page-sub">Vista general · Sistema de Inspecciones</div>
+    </div>
+    <div class="date-chip" id="fechaHoy"></div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-row">
+    <div class="kpi amber delay-1">
+      <div class="kpi-label">Usuarios</div>
+      <div class="kpi-val">{{ total_usuarios }}</div>
+      <div class="kpi-sub">Registrados</div>
+      <div class="kpi-bg-icon">👥</div>
+    </div>
+    <div class="kpi golden delay-2">
+      <div class="kpi-label">Inspecciones</div>
+      <div class="kpi-val">{{ total_inspecciones }}</div>
+      <div class="kpi-sub">Acumuladas</div>
+      <div class="kpi-bg-icon">📋</div>
+    </div>
+    <div class="kpi ember delay-3">
+      <div class="kpi-label">Promedio</div>
+      <div class="kpi-val">{% if total_usuarios > 0 %}{{ (total_inspecciones / total_usuarios) | round(1) }}{% else %}0{% endif %}</div>
+      <div class="kpi-sub">Por conductor</div>
+      <div class="kpi-bg-icon">📈</div>
+    </div>
+    <div class="kpi orange delay-4">
+      <div class="kpi-label">Activos</div>
+      <div class="kpi-val">{{ usuarios_activos | length }}</div>
+      <div class="kpi-sub">Con registros</div>
+      <div class="kpi-bg-icon">🐣</div>
+    </div>
+  </div>
+
+  <!-- Gráficas principales -->
+  <div class="charts-row">
+    <div class="chart-card" style="animation-delay:0.1s">
+      <div class="chart-header">
         <div>
-            <div class="page-title">Dashboard</div>
-            <div class="page-subtitle">Vista general del sistema de inspecciones</div>
+          <div class="chart-title">Actividad reciente</div>
+          <div class="chart-desc">Inspecciones — últimos 14 días</div>
         </div>
-        <div class="date-badge" id="fechaHoy"></div>
+        <span class="chip chip-amber">Línea</span>
+      </div>
+      <canvas id="lineChart" height="170"></canvas>
     </div>
 
-    <!-- KPIs -->
-    <div class="kpi-grid">
-        <div class="kpi-card blue">
-            <div class="kpi-label">Total Usuarios</div>
-            <div class="kpi-value">{{ total_usuarios }}</div>
-            <div class="kpi-sub">Registrados en el sistema</div>
-            <div class="kpi-icon">👥</div>
+    <div class="chart-card" style="animation-delay:0.15s">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Top conductores</div>
+          <div class="chart-desc">Por número de inspecciones</div>
         </div>
-        <div class="kpi-card purple">
-            <div class="kpi-label">Total Inspecciones</div>
-            <div class="kpi-value">{{ total_inspecciones }}</div>
-            <div class="kpi-sub">Acumuladas históricamente</div>
-            <div class="kpi-icon">📋</div>
+        <span class="chip chip-golden">Barras</span>
+      </div>
+      <canvas id="barChart" height="170"></canvas>
+    </div>
+  </div>
+
+  <!-- Bottom -->
+  <div class="bottom-row">
+    <!-- Ranking -->
+    <div class="chart-card" style="animation-delay:0.2s">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Ranking conductores</div>
+          <div class="chart-desc">Más inspecciones registradas</div>
         </div>
-        <div class="kpi-card green">
-            <div class="kpi-label">Promedio por usuario</div>
-            <div class="kpi-value">
-                {% if total_usuarios > 0 %}{{ (total_inspecciones / total_usuarios) | round(1) }}{% else %}0{% endif %}
-            </div>
-            <div class="kpi-sub">Inspecciones promedio</div>
-            <div class="kpi-icon">📈</div>
-        </div>
-        <div class="kpi-card yellow">
-            <div class="kpi-label">Usuarios activos</div>
-            <div class="kpi-value">{{ usuarios_activos | length }}</div>
-            <div class="kpi-sub">Con inspecciones registradas</div>
-            <div class="kpi-icon">⭐</div>
-        </div>
+        <span class="chip chip-ember">Top {{ usuarios_activos | length }}</span>
+      </div>
+      <table class="rk">
+        <thead><tr><th>#</th><th>Conductor</th><th>Total</th></tr></thead>
+        <tbody>
+          {% set max_v = usuarios_activos[0][1] if usuarios_activos else 1 %}
+          {% for u in usuarios_activos %}
+          <tr>
+            <td>
+              {% if loop.index == 1 %}<span class="medal medal-1">1</span>
+              {% elif loop.index == 2 %}<span class="medal medal-2">2</span>
+              {% elif loop.index == 3 %}<span class="medal medal-3">3</span>
+              {% else %}<span class="medal medal-n">{{ loop.index }}</span>{% endif %}
+            </td>
+            <td>{{ u[0] }}</td>
+            <td>
+              <span class="count-pill">{{ u[1] }}</span>
+              <span class="mini-bar" style="width:{{ ((u[1] / max_v) * 55) | int }}px;"></span>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="3" style="text-align:center;color:var(--text3);padding:1.5rem 0;">Sin datos aún</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
 
-    <!-- Charts Row -->
-    <div class="charts-grid">
-        <div class="chart-card">
-            <div class="chart-header">
-                <div>
-                    <div class="chart-title">Actividad reciente</div>
-                    <div class="chart-desc">Inspecciones registradas — últimos 14 días</div>
-                </div>
-                <span class="chart-badge badge-blue">Línea</span>
-            </div>
-            <canvas id="lineChart" height="180"></canvas>
+    <!-- Dona -->
+    <div class="chart-card" style="animation-delay:0.25s">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Distribución</div>
+          <div class="chart-desc">Participación top 5 conductores</div>
         </div>
-
-        <div class="chart-card">
-            <div class="chart-header">
-                <div>
-                    <div class="chart-title">Top conductores</div>
-                    <div class="chart-desc">Inspecciones por usuario</div>
-                </div>
-                <span class="chart-badge badge-green">Barras</span>
-            </div>
-            <canvas id="barChart" height="180"></canvas>
-        </div>
+        <span class="chip chip-amber">Dona</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center;min-height:190px;">
+        <canvas id="donutChart" width="200" height="200"></canvas>
+      </div>
     </div>
+  </div>
 
-    <!-- Bottom Row -->
-    <div class="bottom-grid">
-
-        <!-- Ranking -->
-        <div class="chart-card">
-            <div class="chart-header">
-                <div>
-                    <div class="chart-title">Ranking de conductores</div>
-                    <div class="chart-desc">Más inspecciones registradas</div>
-                </div>
-                <span class="chart-badge badge-purple">Top {{ usuarios_activos | length }}</span>
-            </div>
-            <table class="ranking">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Conductor</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% set max_val = usuarios_activos[0][1] if usuarios_activos else 1 %}
-                    {% for u in usuarios_activos %}
-                    <tr>
-                        <td>
-                            {% if loop.index == 1 %}<span class="rank-num rank-1">1</span>
-                            {% elif loop.index == 2 %}<span class="rank-num rank-2">2</span>
-                            {% elif loop.index == 3 %}<span class="rank-num rank-3">3</span>
-                            {% else %}<span class="rank-num rank-n">{{ loop.index }}</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ u[0] }}</td>
-                        <td>
-                            <span class="pill pill-blue">{{ u[1] }}</span>
-                            <span class="bar-inline"
-                                  style="width:{{ ((u[1] / max_val) * 60) | int }}px; background: var(--accent); opacity:0.5;">
-                            </span>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="3" style="color:var(--muted); text-align:center; padding:1.5rem 0;">
-                            Sin datos aún
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Dona -->
-        <div class="chart-card">
-            <div class="chart-header">
-                <div>
-                    <div class="chart-title">Distribución de inspecciones</div>
-                    <div class="chart-desc">Participación por conductor (top 5)</div>
-                </div>
-                <span class="chart-badge badge-blue">Dona</span>
-            </div>
-            <div style="display:flex; align-items:center; justify-content:center; min-height:200px;">
-                <canvas id="donutChart" width="210" height="210"></canvas>
-            </div>
-        </div>
-
-    </div>
 </main>
 
 <script>
-// ── FECHA ──
 document.getElementById('fechaHoy').textContent = new Date().toLocaleDateString('es-CO', {
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  weekday:'long', year:'numeric', month:'long', day:'numeric'
 });
 
-// ── PALETA ──
-const C = {
-    blue:   '#4f8ef7',
-    purple: '#7c5cfc',
-    green:  '#22d3a5',
-    yellow: '#f5c842',
-    red:    '#f26464',
-    muted:  '#6b7394',
-    border: '#2a2f45',
-};
-const COLORS = [C.blue, C.green, C.purple, C.yellow, C.red, '#e879f9', '#fb923c'];
+// Paleta Incubant para Chart.js
+const AMBER  = '#F59C00';
+const GOLDEN = '#FFCC00';
+const EMBER  = '#EB6608';
+const ORANGE = '#EF7D00';
+const MUTED  = '#6E6860';
+const BORDER = '#2E3444';
+const SURFACE= '#1A1D24';
 
-Chart.defaults.color       = C.muted;
-Chart.defaults.borderColor = C.border;
-Chart.defaults.font.family = "'DM Sans', sans-serif";
+const PALETTE = [AMBER, GOLDEN, EMBER, ORANGE, '#f0c040', '#e8882a', '#ffdd55'];
 
-// ── DATOS JINJA2 ──
+Chart.defaults.color       = MUTED;
+Chart.defaults.borderColor = BORDER;
+Chart.defaults.font.family = "'Futura', 'Trebuchet MS', sans-serif";
+
 const usuariosActivos = [
-    {% for u in usuarios_activos %}
-    { nombre: "{{ u[0] }}", total: {{ u[1] }} },
-    {% endfor %}
+  {% for u in usuarios_activos %}
+  { nombre: "{{ u[0] }}", total: {{ u[1] }} },
+  {% endfor %}
 ];
 
-const inspecciones14 = [
-    {% for d in inspecciones_por_dia %}
-    { fecha: "{{ d.fecha }}", total: {{ d.total }} },
-    {% endfor %}
+const inspeccionesDia = [
+  {% for d in inspecciones_por_dia %}
+  { fecha: "{{ d.fecha }}", total: {{ d.total }} },
+  {% endfor %}
 ];
 
-// ── GRÁFICA LÍNEA ──
+const tooltipDefaults = {
+  backgroundColor: SURFACE,
+  borderColor: BORDER,
+  borderWidth: 1,
+  padding: 10,
+  titleColor: AMBER,
+  bodyColor: '#F0EDE8',
+};
+
+// ── LÍNEA ──
 (function() {
-    const labels = inspecciones14.map(d => d.fecha);
-    const data   = inspecciones14.map(d => d.total);
-    const ctx    = document.getElementById('lineChart').getContext('2d');
+  const ctx  = document.getElementById('lineChart').getContext('2d');
+  const grad = ctx.createLinearGradient(0, 0, 0, 200);
+  grad.addColorStop(0, 'rgba(245,156,0,0.30)');
+  grad.addColorStop(1, 'rgba(245,156,0,0.01)');
 
-    const grad = ctx.createLinearGradient(0, 0, 0, 200);
-    grad.addColorStop(0, 'rgba(79,142,247,0.35)');
-    grad.addColorStop(1, 'rgba(79,142,247,0.01)');
-
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels,
-            datasets: [{
-                label: 'Inspecciones',
-                data,
-                borderColor: C.blue,
-                backgroundColor: grad,
-                borderWidth: 2.5,
-                pointBackgroundColor: C.blue,
-                pointRadius: 4,
-                pointHoverRadius: 7,
-                tension: 0.4,
-                fill: true,
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: '#1e2333',
-                    borderColor: C.border,
-                    borderWidth: 1,
-                    padding: 10,
-                    titleColor: C.blue,
-                    bodyColor: '#e8ecf4',
-                }
-            },
-            scales: {
-                x: { grid: { color: C.border }, ticks: { font: { size: 11 } } },
-                y: { grid: { color: C.border }, beginAtZero: true, ticks: { precision: 0, font: { size: 11 } } }
-            }
-        }
-    });
-})();
-
-// ── GRÁFICA BARRAS ──
-(function() {
-    const labels = usuariosActivos.map(u => u.nombre.split(' ')[0]);
-    const data   = usuariosActivos.map(u => u.total);
-
-    new Chart(document.getElementById('barChart'), {
-        type: 'bar',
-        data: {
-            labels,
-            datasets: [{
-                label: 'Inspecciones',
-                data,
-                backgroundColor: COLORS.slice(0, data.length).map(c => c + 'bb'),
-                borderColor:     COLORS.slice(0, data.length),
-                borderWidth: 1.5,
-                borderRadius: 6,
-                borderSkipped: false,
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: '#1e2333',
-                    borderColor: C.border,
-                    borderWidth: 1,
-                    padding: 10,
-                    titleColor: C.green,
-                    bodyColor: '#e8ecf4',
-                }
-            },
-            scales: {
-                x: { grid: { display: false }, ticks: { font: { size: 11 } } },
-                y: { grid: { color: C.border }, beginAtZero: true, ticks: { precision: 0, font: { size: 11 } } }
-            }
-        }
-    });
-})();
-
-// ── GRÁFICA DONA ──
-(function() {
-    const top5 = usuariosActivos.slice(0, 5);
-    if (!top5.length) {
-        document.getElementById('donutChart').parentElement.innerHTML =
-            '<p style="color:var(--muted);font-size:.85rem;text-align:center;">Sin datos aún</p>';
-        return;
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: inspeccionesDia.map(d => d.fecha),
+      datasets: [{
+        label: 'Inspecciones',
+        data: inspeccionesDia.map(d => d.total),
+        borderColor: AMBER,
+        backgroundColor: grad,
+        borderWidth: 2.5,
+        pointBackgroundColor: AMBER,
+        pointBorderColor: SURFACE,
+        pointBorderWidth: 2,
+        pointRadius: 4, pointHoverRadius: 7,
+        tension: 0.4, fill: true,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false }, tooltip: tooltipDefaults },
+      scales: {
+        x: { grid: { color: BORDER }, ticks: { font: { size: 10 } } },
+        y: { grid: { color: BORDER }, beginAtZero: true, ticks: { precision: 0, font: { size: 10 } } }
+      }
     }
+  });
+})();
 
-    new Chart(document.getElementById('donutChart'), {
-        type: 'doughnut',
-        data: {
-            labels: top5.map(u => u.nombre.split(' ')[0]),
-            datasets: [{
-                data: top5.map(u => u.total),
-                backgroundColor: COLORS.slice(0, top5.length).map(c => c + 'cc'),
-                borderColor: '#181c27',
-                borderWidth: 3,
-                hoverOffset: 8,
-            }]
-        },
-        options: {
-            responsive: false,
-            cutout: '68%',
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: { boxWidth: 10, padding: 14, font: { size: 11 } }
-                },
-                tooltip: {
-                    backgroundColor: '#1e2333',
-                    borderColor: C.border,
-                    borderWidth: 1,
-                    padding: 10,
-                    titleColor: C.yellow,
-                    bodyColor: '#e8ecf4',
-                }
-            }
-        }
-    });
+// ── BARRAS ──
+(function() {
+  const labels = usuariosActivos.map(u => u.nombre.split(' ')[0]);
+  const data   = usuariosActivos.map(u => u.total);
+
+  new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Inspecciones',
+        data,
+        backgroundColor: PALETTE.slice(0, data.length).map(c => c + 'bb'),
+        borderColor:     PALETTE.slice(0, data.length),
+        borderWidth: 1.5,
+        borderRadius: 5,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false }, tooltip: { ...tooltipDefaults, titleColor: GOLDEN } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+        y: { grid: { color: BORDER }, beginAtZero: true, ticks: { precision: 0, font: { size: 10 } } }
+      }
+    }
+  });
+})();
+
+// ── DONA ──
+(function() {
+  const top5 = usuariosActivos.slice(0, 5);
+  if (!top5.length) {
+    document.getElementById('donutChart').parentElement.innerHTML =
+      '<p style="color:var(--text3);font-size:.8rem;">Sin datos aún</p>';
+    return;
+  }
+  new Chart(document.getElementById('donutChart'), {
+    type: 'doughnut',
+    data: {
+      labels: top5.map(u => u.nombre.split(' ')[0]),
+      datasets: [{
+        data: top5.map(u => u.total),
+        backgroundColor: PALETTE.slice(0, top5.length).map(c => c + 'cc'),
+        borderColor: '#13151A',
+        borderWidth: 3,
+        hoverOffset: 8,
+      }]
+    },
+    options: {
+      responsive: false,
+      cutout: '68%',
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 10, padding: 12, font: { size: 10 } } },
+        tooltip: { ...tooltipDefaults, titleColor: GOLDEN }
+      }
+    }
+  });
 })();
 </script>
 </body>
