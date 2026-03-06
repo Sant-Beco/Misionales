@@ -1,7 +1,7 @@
 # app/routes_auth.py - VERSIÓN CORREGIDA
 
 from fastapi import APIRouter, HTTPException, Form, Depends, Response
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 
@@ -133,16 +133,15 @@ def login(
         # Actualizar usuario
         usuario.token = token
         usuario.token_expira = token_expira
-        
         db.commit()
 
-        # ✅ Setear cookie para navegación directa por URL (ej: /admin)
+        # Setear cookie para navegación directa por URL (admin, etc.)
         response.set_cookie(
             key="access_token",
             value=f"Bearer {token}",
             httponly=True,
             max_age=expiracion_horas * 3600,
-            samesite="lax",
+            samesite="lax"
         )
 
         return {
@@ -171,32 +170,28 @@ def login(
 
 @router.post("/logout")
 def logout(
-    response: Response,
     usuario: models.Usuario = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
-    Cierra la sesión del usuario invalidando su token y borrando la cookie
+    Cierra la sesión del usuario invalidando su token
     """
     try:
         usuario.token = None
         usuario.token_expira = None
         db.commit()
-        response.delete_cookie("access_token")
         return {"mensaje": "Sesión cerrada exitosamente"}
-
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error cerrando sesión: {str(e)}")
 
 
 @router.get("/logout")
-def logout_get(db: Session = Depends(get_db)):
+def logout_get():
     """
-    Cierra sesión desde un link <a href="/auth/logout"> del browser.
-    Borra la cookie y redirige al login.
+    Cierre de sesión vía GET — para links <a href='/auth/logout'> en templates.
+    Borra la cookie de sesión y redirige al login.
     """
-    from fastapi.responses import RedirectResponse
     resp = RedirectResponse(url="/login", status_code=302)
     resp.delete_cookie("access_token")
     return resp

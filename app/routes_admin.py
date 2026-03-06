@@ -84,14 +84,14 @@ async def admin_dashboard(
     Dashboard principal del admin
     """
     from fastapi.templating import Jinja2Templates
-    from sqlalchemy import func, desc, cast, Date
-    from datetime import date, timedelta
-
     templates = Jinja2Templates(directory="app/templates")
-
-    total_usuarios     = db.query(models.Usuario).count()
+    
+    # Estadísticas
+    total_usuarios = db.query(models.Usuario).count()
     total_inspecciones = db.query(models.Inspeccion).count()
-
+    
+    # Usuarios activos (con inspecciones recientes)
+    from sqlalchemy import func, desc
     usuarios_activos = (
         db.query(
             models.Usuario.nombre,
@@ -104,13 +104,14 @@ async def admin_dashboard(
         .all()
     )
 
-    # Inspecciones por día — últimos 14 días
-    hoy     = date.today()
+    # Inspecciones por día — últimos 14 días (para gráfica de línea)
+    from datetime import date, timedelta
+    from sqlalchemy import cast, Date as SADate
+    hoy = date.today()
     hace_14 = hoy - timedelta(days=13)
-
     rows = (
         db.query(
-            cast(models.Inspeccion.fecha, Date).label("dia"),
+            cast(models.Inspeccion.fecha, SADate).label("dia"),
             func.count(models.Inspeccion.id).label("total")
         )
         .filter(models.Inspeccion.fecha >= hace_14)
@@ -118,15 +119,14 @@ async def admin_dashboard(
         .order_by("dia")
         .all()
     )
-
-    totales_por_dia = {r.dia: r.total for r in rows}
-    inspecciones_por_dia = []
-    for i in range(14):
-        dia = hace_14 + timedelta(days=i)
-        inspecciones_por_dia.append({
-            "fecha": dia.strftime("%d/%m"),
-            "total": totales_por_dia.get(dia, 0),
-        })
+    totales_dia = {r.dia: r.total for r in rows}
+    inspecciones_por_dia = [
+        {
+            "fecha": (hace_14 + timedelta(days=i)).strftime("%d/%m"),
+            "total": totales_dia.get(hace_14 + timedelta(days=i), 0)
+        }
+        for i in range(14)
+    ]
 
     return templates.TemplateResponse("admin/dashboard.html", {
         "request": request,
@@ -352,9 +352,10 @@ async def admin_usuario_eliminar(
             "No se puede eliminar: el usuario tiene inspecciones registradas"
         )
     
-    # Eliminar tokens de sesión
-    db.query(models.Token).filter_by(usuario_id=usuario_id).delete()
-    
+    # Invalidar token de sesión activo (columnas en el propio usuario)
+    usuario.token = None
+    usuario.token_expira = None
+
     # Eliminar usuario
     nombre_eliminado = usuario.nombre
     db.delete(usuario)
