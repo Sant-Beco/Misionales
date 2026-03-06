@@ -203,6 +203,17 @@
     .f-input.input-valid   { border-color: rgba(40,200,120,0.4); }
     .f-select.input-invalid{ border-color: #f07070 !important; }
 
+    /* Evita que el browser ponga fondo blanco en autofill */
+    .f-input:-webkit-autofill,
+    .f-input:-webkit-autofill:hover,
+    .f-input:-webkit-autofill:focus {
+      -webkit-box-shadow: 0 0 0 1000px #222730 inset !important;
+      -webkit-text-fill-color: #F0EDE8 !important;
+      caret-color: #F0EDE8;
+      border-color: var(--border) !important;
+      transition: background-color 9999s ease-in-out 0s;
+    }
+
     /* Select arrow */
     .f-select {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236E6860'/%3E%3C/svg%3E");

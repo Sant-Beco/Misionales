@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard · Misionales Incubant</title>
   <link rel="stylesheet" href="/static/css/incubant-theme.css">
-  <link rel="icon" href="../static/img/Logotipo_01.png" type="image/png">
+  <link rel="icon" href="/static/img/logotipo_01.png" type="image/png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <style>
     body { display: flex; min-height: 100vh; }
@@ -249,25 +249,25 @@
 
   <!-- KPIs -->
   <div class="kpi-row">
-    <div class="kpi amber delay-1">
+    <div class="kpi amber" style="animation-delay:0.05s">
       <div class="kpi-label">Usuarios</div>
       <div class="kpi-val">{{ total_usuarios }}</div>
       <div class="kpi-sub">Registrados</div>
       <div class="kpi-bg-icon">👥</div>
     </div>
-    <div class="kpi golden delay-2">
+    <div class="kpi golden" style="animation-delay:0.10s">
       <div class="kpi-label">Inspecciones</div>
       <div class="kpi-val">{{ total_inspecciones }}</div>
       <div class="kpi-sub">Acumuladas</div>
       <div class="kpi-bg-icon">📋</div>
     </div>
-    <div class="kpi ember delay-3">
+    <div class="kpi ember" style="animation-delay:0.15s">
       <div class="kpi-label">Promedio</div>
       <div class="kpi-val">{% if total_usuarios > 0 %}{{ (total_inspecciones / total_usuarios) | round(1) }}{% else %}0{% endif %}</div>
       <div class="kpi-sub">Por conductor</div>
       <div class="kpi-bg-icon">📈</div>
     </div>
-    <div class="kpi orange delay-4">
+    <div class="kpi orange" style="animation-delay:0.20s">
       <div class="kpi-label">Activos</div>
       <div class="kpi-val">{{ usuarios_activos | length }}</div>
       <div class="kpi-sub">Con registros</div>
