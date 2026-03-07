@@ -73,19 +73,23 @@ El archivo .env NO se sube a GitHub (por seguridad).
 
 Ejemplo:
 
-DB_URL=mysql+pymysql://usuario:password@localhost/misionales_db
-SECRET_KEY=supersecreto
+DB_HOST=localhost
+DB_USER=tu_usuario_mysql
+DB_PASSWORD=tu_password_seguro
+DB_NAME=misionales_db
+SECRET_KEY=genera_una_con_el_comando_de_abajo
+
+Genera SECRET_KEY segura con:
+  python -c "import secrets; print(secrets.token_urlsafe(32))"
 
 📌 6. Inicializar base de datos
 
 El proyecto usa SQLAlchemy para crear las tablas automáticamente.
 
-Opcional: prueba conexión
-
-python test_db.py
+Las tablas se crean automáticamente al iniciar la app.
 
 📌 7. Crear usuarios administradores
-python create_user.py
+python admin_cli.py
 
 📌 8. Ejecutar servidor FastAPI
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
@@ -114,7 +118,7 @@ Imagen corporativa
 
 Las plantillas están en:
 
-app/utils_pdf/templates/
+app/templates/
 
 
 Generación automática al registrar inspecciones.
@@ -128,6 +132,8 @@ misionales-fastapi/
 │   ├── models.py
 │   ├── routes_auth.py
 │   ├── routes_inspecciones.py
+│   ├── routes_admin.py
+│   ├── security.py
 │   ├── utils_pdf/
 │   │     ├── utils_pdf.py
 │   │     ├── templates/
@@ -138,7 +144,7 @@ misionales-fastapi/
 │   │     ├── js/
 │   │     ├── img/
 │
-├── create_user.py
+├── admin_cli.py
 ├── requirements.txt
 ├── .gitignore
 ├── README.md
