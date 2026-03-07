@@ -1,7 +1,8 @@
 # app/routes_inspecciones.py - VERSIÓN CORREGIDA CON RUTAS DE FIRMA ARREGLADAS
 
-from fastapi import APIRouter, Form, Depends
-from fastapi.responses import FileResponse, JSONResponse, Response
+from fastapi import APIRouter, Form, Depends, Request
+from fastapi.responses import FileResponse, JSONResponse, Response, HTMLResponse
+from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from app.database import SessionLocal
 from app import models
@@ -16,6 +17,9 @@ import secrets
 
 router = APIRouter()
 
+# Templates — mismo directorio que usa main.py
+_TEMPLATES = Jinja2Templates(directory=str(Path(__file__).resolve().parent / "templates"))
+
 # ===============================
 #   DIRECTORIOS PRINCIPALES
 # ===============================
@@ -29,7 +33,7 @@ BASE_FIRMAS_DIR.mkdir(parents=True, exist_ok=True)
 
 LEGACY_DIR = BASE_PDF_DIR
 
-LOGO_PATH = Path("app/static/img/incubant.jpg").resolve()
+LOGO_PATH = Path("app/static/img/Logotipo_02.png").resolve()
 
 DELETE_AFTER_CONSOLIDATION = True
 
@@ -460,5 +464,43 @@ async def generar_pdf15(
 
         return safe_return_pdf(pdf_path, pdf_filename)
 
+    finally:
+        db.close()
+
+# ==========================================================
+#   RUTA: MIS INSPECCIONES (historial del conductor)
+# ==========================================================
+
+@router.get("/mis-inspecciones", response_class=HTMLResponse)
+async def mis_inspecciones(
+    request: Request,
+    usuario_actual: models.Usuario = Depends(get_current_user),
+):
+    """
+    Muestra el historial de inspecciones del conductor autenticado.
+    Sirve el template lista_inspecciones.html con sus KPIs y tabla.
+    """
+    db = SessionLocal()
+    try:
+        nombre_conductor = normalize_name(
+            usuario_actual.nombre_visible or usuario_actual.nombre
+        )
+
+        registros = (
+            db.query(models.Inspeccion)
+            .filter(models.Inspeccion.nombre_conductor == nombre_conductor)
+            .order_by(models.Inspeccion.fecha.asc())
+            .all()
+        )
+
+        return _TEMPLATES.TemplateResponse(
+            "lista_inspecciones.html",
+            {
+                "request":           request,
+                "nombre_conductor":  nombre_conductor,
+                "registros":         registros,
+                "puede_generar_pdf15": len(registros) >= 15,
+            },
+        )
     finally:
         db.close()
