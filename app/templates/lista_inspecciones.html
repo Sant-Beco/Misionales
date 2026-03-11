@@ -266,10 +266,13 @@
             <th>Placa</th>
             <th>Proceso</th>
             <th>Ruta</th>
+            <th>Estado</th>
           </tr>
         </thead>
         <tbody>
           {% for r in registros | reverse %}
+          {% set asp = r.aspectos_dict if r.aspectos_dict is defined else {} %}
+          {% set tiene_malo = 'M' in asp.values() %}
           <tr>
             <td style="color:var(--text3); font-size:0.75rem;">{{ loop.index }}</td>
             <td style="color:var(--text2);">{{ r.fecha.strftime("%d/%m/%Y") }}</td>
@@ -277,6 +280,23 @@
             <td><span class="proceso-chip">{{ r.proceso }}</span></td>
             <td class="ruta-text">
               {{ r.desde }}<span class="ruta-arrow">→</span>{{ r.hasta }}
+            </td>
+            <td>
+              {% if tiene_malo %}
+                <span style="display:inline-flex;align-items:center;gap:0.25rem;
+                  background:rgba(220,60,60,0.12);border:1px solid rgba(220,60,60,0.3);
+                  border-radius:20px;padding:0.15rem 0.55rem;
+                  font-size:0.7rem;font-weight:700;color:#f07070;">
+                  ⚠ M
+                </span>
+              {% else %}
+                <span style="display:inline-flex;align-items:center;gap:0.25rem;
+                  background:rgba(40,200,120,0.12);border:1px solid rgba(40,200,120,0.25);
+                  border-radius:20px;padding:0.15rem 0.55rem;
+                  font-size:0.7rem;font-weight:700;color:#28c878;">
+                  ✓ B
+                </span>
+              {% endif %}
             </td>
           </tr>
           {% endfor %}

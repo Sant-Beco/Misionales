@@ -231,7 +231,8 @@
         <div class="user-role">Administrador</div>
       </div>
     </div>
-    <a href="/auth/logout" class="btn-logout">⏻ Cerrar sesión</a>
+    <!-- ✅ FIX #7: logout vía fetch POST invalida el token server-side antes de redirigir -->
+    <button onclick="cerrarSesion()" class="btn-logout">⏻ Cerrar sesión</button>
   </div>
 </aside>
 
@@ -489,6 +490,16 @@ const tooltipDefaults = {
     }
   });
 })();
+</script>
+
+<script>
+async function cerrarSesion() {
+  try {
+    // POST invalida token en BD; GET borra la cookie httpOnly
+    await fetch("/auth/logout", { method: "POST" });
+  } catch(e) {}
+  window.location.href = "/auth/logout"; // GET → borra cookie + redirect /login
+}
 </script>
 </body>
 </html>

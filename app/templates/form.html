@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Inspección Preoperacional · Misionales Incubant</title>
   <link rel="stylesheet" href="/static/css/incubant-theme.css">
-  <link rel="icon" href="/static/img/Logotipo_01.png" type="image/png">
+  <link rel="icon" href="/static/img/logotipo_01.png" type="image/png">
   <style>
     /* ══ LAYOUT ══ */
     body {
@@ -472,7 +472,7 @@
   <!-- ══════════════ TOPBAR ══════════════ -->
   <header class="topbar">
     <div class="topbar-brand">
-      <img src="/static/img/Logotipo_01.png" alt="Incubant" class="topbar-logo">
+      <img src="/static/img/logotipo_01.png" alt="Incubant" class="topbar-logo">
       <div>
         <div class="topbar-title">Misionales</div>
         <div class="topbar-sub">Inspección Vehicular · SST</div>
@@ -573,7 +573,14 @@
 
             <div class="field">
               <label class="f-label">Gasolina</label>
-              <input id="gasolina" name="gasolina" class="f-input" placeholder="ej: SI">
+              <!-- ✅ FIX #10: select en vez de input libre — datos consistentes en BD -->
+              <select id="gasolina" name="gasolina" class="f-select">
+                <option value="">Seleccione...</option>
+                <option value="Lleno">Lleno</option>
+                <option value="3/4">3/4</option>
+                <option value="1/2">1/2</option>
+                <option value="1/4">1/4</option>
+              </select>
               <span id="error_gasolina" class="f-error"></span>
             </div>
 
@@ -997,15 +1004,10 @@
      NAVEGACIÓN ADMIN
   ═══════════════════════════════════════════ */
   function irAAdmin(e) {
+    // ✅ FIX #8: navegación directa — la cookie httpOnly autentica al admin
+    // Antes usaba window.open + document.write (rompía CSS/links internos)
     e.preventDefault();
-    fetch("/admin", { headers: { "Authorization": `Bearer ${token}` } })
-      .then(r => {
-        if (r.status === 403) { alert("Sin permisos de administrador"); throw new Error("403"); }
-        if (r.status === 401) { alert("Sesión expirada"); localStorage.clear(); window.location.href = "/login"; throw new Error("401"); }
-        return r.text();
-      })
-      .then(html => { const w = window.open("","_blank"); w.document.write(html); w.document.close(); })
-      .catch(e => { if (e.message !== "403" && e.message !== "401") console.error(e); });
+    window.location.href = "/admin";
   }
 
   /* ═══════════════════════════════════════════
@@ -1133,9 +1135,21 @@
 
         form.reset();
         onReset();
-        document.getElementById("globalMessage").innerHTML =
-          '<div class="msg-ok">✓ PDF generado y descargado correctamente.</div>';
-        setTimeout(() => document.getElementById("globalMessage").innerHTML = "", 4000);
+
+        // ✅ FIX #9: Leer advertencia de licencia vencida del header
+        const advertencia = resp.headers.get("X-Advertencias");
+        if (advertencia) {
+          try {
+            const msg = decodeURIComponent(advertencia);
+            document.getElementById("globalMessage").innerHTML =
+              `<div class="msg-error" style="border-color:rgba(245,156,0,0.4);color:var(--amber);">⚠ ${msg}</div>`;
+            setTimeout(() => document.getElementById("globalMessage").innerHTML = "", 8000);
+          } catch(e) {}
+        } else {
+          document.getElementById("globalMessage").innerHTML =
+            '<div class="msg-ok">✓ PDF generado y descargado correctamente.</div>';
+          setTimeout(() => document.getElementById("globalMessage").innerHTML = "", 4000);
+        }
       }
 
     } catch(e) {

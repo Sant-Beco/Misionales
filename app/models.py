@@ -15,6 +15,7 @@ class Usuario(Base):
 
     token = Column(String(255), nullable=True, index=True)
     token_expira = Column(DateTime, nullable=True)
+    activo = Column(Integer, default=1)   # 1=activo, 0=suspendido
 
     inspecciones = relationship("Inspeccion", back_populates="usuario")
 

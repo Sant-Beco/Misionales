@@ -4,7 +4,7 @@ from fastapi import APIRouter, Form, Depends, Request
 from fastapi.responses import FileResponse, JSONResponse, Response, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
-from app.database import SessionLocal
+from app.database import SessionLocal, get_db
 from app import models
 from app.security import get_current_user
 from app.utils_pdf import render_pdf_from_template
@@ -24,16 +24,21 @@ _TEMPLATES = Jinja2Templates(directory=str(Path(__file__).resolve().parent / "te
 #   DIRECTORIOS PRINCIPALES
 # ===============================
 
-BASE_PDF_DIR = Path("app/data/generated_pdfs")
+# ✅ FIX: Rutas absolutas basadas en la ubicación de este archivo
+#    Evita roturas cuando uvicorn no corre desde la raíz del proyecto
+_HERE = Path(__file__).resolve().parent
+
+BASE_PDF_DIR = _HERE / "data" / "generated_pdfs"
 BASE_PDF_DIR.mkdir(parents=True, exist_ok=True)
 
-# ✅ NUEVO: Directorio de firmas separado
-BASE_FIRMAS_DIR = Path("app/data/firmas")
+# Directorio de firmas separado
+BASE_FIRMAS_DIR = _HERE / "data" / "firmas"
 BASE_FIRMAS_DIR.mkdir(parents=True, exist_ok=True)
 
 LEGACY_DIR = BASE_PDF_DIR
 
-LOGO_PATH = Path("app/static/img/Logotipo_02.png").resolve()
+# ✅ FIX: logotipo_01.png (lowercase, archivo correcto)
+LOGO_PATH = (_HERE / "static" / "img" / "logotipo_01.png").resolve()
 
 DELETE_AFTER_CONSOLIDATION = True
 
@@ -206,6 +211,7 @@ def prepare_registro(r):
 @router.post("/submit")
 async def submit_inspeccion(
     usuario_actual: models.Usuario = Depends(get_current_user),
+    db: Session = Depends(get_db),  # ✅ FIX: sin connection leak
     placa: str = Form(""),
     proceso: str = Form(""),
     desde: str = Form(""),
@@ -227,7 +233,7 @@ async def submit_inspeccion(
     observaciones: str = Form(""),
     condiciones_optimas: str = Form("SI"),
 ):
-    db = SessionLocal()
+    # ✅ FIX: db ya inyectada por FastAPI como dependency — sin connection leak
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     usuario_id = usuario_actual.id
@@ -315,6 +321,22 @@ async def submit_inspeccion(
 
         inspeccion = prepare_registro(inspeccion)
 
+        # ── Advertencia licencia vencida ──────────────────────────────
+        _licencia_advertencia = None
+        if licencia_venc:
+            try:
+                for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y", "%m/%Y"):
+                    try:
+                        from datetime import datetime as _dt
+                        _venc = _dt.strptime(licencia_venc.strip(), fmt)
+                        if _venc.date() < _dt.now().date():
+                            _licencia_advertencia = f"⚠️ Licencia de conducción vencida desde {licencia_venc}"
+                        break
+                    except ValueError:
+                        continue
+            except Exception:
+                pass
+
         total = (
             db.query(models.Inspeccion)
             .filter(models.Inspeccion.usuario_id == usuario_id)
@@ -358,6 +380,9 @@ async def submit_inspeccion(
             )
             reporte_path = user_paths["reportes"] / reporte_filename
 
+            # ✅ FIX #6: generar PDF ANTES de tocar la BD
+            # Si render_pdf_from_template falla, la excepción sube y
+            # no se llega nunca al delete — los datos quedan intactos
             render_pdf_from_template(
                 "pdf_template_multiple.html",
                 {
@@ -372,7 +397,11 @@ async def submit_inspeccion(
                 output_path=str(reporte_path),
             )
 
-            # Guardar en historial
+            # ✅ Verificar que el PDF existe y tiene contenido antes de borrar BD
+            if not reporte_path.exists() or reporte_path.stat().st_size < 1000:
+                raise RuntimeError(f"PDF consolidado inválido: {reporte_path}")
+
+            # Solo si el PDF es válido → guardar historial
             hist = models.ReporteInspeccion(
                 nombre_conductor=nombre_conductor,
                 fecha_reporte=datetime.now(),
@@ -382,7 +411,7 @@ async def submit_inspeccion(
             db.add(hist)
             db.commit()
 
-            # Borrar inspecciones + firmas
+            # Solo si el PDF es válido → borrar inspecciones + firmas
             if DELETE_AFTER_CONSOLIDATION:
                 for r in registros:
                     try:
@@ -403,10 +432,16 @@ async def submit_inspeccion(
 
             return safe_return_pdf(reporte_path, reporte_filename)
 
-        return safe_return_pdf(pdf_path, safe_pdf_name)
+        # Construir respuesta con advertencias en header
+        _pdf_response = safe_return_pdf(pdf_path, safe_pdf_name)
+        if _licencia_advertencia:
+            from urllib.parse import quote
+            _pdf_response.headers["X-Advertencias"] = quote(_licencia_advertencia)
+            _pdf_response.headers["Access-Control-Expose-Headers"] = "X-Advertencias"
+        return _pdf_response
 
-    finally:
-        db.close()
+    except Exception:
+        raise  # FastAPI devuelve HTTP 500 automáticamente
 
 
 # ===============================
@@ -416,9 +451,10 @@ async def submit_inspeccion(
 @router.get("/reporte15/{nombre_conductor}")
 async def generar_pdf15(
     nombre_conductor: str,
-    usuario_actual: models.Usuario = Depends(get_current_user)
+    usuario_actual: models.Usuario = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
-    db = SessionLocal()
+    # ✅ FIX: db inyectada por FastAPI
     nombre_conductor = normalize_name(nombre_conductor)
 
     try:
@@ -464,8 +500,8 @@ async def generar_pdf15(
 
         return safe_return_pdf(pdf_path, pdf_filename)
 
-    finally:
-        db.close()
+    except Exception:
+        raise  # FastAPI devuelve HTTP 500 automáticamente
 
 # ==========================================================
 #   RUTA: MIS INSPECCIONES (historial del conductor)
@@ -475,32 +511,29 @@ async def generar_pdf15(
 async def mis_inspecciones(
     request: Request,
     usuario_actual: models.Usuario = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     """
     Muestra el historial de inspecciones del conductor autenticado.
     Sirve el template lista_inspecciones.html con sus KPIs y tabla.
     """
-    db = SessionLocal()
-    try:
-        nombre_conductor = normalize_name(
-            usuario_actual.nombre_visible or usuario_actual.nombre
-        )
+    nombre_conductor = normalize_name(
+        usuario_actual.nombre_visible or usuario_actual.nombre
+    )
 
-        registros = (
-            db.query(models.Inspeccion)
-            .filter(models.Inspeccion.nombre_conductor == nombre_conductor)
-            .order_by(models.Inspeccion.fecha.asc())
-            .all()
-        )
+    registros = (
+        db.query(models.Inspeccion)
+        .filter(models.Inspeccion.nombre_conductor == nombre_conductor)
+        .order_by(models.Inspeccion.fecha.asc())
+        .all()
+    )
 
-        return _TEMPLATES.TemplateResponse(
-            "lista_inspecciones.html",
-            {
-                "request":           request,
-                "nombre_conductor":  nombre_conductor,
-                "registros":         registros,
-                "puede_generar_pdf15": len(registros) >= 15,
-            },
-        )
-    finally:
-        db.close()
+    return _TEMPLATES.TemplateResponse(
+        "lista_inspecciones.html",
+        {
+            "request":           request,
+            "nombre_conductor":  nombre_conductor,
+            "registros":         registros,
+            "puede_generar_pdf15": len(registros) >= 15,
+        },
+    )

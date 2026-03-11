@@ -47,8 +47,16 @@ if not TEMPLATES_DIR.exists():
 # ==========================================================
 #   FASTAPI APP
 # ==========================================================
+import os as _os
+
+_DEBUG = _os.getenv("DEBUG", "false").lower() == "true"
+
 app = FastAPI(
-    title="Sistema Misionales - Formulario Inspección Vehicular"
+    title="Sistema Misionales - Formulario Inspección Vehicular",
+    # Deshabilitar docs en producción (DEBUG=false por defecto)
+    docs_url="/docs" if _DEBUG else None,
+    redoc_url="/redoc" if _DEBUG else None,
+    openapi_url="/openapi.json" if _DEBUG else None,
 )
 
 # ==========================================================

@@ -10,6 +10,7 @@ Funcionalidades:
 - Ver logs de auditoría
 """
 
+from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from sqlalchemy.orm import Session
@@ -20,6 +21,11 @@ from app import models
 from app.security import get_current_user, hash_pin
 
 router = APIRouter()
+
+# ── Templates (instancia única — no crear una por request) ──
+from fastapi.templating import Jinja2Templates as _J2T
+_templates_admin = _J2T(directory=str(Path(__file__).resolve().parent / "templates"))
+
 
 # ===============================
 # DEPENDENCY: Solo administradores
@@ -83,9 +89,7 @@ async def admin_dashboard(
     """
     Dashboard principal del admin
     """
-    from fastapi.templating import Jinja2Templates
-    templates = Jinja2Templates(directory="app/templates")
-    
+    templates = _templates_admin
     # Estadísticas
     total_usuarios = db.query(models.Usuario).count()
     total_inspecciones = db.query(models.Inspeccion).count()
@@ -147,9 +151,7 @@ async def admin_usuarios_list(
     """
     Lista todos los usuarios del sistema
     """
-    from fastapi.templating import Jinja2Templates
-    templates = Jinja2Templates(directory="app/templates")
-    
+    templates = _templates_admin
     usuarios = db.query(models.Usuario).all()
     
     # Contar inspecciones por usuario
@@ -179,9 +181,7 @@ async def admin_usuario_nuevo_form(
     """
     Formulario para crear nuevo usuario
     """
-    from fastapi.templating import Jinja2Templates
-    templates = Jinja2Templates(directory="app/templates")
-    
+    templates = _templates_admin
     return templates.TemplateResponse("admin/usuario_form.html", {
         "request": request,
         "admin": usuario_admin,
@@ -253,9 +253,7 @@ async def admin_usuario_editar_form(
     """
     Formulario para editar usuario
     """
-    from fastapi.templating import Jinja2Templates
-    templates = Jinja2Templates(directory="app/templates")
-    
+    templates = _templates_admin
     usuario = db.query(models.Usuario).filter_by(id=usuario_id).first()
     
     if not usuario:
@@ -384,9 +382,7 @@ async def admin_logs(
     """
     Muestra logs de auditoría
     """
-    from fastapi.templating import Jinja2Templates
-    templates = Jinja2Templates(directory="app/templates")
-    
+    templates = _templates_admin
     # Obtener logs recientes (últimos 100)
     from sqlalchemy import desc
     
@@ -408,6 +404,45 @@ async def admin_logs(
         "logs": logs,
     })
 
+
+
+
+@router.post("/admin/usuarios/{usuario_id}/suspender")
+async def admin_usuario_suspender(
+    usuario_id: int,
+    usuario_admin: models.Usuario = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """Suspende un usuario (no lo elimina — conserva historial)."""
+    usuario = db.query(models.Usuario).filter_by(id=usuario_id).first()
+    if not usuario:
+        raise HTTPException(404, "Usuario no encontrado")
+    if usuario.id == usuario_admin.id:
+        raise HTTPException(400, "No puedes suspenderte a ti mismo")
+    usuario.activo = 0
+    usuario.token = None          # Invalidar sesión activa inmediatamente
+    usuario.token_expira = None
+    db.commit()
+    registrar_accion(db, usuario_admin.id, "SUSPENDER_USUARIO",
+                     f"Usuario '{usuario.nombre}' suspendido")
+    return RedirectResponse(url="/admin/usuarios?mensaje=Usuario suspendido", status_code=303)
+
+
+@router.post("/admin/usuarios/{usuario_id}/reactivar")
+async def admin_usuario_reactivar(
+    usuario_id: int,
+    usuario_admin: models.Usuario = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """Reactiva un usuario previamente suspendido."""
+    usuario = db.query(models.Usuario).filter_by(id=usuario_id).first()
+    if not usuario:
+        raise HTTPException(404, "Usuario no encontrado")
+    usuario.activo = 1
+    db.commit()
+    registrar_accion(db, usuario_admin.id, "REACTIVAR_USUARIO",
+                     f"Usuario '{usuario.nombre}' reactivado")
+    return RedirectResponse(url="/admin/usuarios?mensaje=Usuario reactivado", status_code=303)
 
 # ===============================
 # API REST (opcional)

@@ -1,3 +1,4 @@
+import logging
 # app/routes_auth.py - VERSIÓN CORREGIDA
 
 from fastapi import APIRouter, HTTPException, Form, Depends, Response
@@ -16,6 +17,7 @@ from app.security import (
 )
 
 router = APIRouter(tags=["Auth"])
+_log = logging.getLogger("routes_auth")
 
 
 # ============================
@@ -36,7 +38,10 @@ def registrar_usuario(
     crear usuarios (usar admin_cli.py)
     """
     try:
-        nombre_clean = " ".join(nombre.strip().split()).capitalize()
+        # Normalizar nombre: quitar espacios extra
+        nombre_clean = " ".join(nombre.strip().split())
+        # Buscar case-insensitive para evitar problemas de mayúsculas
+        from sqlalchemy import func as _func
 
         # Verificar si ya existe
         existente = (
@@ -101,12 +106,15 @@ def login(
         }
     """
     try:
-        nombre_clean = " ".join(nombre.strip().split()).capitalize()
+        # Normalizar nombre: quitar espacios extra
+        nombre_clean = " ".join(nombre.strip().split())
+        # Buscar case-insensitive para evitar problemas de mayúsculas
+        from sqlalchemy import func as _func
 
-        # Buscar usuario
+        # Buscar usuario — case-insensitive para evitar mismatch por mayúsculas
         usuario = (
             db.query(models.Usuario)
-            .filter(models.Usuario.nombre == nombre_clean)
+            .filter(_func.lower(models.Usuario.nombre) == nombre_clean.lower())
             .first()
         )
 
@@ -154,13 +162,14 @@ def login(
         }
 
     except HTTPException:
-        # Re-lanzar excepciones HTTP
         raise
     except Exception as e:
         db.rollback()
+        # ← El traceback completo aparece en la consola de uvicorn
+        _log.exception("❌ Error inesperado en /auth/login")
         raise HTTPException(
             status_code=500,
-            detail=f"Error en login: {str(e)}"
+            detail=f"Error en login: {type(e).__name__}: {str(e)}"
         )
 
 
