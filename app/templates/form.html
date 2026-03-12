@@ -22,60 +22,37 @@
       padding: 0.75rem 2rem;
       display: flex; justify-content: space-between; align-items: center;
     }
-
-    .topbar-brand {
-      display: flex; align-items: center; gap: 0.75rem;
-    }
-
-    .topbar-logo {
-      height: 30px;
-      filter: drop-shadow(0 2px 8px rgba(245,156,0,0.35));
-    }
-
+    .topbar-brand { display: flex; align-items: center; gap: 0.75rem; }
+    .topbar-logo { height: 30px; filter: drop-shadow(0 2px 8px rgba(245,156,0,0.35)); }
     .topbar-title {
       font-size: 0.88rem; font-weight: 700;
       letter-spacing: 0.1em; text-transform: uppercase;
       background: var(--grad-brand);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
-
-    .topbar-sub {
-      font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text3);
-    }
-
+    .topbar-sub { font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text3); }
     .topbar-right { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
-
     .user-chip {
       display: flex; align-items: center; gap: 0.5rem;
       background: var(--dark3); border: 1px solid var(--border);
       border-radius: 20px; padding: 0.35rem 0.75rem;
     }
-
-    .user-dot {
-      width: 7px; height: 7px; border-radius: 50%;
-      background: var(--amber);
-      animation: pulse-amber 2s infinite;
-    }
-
+    .user-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); animation: pulse-amber 2s infinite; }
     .user-text { font-size: 0.8rem; font-weight: 700; color: var(--text); }
-
     .btn-admin-top {
       display: inline-flex; align-items: center; gap: 0.35rem;
       padding: 0.45rem 0.9rem;
-      background: rgba(245,156,0,0.08);
-      border: 1px solid rgba(245,156,0,0.2);
+      background: rgba(245,156,0,0.08); border: 1px solid rgba(245,156,0,0.2);
       border-radius: var(--r-md); color: var(--amber);
       font-family: 'Futura', sans-serif; font-size: 0.75rem;
       font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
       cursor: pointer; text-decoration: none; transition: all 0.2s;
     }
     .btn-admin-top:hover { background: rgba(245,156,0,0.14); border-color: var(--amber); }
-
     .btn-logout-top {
       display: inline-flex; align-items: center; gap: 0.35rem;
       padding: 0.45rem 0.9rem;
-      background: rgba(220,60,60,0.07);
-      border: 1px solid rgba(220,60,60,0.18);
+      background: rgba(220,60,60,0.07); border: 1px solid rgba(220,60,60,0.18);
       border-radius: var(--r-md); color: #f07070;
       font-family: 'Futura', sans-serif; font-size: 0.75rem;
       font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
@@ -83,30 +60,21 @@
     }
     .btn-logout-top:hover { background: rgba(220,60,60,0.14); border-color: #f07070; }
 
-    /* ══ CONTENEDOR PRINCIPAL ══ */
-    .page-wrap {
-      max-width: 860px; margin: 0 auto;
-      padding: 2rem 1.5rem 4rem;
-    }
+    /* ══ CONTENEDOR ══ */
+    .page-wrap { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
 
-    /* ══ HERO DEL FORMULARIO ══ */
+    /* ══ HERO ══ */
     .form-hero {
-      background: var(--dark2);
-      border: 1px solid var(--border);
-      border-radius: var(--r-xl);
-      padding: 1.75rem 2rem 1.25rem;
+      background: var(--dark2); border: 1px solid var(--border);
+      border-radius: var(--r-xl); padding: 1.75rem 2rem 1.25rem;
       margin-bottom: 1.5rem;
       display: flex; justify-content: space-between; align-items: flex-start;
-      animation: fadeUp 0.5s ease both;
-      position: relative; overflow: hidden;
+      animation: fadeUp 0.5s ease both; position: relative; overflow: hidden;
     }
-
     .form-hero::before {
-      content: '';
-      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
       background: var(--grad-brand);
     }
-
     .hero-egg {
       position: absolute; right: -30px; top: -40px;
       width: 180px; height: 210px;
@@ -114,7 +82,6 @@
       background: linear-gradient(135deg, rgba(245,156,0,0.06), rgba(235,102,8,0.03));
       border: 1px solid rgba(245,156,0,0.05);
     }
-
     .form-title-main {
       font-size: 1.1rem; font-weight: 700;
       letter-spacing: 0.08em; text-transform: uppercase;
@@ -122,292 +89,206 @@
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
       margin-bottom: 0.3rem;
     }
-
     .form-meta-chips { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.6rem; }
-
     .meta-chip {
       font-size: 0.68rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
       background: var(--dark3); border: 1px solid var(--border);
       border-radius: 20px; padding: 0.2rem 0.65rem; color: var(--text3);
     }
-
     .meta-chip em { color: var(--amber); font-style: normal; }
+
+    /* ══ SELECTOR TIPO VEHÍCULO ══ */
+    .tipo-vehiculo-selector {
+      display: flex; gap: 0.75rem; margin-bottom: 1.5rem;
+      animation: fadeUp 0.5s ease both;
+    }
+    .tipo-btn {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      gap: 0.5rem; padding: 1.1rem 1rem;
+      background: var(--dark2); border: 1.5px solid var(--border);
+      border-radius: var(--r-lg); cursor: pointer;
+      transition: all 0.2s; position: relative; overflow: hidden;
+    }
+    .tipo-btn::before {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+      background: var(--grad-brand); opacity: 0; transition: opacity 0.2s;
+    }
+    .tipo-btn:hover { border-color: rgba(245,156,0,0.3); background: rgba(245,156,0,0.03); }
+    .tipo-btn.active {
+      border-color: var(--amber);
+      background: rgba(245,156,0,0.06);
+      box-shadow: 0 4px 20px rgba(245,156,0,0.12);
+    }
+    .tipo-btn.active::before { opacity: 1; }
+    .tipo-btn-icon { font-size: 2rem; line-height: 1; }
+    .tipo-btn-label {
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text2);
+    }
+    .tipo-btn.active .tipo-btn-label { color: var(--amber); }
+    .tipo-btn-check {
+      position: absolute; top: 0.5rem; right: 0.6rem;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--amber); display: none;
+      align-items: center; justify-content: center;
+      font-size: 0.6rem; color: #1a0f00; font-weight: 900;
+    }
+    .tipo-btn.active .tipo-btn-check { display: flex; }
 
     /* ══ TARJETAS DE SECCIÓN ══ */
     .section-card {
-      background: var(--dark2);
-      border: 1px solid var(--border);
-      border-radius: var(--r-lg);
-      margin-bottom: 1.25rem;
-      overflow: hidden;
+      background: var(--dark2); border: 1px solid var(--border);
+      border-radius: var(--r-lg); margin-bottom: 1.25rem; overflow: hidden;
       animation: fadeUp 0.5s ease both;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .section-card:focus-within {
-      border-color: rgba(245,156,0,0.2);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-    }
-
+    .section-card:focus-within { border-color: rgba(245,156,0,0.2); box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
     .section-head {
       display: flex; align-items: center; gap: 0.65rem;
-      padding: 1rem 1.5rem;
-      border-bottom: 1px solid var(--border);
-      background: var(--dark1);
-      position: relative;
+      padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);
+      background: var(--dark1); position: relative;
     }
     .section-head::before {
-      content: '';
-      position: absolute; left: 0; top: 0; bottom: 0;
-      width: 3px;
-      background: var(--grad-brand);
-      border-radius: 0 2px 2px 0;
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+      background: var(--grad-brand); border-radius: 0 2px 2px 0;
     }
-
     .section-icon {
       width: 30px; height: 30px; border-radius: var(--r-sm);
       background: rgba(245,156,0,0.1); border: 1px solid rgba(245,156,0,0.2);
       display: flex; align-items: center; justify-content: center; font-size: 0.9rem;
-      box-shadow: 0 2px 8px rgba(245,156,0,0.1);
-      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(245,156,0,0.1); flex-shrink: 0;
     }
-
-    .section-label {
-      font-size: 0.78rem; font-weight: 700;
-      letter-spacing: 0.1em; text-transform: uppercase; color: var(--text);
-    }
-
+    .section-label { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text); }
     .section-body { padding: 1.5rem; }
 
     /* ══ GRID CAMPOS ══ */
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
-
-    @media (max-width: 600px) {
-      .grid-2, .grid-3 { grid-template-columns: 1fr; }
-    }
-
+    @media (max-width: 600px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
     .field { display: flex; flex-direction: column; }
 
     /* ══ INPUTS ══ */
-    .f-label {
-      font-size: 0.68rem; font-weight: 700;
-      letter-spacing: 0.1em; text-transform: uppercase;
-      color: var(--text3); margin-bottom: 0.35rem;
-    }
-
+    .f-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.35rem; }
     .f-input, .f-select {
-      padding: 0.7rem 0.9rem;
-      background: var(--dark3);
-      border: 1px solid var(--border);
-      border-radius: var(--r-md);
-      color: var(--text);
-      font-family: 'Futura', sans-serif;
-      font-size: 0.88rem;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      appearance: none;
+      padding: 0.7rem 0.9rem; background: var(--dark3); border: 1px solid var(--border);
+      border-radius: var(--r-md); color: var(--text);
+      font-family: 'Futura', sans-serif; font-size: 0.88rem;
+      outline: none; transition: border-color 0.2s, box-shadow 0.2s; appearance: none;
     }
-
     .f-input:focus, .f-select:focus {
       border-color: var(--amber);
       box-shadow: 0 0 0 3px rgba(245,156,0,0.12), 0 1px 6px rgba(245,156,0,0.08);
     }
-
     .f-input::placeholder { color: var(--text3); }
     .f-input.input-invalid { border-color: #f07070 !important; }
     .f-input.input-valid   { border-color: rgba(40,200,120,0.4); }
-    .f-select.input-invalid{ border-color: #f07070 !important; }
-
-    /* ── Autofill override: evita fondo blanco del browser ── */
+    .f-select.input-invalid { border-color: #f07070 !important; }
     .f-input:-webkit-autofill,
     .f-input:-webkit-autofill:hover,
     .f-input:-webkit-autofill:focus,
     .f-input:-webkit-autofill:active {
       -webkit-box-shadow: 0 0 0 1000px #222730 inset !important;
       -webkit-text-fill-color: #F0EDE8 !important;
-      caret-color: #F0EDE8;
-      border-color: var(--border) !important;
+      caret-color: #F0EDE8; border-color: var(--border) !important;
       transition: background-color 9999s ease-in-out 0s;
     }
-
-    /* Select arrow */
     .f-select {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236E6860'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 0.9rem center;
-      padding-right: 2.2rem;
+      background-repeat: no-repeat; background-position: right 0.9rem center; padding-right: 2.2rem;
     }
     .f-select option { background: var(--dark2); color: var(--text); }
-
-    .f-error {
-      font-size: 0.72rem; color: #f07070;
-      margin-top: 0.3rem; display: none;
-    }
-
+    .f-error { font-size: 0.72rem; color: #f07070; margin-top: 0.3rem; display: none; }
     .f-hint  { font-size: 0.68rem; color: var(--text3); margin-top: 0.25rem; }
-
     .mt { margin-top: 0.85rem; }
 
     /* ══ ASPECTOS ══ */
-    .aspectos-grid {
-      display: flex; flex-direction: column; gap: 0.5rem;
-    }
-
+    .aspectos-grid { display: flex; flex-direction: column; gap: 0.5rem; }
     .aspecto-row {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0.7rem 0.9rem;
-      background: var(--dark3);
-      border: 1px solid var(--border);
-      border-radius: var(--r-md);
-      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
-      gap: 1rem;
+      padding: 0.7rem 0.9rem; background: var(--dark3); border: 1px solid var(--border);
+      border-radius: var(--r-md); transition: border-color 0.2s, background 0.2s, box-shadow 0.2s; gap: 1rem;
     }
-
-    .aspecto-row:hover {
-      border-color: rgba(245,156,0,0.2);
-      background: rgba(245,156,0,0.025);
-    }
-    .aspecto-row.has-m {
-      border-color: rgba(235,102,8,0.45);
-      background: rgba(235,102,8,0.05);
-      box-shadow: inset 3px 0 0 var(--ember);
-    }
-
-    .aspecto-num {
-      font-size: 0.62rem; font-weight: 700;
-      color: var(--amber); opacity: 0.5;
-      min-width: 18px; text-align: right;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .aspecto-label {
-      flex: 1; font-size: 0.83rem; color: var(--text2); line-height: 1.4;
-    }
-
+    .aspecto-row:hover { border-color: rgba(245,156,0,0.2); background: rgba(245,156,0,0.025); }
+    .aspecto-row.has-m { border-color: rgba(235,102,8,0.45); background: rgba(235,102,8,0.05); box-shadow: inset 3px 0 0 var(--ember); }
+    /* Animación de entrada para filas nuevas */
+    @keyframes rowIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+    .aspecto-row { animation: rowIn 0.18s ease both; }
+    .aspecto-num { font-size: 0.62rem; font-weight: 700; color: var(--amber); opacity: 0.5; min-width: 18px; text-align: right; font-variant-numeric: tabular-nums; }
+    .aspecto-label { flex: 1; font-size: 0.83rem; color: var(--text2); line-height: 1.4; }
     .bm-toggle { display: flex; gap: 0; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
-
     .bm-toggle input[type="radio"] { display: none; }
-
     .bm-toggle label {
-      padding: 0.38rem 0.9rem;
-      font-size: 0.72rem; font-weight: 800;
-      letter-spacing: 0.12em; cursor: pointer;
-      background: rgba(0,0,0,0.25); color: var(--text3);
-      transition: all 0.15s;
-      border: 1px solid var(--border);
-      user-select: none;
+      padding: 0.38rem 0.9rem; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em; cursor: pointer;
+      background: rgba(0,0,0,0.25); color: var(--text3); transition: all 0.15s;
+      border: 1px solid var(--border); user-select: none;
     }
-
     .bm-toggle label:first-of-type { border-radius: 6px 0 0 6px; border-right: none; }
     .bm-toggle label:last-of-type  { border-radius: 0 6px 6px 0; }
+    .bm-b input:checked + label { background: rgba(40,200,120,0.18); color: #28c878; border-color: rgba(40,200,120,0.35); text-shadow: 0 0 8px rgba(40,200,120,0.4); }
+    .bm-m input:checked + label { background: rgba(235,102,8,0.18); color: var(--ember); border-color: rgba(235,102,8,0.4); text-shadow: 0 0 8px rgba(235,102,8,0.4); }
 
-    .bm-b input:checked + label {
-      background: rgba(40,200,120,0.18); color: #28c878;
-      border-color: rgba(40,200,120,0.35);
-      text-shadow: 0 0 8px rgba(40,200,120,0.4);
+    /* Badge contador de M */
+    .aspectos-badge {
+      margin-left: auto; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em;
+      padding: 0.15rem 0.5rem; border-radius: 20px;
+      background: rgba(235,102,8,0.1); border: 1px solid rgba(235,102,8,0.25); color: var(--ember);
+      display: none;
     }
-    .bm-m input:checked + label {
-      background: rgba(235,102,8,0.18);  color: var(--ember);
-      border-color: rgba(235,102,8,0.4);
-      text-shadow: 0 0 8px rgba(235,102,8,0.4);
-    }
+    .aspectos-badge.visible { display: inline-flex; align-items: center; gap: 0.3rem; }
 
     /* ══ CONDICIONES ÓPTIMAS ══ */
     .optimas-toggle { display: flex; gap: 0; border-radius: var(--r-md); overflow: hidden; width: fit-content; }
     .optimas-toggle input[type="radio"] { display: none; }
     .optimas-toggle label {
-      padding: 0.55rem 1.5rem;
-      font-size: 0.82rem; font-weight: 700; letter-spacing: 0.06em; cursor: pointer;
-      background: var(--dark4); color: var(--text3);
-      border: 1px solid var(--border); transition: all 0.15s;
+      padding: 0.55rem 1.5rem; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.06em; cursor: pointer;
+      background: var(--dark4); color: var(--text3); border: 1px solid var(--border); transition: all 0.15s;
     }
     .optimas-toggle label:first-of-type { border-radius: var(--r-md) 0 0 var(--r-md); border-right: none; }
     .optimas-toggle label:last-of-type  { border-radius: 0 var(--r-md) var(--r-md) 0; }
     .opt-si input:checked + label { background: rgba(40,200,120,0.12); color: #28c878; border-color: rgba(40,200,120,0.3); }
-    .opt-no input:checked + label { background: rgba(235,102,8,0.12);  color: var(--ember); border-color: rgba(235,102,8,0.3); }
+    .opt-no input:checked + label { background: rgba(235,102,8,0.12); color: var(--ember); border-color: rgba(235,102,8,0.3); }
 
     /* ══ FIRMA ══ */
     .firma-canvas-wrap {
       background: linear-gradient(135deg, rgba(245,156,0,0.02) 0%, transparent 60%);
-      border: 1.5px dashed rgba(245,156,0,0.2);
-      border-radius: var(--r-lg);
-      overflow: hidden;
-      position: relative;
-      transition: border-color 0.2s;
+      border: 1.5px dashed rgba(245,156,0,0.2); border-radius: var(--r-lg);
+      overflow: hidden; position: relative; transition: border-color 0.2s;
     }
-    .firma-canvas-wrap:hover {
-      border-color: rgba(245,156,0,0.35);
-    }
-    .firma-canvas-wrap.has-firma {
-      border-style: solid;
-      border-color: rgba(40,200,120,0.3);
-      background: linear-gradient(135deg, rgba(40,200,120,0.02) 0%, transparent 60%);
-    }
-
-    .firma-canvas-wrap canvas {
-      display: block;
-      touch-action: none;
-      cursor: crosshair;
-      /* Sin width:100% en CSS — el tamaño se fija en JS con el tamaño real del wrapper */
-    }
-
+    .firma-canvas-wrap:hover { border-color: rgba(245,156,0,0.35); }
+    .firma-canvas-wrap.has-firma { border-style: solid; border-color: rgba(40,200,120,0.3); background: linear-gradient(135deg, rgba(40,200,120,0.02) 0%, transparent 60%); }
+    .firma-canvas-wrap canvas { display: block; touch-action: none; cursor: crosshair; }
     .firma-placeholder {
-      position: absolute; inset: 0;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      pointer-events: none;
-      color: var(--text3); gap: 0.3rem;
-      transition: opacity 0.3s;
+      position: absolute; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; pointer-events: none;
+      color: var(--text3); gap: 0.3rem; transition: opacity 0.3s;
     }
-
     .firma-placeholder-icon { font-size: 1.75rem; opacity: 0.35; }
     .firma-placeholder-text { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; }
-
-    .firma-actions-row {
-      display: flex; gap: 0.5rem; margin-top: 0.75rem;
-      justify-content: flex-end;
-    }
-
+    .firma-actions-row { display: flex; gap: 0.5rem; margin-top: 0.75rem; justify-content: flex-end; }
     .btn-limpiar {
-      padding: 0.5rem 1rem;
-      background: var(--dark3); border: 1px solid var(--border);
+      padding: 0.5rem 1rem; background: var(--dark3); border: 1px solid var(--border);
       border-radius: var(--r-md); color: var(--text2);
-      font-family: 'Futura', sans-serif; font-size: 0.75rem;
-      font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      font-family: 'Futura', sans-serif; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
       cursor: pointer; transition: all 0.2s;
     }
     .btn-limpiar:hover { border-color: var(--amber); color: var(--amber); }
-
     .btn-guardar-firma {
-      padding: 0.5rem 1.2rem;
-      background: rgba(40,200,120,0.1); border: 1px solid rgba(40,200,120,0.25);
+      padding: 0.5rem 1.2rem; background: rgba(40,200,120,0.1); border: 1px solid rgba(40,200,120,0.25);
       border-radius: var(--r-md); color: #28c878;
-      font-family: 'Futura', sans-serif; font-size: 0.75rem;
-      font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      font-family: 'Futura', sans-serif; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
       cursor: pointer; transition: all 0.2s;
     }
     .btn-guardar-firma:hover { background: rgba(40,200,120,0.18); border-color: #28c878; }
-
-    .firma-preview {
-      margin-top: 0.75rem;
-      display: flex; align-items: center; gap: 0.5rem;
-    }
-
-    .firma-preview img {
-      border: 1px solid rgba(40,200,120,0.3);
-      border-radius: var(--r-md); max-width: 120px;
-    }
-
+    .firma-preview { margin-top: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+    .firma-preview img { border: 1px solid rgba(40,200,120,0.3); border-radius: var(--r-md); max-width: 120px; }
     .firma-ok { font-size: 0.75rem; color: #28c878; }
 
     /* ══ OBSERVACIONES ══ */
     .f-textarea {
-      width: 100%; padding: 0.75rem 0.9rem;
-      background: var(--dark3); border: 1px solid var(--border);
+      width: 100%; padding: 0.75rem 0.9rem; background: var(--dark3); border: 1px solid var(--border);
       border-radius: var(--r-md); color: var(--text);
       font-family: 'Futura', sans-serif; font-size: 0.88rem;
-      outline: none; resize: vertical; min-height: 80px;
-      transition: border-color 0.2s;
+      outline: none; resize: vertical; min-height: 80px; transition: border-color 0.2s;
     }
     .f-textarea:focus { border-color: var(--amber); box-shadow: 0 0 0 3px rgba(245,156,0,0.1); }
     .f-textarea::placeholder { color: var(--text3); }
@@ -415,56 +296,31 @@
     /* ══ SUBMIT ══ */
     .submit-row {
       display: flex; gap: 0.75rem; align-items: center;
-      padding: 1.25rem 1.5rem;
-      background: var(--dark1);
-      border-top: 1px solid var(--border);
-      box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
+      padding: 1.25rem 1.5rem; background: var(--dark1);
+      border-top: 1px solid var(--border); box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
     }
-
     .btn-submit {
-      display: inline-flex; align-items: center; gap: 0.5rem;
-      padding: 0.85rem 2rem;
-      background: var(--grad-brand); border: none;
-      border-radius: var(--r-md); color: #1a0f00;
-      font-family: 'Futura', sans-serif; font-weight: 700;
-      font-size: 0.88rem; letter-spacing: 0.1em; text-transform: uppercase;
-      cursor: pointer; transition: all 0.25s;
-      box-shadow: var(--shadow-amber);
+      display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.85rem 2rem;
+      background: var(--grad-brand); border: none; border-radius: var(--r-md); color: #1a0f00;
+      font-family: 'Futura', sans-serif; font-weight: 700; font-size: 0.88rem; letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.25s; box-shadow: var(--shadow-amber);
     }
     .btn-submit:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 6px 28px rgba(245,156,0,0.45); }
     .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
     .btn-reset {
-      display: inline-flex; align-items: center; gap: 0.4rem;
-      padding: 0.85rem 1.4rem;
-      background: var(--dark3); border: 1px solid var(--border);
-      border-radius: var(--r-md); color: var(--text2);
-      font-family: 'Futura', sans-serif; font-weight: 700;
-      font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase;
+      display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.85rem 1.4rem;
+      background: var(--dark3); border: 1px solid var(--border); border-radius: var(--r-md); color: var(--text2);
+      font-family: 'Futura', sans-serif; font-weight: 700; font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase;
       cursor: pointer; transition: all 0.2s;
     }
     .btn-reset:hover { border-color: var(--amber); color: var(--amber); }
 
     /* ══ MENSAJES GLOBALES ══ */
-    .msg-error {
-      background: rgba(220,60,60,0.1); border: 1px solid rgba(220,60,60,0.25);
-      border-radius: var(--r-md); padding: 0.7rem 1rem;
-      font-size: 0.82rem; color: #f07070;
-    }
-
-    .msg-ok {
-      background: rgba(40,200,120,0.1); border: 1px solid rgba(40,200,120,0.25);
-      border-radius: var(--r-md); padding: 0.7rem 1rem;
-      font-size: 0.82rem; color: #28c878;
-    }
+    .msg-error { background: rgba(220,60,60,0.1); border: 1px solid rgba(220,60,60,0.25); border-radius: var(--r-md); padding: 0.7rem 1rem; font-size: 0.82rem; color: #f07070; }
+    .msg-ok    { background: rgba(40,200,120,0.1); border: 1px solid rgba(40,200,120,0.25); border-radius: var(--r-md); padding: 0.7rem 1rem; font-size: 0.82rem; color: #28c878; }
 
     @keyframes spin { to { transform: rotate(360deg); } }
-    .spinner {
-      display: inline-block; width: 14px; height: 14px;
-      border: 2px solid rgba(26,15,0,0.3);
-      border-top-color: #1a0f00; border-radius: 50%;
-      animation: spin 0.7s linear infinite; vertical-align: middle;
-    }
+    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(26,15,0,0.3); border-top-color: #1a0f00; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; }
   </style>
 </head>
 <body>
@@ -483,9 +339,7 @@
         <div class="user-dot"></div>
         <span class="user-text" id="headerNombre">—</span>
       </div>
-      <a href="#" id="btnAdmin" class="btn-admin-top" style="display:none;" onclick="irAAdmin(event)">
-        ⚙ Admin
-      </a>
+      <a href="#" id="btnAdmin" class="btn-admin-top" style="display:none;" onclick="irAAdmin(event)">⚙ Admin</a>
       <a href="/inspecciones/mis-inspecciones" class="btn-admin-top">📋 Mis inspecciones</a>
       <button class="btn-logout-top" onclick="cerrarSesion()">⏻ Salir</button>
     </div>
@@ -498,7 +352,7 @@
     <div class="form-hero">
       <div class="hero-egg"></div>
       <div>
-        <div class="form-title-main">Inspección Pre Operacional Motocicleta</div>
+        <div class="form-title-main" id="heroTitle">Inspección Pre Operacional Motocicleta</div>
         <div class="form-meta-chips">
           <span class="meta-chip">Código: <em>FO-SST-063</em></span>
           <span class="meta-chip">Fecha: <em>{{ fecha }}</em></span>
@@ -507,18 +361,33 @@
       </div>
     </div>
 
+    <!-- ── SELECTOR TIPO DE VEHÍCULO ── -->
+    <div class="tipo-vehiculo-selector">
+      <button type="button" class="tipo-btn active" id="btnMoto" onclick="setTipoVehiculo('Moto')">
+        <div class="tipo-btn-check">✓</div>
+        <div class="tipo-btn-icon">🏍</div>
+        <div class="tipo-btn-label">Motocicleta</div>
+      </button>
+      <button type="button" class="tipo-btn" id="btnCarro" onclick="setTipoVehiculo('Carro')">
+        <div class="tipo-btn-check">✓</div>
+        <div class="tipo-btn-icon">🚗</div>
+        <div class="tipo-btn-label">Automóvil</div>
+      </button>
+    </div>
+
     <!-- Formulario -->
     <form id="inspeccionForm" method="post" action="/inspecciones/submit" novalidate>
-      <input type="hidden" id="usuarioIdInput"        name="usuario_id">
-      <input type="hidden" id="nombreConductorInput"  name="nombre_conductor">
-      <input type="hidden" name="aspectos"            id="aspectosInput">
-      <input type="hidden" name="firma_dataurl"       id="firmaDataInput">
+      <input type="hidden" id="usuarioIdInput"       name="usuario_id">
+      <input type="hidden" id="nombreConductorInput" name="nombre_conductor">
+      <input type="hidden" id="tipoVehiculoInput"    name="tipo_vehiculo" value="Moto">
+      <input type="hidden" id="aspectosInput"        name="aspectos">
+      <input type="hidden" name="firma_dataurl"      id="firmaDataInput">
 
       <!-- ── SECCIÓN 1: VEHÍCULO ── -->
       <div class="section-card" style="animation-delay:0.05s">
         <div class="section-head">
-          <div class="section-icon">🏍</div>
-          <span class="section-label">Datos del vehículo</span>
+          <div class="section-icon" id="vehiculoIcon">🏍</div>
+          <span class="section-label" id="vehiculoLabel">Datos de la motocicleta</span>
         </div>
         <div class="section-body">
           <div class="grid-2">
@@ -573,7 +442,6 @@
 
             <div class="field">
               <label class="f-label">Gasolina</label>
-              <!-- ✅ FIX #10: select en vez de input libre — datos consistentes en BD -->
               <select id="gasolina" name="gasolina" class="f-select">
                 <option value="">Seleccione...</option>
                 <option value="Lleno">Lleno</option>
@@ -614,7 +482,6 @@
         </div>
         <div class="section-body">
           <div class="grid-2">
-
             <div class="field">
               <label class="f-label">Licencia No.</label>
               <input id="licencia_num" name="licencia_num" class="f-input" placeholder="Número de licencia">
@@ -623,7 +490,6 @@
               <input id="licencia_venc" name="licencia_venc" type="date" class="f-input">
               <span id="error_licencia_venc" class="f-error"></span>
             </div>
-
             <div class="field">
               <label class="f-label">Tarjeta de propiedad</label>
               <input id="porte_propiedad" name="porte_propiedad" class="f-input">
@@ -632,19 +498,16 @@
               <input id="soat" name="soat" class="f-input">
               <span id="error_soat" class="f-error"></span>
             </div>
-
             <div class="field">
               <label class="f-label">Emisión de gases</label>
               <input id="certificado_emision" name="certificado_emision" class="f-input">
               <span id="error_emision" class="f-error"></span>
             </div>
-
             <div class="field">
               <label class="f-label">Póliza de seguro</label>
               <input id="poliza_seguro" name="poliza_seguro" class="f-input">
               <span id="error_poliza" class="f-error"></span>
             </div>
-
           </div>
         </div>
       </div>
@@ -654,46 +517,12 @@
         <div class="section-head">
           <div class="section-icon">🔍</div>
           <span class="section-label">Aspectos a revisar</span>
+          <span id="aspectosBadge" class="aspectos-badge"></span>
           <span style="margin-left:auto;font-size:0.68rem;color:var(--text3);letter-spacing:0.06em;">B = Bueno · M = Malo</span>
         </div>
         <div class="section-body">
           <div class="aspectos-grid" id="aspectosContainer">
-
-            {% set aspectos_lista = [
-              "Estado de llantas y presión de aire",
-              "Encendido eléctrico y de crank",
-              "Luces y pito",
-              "Espejos retrovisores",
-              "Manijas de freno y clutch",
-              "Sistema de frenos",
-              "Estado de freno de disco",
-              "Nivel de líquido de freno",
-              "Revisión sistema tablero",
-              "Fugas de combustible y/o aceites",
-              "Kit de arrastre",
-              "Estado de suspensión",
-              "Nivel de aceites"
-            ] %}
-
-            {% for aspecto in aspectos_lista %}
-            <div class="aspecto-row" id="row_aspecto_{{ loop.index0 }}">
-              <span class="aspecto-num">{{ loop.index }}</span>
-              <span class="aspecto-label">{{ aspecto }}</span>
-              <div class="bm-toggle">
-                <div class="bm-b">
-                  <input type="radio" name="aspecto_{{ loop.index0 }}" id="b_{{ loop.index0 }}" value="B" checked
-                    onchange="onAspectoChange({{ loop.index0 }})">
-                  <label for="b_{{ loop.index0 }}">B</label>
-                </div>
-                <div class="bm-m">
-                  <input type="radio" name="aspecto_{{ loop.index0 }}" id="m_{{ loop.index0 }}" value="M"
-                    onchange="onAspectoChange({{ loop.index0 }})">
-                  <label for="m_{{ loop.index0 }}">M</label>
-                </div>
-              </div>
-            </div>
-            {% endfor %}
-
+            <!-- Generado dinámicamente por JS según tipo de vehículo -->
           </div>
         </div>
       </div>
@@ -787,9 +616,133 @@
   }
 
   /* ═══════════════════════════════════════════
+     LISTAS DE ASPECTOS POR TIPO DE VEHÍCULO
+  ═══════════════════════════════════════════ */
+  const ASPECTOS = {
+    Moto: [
+      "Estado de llantas y presión de aire",
+      "Encendido eléctrico y de crank",
+      "Luces y pito",
+      "Espejos retrovisores",
+      "Manijas de freno y clutch",
+      "Sistema de frenos",
+      "Estado de freno de disco",
+      "Nivel de líquido de freno",
+      "Revisión sistema tablero",
+      "Fugas de combustible y/o aceites",
+      "Kit de arrastre",
+      "Estado de suspensión",
+      "Nivel de aceites"
+    ],
+    Carro: [
+      "Estado de llantas y presión de aire",
+      "Funcionamiento de luces y bocina",
+      "Espejos retrovisores",
+      "Sistema de frenos",
+      "Nivel de líquido de freno",
+      "Nivel de aceites",
+      "Nivel de líquido refrigerante",
+      "Fugas de combustible y/o aceites",
+      "Revisión tablero e instrumentos",
+      "Funcionamiento de limpiaparabrisas",
+      "Estado de correas y mangueras",
+      "Funcionamiento de puertas y seguros",
+      "Estado de la dirección",
+      "Cinturón de seguridad",
+      "Estado de la carrocería / estructura"
+    ]
+  };
+
+  /* ═══════════════════════════════════════════
+     TIPO DE VEHÍCULO — selector y render aspectos
+  ═══════════════════════════════════════════ */
+  let tipoActual = "Moto";
+
+  function setTipoVehiculo(tipo) {
+    tipoActual = tipo;
+
+    // Actualizar botones
+    document.getElementById("btnMoto").classList.toggle("active",  tipo === "Moto");
+    document.getElementById("btnCarro").classList.toggle("active", tipo === "Carro");
+
+    // Actualizar hidden input
+    document.getElementById("tipoVehiculoInput").value = tipo;
+
+    // Actualizar hero title
+    const titles = {
+      Moto:  "Inspección Pre Operacional Motocicleta",
+      Carro: "Inspección Pre Operacional Automóvil"
+    };
+    document.getElementById("heroTitle").textContent = titles[tipo];
+
+    // Actualizar ícono y label de sección vehículo
+    const icons  = { Moto: "🏍", Carro: "🚗" };
+    const labels = { Moto: "Datos de la motocicleta", Carro: "Datos del automóvil" };
+    document.getElementById("vehiculoIcon").textContent  = icons[tipo];
+    document.getElementById("vehiculoLabel").textContent = labels[tipo];
+
+    // Renderizar aspectos
+    renderAspectos(tipo);
+  }
+
+  function renderAspectos(tipo) {
+    const lista     = ASPECTOS[tipo];
+    const container = document.getElementById("aspectosContainer");
+
+    container.innerHTML = "";
+
+    lista.forEach((texto, i) => {
+      const uid = `aspecto_${i}`;
+      const row = document.createElement("div");
+      row.className = "aspecto-row";
+      row.id = `row_aspecto_${i}`;
+      row.style.animationDelay = `${i * 0.03}s`;
+
+      row.innerHTML = `
+        <span class="aspecto-num">${i + 1}</span>
+        <span class="aspecto-label">${texto}</span>
+        <div class="bm-toggle">
+          <div class="bm-b">
+            <input type="radio" name="${uid}" id="b_${i}" value="B" checked onchange="onAspectoChange(${i})">
+            <label for="b_${i}">B</label>
+          </div>
+          <div class="bm-m">
+            <input type="radio" name="${uid}" id="m_${i}" value="M" onchange="onAspectoChange(${i})">
+            <label for="m_${i}">M</label>
+          </div>
+        </div>
+      `;
+      container.appendChild(row);
+    });
+
+    // Reiniciar badge
+    actualizarBadge();
+  }
+
+  // Render inicial
+  renderAspectos("Moto");
+
+  /* ═══════════════════════════════════════════
+     BADGE CONTADOR DE M
+  ═══════════════════════════════════════════ */
+  function actualizarBadge() {
+    const total = ASPECTOS[tipoActual].length;
+    let countM = 0;
+    for (let i = 0; i < total; i++) {
+      const mInput = document.getElementById("m_" + i);
+      if (mInput && mInput.checked) countM++;
+    }
+    const badge = document.getElementById("aspectosBadge");
+    if (countM > 0) {
+      badge.textContent = `⚠ ${countM} en M`;
+      badge.classList.add("visible");
+    } else {
+      badge.classList.remove("visible");
+    }
+  }
+
+  /* ═══════════════════════════════════════════
      FIRMA — implementación propia sin firma.js
-     Coordenadas con getBoundingClientRect() para
-     que el trazo siga exactamente al cursor/dedo.
   ═══════════════════════════════════════════ */
   (function initFirma() {
     const canvas      = document.getElementById("firmaCanvas");
@@ -797,28 +750,22 @@
     const wrapper     = canvas.parentElement;
     const placeholder = document.getElementById("firmaPlaceholder");
 
-    let drawing  = false;
-    let hasMark  = false;
+    let drawing = false;
+    let hasMark = false;
 
-    /* ── Ajustar resolución del canvas al wrapper ── */
     function resize() {
       const rect = wrapper.getBoundingClientRect();
       const dpr  = window.devicePixelRatio || 1;
-      // Guardar imagen actual antes de redimensionar
       const snapshot = hasMark ? canvas.toDataURL() : null;
-
       canvas.width  = rect.width  * dpr;
       canvas.height = rect.height * dpr;
       canvas.style.width  = rect.width  + "px";
       canvas.style.height = rect.height + "px";
-
       ctx.scale(dpr, dpr);
       ctx.strokeStyle = "#F0EDE8";
       ctx.lineWidth   = 2.2;
       ctx.lineCap     = "round";
       ctx.lineJoin    = "round";
-
-      // Restaurar imagen si había trazos
       if (snapshot) {
         const img = new Image();
         img.onload = () => ctx.drawImage(img, 0, 0, rect.width, rect.height);
@@ -826,7 +773,6 @@
       }
     }
 
-    /* ── Coordenadas relativas al canvas (mouse y touch) ── */
     function getPos(e) {
       const rect = canvas.getBoundingClientRect();
       if (e.touches) {
@@ -836,52 +782,14 @@
       return { x: e.clientX - rect.left, y: e.clientY - rect.top };
     }
 
-    /* ── Eventos mouse ── */
-    canvas.addEventListener("mousedown", e => {
-      drawing = true;
-      const p = getPos(e);
-      ctx.beginPath();
-      ctx.moveTo(p.x, p.y);
-      placeholder.style.opacity = "0";
-    });
-
-    canvas.addEventListener("mousemove", e => {
-      if (!drawing) return;
-      const p = getPos(e);
-      ctx.lineTo(p.x, p.y);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(p.x, p.y);
-      hasMark = true;
-    });
-
+    canvas.addEventListener("mousedown", e => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); placeholder.style.opacity = "0"; });
+    canvas.addEventListener("mousemove", e => { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x, p.y); hasMark = true; });
     canvas.addEventListener("mouseup",    () => { drawing = false; ctx.beginPath(); });
     canvas.addEventListener("mouseleave", () => { drawing = false; ctx.beginPath(); });
+    canvas.addEventListener("touchstart", e => { e.preventDefault(); drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); placeholder.style.opacity = "0"; }, { passive: false });
+    canvas.addEventListener("touchmove",  e => { e.preventDefault(); if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x, p.y); hasMark = true; }, { passive: false });
+    canvas.addEventListener("touchend",   () => { drawing = false; ctx.beginPath(); });
 
-    /* ── Eventos touch ── */
-    canvas.addEventListener("touchstart", e => {
-      e.preventDefault();
-      drawing = true;
-      const p = getPos(e);
-      ctx.beginPath();
-      ctx.moveTo(p.x, p.y);
-      placeholder.style.opacity = "0";
-    }, { passive: false });
-
-    canvas.addEventListener("touchmove", e => {
-      e.preventDefault();
-      if (!drawing) return;
-      const p = getPos(e);
-      ctx.lineTo(p.x, p.y);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(p.x, p.y);
-      hasMark = true;
-    }, { passive: false });
-
-    canvas.addEventListener("touchend", () => { drawing = false; ctx.beginPath(); });
-
-    /* ── API pública que el resto del script consume ── */
     window.firmaApp = {
       isEmpty:    () => !hasMark,
       getDataURL: () => canvas.toDataURL("image/png"),
@@ -902,7 +810,6 @@
       }
     };
 
-    /* ── Inicializar tamaño ── */
     resize();
     window.addEventListener("resize", resize);
   })();
@@ -927,24 +834,21 @@
     const dataURL = window.firmaApp.getDataURL();
     document.getElementById("firmaDataInput").value = dataURL;
     document.getElementById("error_firma").style.display = "none";
-
     const prev = document.getElementById("firmaPreview");
     prev.style.display = "flex";
-    prev.innerHTML = `
-      <img src="${dataURL}" alt="Firma guardada">
-      <span class="firma-ok">✓ Firma guardada</span>
-    `;
+    prev.innerHTML = `<img src="${dataURL}" alt="Firma guardada"><span class="firma-ok">✓ Firma guardada</span>`;
     document.querySelector(".firma-canvas-wrap").classList.add("has-firma");
   }
 
   /* ═══════════════════════════════════════════
-     ASPECTOS — resaltar fila si M
+     ASPECTOS — resaltar fila si M + badge
   ═══════════════════════════════════════════ */
   function onAspectoChange(idx) {
     const mInput = document.getElementById("m_" + idx);
     const row    = document.getElementById("row_aspecto_" + idx);
     if (!mInput || !row) return;
     row.classList.toggle("has-m", mInput.checked);
+    actualizarBadge();
   }
 
   /* ═══════════════════════════════════════════
@@ -997,6 +901,9 @@
       limpiarFirma();
       clearAllErrors();
       document.querySelectorAll(".aspecto-row").forEach(r => r.classList.remove("has-m"));
+      actualizarBadge();
+      // Volver a Moto al limpiar todo
+      setTipoVehiculo("Moto");
     }, 10);
   }
 
@@ -1004,8 +911,6 @@
      NAVEGACIÓN ADMIN
   ═══════════════════════════════════════════ */
   function irAAdmin(e) {
-    // ✅ FIX #8: navegación directa — la cookie httpOnly autentica al admin
-    // Antes usaba window.open + document.write (rompía CSS/links internos)
     e.preventDefault();
     window.location.href = "/admin";
   }
@@ -1029,22 +934,27 @@
     const form     = ev.target;
     const formData = new FormData(form);
 
-    // Recolectar aspectos
+    // Recolectar aspectos con texto de la etiqueta
+    // Formato: { "1": { valor: "B", label: "Estado de llantas..." }, ... }
+    // El backend guarda el JSON como string — el PDF lo puede usar
+    const lista  = ASPECTOS[tipoActual];
     const aspectos = {};
-    const total = document.querySelectorAll('[name^="aspecto_"]').length / 2;
-    for (let i = 0; i < total; i++) {
+    for (let i = 0; i < lista.length; i++) {
       const radios = document.getElementsByName("aspecto_" + i);
-      for (const r of radios) if (r.checked) aspectos[i + 1] = r.value;
+      for (const r of radios) {
+        if (r.checked) {
+          aspectos[i + 1] = { valor: r.value, label: lista[i] };
+        }
+      }
     }
     formData.set("aspectos", JSON.stringify(aspectos));
+    formData.set("tipo_vehiculo", tipoActual);
 
     // Firma
-    const firmaData = window.firmaApp.getDataURL();
-    formData.set("firma_dataurl", firmaData);
+    formData.set("firma_dataurl", window.firmaApp.getDataURL());
 
     // Validaciones
     let hasError = false;
-
     const checks = [
       ["placa",               v => v.trim().toUpperCase().replace(/[^A-Z0-9]/g,"").length >= 5, "Placa inválida"],
       ["proceso",             v => v.trim() !== "", "Seleccione un proceso"],
@@ -1080,7 +990,8 @@
       hasError = true;
     }
 
-    const anyM = Object.values(aspectos).includes("M");
+    // Verificar si hay algún M usando el nuevo formato de objeto
+    const anyM = Object.values(aspectos).some(a => a.valor === "M");
     if (anyM && (formData.get("observaciones") || "").trim().length < 6) {
       showErr("error_observaciones", "Obligatorio si hay aspectos en M");
       hasError = true;
@@ -1136,7 +1047,7 @@
         form.reset();
         onReset();
 
-        // ✅ FIX #9: Leer advertencia de licencia vencida del header
+        // ✅ Leer advertencia de licencia vencida del header
         const advertencia = resp.headers.get("X-Advertencias");
         if (advertencia) {
           try {

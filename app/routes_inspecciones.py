@@ -264,7 +264,11 @@ async def submit_inspeccion(
     except:
         return JSONResponse({"error": "Aspectos inválidos"}, status_code=400)
 
-    if "M" in asp_json.values() and len(observaciones.strip()) < 6:
+    # ✅ Compatibilidad: formato nuevo {"1": {"valor":"M","label":"..."}} y viejo {"1": "M"}
+    def _asp_valor(v):
+        return v.get("valor") if isinstance(v, dict) else v
+
+    if "M" in [_asp_valor(v) for v in asp_json.values()] and len(observaciones.strip()) < 6:
         return JSONResponse(
             {"error": "Debes agregar observaciones si algún aspecto está en M"},
             status_code=400
