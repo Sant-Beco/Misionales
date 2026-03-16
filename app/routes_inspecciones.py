@@ -171,17 +171,84 @@ def _guess_firma_path_for_record(r):
     return None
 
 
+# Listas de aspectos por tipo de vehículo — fuente única de verdad
+ASPECTOS_MOTO = [
+    "Estado de llantas y presión de aire",
+    "Encendido eléctrico y de crank",
+    "Luces y pito",
+    "Espejos retrovisores",
+    "Manijas de freno y clutch",
+    "Sistema de frenos",
+    "Estado de freno de disco",
+    "Nivel de líquido de freno",
+    "Revisión sistema tablero",
+    "Fugas de combustible y/o aceites",
+    "Kit de arrastre",
+    "Estado de suspensión",
+    "Nivel de aceites",
+]
+
+ASPECTOS_CARRO = [
+    "Estado de llantas y presión de aire",
+    "Funcionamiento de luces y bocina",
+    "Espejos retrovisores",
+    "Sistema de frenos",
+    "Nivel de líquido de freno",
+    "Nivel de aceites",
+    "Nivel de líquido refrigerante",
+    "Fugas de combustible y/o aceites",
+    "Revisión tablero e instrumentos",
+    "Funcionamiento de limpiaparabrisas",
+    "Estado de correas y mangueras",
+    "Funcionamiento de puertas y seguros",
+    "Estado de la dirección",
+    "Cinturón de seguridad",
+    "Estado de la carrocería / estructura",
+]
+
+ASPECTOS_POR_TIPO = {
+    "Moto":  ASPECTOS_MOTO,
+    "Carro": ASPECTOS_CARRO,
+}
+
+
 def prepare_registro(r):
     """
-    Prepara campos para PDF y templates.
+    Prepara campos para PDF y templates:
+    - Normaliza aspectos_parsed al formato simple {"1": "B"/"M"}
+      compatible con el viejo formato {"1":"B"} y el nuevo {"1":{"valor":"B","label":"..."}}
+    - Inyecta aspectos_lista según tipo_vehiculo para que el template
+      muestre la lista correcta (Moto o Carro) sin hardcodearla
+    - Carga firma como base64 para WeasyPrint
     """
+    # ── Parsear y normalizar aspectos ──────────────────────────────
+    raw_parsed = {}
     try:
         if r.aspectos and r.aspectos not in ["null", "None"]:
-            r.aspectos_parsed = json.loads(r.aspectos)
+            raw_parsed = json.loads(r.aspectos)
+    except Exception:
+        raw_parsed = {}
+
+    # Normalizar: {"1": {"valor":"B","label":"..."}} → {"1": "B"}
+    normalized = {}
+    for k, v in raw_parsed.items():
+        if isinstance(v, dict):
+            normalized[k] = v.get("valor", "")
         else:
-            r.aspectos_parsed = {}
-    except:
-        r.aspectos_parsed = {}
+            normalized[k] = v  # formato viejo, ya es string
+
+    r.aspectos_parsed = normalized
+
+    # ── Lista de aspectos para el template ─────────────────────────
+    tipo = getattr(r, "tipo_vehiculo", None) or "Moto"
+    r.aspectos_lista = ASPECTOS_POR_TIPO.get(tipo, ASPECTOS_MOTO)
+
+    # ── Título según tipo ──────────────────────────────────────────
+    titulos = {
+        "Moto":  "Inspección Pre Operacional Motocicleta",
+        "Carro": "Inspección Pre Operacional Automóvil",
+    }
+    r.titulo_tipo = titulos.get(tipo, "Inspección Pre Operacional")
 
     r.firma_path = None
     r.firma_base64 = None
@@ -359,6 +426,9 @@ async def submit_inspeccion(
                 "codigo": "FO-SST-063",
                 "version": "01",
                 "logo_path": build_file_uri(LOGO_PATH),
+                # ✅ Lista correcta según tipo_vehiculo para el template
+                "aspectos_lista": inspeccion.aspectos_lista,
+                "titulo_tipo": inspeccion.titulo_tipo,
             },
             output_path=str(pdf_path),
         )
@@ -397,6 +467,9 @@ async def submit_inspeccion(
                     "desde": fecha_desde,
                     "hasta": fecha_hasta,
                     "logo_path": build_file_uri(LOGO_PATH),
+                    # ✅ Lista y título según tipo del primer registro
+                    "aspectos_lista": registros[0].aspectos_lista,
+                    "titulo_tipo": registros[0].titulo_tipo,
                 },
                 output_path=str(reporte_path),
             )
@@ -498,6 +571,9 @@ async def generar_pdf15(
                 "desde": fecha_desde,
                 "hasta": fecha_hasta,
                 "logo_path": build_file_uri(LOGO_PATH),
+                # ✅ Lista y título según tipo del primer registro
+                "aspectos_lista": registros[0].aspectos_lista,
+                "titulo_tipo": registros[0].titulo_tipo,
             },
             output_path=str(pdf_path),
         )
