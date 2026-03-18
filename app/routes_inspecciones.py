@@ -601,9 +601,11 @@ async def mis_inspecciones(
         usuario_actual.nombre_visible or usuario_actual.nombre
     )
 
+    # ✅ BLOQUEANTE #3: filtrar por usuario_id, no por nombre
+    # Evita que dos conductores con el mismo nombre vean las inspecciones del otro
     registros = (
         db.query(models.Inspeccion)
-        .filter(models.Inspeccion.nombre_conductor == nombre_conductor)
+        .filter(models.Inspeccion.usuario_id == usuario_actual.id)
         .order_by(models.Inspeccion.fecha.asc())
         .all()
     )

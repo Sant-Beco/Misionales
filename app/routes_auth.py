@@ -1,12 +1,13 @@
+import os
 import logging
-# app/routes_auth.py - VERSIÓN CORREGIDA
-
-from fastapi import APIRouter, HTTPException, Form, Depends, Response
+from fastapi import APIRouter, HTTPException, Form, Depends, Response, Request
 from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
+from collections import defaultdict
+import time
 
-from app.database import SessionLocal, get_db
+from app.database import get_db
 from app import models
 from app.security import (
     hash_pin,
@@ -19,9 +20,48 @@ from app.security import (
 router = APIRouter(tags=["Auth"])
 _log = logging.getLogger("routes_auth")
 
+# ============================
+# RATE LIMITING EN MEMORIA
+# ============================
+# Estructura: { ip: [(timestamp, nombre), ...] }
+_intentos_fallidos: dict = defaultdict(list)
+_VENTANA_SEG   = 300   # 5 minutos
+_MAX_INTENTOS  = 5     # máximo intentos fallidos por IP en esa ventana
+
+def _ip(request: Request) -> str:
+    """Extrae IP real respetando proxies (nginx/cloudflare)."""
+    xff = request.headers.get("X-Forwarded-For")
+    if xff:
+        return xff.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
+
+def _check_rate_limit(ip: str):
+    """Lanza 429 si la IP superó el límite de intentos fallidos."""
+    ahora = time.time()
+    # Limpiar intentos fuera de ventana
+    _intentos_fallidos[ip] = [
+        t for t in _intentos_fallidos[ip]
+        if ahora - t < _VENTANA_SEG
+    ]
+    if len(_intentos_fallidos[ip]) >= _MAX_INTENTOS:
+        restante = int(_VENTANA_SEG - (ahora - _intentos_fallidos[ip][0]))
+        raise HTTPException(
+            status_code=429,
+            detail=f"Demasiados intentos fallidos. Espera {restante}s antes de intentar de nuevo."
+        )
+
+def _registrar_fallo(ip: str):
+    _intentos_fallidos[ip].append(time.time())
+
+def _limpiar_fallo(ip: str):
+    """Limpia historial de la IP tras login exitoso."""
+    _intentos_fallidos.pop(ip, None)
+
 
 # ============================
-# REGISTRO (opcional)
+# REGISTRO
+# ✅ BLOQUEANTE #1: deshabilitado en producción
+# Habilitar solo localmente con REGISTER_ENABLED=true en .env
 # ============================
 
 @router.post("/register")
@@ -31,87 +71,71 @@ def registrar_usuario(
     db: Session = Depends(get_db)
 ):
     """
-    Registra un nuevo usuario
-    
-    Nota: En producción, este endpoint debería estar protegido
-    o deshabilitado completamente. Solo administradores deberían
-    crear usuarios (usar admin_cli.py)
+    Registro de usuario.
+    DESHABILITADO EN PRODUCCIÓN — usar admin_cli.py para crear usuarios.
+    Habilitar con REGISTER_ENABLED=true en .env solo para setup inicial.
     """
-    try:
-        # Normalizar nombre: quitar espacios extra
-        nombre_clean = " ".join(nombre.strip().split())
-        # Buscar case-insensitive para evitar problemas de mayúsculas
-        from sqlalchemy import func as _func
-
-        # Verificar si ya existe
-        existente = (
-            db.query(models.Usuario)
-            .filter(models.Usuario.nombre == nombre_clean)
-            .first()
+    if os.getenv("REGISTER_ENABLED", "false").lower() != "true":
+        raise HTTPException(
+            status_code=403,
+            detail="Registro deshabilitado. Contacta al administrador."
         )
-        if existente:
-            return JSONResponse(
-                {"mensaje": "Usuario ya existe"},
-                status_code=400
-            )
 
-        # ✅ Usar helper centralizado
-        pin_hash = hash_pin(pin)
+    nombre_clean = " ".join(nombre.strip().split())
 
+    existente = db.query(models.Usuario).filter(
+        models.Usuario.nombre == nombre_clean
+    ).first()
+    if existente:
+        return JSONResponse({"mensaje": "Usuario ya existe"}, status_code=400)
+
+    if not pin.isdigit() or not (4 <= len(pin) <= 6):
+        raise HTTPException(status_code=400, detail="PIN debe ser 4-6 dígitos numéricos")
+
+    try:
         usuario = models.Usuario(
             nombre=nombre_clean,
             nombre_visible=nombre_clean,
-            pin_hash=pin_hash
+            pin_hash=hash_pin(pin)
         )
-
         db.add(usuario)
         db.commit()
         db.refresh(usuario)
-
-        return {
-            "mensaje": "Usuario creado exitosamente",
-            "usuario_id": usuario.id,
-            "nombre": usuario.nombre
-        }
-
+        return {"mensaje": "Usuario creado exitosamente", "usuario_id": usuario.id}
     except Exception as e:
         db.rollback()
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error creando usuario: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Error creando usuario: {str(e)}")
 
 
 # ============================
-# LOGIN - ✅ CORREGIDO
+# LOGIN
+# ✅ BLOQUEANTE #4: rate limiting
+# ✅ IMPORTANTE: verifica activo
+# ✅ IMPORTANTE: cookie secure según HTTPS_ENABLED
 # ============================
 
 @router.post("/login")
 def login(
+    request: Request,
     response: Response,
     nombre: str = Form(...),
     pin: str = Form(...),
     db: Session = Depends(get_db)
 ):
-    """
-    Autentica un usuario y retorna token de sesión
-    
-    Returns:
-        {
-            "access_token": "...",
-            "token_type": "bearer",
-            "expires_in": 86400,  # segundos
-            "usuario_id": 1,
-            "nombre": "Juan Pérez"
-        }
-    """
-    try:
-        # Normalizar nombre: quitar espacios extra
-        nombre_clean = " ".join(nombre.strip().split())
-        # Buscar case-insensitive para evitar problemas de mayúsculas
-        from sqlalchemy import func as _func
+    ip = _ip(request)
 
-        # Buscar usuario — case-insensitive para evitar mismatch por mayúsculas
+    # ── Rate limiting ANTES de tocar la BD ──────────────────────────
+    _check_rate_limit(ip)
+
+    # ── Validación básica del PIN (evita queries con inputs basura) ──
+    if not pin or not pin.isdigit() or not (4 <= len(pin) <= 6):
+        _registrar_fallo(ip)
+        raise HTTPException(status_code=401, detail="Usuario o PIN incorrecto")
+
+    try:
+        nombre_clean = " ".join(nombre.strip().split())
+
+        from sqlalchemy import func as _func
         usuario = (
             db.query(models.Usuario)
             .filter(_func.lower(models.Usuario.nombre) == nombre_clean.lower())
@@ -119,62 +143,62 @@ def login(
         )
 
         if not usuario:
-            raise HTTPException(
-                status_code=401,
-                detail="Usuario o PIN incorrecto"
-            )
+            _registrar_fallo(ip)
+            raise HTTPException(status_code=401, detail="Usuario o PIN incorrecto")
 
-        # ✅ Verificar PIN con helper centralizado
         if not verify_pin(pin, usuario.pin_hash):
+            _registrar_fallo(ip)
+            raise HTTPException(status_code=401, detail="Usuario o PIN incorrecto")
+
+        # ✅ IMPORTANTE: verificar que el usuario esté activo
+        if not getattr(usuario, "activo", 1):
             raise HTTPException(
-                status_code=401,
-                detail="Usuario o PIN incorrecto"
+                status_code=403,
+                detail="Usuario suspendido. Contacta al administrador."
             )
 
-        # Generar token seguro
+        # Login exitoso — limpiar historial de fallos
+        _limpiar_fallo(ip)
+
+        # Generar token y expiración
         token = generar_token()
-        
-        # Configurar expiración
         expiracion_horas = DEFAULT_TOKEN_EXPIRATION_HOURS
         token_expira = datetime.utcnow() + timedelta(hours=expiracion_horas)
 
-        # Actualizar usuario
         usuario.token = token
         usuario.token_expira = token_expira
         db.commit()
 
-        # Setear cookie para navegación directa por URL (admin, etc.)
+        # ✅ IMPORTANTE: secure=True cuando HTTPS_ENABLED=true
+        _https = os.getenv("HTTPS_ENABLED", "false").lower() == "true"
         response.set_cookie(
             key="access_token",
             value=f"Bearer {token}",
             httponly=True,
             max_age=expiracion_horas * 3600,
-            samesite="lax"
+            samesite="lax",
+            secure=_https,
         )
 
         return {
             "access_token": token,
             "token_type": "bearer",
-            "expires_in": expiracion_horas * 3600,  
+            "expires_in": expiracion_horas * 3600,
             "usuario_id": usuario.id,
-            "nombre": usuario.nombre,
-            "rol": usuario.rol  # ← AGREGAR ESTA LÍNEA
+            "nombre": usuario.nombre_visible or usuario.nombre,
+            "rol": usuario.rol,
         }
 
     except HTTPException:
         raise
     except Exception as e:
         db.rollback()
-        # ← El traceback completo aparece en la consola de uvicorn
         _log.exception("❌ Error inesperado en /auth/login")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error en login: {type(e).__name__}: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Error en login: {type(e).__name__}: {str(e)}")
 
 
 # ============================
-# LOGOUT - ✅ NUEVO
+# LOGOUT
 # ============================
 
 @router.post("/logout")
@@ -182,9 +206,6 @@ def logout(
     usuario: models.Usuario = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Cierra la sesión del usuario invalidando su token
-    """
     try:
         usuario.token = None
         usuario.token_expira = None
@@ -197,46 +218,30 @@ def logout(
 
 @router.get("/logout")
 def logout_get():
-    """
-    Cierre de sesión vía GET — para links <a href='/auth/logout'> en templates.
-    Borra la cookie de sesión y redirige al login.
-    """
+    """Cierre de sesión vía GET — borra cookie y redirige al login."""
     resp = RedirectResponse(url="/login", status_code=302)
     resp.delete_cookie("access_token")
     return resp
 
 
 # ============================
-# VERIFICAR TOKEN (útil para frontend)
+# VERIFICAR TOKEN
 # ============================
 
 @router.get("/verify")
 def verify_token(
     usuario: models.Usuario = Depends(get_current_user)
 ):
-    """
-    Verifica si el token actual es válido
-    
-    Útil para que el frontend verifique si la sesión sigue activa
-    
-    Returns:
-        {
-            "valid": true,
-            "usuario_id": 1,
-            "nombre": "Juan Pérez",
-            "expires_at": "2026-01-28T10:30:00Z"
-        }
-    """
     return {
         "valid": True,
         "usuario_id": usuario.id,
-        "nombre": usuario.nombre,
+        "nombre": usuario.nombre_visible or usuario.nombre,
         "expires_at": usuario.token_expira.isoformat() if usuario.token_expira else None
     }
 
 
 # ============================
-# CAMBIAR PIN (protegido)
+# CAMBIAR PIN
 # ============================
 
 @router.post("/cambiar-pin")
@@ -246,50 +251,16 @@ def cambiar_pin(
     usuario: models.Usuario = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Permite al usuario cambiar su PIN
-    
-    Args:
-        pin_actual: PIN actual del usuario
-        pin_nuevo: Nuevo PIN deseado
-    
-    Returns:
-        {"mensaje": "PIN actualizado exitosamente"}
-    """
+    if not verify_pin(pin_actual, usuario.pin_hash):
+        raise HTTPException(status_code=401, detail="PIN actual incorrecto")
+
+    if not pin_nuevo.isdigit() or not (4 <= len(pin_nuevo) <= 6):
+        raise HTTPException(status_code=400, detail="El PIN debe tener entre 4 y 6 dígitos")
+
     try:
-        # Verificar PIN actual
-        if not verify_pin(pin_actual, usuario.pin_hash):
-            raise HTTPException(
-                status_code=401,
-                detail="PIN actual incorrecto"
-            )
-        
-        # Validar nuevo PIN
-        if not pin_nuevo.isdigit():
-            raise HTTPException(
-                status_code=400,
-                detail="El PIN debe contener solo números"
-            )
-        
-        if not (4 <= len(pin_nuevo) <= 6):
-            raise HTTPException(
-                status_code=400,
-                detail="El PIN debe tener entre 4 y 6 dígitos"
-            )
-        
-        # Actualizar PIN
         usuario.pin_hash = hash_pin(pin_nuevo)
         db.commit()
-
-        return {
-            "mensaje": "PIN actualizado exitosamente"
-        }
-
-    except HTTPException:
-        raise
+        return {"mensaje": "PIN actualizado exitosamente"}
     except Exception as e:
         db.rollback()
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error actualizando PIN: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Error actualizando PIN: {str(e)}")        
