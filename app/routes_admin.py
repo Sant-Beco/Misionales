@@ -132,6 +132,35 @@ async def admin_dashboard(
         for i in range(14)
     ]
 
+    # ── Gráfica anual comparativa: inspecciones por mes × año ──────
+    from sqlalchemy import extract
+    rows_anual = (
+        db.query(
+            extract("year",  models.Inspeccion.fecha).label("anio"),
+            extract("month", models.Inspeccion.fecha).label("mes"),
+            func.count(models.Inspeccion.id).label("total")
+        )
+        .group_by("anio", "mes")
+        .order_by("anio", "mes")
+        .all()
+    )
+
+    # Organizar en dict { año: [0..0] (12 valores, índice 0=Enero) }
+    anual_dict: dict = {}
+    for row in rows_anual:
+        anio = int(row.anio)
+        mes  = int(row.mes)   # 1-12
+        if anio not in anual_dict:
+            anual_dict[anio] = [0] * 12
+        anual_dict[anio][mes - 1] = int(row.total)
+
+    # Lista ordenada de años para el frontend
+    anios_disponibles = sorted(anual_dict.keys())
+    inspecciones_anual = [
+        {"anio": anio, "meses": anual_dict[anio]}
+        for anio in anios_disponibles
+    ]
+
     return templates.TemplateResponse("admin/dashboard.html", {
         "request": request,
         "admin": usuario_admin,
@@ -139,6 +168,7 @@ async def admin_dashboard(
         "total_inspecciones": total_inspecciones,
         "usuarios_activos": usuarios_activos,
         "inspecciones_por_dia": inspecciones_por_dia,
+        "inspecciones_anual": inspecciones_anual,
     })
 
 

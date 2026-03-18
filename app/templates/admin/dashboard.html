@@ -201,7 +201,9 @@
 
     .mini-bar { display: inline-block; height: 4px; border-radius: 2px; margin-left: 0.4rem; vertical-align: middle; background: var(--amber); opacity: 0.45; }
     .count-pill { background: rgba(245,156,0,0.1); color: var(--amber); padding: 0.15rem 0.55rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700; }
-  </style>
+    .annual-card { grid-column: 1 / -1; }  /* full-width en cualquier grid */
+
+</style>
 </head>
 <body>
 
@@ -351,6 +353,25 @@
       </div>
     </div>
   </div>
+  <!-- ── GRÁFICA ANUAL COMPARATIVA ── -->
+  <div class="chart-card annual-card" style="animation-delay:0.30s; margin-top:1.25rem;">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title">Comparativa anual de inspecciones</div>
+        <div class="chart-desc">Inspecciones por mes — comparación entre años</div>
+      </div>
+      <div style="display:flex;gap:0.5rem;align-items:center;">
+        <span id="anualLegend" style="display:flex;gap:0.75rem;flex-wrap:wrap;"></span>
+        <span class="chip chip-amber">Barras agrupadas</span>
+      </div>
+    </div>
+    <div style="position:relative;">
+      <canvas id="annualChart" height="130"></canvas>
+      <div id="annualEmpty" style="display:none;text-align:center;padding:2rem;color:var(--text3);font-size:0.82rem;">
+        Sin datos anuales registrados aún.
+      </div>
+    </div>
+  </div>
 
 </main>
 
@@ -460,7 +481,87 @@ const tooltipDefaults = {
   });
 })();
 
-// ── DONA ──
+// ── BARRAS AGRUPADAS — ANUAL ──
+(function() {
+  const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+  // Datos inyectados desde Jinja2
+  const datosAnuales = [
+    {% for serie in inspecciones_anual %}
+    { anio: {{ serie.anio }}, meses: {{ serie.meses | tojson }} },
+    {% endfor %}
+  ];
+
+  if (!datosAnuales.length) {
+    document.getElementById('annualChart').style.display = 'none';
+    document.getElementById('annualEmpty').style.display = 'block';
+    return;
+  }
+
+  // Paleta por año — amber, golden, ember, orange + variantes
+  const YEAR_PALETTE = [
+    { bg: 'rgba(245,156,0,0.75)',  border: '#F59C00' },
+    { bg: 'rgba(255,204,0,0.75)',  border: '#FFCC00' },
+    { bg: 'rgba(235,102,8,0.75)',  border: '#EB6608' },
+    { bg: 'rgba(239,125,0,0.75)',  border: '#EF7D00' },
+    { bg: 'rgba(180,220,80,0.75)', border: '#a8d440' },
+  ];
+
+  const datasets = datosAnuales.map((serie, i) => {
+    const pal = YEAR_PALETTE[i % YEAR_PALETTE.length];
+    return {
+      label: String(serie.anio),
+      data: serie.meses,
+      backgroundColor: pal.bg,
+      borderColor: pal.border,
+      borderWidth: 1.5,
+      borderRadius: 4,
+      borderSkipped: false,
+    };
+  });
+
+  new Chart(document.getElementById('annualChart'), {
+    type: 'bar',
+    data: { labels: meses, datasets },
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          align: 'end',
+          labels: {
+            boxWidth: 12, boxHeight: 12,
+            padding: 14,
+            font: { size: 11 },
+            color: '#F0EDE8',
+          }
+        },
+        tooltip: {
+          ...tooltipDefaults,
+          callbacks: {
+            title: (items) => `${meses[items[0].dataIndex]}`,
+            label: (item) => ` ${item.dataset.label}: ${item.parsed.y} inspecciones`,
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { font: { size: 11 } }
+        },
+        y: {
+          grid: { color: BORDER },
+          beginAtZero: true,
+          ticks: { precision: 0, font: { size: 11 } }
+        }
+      }
+    }
+  });
+})();
+
+
 (function() {
   const top5 = usuariosActivos.slice(0, 5);
   if (!top5.length) {
