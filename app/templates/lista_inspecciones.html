@@ -42,6 +42,17 @@
     }
     .btn-back:hover { border-color: var(--amber); color: var(--amber); }
 
+    .btn-logout-top {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      padding: 0.45rem 0.9rem;
+      background: rgba(220,60,60,0.07); border: 1px solid rgba(220,60,60,0.18);
+      border-radius: var(--r-md); color: #f07070;
+      font-family: 'Futura', sans-serif; font-size: 0.75rem;
+      font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-logout-top:hover { background: rgba(220,60,60,0.14); border-color: #f07070; }
+
     /* ── CONTENIDO ── */
     .page-wrap { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
 
@@ -186,7 +197,7 @@
   <!-- TOPBAR -->
   <header class="topbar">
     <div class="topbar-brand">
-      <img src="/static/img/Logotipo_01.png" alt="Incubant" class="topbar-logo">
+      <img src="/static/img/logotipo_01.png" alt="Incubant" class="topbar-logo">
       <div>
         <div class="topbar-title">Misionales</div>
         <div class="topbar-sub">Mis Inspecciones</div>
@@ -198,6 +209,7 @@
         <span class="user-text">{{ nombre_conductor }}</span>
       </div>
       <a href="/" class="btn-back">← Nueva inspección</a>
+      <button class="btn-logout-top" onclick="cerrarSesion()">⏻ Salir</button>
     </div>
   </header>
 
@@ -327,5 +339,24 @@
 
   </div>
 
+  <script>
+  /* ── Autenticación ── */
+  const token = localStorage.getItem("token");
+  if (!token) window.location.href = "/login";
+
+  /* ── Cerrar sesión: invalida token en BD, borra cookie y redirige ── */
+  async function cerrarSesion() {
+    try {
+      await fetch("/auth/logout", {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+    } catch(e) {}
+    finally {
+      localStorage.clear();
+      window.location.href = "/login";
+    }
+  }
+  </script>
 </body>
 </html>
