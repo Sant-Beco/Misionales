@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Inspecciones · Misionales Incubant</title>
   <link rel="stylesheet" href="/static/css/incubant-theme.css">
-  <link rel="shortcut icon" href="/static/img/logotipo_01.png" type="image/png">
+  <link rel="icon" href="/static/img/logotipo_01.png" type="image/png">
   <style>
     body { display: flex; min-height: 100vh; }
 
@@ -206,7 +206,7 @@
         <div class="user-role">Administrador</div>
       </div>
     </div>
-    <button onclick="cerrarSesion()" class="btn-logout"><svg width="11" height="11" viewBox="0 0 11 11" fill="none" style="vertical-align:middle;margin-right:2px"><path d="M5.5 1.5v3.5M2.8 2.8a4 4 0 1 0 5.4 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg> Cerrar sesión</button>
+    <button onclick="cerrarSesion()" class="btn-logout">⏻ Cerrar sesión</button>
   </div>
 </aside>
 
@@ -351,7 +351,7 @@
             <td><span class="placa-chip">{{ inspeccion.placa }}</span></td>
             <td>
               <span class="tipo-chip">
-                {% if inspeccion.tipo_vehiculo == 'Carro' %}🚗{% else %}🏍{% endif %}
+                {% if inspeccion.tipo_vehiculo == 'Carro' %}🚗{% elif inspeccion.tipo_vehiculo == 'Camion' %}🚛{% else %}🏍{% endif %}
                 {{ inspeccion.tipo_vehiculo or "Moto" }}
               </span>
             </td>
@@ -374,7 +374,14 @@
               {% endif %}
             </td>
             <td>
-              <button class="btn-ver" onclick="verDetalle({{ loop.index0 }})">Ver</button>
+              <div style="display:flex;gap:0.35rem;align-items:center;">
+                <button class="btn-ver" onclick="verDetalle({{ loop.index0 }})">🔍 Ver</button>
+                <a href="/inspecciones/detalle/{{ inspeccion.id }}?formato=pdf"
+                   class="btn-ver" target="_blank"
+                   style="background:rgba(245,156,0,0.06);border-color:rgba(245,156,0,0.2);color:var(--amber);">
+                  📄 PDF
+                </a>
+              </div>
             </td>
           </tr>
           {% endfor %}
@@ -476,6 +483,7 @@
 const INSPECCIONES = [
   {% for inspeccion, usuario in resultados %}
   {
+    id:           {{ inspeccion.id }},
     fecha:        "{{ inspeccion.fecha.strftime('%d/%m/%Y %H:%M') }}",
     conductor:    "{{ inspeccion.nombre_conductor }}",
     usuario:      "@{{ usuario.nombre }}",
@@ -572,6 +580,27 @@ function verDetalle(idx) {
       ${aspectosHtml}
     </div>` : ''}
   `;
+
+  // Agregar footer con botón descarga al modal
+  const modalEl = document.getElementById('modalContent');
+  const footer  = `
+    <div style="display:flex;justify-content:flex-end;gap:0.75rem;
+                margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border);">
+      <button onclick="cerrarModal()"
+        style="padding:0.55rem 1rem;background:var(--dark3);border:1px solid var(--border);
+               border-radius:var(--r-md);color:var(--text2);font-family:'Futura',sans-serif;
+               font-size:0.78rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+               cursor:pointer;">Cerrar</button>
+      <a href="/inspecciones/detalle/${d.id}?formato=pdf" target="_blank"
+        style="display:inline-flex;align-items:center;gap:0.4rem;
+               padding:0.55rem 1.25rem;background:var(--grad-brand);border:none;
+               border-radius:var(--r-md);color:#1a0f00;font-family:'Futura',sans-serif;
+               font-weight:700;font-size:0.78rem;letter-spacing:0.08em;text-transform:uppercase;
+               text-decoration:none;box-shadow:var(--shadow-amber);">
+        📄 Descargar PDF
+      </a>
+    </div>`;
+  modalEl.insertAdjacentHTML('beforeend', footer);
 
   document.getElementById('modalOverlay').classList.add('open');
 }
