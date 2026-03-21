@@ -4,7 +4,8 @@ from datetime import datetime
 from pathlib import Path
 
 from fastapi import FastAPI, Request, Depends
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.exceptions import HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
@@ -118,6 +119,47 @@ from app.routes_admin import router as admin_router
 app.include_router(auth_router,         prefix="/auth",          tags=["Auth"])
 app.include_router(inspecciones_router, prefix="/inspecciones",  tags=["Inspecciones"])
 app.include_router(admin_router,                                  tags=["Admin"])
+
+# ==========================================================
+#   HANDLER GLOBAL: 401 / 403 → redirect al login
+#   Distingue requests de browser (quieren HTML) de
+#   requests fetch/API (quieren JSON).
+#   - Browser sin sesión → redirect /login?next=<url>
+#   - fetch/API sin sesión → 401 JSON (comportamiento actual)
+# ==========================================================
+@app.exception_handler(HTTPException)
+async def auth_exception_handler(request: Request, exc: HTTPException):
+    if exc.status_code in (401, 403):
+        # Detectar si el cliente espera HTML:
+        # 1. Método GET (navegación directa)
+        # 2. Accept header contiene text/html
+        # 3. No es una llamada fetch con Authorization header
+        accept = request.headers.get("accept", "")
+        is_browser = (
+            request.method == "GET"
+            and "text/html" in accept
+            and not request.headers.get("authorization")
+            and not request.headers.get("x-requested-with")
+        )
+        if is_browser:
+            # Guardar la URL destino para redirigir después del login
+            next_url = str(request.url.path)
+            if request.url.query:
+                next_url += "?" + request.url.query
+            from urllib.parse import quote
+            redirect_url = f"/login?next={quote(next_url)}&razon={exc.status_code}"
+            resp = RedirectResponse(url=redirect_url, status_code=302)
+            # Limpiar cookie expirada/inválida para que el login parta limpio
+            resp.delete_cookie("access_token")
+            return resp
+
+    # Para todo lo demás (fetch, POST, otros status) → JSON normal
+    from fastapi.responses import JSONResponse
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+    )
+
 
 # ==========================================================
 #   RUTA: LOGIN

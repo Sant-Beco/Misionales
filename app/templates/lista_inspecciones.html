@@ -190,6 +190,40 @@
       .kpi-row { grid-template-columns: 1fr; }
       .pdf15-wrap { flex-direction: column; gap: 0.75rem; }
     }
+
+    /* ── MODAL DETALLE ── */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.72); backdrop-filter:blur(5px); z-index:200; align-items:flex-start; justify-content:center; padding:2rem 1rem; overflow-y:auto; }
+    .modal-overlay.open { display:flex; }
+    .modal { background:var(--dark2); border:1px solid var(--border); border-radius:var(--r-xl); padding:1.75rem; width:100%; max-width:580px; margin:auto; animation:fadeUp 0.25s ease both; box-shadow:0 20px 60px rgba(0,0,0,0.5); }
+    .modal-head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.25rem; padding-bottom:1rem; border-bottom:1px solid var(--border); }
+    .modal-titulo { font-size:1rem; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; color:var(--text); }
+    .modal-sub { font-size:0.75rem; color:var(--text3); margin-top:0.2rem; }
+    .modal-close { background:var(--dark3); border:1px solid var(--border); border-radius:var(--r-sm); color:var(--text2); font-size:1rem; cursor:pointer; padding:0.3rem 0.6rem; transition:all 0.2s; line-height:1; }
+    .modal-close:hover { border-color:#f07070; color:#f07070; }
+    .modal-section { margin-bottom:1.1rem; }
+    .modal-section-title { font-size:0.65rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text3); margin-bottom:0.6rem; padding-bottom:0.3rem; border-bottom:1px solid var(--border); }
+    .modal-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; }
+    .modal-field { background:var(--dark3); border:1px solid var(--border); border-radius:var(--r-md); padding:0.55rem 0.8rem; }
+    .modal-field.full { grid-column:1/-1; }
+    .mf-label { font-size:0.6rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text3); margin-bottom:0.2rem; }
+    .mf-val { font-size:0.85rem; color:var(--text); }
+    .asp-row { display:flex; justify-content:space-between; align-items:center; padding:0.4rem 0.65rem; border-radius:var(--r-sm); margin-bottom:2px; }
+    .asp-row.bueno { background:var(--dark3); }
+    .asp-row.malo  { background:rgba(235,102,8,0.07); border-left:2px solid var(--ember); }
+    .asp-num { font-size:0.65rem; color:var(--amber); opacity:0.6; min-width:20px; }
+    .asp-label { font-size:0.8rem; color:var(--text2); flex:1; padding:0 0.5rem; }
+    .asp-b { font-size:0.72rem; font-weight:700; color:#28c878; }
+    .asp-m { font-size:0.72rem; font-weight:700; color:var(--ember); }
+    .modal-footer { display:flex; gap:0.75rem; justify-content:flex-end; margin-top:1.25rem; padding-top:1rem; border-top:1px solid var(--border); }
+    .btn-dl-pdf { display:inline-flex; align-items:center; gap:0.4rem; padding:0.6rem 1.25rem; background:var(--grad-brand); border:none; border-radius:var(--r-md); color:#1a0f00; font-family:'Futura',sans-serif; font-weight:700; font-size:0.78rem; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; transition:all 0.2s; box-shadow:var(--shadow-amber); }
+    .btn-dl-pdf:hover { filter:brightness(1.1); transform:translateY(-1px); }
+    .btn-dl-pdf:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+    .btn-cerrar-modal { display:inline-flex; align-items:center; gap:0.4rem; padding:0.6rem 1rem; background:var(--dark3); border:1px solid var(--border); border-radius:var(--r-md); color:var(--text2); font-family:'Futura',sans-serif; font-weight:700; font-size:0.78rem; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; transition:all 0.2s; }
+    .btn-cerrar-modal:hover { border-color:var(--amber); color:var(--amber); }
+    .btn-ver-insp { display:inline-flex; align-items:center; gap:0.25rem; padding:0.28rem 0.65rem; background:var(--dark3); border:1px solid var(--border); border-radius:var(--r-sm); color:var(--text2); font-family:'Futura',sans-serif; font-size:0.7rem; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; cursor:pointer; transition:all 0.2s; }
+    .btn-ver-insp:hover { border-color:var(--amber); color:var(--amber); }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .spinner-sm { display:inline-block; width:12px; height:12px; border:2px solid rgba(26,15,0,0.3); border-top-color:#1a0f00; border-radius:50%; animation:spin 0.7s linear infinite; vertical-align:middle; }
   </style>
 </head>
 <body>
@@ -279,6 +313,7 @@
             <th>Proceso</th>
             <th>Ruta</th>
             <th>Estado</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -310,6 +345,9 @@
                 </span>
               {% endif %}
             </td>
+            <td>
+              <button class="btn-ver-insp" onclick="verInspeccion({{ r.id }})">🔍 Ver</button>
+            </td>
           </tr>
           {% endfor %}
         </tbody>
@@ -336,6 +374,9 @@
       </div>
       {% endif %}
     </div>
+
+  </div>
+
 
     <!-- ── HISTORIAL DE PDFs CONSOLIDADOS ── -->
     {% if reportes_consolidados %}
@@ -386,6 +427,22 @@
     </div>
     {% endif %}
 
+  <!-- Modal detalle inspección -->
+  <div id="modalOverlay" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <div class="modal-titulo">Detalle de inspección</div>
+          <div class="modal-sub" id="modalSub"></div>
+        </div>
+        <button class="modal-close" onclick="cerrarModal()">✕</button>
+      </div>
+      <div id="modalCuerpo"></div>
+      <div class="modal-footer">
+        <button class="btn-cerrar-modal" onclick="cerrarModal()">Cerrar</button>
+        <button class="btn-dl-pdf" id="btnDescarga" onclick="descargarPDF()" disabled>📄 Descargar PDF</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -406,6 +463,118 @@
       window.location.href = "/login";
     }
   }
+
+
+  let _inspeccionActual = null;
+
+  async function verInspeccion(id) {
+    const overlay = document.getElementById('modalOverlay');
+    const cuerpo  = document.getElementById('modalCuerpo');
+    const sub     = document.getElementById('modalSub');
+    const btnDl   = document.getElementById('btnDescarga');
+    cuerpo.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text3);">Cargando...</div>';
+    sub.textContent = '';
+    btnDl.disabled  = true;
+    overlay.classList.add('open');
+    try {
+      const resp = await fetch('/inspecciones/detalle/' + id + '?formato=json', {
+        headers: { "Authorization": 'Bearer ' + token }
+      });
+      if (!resp.ok) throw new Error('Error ' + resp.status);
+      const d = await resp.json();
+      _inspeccionActual = id;
+      sub.textContent = d.fecha + '  ·  ' + d.tipo_vehiculo + '  ·  Placa: ' + d.placa;
+      const malos = d.aspectos.filter(function(a){ return a.valor === 'M'; }).length;
+
+      const aspHtml = d.aspectos.map(function(a) {
+        return '<div class="asp-row ' + (a.valor === 'M' ? 'malo' : 'bueno') + '">'
+          + '<span class="asp-num">' + a.num + '</span>'
+          + '<span class="asp-label">' + a.label + '</span>'
+          + (a.valor === 'M' ? '<span class="asp-m">✖ Malo</span>' : '<span class="asp-b">✔ Bueno</span>')
+          + '</div>';
+      }).join('');
+
+      cuerpo.innerHTML =
+        '<div class="modal-section">'
+        + '<div class="modal-section-title">🏍 Datos del vehículo</div>'
+        + '<div class="modal-grid">'
+        + '<div class="modal-field"><div class="mf-label">Placa</div><div class="mf-val"><span class="placa-chip">' + d.placa + '</span></div></div>'
+        + '<div class="modal-field"><div class="mf-label">Tipo</div><div class="mf-val">' + (d.tipo_vehiculo === 'Carro' ? '🚗' : '🏍') + ' ' + d.tipo_vehiculo + '</div></div>'
+        + '<div class="modal-field"><div class="mf-label">Marca</div><div class="mf-val">' + (d.marca || '—') + '</div></div>'
+        + '<div class="modal-field"><div class="mf-label">Modelo / Motor</div><div class="mf-val">' + (d.modelo || '—') + ' · ' + (d.motor || '—') + 'cc</div></div>'
+        + '<div class="modal-field"><div class="mf-label">Gasolina</div><div class="mf-val">' + (d.gasolina || '—') + '</div></div>'
+        + '<div class="modal-field"><div class="mf-label">Proceso</div><div class="mf-val">' + d.proceso + '</div></div>'
+        + '<div class="modal-field full"><div class="mf-label">Ruta</div><div class="mf-val">' + d.desde + ' <span style="color:var(--amber)">→</span> ' + d.hasta + '</div></div>'
+        + '</div></div>'
+        + '<div class="modal-section">'
+        + '<div class="modal-section-title">📄 Documentos</div>'
+        + '<div class="modal-grid">'
+        + '<div class="modal-field"><div class="mf-label">Licencia N°</div><div class="mf-val">' + (d.licencia_num || '—') + '</div></div>'
+        + '<div class="modal-field"><div class="mf-label">Vencimiento</div><div class="mf-val">' + (d.licencia_venc || '—') + '</div></div>'
+        + '<div class="modal-field"><div class="mf-label">Tarjeta propiedad</div><div class="mf-val">' + (d.porte_propiedad || '—') + '</div></div>'
+        + '<div class="modal-field"><div class="mf-label">SOAT</div><div class="mf-val">' + (d.soat || '—') + '</div></div>'
+        + '<div class="modal-field"><div class="mf-label">Emisión gases</div><div class="mf-val">' + (d.certificado_emision || '—') + '</div></div>'
+        + '<div class="modal-field"><div class="mf-label">Póliza seguro</div><div class="mf-val">' + (d.poliza_seguro || '—') + '</div></div>'
+        + '</div></div>'
+        + '<div class="modal-section">'
+        + '<div class="modal-section-title">🔍 Aspectos revisados <span style="float:right;background:' + (malos > 0 ? 'rgba(235,102,8,0.12);color:var(--ember)' : 'rgba(40,200,120,0.1);color:#28c878') + ';padding:0.1rem 0.5rem;border-radius:12px;font-size:0.68rem;">' + (malos > 0 ? '⚠ ' + malos + ' en M' : '✓ Todo B') + '</span></div>'
+        + aspHtml
+        + '</div>'
+        + '<div class="modal-section"><div class="modal-section-title">📋 Condición general</div>'
+        + '<div class="modal-grid">'
+        + '<div class="modal-field"><div class="mf-label">¿Óptimas condiciones?</div><div class="mf-val">' + (d.condiciones_optimas === 'SI' ? '<span style="color:#28c878;font-weight:700;">✓ Sí</span>' : '<span style="color:#f07070;font-weight:700;">✕ No</span>') + '</div></div>'
+        + (d.observaciones ? '<div class="modal-field full"><div class="mf-label">Observaciones</div><div class="mf-val" style="line-height:1.5;">' + d.observaciones + '</div></div>' : '')
+        + '</div></div>';
+
+      btnDl.disabled = false;
+    } catch(err) {
+      cuerpo.innerHTML = '<div style="text-align:center;padding:2rem;color:#f07070;">Error cargando el detalle. Intenta de nuevo.</div>';
+    }
+  }
+
+  async function descargarPDF() {
+    if (!_inspeccionActual) return;
+    const btn = document.getElementById('btnDescarga');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-sm"></span>&nbsp;Generando...';
+    try {
+      const resp = await fetch('/inspecciones/detalle/' + _inspeccionActual + '?formato=pdf', {
+        headers: { "Authorization": 'Bearer ' + token }
+      });
+      if (!resp.ok) {
+        const err = await resp.json().catch(function(){ return {}; });
+        alert('Error: ' + (err.error || 'No se pudo generar el PDF'));
+        return;
+      }
+      const blob = await resp.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      const cd   = resp.headers.get('content-disposition') || '';
+      const m    = cd.match(/filename="?(.+?)"?$/);
+      a.href     = url;
+      a.download = m ? m[1] : 'inspeccion_' + _inspeccionActual + '.pdf';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch(e) {
+      alert('Error de conexión al generar el PDF.');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '📄 Descargar PDF';
+    }
+  }
+
+  function cerrarModal() {
+    document.getElementById('modalOverlay').classList.remove('open');
+    _inspeccionActual = null;
+  }
+  document.getElementById('modalOverlay').addEventListener('click', function(e) {
+    if (e.target === e.currentTarget) cerrarModal();
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') cerrarModal();
+  });
   </script>
 </body>
 </html>

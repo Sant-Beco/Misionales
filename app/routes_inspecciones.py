@@ -206,9 +206,33 @@ ASPECTOS_CARRO = [
     "Estado de la carrocería / estructura",
 ]
 
+ASPECTOS_CAMION = [
+    "Estado de llantas y presión de aire (todas las ruedas)",
+    "Funcionamiento de luces, direccionales y pito",
+    "Espejos retrovisores y laterales",
+    "Sistema de frenos de servicio",
+    "Sistema de frenos de emergencia / parqueo",
+    "Nivel de líquido de freno",
+    "Nivel de aceite de motor",
+    "Nivel de aceite de transmisión / diferencial",
+    "Nivel de líquido refrigerante",
+    "Fugas de combustible, aceites o líquidos",
+    "Revisión tablero e instrumentos",
+    "Funcionamiento de limpiaparabrisas",
+    "Estado de correas, mangueras y filtros",
+    "Estado de la dirección y columna",
+    "Funcionamiento de puertas, seguros y espejos",
+    "Estado de la carrocería y tolva / furgón",
+    "Cinturones de seguridad",
+    "Extintor y kit de carretera",
+    "Estado de la batería y sistema eléctrico",
+    "Revisión de carga (aseguramiento y peso)",
+]
+
 ASPECTOS_POR_TIPO = {
-    "Moto":  ASPECTOS_MOTO,
-    "Carro": ASPECTOS_CARRO,
+    "Moto":   ASPECTOS_MOTO,
+    "Carro":  ASPECTOS_CARRO,
+    "Camion": ASPECTOS_CAMION,
 }
 
 
@@ -245,8 +269,9 @@ def prepare_registro(r):
 
     # ── Título según tipo ──────────────────────────────────────────
     titulos = {
-        "Moto":  "Inspección Pre Operacional Motocicleta",
-        "Carro": "Inspección Pre Operacional Automóvil",
+        "Moto":   "Inspección Pre Operacional Motocicleta",
+        "Carro":  "Inspección Pre Operacional Automóvil",
+        "Camion": "Inspección Pre Operacional Camión",
     }
     r.titulo_tipo = titulos.get(tipo, "Inspección Pre Operacional")
 
@@ -610,22 +635,19 @@ async def mis_inspecciones(
         .all()
     )
 
-    # Historial de PDFs consolidados ya generados para este conductor
-    reportes_consolidados = (
-        db.query(models.ReporteInspeccion)
-        .filter(models.ReporteInspeccion.nombre_conductor == nombre_conductor)
-        .order_by(models.ReporteInspeccion.fecha_reporte.desc())
-        .all()
-    )
-
     return _TEMPLATES.TemplateResponse(
         "lista_inspecciones.html",
         {
-            "request":               request,
-            "nombre_conductor":      nombre_conductor,
-            "registros":             registros,
-            "puede_generar_pdf15":   len(registros) >= 15,
-            "reportes_consolidados": reportes_consolidados,
+            "request":           request,
+            "nombre_conductor":  nombre_conductor,
+            "registros":         registros,
+            "puede_generar_pdf15": len(registros) >= 15,
+            "reportes_consolidados": (
+                db.query(models.ReporteInspeccion)
+                .filter(models.ReporteInspeccion.nombre_conductor == nombre_conductor)
+                .order_by(models.ReporteInspeccion.fecha_reporte.desc())
+                .all()
+            ),
         },
     )
 
@@ -648,7 +670,6 @@ async def descargar_reporte_consolidado(
     if not reporte:
         return JSONResponse({"error": "Reporte no encontrado"}, status_code=404)
 
-    # Verificar que el conductor es el dueño (o admin)
     nombre_conductor = normalize_name(
         usuario_actual.nombre_visible or usuario_actual.nombre
     )
@@ -667,3 +688,85 @@ async def descargar_reporte_consolidado(
         filename += ".pdf"
 
     return safe_return_pdf(pdf_path, filename)
+
+
+# ==========================================================
+#   RUTA: DETALLE + DESCARGA PDF DE INSPECCIÓN INDIVIDUAL
+# ==========================================================
+
+@router.get("/detalle/{inspeccion_id}")
+async def detalle_inspeccion(
+    inspeccion_id: int,
+    formato: str = "json",
+    usuario_actual: models.Usuario = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Devuelve el detalle de una inspección individual.
+    ?formato=json → datos en JSON (para modal del frontend)
+    ?formato=pdf  → regenera y descarga el PDF individual
+    El conductor solo puede ver/descargar sus propias inspecciones.
+    El admin puede acceder a cualquiera.
+    """
+    inspeccion = db.query(models.Inspeccion).filter_by(id=inspeccion_id).first()
+    if not inspeccion:
+        return JSONResponse({"error": "Inspección no encontrada"}, status_code=404)
+
+    if usuario_actual.rol != "admin" and inspeccion.usuario_id != usuario_actual.id:
+        return JSONResponse({"error": "Sin acceso a esta inspección"}, status_code=403)
+
+    inspeccion = prepare_registro(inspeccion)
+
+    if formato == "pdf":
+        timestamp  = inspeccion.fecha.strftime("%Y%m%d_%H%M%S")
+        pdf_filename = f"inspeccion_{inspeccion.nombre_conductor.replace(' ','_')}_{timestamp}.pdf"
+        user_paths = get_user_paths(inspeccion.usuario_id)
+        pdf_path   = user_paths["inspecciones"] / pdf_filename
+
+        render_pdf_from_template(
+            "pdf_template.html",
+            {
+                "registro":       inspeccion,
+                "fecha":          inspeccion.fecha.strftime("%d - %m - %Y"),
+                "codigo":         "FO-SST-063",
+                "version":        "01",
+                "logo_path":      build_file_uri(LOGO_PATH),
+                "aspectos_lista": inspeccion.aspectos_lista,
+                "titulo_tipo":    inspeccion.titulo_tipo,
+            },
+            output_path=str(pdf_path),
+        )
+        return safe_return_pdf(pdf_path, pdf_filename)
+
+    # Formato JSON — datos completos para el modal
+    asp   = inspeccion.aspectos_parsed or {}
+    lista = inspeccion.aspectos_lista  or []
+
+    aspectos_detalle = [
+        {"num": i, "label": label, "valor": asp.get(str(i), "B")}
+        for i, label in enumerate(lista, 1)
+    ]
+
+    return JSONResponse({
+        "id":                  inspeccion.id,
+        "fecha":               inspeccion.fecha.strftime("%d/%m/%Y %H:%M"),
+        "nombre_conductor":    inspeccion.nombre_conductor,
+        "placa":               inspeccion.placa,
+        "tipo_vehiculo":       inspeccion.tipo_vehiculo or "Moto",
+        "proceso":             inspeccion.proceso,
+        "desde":               inspeccion.desde,
+        "hasta":               inspeccion.hasta,
+        "marca":               inspeccion.marca,
+        "modelo":              inspeccion.modelo,
+        "motor":               inspeccion.motor,
+        "gasolina":            inspeccion.gasolina,
+        "licencia_num":        inspeccion.licencia_num,
+        "licencia_venc":       inspeccion.licencia_venc,
+        "porte_propiedad":     inspeccion.porte_propiedad,
+        "soat":                inspeccion.soat,
+        "certificado_emision": inspeccion.certificado_emision,
+        "poliza_seguro":       inspeccion.poliza_seguro,
+        "condiciones_optimas": inspeccion.condiciones_optimas,
+        "observaciones":       inspeccion.observaciones or "",
+        "aspectos":            aspectos_detalle,
+    })

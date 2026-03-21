@@ -373,6 +373,11 @@
         <div class="tipo-btn-icon">🚗</div>
         <div class="tipo-btn-label">Automóvil</div>
       </button>
+      <button type="button" class="tipo-btn" id="btnCamion" onclick="setTipoVehiculo('Camion')">
+        <div class="tipo-btn-check">✓</div>
+        <div class="tipo-btn-icon">🚛</div>
+        <div class="tipo-btn-label">Camión</div>
+      </button>
     </div>
 
     <!-- Formulario -->
@@ -410,31 +415,32 @@
               <span id="error_proceso" class="f-error"></span>
             </div>
 
+            <!-- datalist: sugerencias fijas + escritura libre -->
+            <datalist id="lugares-list">
+              <option value="La Esperanza">
+              <option value="La Fe">
+              <option value="La Planta">
+              <option value="Municipio">
+            </datalist>
+
             <div class="field">
               <label class="f-label">Desde <span style="color:var(--amber)">*</span></label>
-              <select id="desde" name="desde" class="f-select">
-                <option value="">Seleccione origen...</option>
-                <option>La Esperanza</option>
-                <option>La Fe</option>
-                <option>La Planta</option>
-                <option>Municipio</option>
-              </select>
+              <input id="desde" name="desde" class="f-input"
+                list="lugares-list"
+                placeholder="Origen (ej: La Esperanza, Andes...)"
+                autocomplete="off">
               <span id="error_desde" class="f-error"></span>
             </div>
 
             <div class="field">
               <label class="f-label">Hasta <span style="color:var(--amber)">*</span></label>
-              <select id="hasta" name="hasta" class="f-select">
-                <option value="">Seleccione destino...</option>
-                <option>La Esperanza</option>
-                <option>La Fe</option>
-                <option>La Planta</option>
-                <option>Municipio</option>
-              </select>
+              <input id="hasta" name="hasta" class="f-input"
+                list="lugares-list"
+                placeholder="Destino (ej: La Planta, Medellín...)"
+                autocomplete="off">
               <span id="error_hasta" class="f-error"></span>
             </div>
-
-            <div class="field">
+<div class="field">
               <label class="f-label">Marca</label>
               <input id="marca" name="marca" class="f-input" placeholder="ej: Yamaha">
               <span id="error_marca" class="f-error"></span>
@@ -650,6 +656,28 @@
       "Estado de la dirección",
       "Cinturón de seguridad",
       "Estado de la carrocería / estructura"
+    ],
+    Camion: [
+      "Estado de llantas y presión de aire (todas las ruedas)",
+      "Funcionamiento de luces, direccionales y pito",
+      "Espejos retrovisores y laterales",
+      "Sistema de frenos de servicio",
+      "Sistema de frenos de emergencia / parqueo",
+      "Nivel de líquido de freno",
+      "Nivel de aceite de motor",
+      "Nivel de aceite de transmisión / diferencial",
+      "Nivel de líquido refrigerante",
+      "Fugas de combustible, aceites o líquidos",
+      "Revisión tablero e instrumentos",
+      "Funcionamiento de limpiaparabrisas",
+      "Estado de correas, mangueras y filtros",
+      "Estado de la dirección y columna",
+      "Funcionamiento de puertas, seguros y espejos",
+      "Estado de la carrocería y tolva / furgón",
+      "Cinturones de seguridad",
+      "Extintor y kit de carretera",
+      "Estado de la batería y sistema eléctrico",
+      "Revisión de carga (aseguramiento y peso)"
     ]
   };
 
@@ -662,22 +690,24 @@
     tipoActual = tipo;
 
     // Actualizar botones
-    document.getElementById("btnMoto").classList.toggle("active",  tipo === "Moto");
-    document.getElementById("btnCarro").classList.toggle("active", tipo === "Carro");
+    document.getElementById("btnMoto").classList.toggle("active",   tipo === "Moto");
+    document.getElementById("btnCarro").classList.toggle("active",  tipo === "Carro");
+    document.getElementById("btnCamion").classList.toggle("active", tipo === "Camion");
 
     // Actualizar hidden input
     document.getElementById("tipoVehiculoInput").value = tipo;
 
     // Actualizar hero title
     const titles = {
-      Moto:  "Inspección Pre Operacional Motocicleta",
-      Carro: "Inspección Pre Operacional Automóvil"
+      Moto:   "Inspección Pre Operacional Motocicleta",
+      Carro:  "Inspección Pre Operacional Automóvil",
+      Camion: "Inspección Pre Operacional Camión"
     };
     document.getElementById("heroTitle").textContent = titles[tipo];
 
     // Actualizar ícono y label de sección vehículo
-    const icons  = { Moto: "🏍", Carro: "🚗" };
-    const labels = { Moto: "Datos de la motocicleta", Carro: "Datos del automóvil" };
+    const icons  = { Moto: "🏍", Carro: "🚗", Camion: "🚛" };
+    const labels = { Moto: "Datos de la motocicleta", Carro: "Datos del automóvil", Camion: "Datos del camión" };
     document.getElementById("vehiculoIcon").textContent  = icons[tipo];
     document.getElementById("vehiculoLabel").textContent = labels[tipo];
 
@@ -1072,6 +1102,9 @@
       btn.innerHTML = "📄 Enviar y generar PDF";
     }
   });
+
+  
+
   </script>
 
 </body>
