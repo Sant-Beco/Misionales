@@ -337,6 +337,55 @@
       {% endif %}
     </div>
 
+    <!-- ── HISTORIAL DE PDFs CONSOLIDADOS ── -->
+    {% if reportes_consolidados %}
+    <div class="table-card" style="animation-delay:0.28s; margin-top:1.25rem;">
+      <div class="table-header">
+        <div>
+          <div class="table-title">📁 Historial de consolidados</div>
+          <div class="table-count">{{ reportes_consolidados | length }} PDF(s) generado(s)</div>
+        </div>
+      </div>
+      <table class="hist">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Fecha generación</th>
+            <th>Inspecciones incluidas</th>
+            <th>Descargar</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in reportes_consolidados %}
+          <tr>
+            <td style="color:var(--text3);font-size:0.75rem;">{{ loop.index }}</td>
+            <td style="color:var(--text2);">
+              {{ r.fecha_reporte.strftime("%d/%m/%Y") }}
+              <span style="color:var(--text3);font-size:0.72rem;"> · {{ r.fecha_reporte.strftime("%H:%M") }}</span>
+            </td>
+            <td style="text-align:center;">
+              <span style="background:rgba(245,156,0,0.1);color:var(--amber);padding:0.15rem 0.65rem;border-radius:20px;font-size:0.75rem;font-weight:700;">
+                {{ r.total_incluidas }} inspecciones
+              </span>
+            </td>
+            <td>
+              <a href="/inspecciones/reporte-consolidado/{{ r.id }}"
+                 style="display:inline-flex;align-items:center;gap:0.3rem;padding:0.3rem 0.75rem;
+                        background:rgba(245,156,0,0.08);border:1px solid rgba(245,156,0,0.2);
+                        border-radius:var(--r-sm);color:var(--amber);font-size:0.72rem;font-weight:700;
+                        letter-spacing:0.05em;text-transform:uppercase;text-decoration:none;transition:all 0.2s;"
+                 target="_blank">📄 Descargar PDF</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div style="padding:0.75rem 1.5rem;border-top:1px solid var(--border);font-size:0.72rem;color:var(--text3);">
+        ℹ Los PDFs se generan al completar 15 inspecciones. Una vez generados, el ciclo reinicia.
+      </div>
+    </div>
+    {% endif %}
+
   </div>
 
   <script>

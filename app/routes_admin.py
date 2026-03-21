@@ -474,6 +474,157 @@ async def admin_usuario_reactivar(
                      f"Usuario '{usuario.nombre}' reactivado")
     return RedirectResponse(url="/admin/usuarios?mensaje=Usuario reactivado", status_code=303)
 
+
+
+# ===============================
+# RUTAS: INSPECCIONES
+# ===============================
+
+@router.get("/admin/inspecciones", response_class=HTMLResponse)
+async def admin_inspecciones(
+    request: Request,
+    usuario_admin: models.Usuario = Depends(require_admin),
+    db: Session = Depends(get_db),
+    conductor: str = "",
+    placa: str = "",
+    tipo: str = "",
+    fecha_desde: str = "",
+    fecha_hasta: str = "",
+):
+    """
+    Vista admin: todas las inspecciones activas del sistema.
+    Filtros: conductor, placa, tipo_vehiculo, rango de fechas.
+    """
+    from sqlalchemy import or_
+    from datetime import datetime as _dt, timedelta
+
+    # Query con JOIN a usuario para tener ambos objetos
+    q = (
+        db.query(models.Inspeccion, models.Usuario)
+        .join(models.Usuario, models.Inspeccion.usuario_id == models.Usuario.id)
+    )
+
+    if conductor.strip():
+        q = q.filter(models.Inspeccion.nombre_conductor.ilike(f"%{conductor.strip()}%"))
+    if placa.strip():
+        q = q.filter(models.Inspeccion.placa.ilike(f"%{placa.strip()}%"))
+    if tipo.strip():
+        q = q.filter(models.Inspeccion.tipo_vehiculo == tipo.strip())
+    if fecha_desde.strip():
+        try:
+            q = q.filter(models.Inspeccion.fecha >= _dt.strptime(fecha_desde.strip(), "%Y-%m-%d"))
+        except ValueError:
+            pass
+    if fecha_hasta.strip():
+        try:
+            limite = _dt.strptime(fecha_hasta.strip(), "%Y-%m-%d") + timedelta(days=1)
+            q = q.filter(models.Inspeccion.fecha < limite)
+        except ValueError:
+            pass
+
+    resultados = (
+        q.order_by(models.Inspeccion.fecha.desc())
+        .limit(300)
+        .all()
+    )
+
+    # KPIs rápidos
+    total_activas = db.query(models.Inspeccion).count()
+    conductores_unicos = db.query(models.Inspeccion.usuario_id).distinct().count()
+
+    # Contar aspectos M — soporta formato viejo {"1":"M"} y nuevo {"1":{"valor":"M"}}
+    def _tiene_malo(inspeccion):
+        asp = inspeccion.aspectos_dict or {}
+        for v in asp.values():
+            val = v.get("valor") if isinstance(v, dict) else v
+            if val == "M":
+                return True
+        return False
+
+    con_malo = sum(1 for r, u in resultados if _tiene_malo(r))
+
+    templates = _templates_admin
+    return templates.TemplateResponse("admin/inspecciones.html", {
+        "request":           request,
+        "admin":             usuario_admin,
+        "resultados":        resultados,
+        "total_activas":     total_activas,
+        "con_malo":          con_malo,
+        "conductores_unicos": conductores_unicos,
+        "usuario_filtro":    None,
+        "reportes":          [],
+        "filtros": {
+            "conductor":   conductor,
+            "placa":       placa,
+            "tipo":        tipo,
+            "fecha_desde": fecha_desde,
+            "fecha_hasta": fecha_hasta,
+        },
+    })
+
+
+@router.get("/admin/usuarios/{usuario_id}/inspecciones", response_class=HTMLResponse)
+async def admin_usuario_inspecciones(
+    request: Request,
+    usuario_id: int,
+    usuario_admin: models.Usuario = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    """
+    Vista admin: inspecciones activas + historial de consolidados de un usuario.
+    Accesible desde la tabla de usuarios con botón "Ver inspecciones".
+    """
+    usuario = db.query(models.Usuario).filter_by(id=usuario_id).first()
+    if not usuario:
+        raise HTTPException(404, "Usuario no encontrado")
+
+    inspecciones = (
+        db.query(models.Inspeccion)
+        .filter(models.Inspeccion.usuario_id == usuario_id)
+        .order_by(models.Inspeccion.fecha.desc())
+        .all()
+    )
+
+    nombre_visible = usuario.nombre_visible or usuario.nombre
+    reportes = (
+        db.query(models.ReporteInspeccion)
+        .filter(models.ReporteInspeccion.nombre_conductor == nombre_visible)
+        .order_by(models.ReporteInspeccion.fecha_reporte.desc())
+        .all()
+    )
+
+    def _tiene_malo(inspeccion):
+        asp = inspeccion.aspectos_dict or {}
+        for v in asp.values():
+            val = v.get("valor") if isinstance(v, dict) else v
+            if val == "M":
+                return True
+        return False
+
+    con_malo = sum(1 for i in inspecciones if _tiene_malo(i))
+
+    # Empaquetar inspecciones igual que la vista general (tupla inspeccion + usuario)
+    resultados = [(i, usuario) for i in inspecciones]
+
+    templates = _templates_admin
+    return templates.TemplateResponse("admin/inspecciones.html", {
+        "request":            request,
+        "admin":              usuario_admin,
+        "resultados":         resultados,
+        "total_activas":      db.query(models.Inspeccion).count(),
+        "con_malo":           con_malo,
+        "conductores_unicos": 1,
+        "usuario_filtro":     usuario,
+        "reportes":           reportes,
+        "filtros": {
+            "conductor":   nombre_visible,
+            "placa":       "",
+            "tipo":        "",
+            "fecha_desde": "",
+            "fecha_hasta": "",
+        },
+    })
+
 # ===============================
 # API REST (opcional)
 # ===============================

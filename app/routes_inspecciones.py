@@ -610,12 +610,60 @@ async def mis_inspecciones(
         .all()
     )
 
+    # Historial de PDFs consolidados ya generados para este conductor
+    reportes_consolidados = (
+        db.query(models.ReporteInspeccion)
+        .filter(models.ReporteInspeccion.nombre_conductor == nombre_conductor)
+        .order_by(models.ReporteInspeccion.fecha_reporte.desc())
+        .all()
+    )
+
     return _TEMPLATES.TemplateResponse(
         "lista_inspecciones.html",
         {
-            "request":           request,
-            "nombre_conductor":  nombre_conductor,
-            "registros":         registros,
-            "puede_generar_pdf15": len(registros) >= 15,
+            "request":               request,
+            "nombre_conductor":      nombre_conductor,
+            "registros":             registros,
+            "puede_generar_pdf15":   len(registros) >= 15,
+            "reportes_consolidados": reportes_consolidados,
         },
     )
+
+# ==========================================================
+#   RUTA: DESCARGA PDF CONSOLIDADO (por id de reporte)
+# ==========================================================
+
+@router.get("/reporte-consolidado/{reporte_id}")
+async def descargar_reporte_consolidado(
+    reporte_id: int,
+    usuario_actual: models.Usuario = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Descarga un PDF consolidado del historial.
+    El conductor solo puede descargar sus propios reportes.
+    El admin puede descargar cualquiera.
+    """
+    reporte = db.query(models.ReporteInspeccion).filter_by(id=reporte_id).first()
+    if not reporte:
+        return JSONResponse({"error": "Reporte no encontrado"}, status_code=404)
+
+    # Verificar que el conductor es el dueño (o admin)
+    nombre_conductor = normalize_name(
+        usuario_actual.nombre_visible or usuario_actual.nombre
+    )
+    if usuario_actual.rol != "admin" and reporte.nombre_conductor != nombre_conductor:
+        return JSONResponse({"error": "Sin acceso a este reporte"}, status_code=403)
+
+    pdf_path = Path(reporte.archivo_pdf)
+    if not pdf_path.exists():
+        return JSONResponse(
+            {"error": "El archivo PDF ya no existe en el servidor"},
+            status_code=404
+        )
+
+    filename = pdf_path.name
+    if not filename.lower().endswith(".pdf"):
+        filename += ".pdf"
+
+    return safe_return_pdf(pdf_path, filename)

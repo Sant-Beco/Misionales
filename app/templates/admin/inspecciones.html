@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inspecciones · Misionales Incubant</title>
+  <link rel="stylesheet" href="/static/css/incubant-theme.css">
+  <link rel="icon" href="/static/img/logotipo_01.png" type="image/png">
+  <style>
+    body { display: flex; min-height: 100vh; }
+
+    /* ══ SIDEBAR ══ */
+    .sidebar {
+      width: 220px; flex-shrink: 0;
+      background: var(--dark1); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      padding: 1.5rem 0.875rem;
+      position: fixed; top: 0; left: 0; bottom: 0; z-index: 20;
+    }
+    .sidebar-brand { display: flex; align-items: center; gap: 0.6rem; padding: 0 0.5rem 1.5rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+    .brand-logo { height: 32px; filter: drop-shadow(0 2px 8px rgba(245,156,0,0.35)); }
+    .brand-texts { line-height: 1.2; }
+    .brand-name { font-size: 0.95rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; background: var(--grad-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .brand-sub { font-size: 0.62rem; color: var(--text3); letter-spacing: 0.06em; text-transform: uppercase; }
+    .nav-section { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); padding: 0 0.75rem; margin-bottom: 0.4rem; }
+    .nav-link { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.75rem; border-radius: var(--r-md); color: var(--text2); text-decoration: none; font-size: 0.85rem; margin-bottom: 2px; transition: all 0.2s; }
+    .nav-link:hover { background: var(--dark3); color: var(--text); }
+    .nav-link.active { background: rgba(245,156,0,0.1); color: var(--amber); border-left: 2px solid var(--amber); }
+    .nav-icon { font-size: 0.95rem; width: 18px; text-align: center; }
+    .sidebar-footer { margin-top: auto; padding-top: 1.25rem; border-top: 1px solid var(--border); }
+    .user-pill { display: flex; align-items: center; gap: 0.6rem; padding: 0.65rem 0.75rem; border-radius: var(--r-md); background: var(--dark3); margin-bottom: 0.75rem; }
+    .user-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--grad-brand); display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; color: #1a0f00; flex-shrink: 0; }
+    .user-name { font-size: 0.8rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: 0.65rem; color: var(--amber); letter-spacing: 0.06em; text-transform: uppercase; }
+    .btn-logout { display: flex; align-items: center; justify-content: center; gap: 0.4rem; width: 100%; padding: 0.6rem; background: rgba(220,60,60,0.08); border: 1px solid rgba(220,60,60,0.2); border-radius: var(--r-md); color: #f07070; text-decoration: none; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.2s; cursor: pointer; }
+    .btn-logout:hover { background: rgba(220,60,60,0.18); border-color: #f07070; }
+
+    /* ══ MAIN ══ */
+    .main { margin-left: 220px; flex: 1; padding: 2rem 2.25rem; min-height: 100vh; background: var(--night); }
+    .topbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.75rem; flex-wrap: wrap; gap: 0.75rem; }
+    .page-title { font-size: 1.6rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; background: var(--grad-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; }
+    .page-sub { font-size: 0.78rem; color: var(--text3); margin-top: 0.3rem; }
+
+    /* ══ KPIs ══ */
+    .kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    .kpi { background: var(--dark2); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 1.1rem 1.4rem; position: relative; overflow: hidden; animation: fadeUp 0.5s ease both; }
+    .kpi::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+    .kpi.amber::after  { background: var(--amber); }
+    .kpi.ember::after  { background: var(--ember); }
+    .kpi.golden::after { background: var(--golden); }
+    .kpi-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.5rem; }
+    .kpi-val { font-size: 2rem; font-weight: 700; line-height: 1; }
+    .kpi.amber  .kpi-val { color: var(--amber); }
+    .kpi.ember  .kpi-val { color: var(--ember); }
+    .kpi.golden .kpi-val { color: var(--golden); }
+    .kpi-sub { font-size: 0.72rem; color: var(--text3); margin-top: 0.3rem; }
+    .kpi-bg-icon { position: absolute; bottom: 0.75rem; right: 1rem; font-size: 2rem; opacity: 0.06; }
+
+    /* ══ FILTROS ══ */
+    .filter-card {
+      background: var(--dark2); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: 1.25rem 1.5rem;
+      margin-bottom: 1.25rem; animation: fadeUp 0.5s ease both;
+    }
+    .filter-title { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.9rem; }
+    .filter-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto; gap: 0.65rem; align-items: end; }
+    @media (max-width: 900px) { .filter-row { grid-template-columns: 1fr 1fr; } }
+
+    .f-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.3rem; display: block; }
+    .f-input, .f-select {
+      width: 100%; padding: 0.6rem 0.8rem;
+      background: var(--dark3); border: 1px solid var(--border);
+      border-radius: var(--r-md); color: var(--text);
+      font-family: 'Futura', sans-serif; font-size: 0.82rem;
+      outline: none; transition: border-color 0.2s; box-sizing: border-box;
+    }
+    .f-input:focus, .f-select:focus { border-color: var(--amber); }
+    .f-input::placeholder { color: var(--text3); }
+    .f-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236E6860'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.75rem center; padding-right: 2rem; }
+    .f-select option { background: var(--dark2); color: var(--text); }
+
+    .btn-filter {
+      padding: 0.6rem 1.25rem; background: var(--grad-brand); border: none;
+      border-radius: var(--r-md); color: #1a0f00;
+      font-family: 'Futura', sans-serif; font-weight: 700; font-size: 0.78rem;
+      letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .btn-filter:hover { filter: brightness(1.1); }
+    .btn-clear {
+      padding: 0.6rem 0.9rem; background: var(--dark3); border: 1px solid var(--border);
+      border-radius: var(--r-md); color: var(--text2);
+      font-family: 'Futura', sans-serif; font-weight: 700; font-size: 0.78rem;
+      letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.2s;
+      text-decoration: none; display: inline-flex; align-items: center;
+    }
+    .btn-clear:hover { border-color: var(--amber); color: var(--amber); }
+
+    /* ══ BANNER CONDUCTOR FILTRADO ══ */
+    .conductor-banner {
+      background: rgba(245,156,0,0.06); border: 1px solid rgba(245,156,0,0.18);
+      border-radius: var(--r-lg); padding: 1rem 1.5rem;
+      margin-bottom: 1.25rem; display: flex; align-items: center; gap: 1rem;
+      animation: fadeUp 0.4s ease both;
+    }
+    .conductor-avatar {
+      width: 40px; height: 40px; border-radius: 50%; background: var(--grad-brand);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; font-weight: 700; color: #1a0f00; flex-shrink: 0;
+    }
+    .conductor-name { font-size: 1rem; font-weight: 700; color: var(--text); }
+    .conductor-sub  { font-size: 0.75rem; color: var(--text3); margin-top: 0.15rem; }
+
+    /* ══ TABLA INSPECCIONES ══ */
+    .table-card { background: var(--dark2); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; animation: fadeUp 0.5s ease both; margin-bottom: 1.25rem; }
+    .table-header { display: flex; justify-content: space-between; align-items: center; padding: 1.1rem 1.5rem; border-bottom: 1px solid var(--border); background: var(--dark1); }
+    .table-title { font-size: 0.82rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); }
+    .table-count { font-size: 0.72rem; color: var(--text3); margin-top: 0.15rem; }
+
+    table.insp { width: 100%; border-collapse: collapse; }
+    table.insp thead th { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text3); padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); text-align: left; background: var(--dark1); white-space: nowrap; }
+    table.insp tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+    table.insp tbody tr:last-child { border-bottom: none; }
+    table.insp tbody tr:hover { background: rgba(245,156,0,0.025); }
+    table.insp tbody td { padding: 0.75rem 1rem; font-size: 0.83rem; vertical-align: middle; }
+
+    .placa-chip { display: inline-flex; align-items: center; background: rgba(245,156,0,0.08); border: 1px solid rgba(245,156,0,0.18); border-radius: var(--r-sm); padding: 0.15rem 0.55rem; font-size: 0.78rem; font-weight: 700; color: var(--amber); letter-spacing: 0.06em; }
+    .tipo-chip { display: inline-flex; align-items: center; background: var(--dark3); border: 1px solid var(--border); border-radius: 20px; padding: 0.15rem 0.5rem; font-size: 0.7rem; color: var(--text3); }
+    .proceso-chip { display: inline-flex; align-items: center; background: rgba(255,204,0,0.07); border: 1px solid rgba(255,204,0,0.15); border-radius: 20px; padding: 0.15rem 0.55rem; font-size: 0.7rem; color: var(--golden); }
+    .ruta-arrow { color: var(--amber); margin: 0 0.25rem; }
+    .condicion-ok  { display: inline-flex; align-items: center; gap: 0.25rem; background: rgba(40,200,120,0.1); border: 1px solid rgba(40,200,120,0.2); border-radius: 20px; padding: 0.15rem 0.55rem; font-size: 0.7rem; font-weight: 700; color: #28c878; }
+    .condicion-no  { display: inline-flex; align-items: center; gap: 0.25rem; background: rgba(220,60,60,0.1); border: 1px solid rgba(220,60,60,0.2); border-radius: 20px; padding: 0.15rem 0.55rem; font-size: 0.7rem; font-weight: 700; color: #f07070; }
+    .malo-badge    { display: inline-flex; align-items: center; gap: 0.2rem; background: rgba(235,102,8,0.1); border: 1px solid rgba(235,102,8,0.25); border-radius: 20px; padding: 0.15rem 0.55rem; font-size: 0.7rem; font-weight: 700; color: var(--ember); }
+    .ok-badge      { display: inline-flex; align-items: center; gap: 0.2rem; background: rgba(40,200,120,0.08); border: 1px solid rgba(40,200,120,0.2); border-radius: 20px; padding: 0.15rem 0.55rem; font-size: 0.7rem; font-weight: 700; color: #28c878; }
+
+    .btn-ver { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.3rem 0.65rem; background: var(--dark3); border: 1px solid var(--border); border-radius: var(--r-sm); color: var(--text2); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; text-decoration: none; cursor: pointer; transition: all 0.2s; font-family: 'Futura', sans-serif; }
+    .btn-ver:hover { border-color: var(--amber); color: var(--amber); }
+
+    .empty-state { padding: 3rem; text-align: center; color: var(--text3); }
+    .empty-icon  { font-size: 2.5rem; margin-bottom: 0.5rem; }
+
+    /* ══ HISTORIAL CONSOLIDADOS ══ */
+    .section-title-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.85rem; }
+    .section-title { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); }
+
+    table.rep { width: 100%; border-collapse: collapse; }
+    table.rep thead th { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text3); padding: 0.7rem 1rem; border-bottom: 1px solid var(--border); text-align: left; background: var(--dark1); }
+    table.rep tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+    table.rep tbody tr:last-child { border-bottom: none; }
+    table.rep tbody tr:hover { background: rgba(245,156,0,0.025); }
+    table.rep tbody td { padding: 0.75rem 1rem; font-size: 0.83rem; vertical-align: middle; }
+
+    .btn-dl { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.3rem 0.75rem; background: rgba(245,156,0,0.08); border: 1px solid rgba(245,156,0,0.2); border-radius: var(--r-sm); color: var(--amber); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; text-decoration: none; transition: all 0.2s; font-family: 'Futura', sans-serif; }
+    .btn-dl:hover { background: rgba(245,156,0,0.14); border-color: var(--amber); }
+    .btn-dl.disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+
+    /* Modal detalle */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 100; align-items: flex-start; justify-content: center; padding: 2rem 1rem; overflow-y: auto; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--dark2); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 1.75rem; width: 100%; max-width: 560px; animation: fadeUp 0.25s ease both; box-shadow: var(--shadow-lg); margin: auto; }
+    .modal-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem; }
+    .modal-title { font-size: 0.95rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); }
+    .modal-close { background: none; border: none; color: var(--text3); font-size: 1.25rem; cursor: pointer; padding: 0; line-height: 1; transition: color 0.2s; }
+    .modal-close:hover { color: var(--text); }
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .modal-field { background: var(--dark3); border: 1px solid var(--border); border-radius: var(--r-md); padding: 0.6rem 0.9rem; }
+    .modal-field-label { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.25rem; }
+    .modal-field-val { font-size: 0.85rem; color: var(--text); }
+    .modal-field.full { grid-column: 1 / -1; }
+    .modal-aspectos { margin-top: 1rem; }
+    .modal-asp-title { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.5rem; }
+    .asp-row { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0.6rem; border-radius: var(--r-sm); margin-bottom: 2px; }
+    .asp-row.malo { background: rgba(235,102,8,0.08); border-left: 2px solid var(--ember); }
+    .asp-row.bueno { background: var(--dark3); }
+    .asp-label { font-size: 0.78rem; color: var(--text2); }
+    .asp-val-b { font-size: 0.72rem; font-weight: 700; color: #28c878; }
+    .asp-val-m { font-size: 0.72rem; font-weight: 700; color: var(--ember); }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <img src="/static/img/logotipo_01.png" alt="Incubant" class="brand-logo">
+    <div class="brand-texts">
+      <div class="brand-name">Misionales</div>
+      <div class="brand-sub">Incubant SST</div>
+    </div>
+  </div>
+
+  <div class="nav-section" style="margin-top:0.25rem;">Panel</div>
+  <a href="/admin"               class="nav-link"><span class="nav-icon">📊</span> Dashboard</a>
+  <a href="/admin/usuarios"      class="nav-link"><span class="nav-icon">👥</span> Usuarios</a>
+  <a href="/admin/inspecciones"  class="nav-link active"><span class="nav-icon">🔍</span> Inspecciones</a>
+  <a href="/admin/logs"          class="nav-link"><span class="nav-icon">📋</span> Auditoría</a>
+
+  <div class="nav-section" style="margin-top:1.25rem;">Sistema</div>
+  <a href="/" class="nav-link"><span class="nav-icon">🚗</span> Formulario</a>
+
+  <div class="sidebar-footer">
+    <div class="user-pill">
+      <div class="user-avatar">{{ admin.nombre_visible[0]|upper if admin.nombre_visible else 'A' }}</div>
+      <div style="overflow:hidden;">
+        <div class="user-name">{{ admin.nombre_visible or admin.nombre }}</div>
+        <div class="user-role">Administrador</div>
+      </div>
+    </div>
+    <button onclick="cerrarSesion()" class="btn-logout">⏻ Cerrar sesión</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div>
+      {% if usuario_filtro %}
+        <div class="page-title">Inspecciones</div>
+        <div class="page-sub">
+          Historial de <strong style="color:var(--amber)">{{ usuario_filtro.nombre_visible or usuario_filtro.nombre }}</strong>
+          · <a href="/admin/inspecciones" style="color:var(--text3);font-size:0.75rem;">← Ver todas</a>
+        </div>
+      {% else %}
+        <div class="page-title">Inspecciones</div>
+        <div class="page-sub">Vista general · Todas las inspecciones activas del sistema</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-row">
+    <div class="kpi amber" style="animation-delay:0.05s">
+      <div class="kpi-label">Activas en sistema</div>
+      <div class="kpi-val">{{ total_activas }}</div>
+      <div class="kpi-sub">Pendientes de consolidar</div>
+      <div class="kpi-bg-icon">📄</div>
+    </div>
+    <div class="kpi ember" style="animation-delay:0.10s">
+      <div class="kpi-label">Con aspectos M</div>
+      <div class="kpi-val">{{ con_malo }}</div>
+      <div class="kpi-sub">En el resultado filtrado</div>
+      <div class="kpi-bg-icon">⚠</div>
+    </div>
+    <div class="kpi golden" style="animation-delay:0.15s">
+      <div class="kpi-label">{% if usuario_filtro %}Consolidados{% else %}Conductores activos{% endif %}</div>
+      <div class="kpi-val">{% if usuario_filtro %}{{ reportes | length }}{% else %}{{ conductores_unicos }}{% endif %}</div>
+      <div class="kpi-sub">{% if usuario_filtro %}PDFs generados{% else %}Con inspecciones{% endif %}</div>
+      <div class="kpi-bg-icon">{% if usuario_filtro %}📁{% else %}👤{% endif %}</div>
+    </div>
+  </div>
+
+  <!-- Banner conductor filtrado -->
+  {% if usuario_filtro %}
+  <div class="conductor-banner">
+    <div class="conductor-avatar">{{ (usuario_filtro.nombre_visible or usuario_filtro.nombre)[0] | upper }}</div>
+    <div>
+      <div class="conductor-name">{{ usuario_filtro.nombre_visible or usuario_filtro.nombre }}</div>
+      <div class="conductor-sub">@{{ usuario_filtro.nombre }} · {{ resultados | length }} inspecciones activas · {{ reportes | length }} consolidados</div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Filtros -->
+  {% if not usuario_filtro %}
+  <div class="filter-card" style="animation-delay:0.18s">
+    <div class="filter-title">🔍 Filtrar inspecciones</div>
+    <form method="GET" action="/admin/inspecciones">
+      <div class="filter-row">
+        <div>
+          <label class="f-label">Conductor</label>
+          <input name="conductor" class="f-input" placeholder="Nombre..." value="{{ filtros.conductor }}">
+        </div>
+        <div>
+          <label class="f-label">Placa</label>
+          <input name="placa" class="f-input" placeholder="ej: KSK45" value="{{ filtros.placa }}">
+        </div>
+        <div>
+          <label class="f-label">Tipo vehículo</label>
+          <select name="tipo" class="f-select">
+            <option value="">Todos</option>
+            <option value="Moto"  {% if filtros.tipo == 'Moto'  %}selected{% endif %}>🏍 Moto</option>
+            <option value="Carro" {% if filtros.tipo == 'Carro' %}selected{% endif %}>🚗 Carro</option>
+          </select>
+        </div>
+        <div>
+          <label class="f-label">Desde</label>
+          <input name="fecha_desde" type="date" class="f-input" value="{{ filtros.fecha_desde }}">
+        </div>
+        <div>
+          <label class="f-label">Hasta</label>
+          <input name="fecha_hasta" type="date" class="f-input" value="{{ filtros.fecha_hasta }}">
+        </div>
+        <div style="display:flex;gap:0.4rem;align-items:flex-end;">
+          <button type="submit" class="btn-filter">Filtrar</button>
+          <a href="/admin/inspecciones" class="btn-clear">✕</a>
+        </div>
+      </div>
+    </form>
+  </div>
+  {% endif %}
+
+  <!-- Tabla inspecciones activas -->
+  <div class="table-card" style="animation-delay:0.22s">
+    <div class="table-header">
+      <div>
+        <div class="table-title">Inspecciones activas</div>
+        <div class="table-count">
+          {{ resultados | length }} resultado(s)
+          {% if filtros.conductor or filtros.placa or filtros.tipo or filtros.fecha_desde or filtros.fecha_hasta %}
+            · filtrado
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    {% if resultados %}
+    <div style="overflow-x:auto;">
+      <table class="insp">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Conductor</th>
+            <th>Placa</th>
+            <th>Tipo</th>
+            <th>Proceso</th>
+            <th>Ruta</th>
+            <th>Condición</th>
+            <th>Aspectos</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for inspeccion, usuario in resultados %}
+          {% set asp = inspeccion.aspectos_dict or {} %}
+          {% set malos = namespace(count=0) %}
+          {% for k, v in asp.items() %}
+            {% set val = v.get('valor') if v is mapping else v %}
+            {% if val == 'M' %}{% set malos.count = malos.count + 1 %}{% endif %}
+          {% endfor %}
+          <tr>
+            <td style="white-space:nowrap;color:var(--text3);font-size:0.78rem;">
+              {{ inspeccion.fecha.strftime("%d/%m/%Y") }}<br>
+              <span style="font-size:0.7rem;">{{ inspeccion.fecha.strftime("%H:%M") }}</span>
+            </td>
+            <td>
+              <div style="font-weight:700;font-size:0.85rem;">{{ inspeccion.nombre_conductor }}</div>
+              <div style="font-size:0.72rem;color:var(--text3);">@{{ usuario.nombre }}</div>
+            </td>
+            <td><span class="placa-chip">{{ inspeccion.placa }}</span></td>
+            <td>
+              <span class="tipo-chip">
+                {% if inspeccion.tipo_vehiculo == 'Carro' %}🚗{% else %}🏍{% endif %}
+                {{ inspeccion.tipo_vehiculo or "Moto" }}
+              </span>
+            </td>
+            <td><span class="proceso-chip">{{ inspeccion.proceso }}</span></td>
+            <td style="font-size:0.78rem;color:var(--text3);white-space:nowrap;">
+              {{ inspeccion.desde }}<span class="ruta-arrow">→</span>{{ inspeccion.hasta }}
+            </td>
+            <td>
+              {% if inspeccion.condiciones_optimas == "SI" %}
+                <span class="condicion-ok">✓ Óptimas</span>
+              {% else %}
+                <span class="condicion-no">✕ No óptimas</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if malos.count > 0 %}
+                <span class="malo-badge">⚠ {{ malos.count }} M</span>
+              {% else %}
+                <span class="ok-badge">✓ Todo B</span>
+              {% endif %}
+            </td>
+            <td>
+              <button class="btn-ver" onclick="verDetalle({{ loop.index0 }})">Ver</button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">🐣</div>
+      <div>No hay inspecciones que coincidan con el filtro.</div>
+      {% if filtros.conductor or filtros.placa %}
+      <div style="margin-top:0.5rem;font-size:0.78rem;">
+        <a href="/admin/inspecciones" style="color:var(--amber);">← Ver todas</a>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Historial de consolidados (solo cuando se filtra por conductor) -->
+  {% if usuario_filtro %}
+  <div class="table-card" style="animation-delay:0.28s">
+    <div class="table-header">
+      <div>
+        <div class="table-title">📁 PDFs consolidados generados</div>
+        <div class="table-count">{{ reportes | length }} reporte(s) en historial</div>
+      </div>
+    </div>
+
+    {% if reportes %}
+    <table class="rep">
+      <thead>
+        <tr>
+          <th>Fecha generación</th>
+          <th>Conductor</th>
+          <th>Inspecciones incluidas</th>
+          <th>Estado archivo</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in reportes %}
+        {% set existe = r.archivo_pdf %}
+        <tr>
+          <td style="white-space:nowrap;">
+            <div style="font-weight:700;">{{ r.fecha_reporte.strftime("%d/%m/%Y") }}</div>
+            <div style="font-size:0.72rem;color:var(--text3);">{{ r.fecha_reporte.strftime("%H:%M") }}</div>
+          </td>
+          <td>{{ r.nombre_conductor }}</td>
+          <td style="text-align:center;">
+            <span style="background:rgba(245,156,0,0.1);color:var(--amber);padding:0.2rem 0.65rem;border-radius:20px;font-size:0.75rem;font-weight:700;">
+              {{ r.total_incluidas }}
+            </span>
+          </td>
+          <td>
+            {% if existe %}
+              <span style="color:#28c878;font-size:0.75rem;font-weight:700;">✓ Disponible</span>
+            {% else %}
+              <span style="color:var(--text3);font-size:0.75rem;">— No disponible</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if existe %}
+              <a href="/inspecciones/reporte-consolidado/{{ r.id }}"
+                 class="btn-dl" target="_blank">📄 Descargar</a>
+            {% else %}
+              <span class="btn-dl disabled">📄 Sin archivo</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state" style="padding:2rem;">
+      <div class="empty-icon" style="font-size:1.75rem;">📁</div>
+      <div style="font-size:0.85rem;">Este conductor aún no tiene PDFs consolidados generados.</div>
+      <div style="font-size:0.75rem;color:var(--text3);margin-top:0.4rem;">Se generan automáticamente al completar 15 inspecciones.</div>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</main>
+
+<!-- Modal detalle inspección -->
+<div id="modalOverlay" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">Detalle de inspección</div>
+      <button class="modal-close" onclick="cerrarModal()">✕</button>
+    </div>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+// Datos para el modal — inyectados desde Jinja
+const INSPECCIONES = [
+  {% for inspeccion, usuario in resultados %}
+  {
+    fecha:        "{{ inspeccion.fecha.strftime('%d/%m/%Y %H:%M') }}",
+    conductor:    "{{ inspeccion.nombre_conductor }}",
+    usuario:      "@{{ usuario.nombre }}",
+    placa:        "{{ inspeccion.placa }}",
+    tipo:         "{{ inspeccion.tipo_vehiculo or 'Moto' }}",
+    proceso:      "{{ inspeccion.proceso }}",
+    desde:        "{{ inspeccion.desde }}",
+    hasta:        "{{ inspeccion.hasta }}",
+    marca:        "{{ inspeccion.marca }}",
+    modelo:       "{{ inspeccion.modelo }}",
+    gasolina:     "{{ inspeccion.gasolina }}",
+    motor:        "{{ inspeccion.motor }}",
+    condicion:    "{{ inspeccion.condiciones_optimas }}",
+    observaciones:"{{ inspeccion.observaciones | replace('"', '\\"') | replace('\n', ' ') }}",
+    aspectos: {
+      {% for k, v in (inspeccion.aspectos_dict or {}).items() %}
+      "{{ k }}": "{% if v is mapping %}{{ v.get('valor','') }}{% else %}{{ v }}{% endif %}",
+      {% endfor %}
+    },
+    aspectosLabel: {
+      {% for k, v in (inspeccion.aspectos_dict or {}).items() %}
+      "{{ k }}": "{% if v is mapping %}{{ v.get('label', 'Aspecto ' ~ k) }}{% else %}Aspecto {{ k }}{% endif %}",
+      {% endfor %}
+    },
+  },
+  {% endfor %}
+];
+
+function verDetalle(idx) {
+  const d = INSPECCIONES[idx];
+  if (!d) return;
+
+  let aspectosHtml = '';
+  const keys = Object.keys(d.aspectos).sort((a,b) => parseInt(a) - parseInt(b));
+  keys.forEach(k => {
+    const val   = d.aspectos[k];
+    const label = d.aspectosLabel[k] || `Aspecto ${k}`;
+    const cls   = val === 'M' ? 'malo' : 'bueno';
+    const valHtml = val === 'M'
+      ? `<span class="asp-val-m">✖ M</span>`
+      : `<span class="asp-val-b">✔ B</span>`;
+    aspectosHtml += `<div class="asp-row ${cls}"><span class="asp-label">${label}</span>${valHtml}</div>`;
+  });
+
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-grid">
+      <div class="modal-field">
+        <div class="modal-field-label">Fecha</div>
+        <div class="modal-field-val">${d.fecha}</div>
+      </div>
+      <div class="modal-field">
+        <div class="modal-field-label">Conductor</div>
+        <div class="modal-field-val">${d.conductor} <span style="color:var(--text3);font-size:0.78rem;">${d.usuario}</span></div>
+      </div>
+      <div class="modal-field">
+        <div class="modal-field-label">Placa</div>
+        <div class="modal-field-val"><span class="placa-chip">${d.placa}</span></div>
+      </div>
+      <div class="modal-field">
+        <div class="modal-field-label">Tipo</div>
+        <div class="modal-field-val">${d.tipo === 'Carro' ? '🚗' : '🏍'} ${d.tipo}</div>
+      </div>
+      <div class="modal-field">
+        <div class="modal-field-label">Proceso</div>
+        <div class="modal-field-val">${d.proceso}</div>
+      </div>
+      <div class="modal-field">
+        <div class="modal-field-label">Ruta</div>
+        <div class="modal-field-val">${d.desde} → ${d.hasta}</div>
+      </div>
+      <div class="modal-field">
+        <div class="modal-field-label">Marca / Modelo / Motor</div>
+        <div class="modal-field-val">${d.marca} ${d.modelo} · ${d.motor}cc</div>
+      </div>
+      <div class="modal-field">
+        <div class="modal-field-label">Gasolina</div>
+        <div class="modal-field-val">${d.gasolina}</div>
+      </div>
+      <div class="modal-field full">
+        <div class="modal-field-label">Condición general</div>
+        <div class="modal-field-val">${d.condicion === 'SI'
+          ? '<span class="condicion-ok">✓ Vehículo en óptimas condiciones</span>'
+          : '<span class="condicion-no">✕ Vehículo NO en óptimas condiciones</span>'}</div>
+      </div>
+      ${d.observaciones ? `
+      <div class="modal-field full">
+        <div class="modal-field-label">Observaciones</div>
+        <div class="modal-field-val" style="line-height:1.5;">${d.observaciones}</div>
+      </div>` : ''}
+    </div>
+    ${keys.length ? `
+    <div class="modal-aspectos">
+      <div class="modal-asp-title">Aspectos revisados (${keys.length})</div>
+      ${aspectosHtml}
+    </div>` : ''}
+  `;
+
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function cerrarModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) cerrarModal();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') cerrarModal();
+});
+
+async function cerrarSesion() {
+  try { await fetch("/auth/logout", { method: "POST" }); } catch(e) {}
+  window.location.href = "/auth/logout";
+}
+</script>
+</body>
+</html>
