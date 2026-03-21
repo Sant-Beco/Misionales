@@ -6,6 +6,7 @@
   <title>MISONALES · Incubant</title>
   <link rel="stylesheet" href="/static/css/incubant-theme.css">
   <link rel="icon" href="/static/img/logotipo_01.png" type="image/png">
+  <link rel="shortcut icon" href="/static/img/logotipo_01.png" type="image/png">
   <style>
     body {
       min-height: 100vh;
@@ -156,6 +157,18 @@
       border: 2px solid rgba(26,15,0,0.3);
       border-top-color: #1a0f00; border-radius: 50%;
       animation: spin 0.7s linear infinite; vertical-align: middle;
+    }
+
+    /* ── Autofill: evitar fondo blanco del browser ── */
+    .form-input:-webkit-autofill,
+    .form-input:-webkit-autofill:hover,
+    .form-input:-webkit-autofill:focus,
+    .form-input:-webkit-autofill:active {
+      -webkit-box-shadow: 0 0 0 1000px #222730 inset !important;
+      -webkit-text-fill-color: #F0EDE8 !important;
+      caret-color: #F0EDE8;
+      border-color: var(--border) !important;
+      transition: background-color 9999s ease-in-out 0s;
     }
   </style>
 </head>
