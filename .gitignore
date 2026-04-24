@@ -7,6 +7,7 @@
 *.db
 *.sqlite
 *.sqlite3
+*.sql
 
 # ===== PYTHON =====
 __pycache__/
