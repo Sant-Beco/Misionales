@@ -175,9 +175,102 @@
     .asp-label { font-size: 0.78rem; color: var(--text2); }
     .asp-val-b { font-size: 0.72rem; font-weight: 700; color: #28c878; }
     .asp-val-m { font-size: 0.72rem; font-weight: 700; color: var(--ember); }
-  </style>
+  
+    /* ══ RESPONSIVE MÓVIL ══ */
+    .hamburger {
+      display: none;
+      position: fixed; top: 1rem; left: 1rem; z-index: 30;
+      flex-direction: column; justify-content: center; align-items: center;
+      gap: 5px; width: 40px; height: 40px;
+      background: var(--dark2); border: 1px solid var(--border);
+      border-radius: var(--r-md); cursor: pointer; padding: 0;
+    }
+    .hamburger span {
+      display: block; width: 18px; height: 2px;
+      background: var(--amber); border-radius: 2px;
+      transition: all 0.25s;
+    }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .sidebar-backdrop {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6); z-index: 19;
+      backdrop-filter: blur(2px);
+    }
+
+    @media (max-width: 768px) {
+      .hamburger { display: flex; }
+
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.28s ease;
+        z-index: 25;
+      }
+      .sidebar.open {
+        transform: translateX(0);
+        box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+      }
+      .sidebar-backdrop.open { display: block; }
+
+      .main {
+        margin-left: 0 !important;
+        padding: 1rem;
+        padding-top: 4rem;
+      }
+
+      /* KPIs */
+      .kpi-row { grid-template-columns: 1fr 1fr !important; gap: 0.65rem; }
+
+      /* Gráficas */
+      .charts-row  { grid-template-columns: 1fr !important; }
+      .bottom-row  { grid-template-columns: 1fr !important; }
+      .annual-card { grid-column: auto !important; }
+
+      /* Filtros */
+      .filter-row { grid-template-columns: 1fr 1fr !important; }
+      .filter-row > div:last-child { grid-column: 1 / -1; }
+
+      /* Topbar */
+      .topbar { flex-direction: column; gap: 0.5rem; }
+      .page-title { font-size: 1.2rem; }
+
+      /* Tablas */
+      .table-card { overflow-x: auto; }
+      table.insp, table.rk, table.rep, table.logs, table.users { min-width: 600px; }
+
+      /* Form */
+      .form-card { padding: 1.25rem; }
+      .form-row  { grid-template-columns: 1fr !important; }
+      .form-actions { flex-direction: column; }
+      .btn-save, .btn-back { width: 100%; justify-content: center; }
+
+      /* Modal */
+      .modal { padding: 1.25rem; margin: 1rem; }
+      .modal-grid { grid-template-columns: 1fr !important; }
+      .modal-field.full { grid-column: auto !important; }
+
+      /* Conductor banner */
+      .conductor-banner { flex-wrap: wrap; }
+
+      /* Botones topbar */
+      .btn-new { font-size: 0.72rem; padding: 0.5rem 0.9rem; }
+    }
+
+    @media (max-width: 420px) {
+      .kpi-row { grid-template-columns: 1fr !important; }
+      .kpi-val { font-size: 1.75rem; }
+    }
+</style>
 </head>
 <body>
+<!-- Hamburger (móvil) -->
+<button class="hamburger" onclick="toggleSidebar()" id="hamburgerBtn">
+  <span></span><span></span><span></span>
+</button>
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
@@ -351,7 +444,7 @@
             <td><span class="placa-chip">{{ inspeccion.placa }}</span></td>
             <td>
               <span class="tipo-chip">
-                {% if inspeccion.tipo_vehiculo == 'Carro' %}🚗{% elif inspeccion.tipo_vehiculo == 'Camion' %}🚛{% else %}🏍{% endif %}
+                {% if inspeccion.tipo_vehiculo == 'Carro' %}🚗{% else %}🏍{% endif %}
                 {{ inspeccion.tipo_vehiculo or "Moto" }}
               </span>
             </td>
@@ -374,14 +467,7 @@
               {% endif %}
             </td>
             <td>
-              <div style="display:flex;gap:0.35rem;align-items:center;">
-                <button class="btn-ver" onclick="verDetalle({{ loop.index0 }})">🔍 Ver</button>
-                <a href="/inspecciones/detalle/{{ inspeccion.id }}?formato=pdf"
-                   class="btn-ver" target="_blank"
-                   style="background:rgba(245,156,0,0.06);border-color:rgba(245,156,0,0.2);color:var(--amber);">
-                  📄 PDF
-                </a>
-              </div>
+              <button class="btn-ver" onclick="verDetalle({{ loop.index0 }})">Ver</button>
             </td>
           </tr>
           {% endfor %}
@@ -483,7 +569,6 @@
 const INSPECCIONES = [
   {% for inspeccion, usuario in resultados %}
   {
-    id:           {{ inspeccion.id }},
     fecha:        "{{ inspeccion.fecha.strftime('%d/%m/%Y %H:%M') }}",
     conductor:    "{{ inspeccion.nombre_conductor }}",
     usuario:      "@{{ usuario.nombre }}",
@@ -581,27 +666,6 @@ function verDetalle(idx) {
     </div>` : ''}
   `;
 
-  // Agregar footer con botón descarga al modal
-  const modalEl = document.getElementById('modalContent');
-  const footer  = `
-    <div style="display:flex;justify-content:flex-end;gap:0.75rem;
-                margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border);">
-      <button onclick="cerrarModal()"
-        style="padding:0.55rem 1rem;background:var(--dark3);border:1px solid var(--border);
-               border-radius:var(--r-md);color:var(--text2);font-family:'Futura',sans-serif;
-               font-size:0.78rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
-               cursor:pointer;">Cerrar</button>
-      <a href="/inspecciones/detalle/${d.id}?formato=pdf" target="_blank"
-        style="display:inline-flex;align-items:center;gap:0.4rem;
-               padding:0.55rem 1.25rem;background:var(--grad-brand);border:none;
-               border-radius:var(--r-md);color:#1a0f00;font-family:'Futura',sans-serif;
-               font-weight:700;font-size:0.78rem;letter-spacing:0.08em;text-transform:uppercase;
-               text-decoration:none;box-shadow:var(--shadow-amber);">
-        📄 Descargar PDF
-      </a>
-    </div>`;
-  modalEl.insertAdjacentHTML('beforeend', footer);
-
   document.getElementById('modalOverlay').classList.add('open');
 }
 
@@ -621,6 +685,27 @@ async function cerrarSesion() {
   try { await fetch("/auth/logout", { method: "POST" }); } catch(e) {}
   window.location.href = "/auth/logout";
 }
+</script>
+
+<script>
+function toggleSidebar() {
+  const sidebar  = document.querySelector('.sidebar');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  const btn      = document.getElementById('hamburgerBtn');
+  sidebar.classList.toggle('open');
+  backdrop.classList.toggle('open');
+  btn.classList.toggle('open');
+}
+document.querySelectorAll('.nav-link').forEach(link => {
+  link.addEventListener('click', () => {
+    if (window.innerWidth <= 768) {
+      setTimeout(() => {
+        const s = document.querySelector('.sidebar');
+        if (s.classList.contains('open')) toggleSidebar();
+      }, 150);
+    }
+  });
+});
 </script>
 </body>
 </html>
