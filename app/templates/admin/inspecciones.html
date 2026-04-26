@@ -4,289 +4,558 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Inspecciones · Misionales Incubant</title>
-  <link rel="stylesheet" href="/static/css/incubant-theme.css">
   <link rel="icon" href="/static/img/logotipo_01.png" type="image/png">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/incubant-theme.css">
   <style>
-    body { display: flex; min-height: 100vh; }
+    /* ══ RESET & BASE ══ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --night:   #09090F;
+      --dark1:   #0E0E18;
+      --dark2:   #13131F;
+      --dark3:   #1A1A2B;
+      --dark4:   #222236;
+      --border:  rgba(255,255,255,0.07);
+      --border2: rgba(255,255,255,0.04);
+      --amber:   #F59C00;
+      --amber-d: #C07800;
+      --ember:   #EB6608;
+      --golden:  #FFCC00;
+      --green:   #28C878;
+      --red:     #DC3C3C;
+      --text:    #F0EFE8;
+      --text2:   #A09E94;
+      --text3:   #5C5A54;
+      --grad-brand: linear-gradient(135deg, #F59C00 0%, #FFCC00 100%);
+      --r-sm:  6px;
+      --r-md:  10px;
+      --r-lg:  14px;
+      --r-xl:  20px;
+      --sidebar-w: 230px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    }
+
+    html, body {
+      background: var(--night);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    /* ══ LAYOUT ══ */
+    .layout { display: flex; min-height: 100vh; }
 
     /* ══ SIDEBAR ══ */
     .sidebar {
-      width: 220px; flex-shrink: 0;
-      background: var(--dark1); border-right: 1px solid var(--border);
+      width: var(--sidebar-w);
+      background: var(--dark1);
+      border-right: 1px solid var(--border);
+      position: fixed; top: 0; left: 0; bottom: 0;
       display: flex; flex-direction: column;
-      padding: 1.5rem 0.875rem;
-      position: fixed; top: 0; left: 0; bottom: 0; z-index: 20;
+      padding: 1.25rem 0.75rem;
+      z-index: 50;
+      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+      overflow-y: auto;
     }
-    .sidebar-brand { display: flex; align-items: center; gap: 0.6rem; padding: 0 0.5rem 1.5rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
-    .brand-logo { height: 32px; filter: drop-shadow(0 2px 8px rgba(245,156,0,0.35)); }
-    .brand-texts { line-height: 1.2; }
-    .brand-name { font-size: 0.95rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; background: var(--grad-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .brand-sub { font-size: 0.62rem; color: var(--text3); letter-spacing: 0.06em; text-transform: uppercase; }
-    .nav-section { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); padding: 0 0.75rem; margin-bottom: 0.4rem; }
-    .nav-link { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.75rem; border-radius: var(--r-md); color: var(--text2); text-decoration: none; font-size: 0.85rem; margin-bottom: 2px; transition: all 0.2s; }
+
+    .sidebar-brand {
+      display: flex; align-items: center; gap: 0.65rem;
+      padding: 0.5rem 0.65rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.25rem;
+    }
+    .brand-logo { height: 30px; filter: drop-shadow(0 2px 8px rgba(245,156,0,0.4)); }
+    .brand-name {
+      font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      background: var(--grad-brand); -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent; background-clip: text;
+      line-height: 1.1;
+    }
+    .brand-sub { font-size: 0.6rem; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 1px; }
+
+    .nav-section {
+      font-size: 0.58rem; font-weight: 700; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--text3);
+      padding: 0 0.65rem; margin: 0.25rem 0 0.5rem;
+    }
+    .nav-link {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.58rem 0.65rem; border-radius: var(--r-md);
+      color: var(--text2); text-decoration: none;
+      font-size: 0.84rem; font-weight: 500;
+      margin-bottom: 2px; transition: all 0.18s;
+      position: relative;
+    }
     .nav-link:hover { background: var(--dark3); color: var(--text); }
-    .nav-link.active { background: rgba(245,156,0,0.1); color: var(--amber); border-left: 2px solid var(--amber); }
-    .nav-icon { font-size: 0.95rem; width: 18px; text-align: center; }
-    .sidebar-footer { margin-top: auto; padding-top: 1.25rem; border-top: 1px solid var(--border); }
-    .user-pill { display: flex; align-items: center; gap: 0.6rem; padding: 0.65rem 0.75rem; border-radius: var(--r-md); background: var(--dark3); margin-bottom: 0.75rem; }
-    .user-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--grad-brand); display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; color: #1a0f00; flex-shrink: 0; }
-    .user-name { font-size: 0.8rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .user-role { font-size: 0.65rem; color: var(--amber); letter-spacing: 0.06em; text-transform: uppercase; }
-    .btn-logout { display: flex; align-items: center; justify-content: center; gap: 0.4rem; width: 100%; padding: 0.6rem; background: rgba(220,60,60,0.08); border: 1px solid rgba(220,60,60,0.2); border-radius: var(--r-md); color: #f07070; text-decoration: none; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.2s; cursor: pointer; }
-    .btn-logout:hover { background: rgba(220,60,60,0.18); border-color: #f07070; }
+    .nav-link.active {
+      background: rgba(245,156,0,0.1);
+      color: var(--amber);
+      border-left: 2px solid var(--amber);
+      padding-left: calc(0.65rem - 2px);
+    }
+    .nav-icon { font-size: 0.95rem; width: 20px; text-align: center; flex-shrink: 0; }
+
+    .sidebar-footer {
+      margin-top: auto; padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+    .user-pill {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.6rem 0.65rem; border-radius: var(--r-md);
+      background: var(--dark3); margin-bottom: 0.6rem;
+    }
+    .user-avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: var(--grad-brand);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 800;
+      color: #1a0f00; flex-shrink: 0;
+    }
+    .user-name { font-size: 0.82rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: 0.62rem; color: var(--amber); letter-spacing: 0.06em; text-transform: uppercase; }
+    .btn-logout {
+      display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+      width: 100%; padding: 0.58rem;
+      background: rgba(220,60,60,0.07);
+      border: 1px solid rgba(220,60,60,0.18);
+      border-radius: var(--r-md); color: #f07070;
+      font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-logout:hover { background: rgba(220,60,60,0.15); border-color: #f07070; }
+
+    /* ══ HAMBURGER ══ */
+    .hamburger {
+      display: none;
+      position: fixed; top: 0.9rem; left: 0.9rem; z-index: 60;
+      flex-direction: column; justify-content: center; align-items: center;
+      gap: 4px; width: 38px; height: 38px;
+      background: var(--dark2); border: 1px solid var(--border);
+      border-radius: var(--r-md); cursor: pointer;
+    }
+    .hamburger span {
+      display: block; width: 16px; height: 2px;
+      background: var(--amber); border-radius: 2px;
+      transition: all 0.25s;
+    }
+    .hamburger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .hamburger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+    .sidebar-backdrop {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.65); backdrop-filter: blur(3px);
+      z-index: 49;
+    }
+    .sidebar-backdrop.open { display: block; }
 
     /* ══ MAIN ══ */
-    .main { margin-left: 220px; flex: 1; padding: 2rem 2.25rem; min-height: 100vh; background: var(--night); }
-    .topbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.75rem; flex-wrap: wrap; gap: 0.75rem; }
-    .page-title { font-size: 1.6rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; background: var(--grad-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; }
-    .page-sub { font-size: 0.78rem; color: var(--text3); margin-top: 0.3rem; }
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1; padding: 2rem 2rem 3rem;
+      min-height: 100vh;
+    }
 
-    /* ══ KPIs ══ */
-    .kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
-    .kpi { background: var(--dark2); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 1.1rem 1.4rem; position: relative; overflow: hidden; animation: fadeUp 0.5s ease both; }
-    .kpi::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
-    .kpi.amber::after  { background: var(--amber); }
-    .kpi.ember::after  { background: var(--ember); }
-    .kpi.golden::after { background: var(--golden); }
-    .kpi-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.5rem; }
-    .kpi-val { font-size: 2rem; font-weight: 700; line-height: 1; }
+    /* ══ TOPBAR ══ */
+    .topbar {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 1.75rem; gap: 0.75rem; flex-wrap: wrap;
+    }
+    .page-title {
+      font-family: 'Syne', sans-serif; font-size: 1.75rem; font-weight: 800;
+      letter-spacing: 0.04em; text-transform: uppercase;
+      background: var(--grad-brand); -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent; background-clip: text;
+      line-height: 1;
+    }
+    .page-sub { font-size: 0.78rem; color: var(--text3); margin-top: 0.3rem; }
+    .page-sub a { color: var(--amber); text-decoration: none; }
+    .page-sub a:hover { text-decoration: underline; }
+
+    /* ══ KPI ROW ══ */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem; margin-bottom: 1.5rem;
+    }
+    .kpi {
+      background: var(--dark2); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: 1.1rem 1.35rem;
+      position: relative; overflow: hidden;
+      animation: fadeUp 0.4s ease both;
+    }
+    .kpi::before {
+      content: ''; position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+    }
+    .kpi.amber::before  { background: var(--amber); }
+    .kpi.ember::before  { background: var(--ember); }
+    .kpi.golden::before { background: var(--golden); }
+    .kpi-label { font-size: 0.64rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.5rem; }
+    .kpi-val { font-family: 'Syne', sans-serif; font-size: 2.1rem; font-weight: 800; line-height: 1; }
     .kpi.amber  .kpi-val { color: var(--amber); }
     .kpi.ember  .kpi-val { color: var(--ember); }
     .kpi.golden .kpi-val { color: var(--golden); }
-    .kpi-sub { font-size: 0.72rem; color: var(--text3); margin-top: 0.3rem; }
-    .kpi-bg-icon { position: absolute; bottom: 0.75rem; right: 1rem; font-size: 2rem; opacity: 0.06; }
+    .kpi-sub { font-size: 0.7rem; color: var(--text3); margin-top: 0.3rem; }
+    .kpi-icon { position: absolute; bottom: 0.75rem; right: 1rem; font-size: 2.2rem; opacity: 0.05; }
+
+    /* ══ CONDUCTOR BANNER ══ */
+    .conductor-banner {
+      background: rgba(245,156,0,0.05);
+      border: 1px solid rgba(245,156,0,0.15);
+      border-radius: var(--r-lg); padding: 1rem 1.35rem;
+      margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 1rem;
+      animation: fadeUp 0.4s ease both;
+    }
+    .conductor-avatar {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: var(--grad-brand); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; color: #1a0f00;
+    }
+    .conductor-name { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; color: var(--text); }
+    .conductor-sub  { font-size: 0.74rem; color: var(--text3); margin-top: 0.15rem; }
 
     /* ══ FILTROS ══ */
     .filter-card {
       background: var(--dark2); border: 1px solid var(--border);
-      border-radius: var(--r-lg); padding: 1.25rem 1.5rem;
-      margin-bottom: 1.25rem; animation: fadeUp 0.5s ease both;
+      border-radius: var(--r-lg); padding: 1.1rem 1.35rem;
+      margin-bottom: 1.25rem; animation: fadeUp 0.4s ease both;
     }
-    .filter-title { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.9rem; }
-    .filter-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto; gap: 0.65rem; align-items: end; }
-    @media (max-width: 900px) { .filter-row { grid-template-columns: 1fr 1fr; } }
-
-    .f-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.3rem; display: block; }
+    .filter-title {
+      font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text3); margin-bottom: 0.85rem;
+    }
+    .filter-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto;
+      gap: 0.6rem; align-items: end;
+    }
+    .f-group { display: flex; flex-direction: column; gap: 0.3rem; }
+    .f-label { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); }
     .f-input, .f-select {
-      width: 100%; padding: 0.6rem 0.8rem;
+      padding: 0.58rem 0.8rem;
       background: var(--dark3); border: 1px solid var(--border);
       border-radius: var(--r-md); color: var(--text);
-      font-family: 'Futura', sans-serif; font-size: 0.82rem;
-      outline: none; transition: border-color 0.2s; box-sizing: border-box;
+      font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+      outline: none; transition: border-color 0.2s; width: 100%;
     }
     .f-input:focus, .f-select:focus { border-color: var(--amber); }
     .f-input::placeholder { color: var(--text3); }
-    .f-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236E6860'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.75rem center; padding-right: 2rem; }
-    .f-select option { background: var(--dark2); color: var(--text); }
-
+    .f-select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235C5A54'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 0.75rem center; padding-right: 2rem;
+    }
+    .f-select option { background: var(--dark2); }
+    .filter-btns { display: flex; gap: 0.4rem; align-items: flex-end; }
     .btn-filter {
-      padding: 0.6rem 1.25rem; background: var(--grad-brand); border: none;
+      padding: 0.58rem 1.1rem; background: var(--grad-brand); border: none;
       border-radius: var(--r-md); color: #1a0f00;
-      font-family: 'Futura', sans-serif; font-weight: 700; font-size: 0.78rem;
-      letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.2s;
-      white-space: nowrap;
+      font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 0.78rem;
+      letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer;
+      transition: filter 0.2s; white-space: nowrap;
     }
     .btn-filter:hover { filter: brightness(1.1); }
     .btn-clear {
-      padding: 0.6rem 0.9rem; background: var(--dark3); border: 1px solid var(--border);
-      border-radius: var(--r-md); color: var(--text2);
-      font-family: 'Futura', sans-serif; font-weight: 700; font-size: 0.78rem;
-      letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.2s;
-      text-decoration: none; display: inline-flex; align-items: center;
+      padding: 0.58rem 0.8rem; background: var(--dark3);
+      border: 1px solid var(--border); border-radius: var(--r-md);
+      color: var(--text2); font-family: 'DM Sans', sans-serif;
+      font-weight: 700; font-size: 0.78rem; letter-spacing: 0.06em;
+      text-transform: uppercase; cursor: pointer; text-decoration: none;
+      display: inline-flex; align-items: center; transition: all 0.2s;
     }
     .btn-clear:hover { border-color: var(--amber); color: var(--amber); }
 
-    /* ══ BANNER CONDUCTOR FILTRADO ══ */
-    .conductor-banner {
-      background: rgba(245,156,0,0.06); border: 1px solid rgba(245,156,0,0.18);
-      border-radius: var(--r-lg); padding: 1rem 1.5rem;
-      margin-bottom: 1.25rem; display: flex; align-items: center; gap: 1rem;
-      animation: fadeUp 0.4s ease both;
+    /* ══ TABLE CARD ══ */
+    .table-card {
+      background: var(--dark2); border: 1px solid var(--border);
+      border-radius: var(--r-lg); overflow: hidden;
+      animation: fadeUp 0.45s ease both; margin-bottom: 1.25rem;
     }
-    .conductor-avatar {
-      width: 40px; height: 40px; border-radius: 50%; background: var(--grad-brand);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1rem; font-weight: 700; color: #1a0f00; flex-shrink: 0;
+    .table-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 1.35rem; border-bottom: 1px solid var(--border);
+      background: var(--dark1);
     }
-    .conductor-name { font-size: 1rem; font-weight: 700; color: var(--text); }
-    .conductor-sub  { font-size: 0.75rem; color: var(--text3); margin-top: 0.15rem; }
+    .table-title { font-family: 'Syne', sans-serif; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+    .table-count { font-size: 0.7rem; color: var(--text3); margin-top: 0.15rem; }
 
-    /* ══ TABLA INSPECCIONES ══ */
-    .table-card { background: var(--dark2); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; animation: fadeUp 0.5s ease both; margin-bottom: 1.25rem; }
-    .table-header { display: flex; justify-content: space-between; align-items: center; padding: 1.1rem 1.5rem; border-bottom: 1px solid var(--border); background: var(--dark1); }
-    .table-title { font-size: 0.82rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); }
-    .table-count { font-size: 0.72rem; color: var(--text3); margin-top: 0.15rem; }
-
-    table.insp { width: 100%; border-collapse: collapse; }
-    table.insp thead th { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text3); padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); text-align: left; background: var(--dark1); white-space: nowrap; }
-    table.insp tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+    /* ══ TABLE DESKTOP ══ */
+    .table-scroll { overflow-x: auto; }
+    table.insp { width: 100%; border-collapse: collapse; min-width: 720px; }
+    table.insp thead th {
+      font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text3);
+      padding: 0.7rem 1rem; border-bottom: 1px solid var(--border);
+      text-align: left; background: var(--dark1); white-space: nowrap;
+    }
+    table.insp tbody tr { border-bottom: 1px solid var(--border2); transition: background 0.15s; }
     table.insp tbody tr:last-child { border-bottom: none; }
-    table.insp tbody tr:hover { background: rgba(245,156,0,0.025); }
-    table.insp tbody td { padding: 0.75rem 1rem; font-size: 0.83rem; vertical-align: middle; }
+    table.insp tbody tr:hover { background: rgba(245,156,0,0.02); }
+    table.insp tbody td { padding: 0.72rem 1rem; font-size: 0.83rem; vertical-align: middle; }
 
-    .placa-chip { display: inline-flex; align-items: center; background: rgba(245,156,0,0.08); border: 1px solid rgba(245,156,0,0.18); border-radius: var(--r-sm); padding: 0.15rem 0.55rem; font-size: 0.78rem; font-weight: 700; color: var(--amber); letter-spacing: 0.06em; }
-    .tipo-chip { display: inline-flex; align-items: center; background: var(--dark3); border: 1px solid var(--border); border-radius: 20px; padding: 0.15rem 0.5rem; font-size: 0.7rem; color: var(--text3); }
-    .proceso-chip { display: inline-flex; align-items: center; background: rgba(255,204,0,0.07); border: 1px solid rgba(255,204,0,0.15); border-radius: 20px; padding: 0.15rem 0.55rem; font-size: 0.7rem; color: var(--golden); }
-    .ruta-arrow { color: var(--amber); margin: 0 0.25rem; }
-    .condicion-ok  { display: inline-flex; align-items: center; gap: 0.25rem; background: rgba(40,200,120,0.1); border: 1px solid rgba(40,200,120,0.2); border-radius: 20px; padding: 0.15rem 0.55rem; font-size: 0.7rem; font-weight: 700; color: #28c878; }
-    .condicion-no  { display: inline-flex; align-items: center; gap: 0.25rem; background: rgba(220,60,60,0.1); border: 1px solid rgba(220,60,60,0.2); border-radius: 20px; padding: 0.15rem 0.55rem; font-size: 0.7rem; font-weight: 700; color: #f07070; }
-    .malo-badge    { display: inline-flex; align-items: center; gap: 0.2rem; background: rgba(235,102,8,0.1); border: 1px solid rgba(235,102,8,0.25); border-radius: 20px; padding: 0.15rem 0.55rem; font-size: 0.7rem; font-weight: 700; color: var(--ember); }
-    .ok-badge      { display: inline-flex; align-items: center; gap: 0.2rem; background: rgba(40,200,120,0.08); border: 1px solid rgba(40,200,120,0.2); border-radius: 20px; padding: 0.15rem 0.55rem; font-size: 0.7rem; font-weight: 700; color: #28c878; }
+    /* ══ CARDS MÓVIL ══ */
+    .cards-mobile { display: none; }
+    .insp-card {
+      border-bottom: 1px solid var(--border2);
+      padding: 1rem 1rem;
+      transition: background 0.15s;
+    }
+    .insp-card:last-child { border-bottom: none; }
+    .insp-card:active { background: rgba(245,156,0,0.02); }
+    .insp-card-top {
+      display: flex; justify-content: space-between;
+      align-items: flex-start; margin-bottom: 0.6rem;
+    }
+    .insp-card-name { font-family: 'Syne', sans-serif; font-size: 0.92rem; font-weight: 700; color: var(--text); }
+    .insp-card-user { font-size: 0.7rem; color: var(--text3); margin-top: 1px; }
+    .insp-card-date { font-size: 0.7rem; color: var(--text3); text-align: right; line-height: 1.4; flex-shrink: 0; margin-left: 0.5rem; }
+    .insp-card-row {
+      display: flex; gap: 0.4rem; flex-wrap: wrap;
+      align-items: center; margin-bottom: 0.5rem;
+    }
+    .insp-card-bottom {
+      display: flex; justify-content: space-between;
+      align-items: center; margin-top: 0.5rem;
+    }
+    .insp-card-route { font-size: 0.72rem; color: var(--text3); }
+    .insp-card-route span { color: var(--amber); }
 
-    .btn-ver { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.3rem 0.65rem; background: var(--dark3); border: 1px solid var(--border); border-radius: var(--r-sm); color: var(--text2); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; text-decoration: none; cursor: pointer; transition: all 0.2s; font-family: 'Futura', sans-serif; }
+    /* ══ CHIPS ══ */
+    .placa-chip {
+      display: inline-flex; align-items: center;
+      background: rgba(245,156,0,0.08); border: 1px solid rgba(245,156,0,0.2);
+      border-radius: var(--r-sm); padding: 0.15rem 0.5rem;
+      font-family: 'DM Mono', monospace; font-size: 0.75rem; font-weight: 500;
+      color: var(--amber); letter-spacing: 0.04em;
+    }
+    .tipo-chip {
+      display: inline-flex; align-items: center; gap: 0.2rem;
+      background: var(--dark3); border: 1px solid var(--border);
+      border-radius: 20px; padding: 0.15rem 0.5rem;
+      font-size: 0.68rem; color: var(--text2);
+    }
+    .proceso-chip {
+      display: inline-flex; align-items: center;
+      background: rgba(255,204,0,0.06); border: 1px solid rgba(255,204,0,0.14);
+      border-radius: 20px; padding: 0.15rem 0.5rem;
+      font-size: 0.68rem; color: var(--golden); max-width: 140px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .condicion-ok {
+      display: inline-flex; align-items: center; gap: 0.25rem;
+      background: rgba(40,200,120,0.09); border: 1px solid rgba(40,200,120,0.18);
+      border-radius: 20px; padding: 0.15rem 0.55rem;
+      font-size: 0.68rem; font-weight: 700; color: var(--green);
+    }
+    .condicion-no {
+      display: inline-flex; align-items: center; gap: 0.25rem;
+      background: rgba(220,60,60,0.09); border: 1px solid rgba(220,60,60,0.18);
+      border-radius: 20px; padding: 0.15rem 0.55rem;
+      font-size: 0.68rem; font-weight: 700; color: #f07070;
+    }
+    .malo-badge {
+      display: inline-flex; align-items: center; gap: 0.2rem;
+      background: rgba(235,102,8,0.09); border: 1px solid rgba(235,102,8,0.22);
+      border-radius: 20px; padding: 0.15rem 0.55rem;
+      font-size: 0.68rem; font-weight: 700; color: var(--ember);
+    }
+    .ok-badge {
+      display: inline-flex; align-items: center; gap: 0.2rem;
+      background: rgba(40,200,120,0.07); border: 1px solid rgba(40,200,120,0.18);
+      border-radius: 20px; padding: 0.15rem 0.55rem;
+      font-size: 0.68rem; font-weight: 700; color: var(--green);
+    }
+
+    .btn-ver {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      padding: 0.3rem 0.65rem; background: var(--dark3);
+      border: 1px solid var(--border); border-radius: var(--r-sm);
+      color: var(--text2); font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 0.05em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
     .btn-ver:hover { border-color: var(--amber); color: var(--amber); }
 
     .empty-state { padding: 3rem; text-align: center; color: var(--text3); }
-    .empty-icon  { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .empty-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
 
-    /* ══ HISTORIAL CONSOLIDADOS ══ */
-    .section-title-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.85rem; }
-    .section-title { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); }
-
+    /* ══ CONSOLIDADOS ══ */
     table.rep { width: 100%; border-collapse: collapse; }
-    table.rep thead th { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text3); padding: 0.7rem 1rem; border-bottom: 1px solid var(--border); text-align: left; background: var(--dark1); }
-    table.rep tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+    table.rep thead th {
+      font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text3);
+      padding: 0.7rem 1rem; border-bottom: 1px solid var(--border);
+      text-align: left; background: var(--dark1);
+    }
+    table.rep tbody tr { border-bottom: 1px solid var(--border2); transition: background 0.15s; }
     table.rep tbody tr:last-child { border-bottom: none; }
-    table.rep tbody tr:hover { background: rgba(245,156,0,0.025); }
-    table.rep tbody td { padding: 0.75rem 1rem; font-size: 0.83rem; vertical-align: middle; }
+    table.rep tbody tr:hover { background: rgba(245,156,0,0.02); }
+    table.rep tbody td { padding: 0.72rem 1rem; font-size: 0.83rem; vertical-align: middle; }
 
-    .btn-dl { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.3rem 0.75rem; background: rgba(245,156,0,0.08); border: 1px solid rgba(245,156,0,0.2); border-radius: var(--r-sm); color: var(--amber); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; text-decoration: none; transition: all 0.2s; font-family: 'Futura', sans-serif; }
+    /* Cards consolidados móvil */
+    .rep-cards { display: none; }
+    .rep-card {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.9rem 1rem; border-bottom: 1px solid var(--border2);
+    }
+    .rep-card:last-child { border-bottom: none; }
+    .rep-card-info { flex: 1; }
+    .rep-card-date { font-size: 0.78rem; font-weight: 600; color: var(--text); }
+    .rep-card-sub { font-size: 0.68rem; color: var(--text3); margin-top: 2px; }
+
+    .btn-dl {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      padding: 0.32rem 0.75rem;
+      background: rgba(245,156,0,0.08); border: 1px solid rgba(245,156,0,0.2);
+      border-radius: var(--r-sm); color: var(--amber);
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em;
+      text-transform: uppercase; text-decoration: none;
+      transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+      white-space: nowrap;
+    }
     .btn-dl:hover { background: rgba(245,156,0,0.14); border-color: var(--amber); }
-    .btn-dl.disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+    .btn-dl.disabled { opacity: 0.38; cursor: not-allowed; pointer-events: none; }
 
-    /* Modal detalle */
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 100; align-items: flex-start; justify-content: center; padding: 2rem 1rem; overflow-y: auto; }
+    /* ══ MODAL ══ */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.72); backdrop-filter: blur(6px);
+      z-index: 100; align-items: flex-start; justify-content: center;
+      padding: 1.5rem 1rem; overflow-y: auto;
+    }
     .modal-overlay.open { display: flex; }
-    .modal { background: var(--dark2); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 1.75rem; width: 100%; max-width: 560px; animation: fadeUp 0.25s ease both; box-shadow: var(--shadow-lg); margin: auto; }
-    .modal-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem; }
-    .modal-title { font-size: 0.95rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); }
-    .modal-close { background: none; border: none; color: var(--text3); font-size: 1.25rem; cursor: pointer; padding: 0; line-height: 1; transition: color 0.2s; }
+    .modal {
+      background: var(--dark2); border: 1px solid var(--border);
+      border-radius: var(--r-xl); padding: 1.5rem;
+      width: 100%; max-width: 540px; margin: auto;
+      animation: fadeUp 0.25s ease both; box-shadow: var(--shadow);
+    }
+    .modal-head {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 1.25rem;
+    }
+    .modal-title { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+    .modal-close { background: none; border: none; color: var(--text3); font-size: 1.2rem; cursor: pointer; line-height: 1; transition: color 0.2s; }
     .modal-close:hover { color: var(--text); }
-    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-    .modal-field { background: var(--dark3); border: 1px solid var(--border); border-radius: var(--r-md); padding: 0.6rem 0.9rem; }
-    .modal-field-label { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.25rem; }
-    .modal-field-val { font-size: 0.85rem; color: var(--text); }
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; }
+    .modal-field { background: var(--dark3); border: 1px solid var(--border); border-radius: var(--r-md); padding: 0.58rem 0.85rem; }
+    .modal-field-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.25rem; }
+    .modal-field-val { font-size: 0.84rem; color: var(--text); }
     .modal-field.full { grid-column: 1 / -1; }
     .modal-aspectos { margin-top: 1rem; }
-    .modal-asp-title { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.5rem; }
-    .asp-row { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0.6rem; border-radius: var(--r-sm); margin-bottom: 2px; }
-    .asp-row.malo { background: rgba(235,102,8,0.08); border-left: 2px solid var(--ember); }
+    .modal-asp-title { font-size: 0.64rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.5rem; }
+    .asp-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.38rem 0.6rem; border-radius: var(--r-sm); margin-bottom: 2px;
+    }
+    .asp-row.malo { background: rgba(235,102,8,0.07); border-left: 2px solid var(--ember); }
     .asp-row.bueno { background: var(--dark3); }
     .asp-label { font-size: 0.78rem; color: var(--text2); }
-    .asp-val-b { font-size: 0.72rem; font-weight: 700; color: #28c878; }
+    .asp-val-b { font-size: 0.72rem; font-weight: 700; color: var(--green); }
     .asp-val-m { font-size: 0.72rem; font-weight: 700; color: var(--ember); }
-  
-    /* ══ RESPONSIVE MÓVIL ══ */
-    .hamburger {
-      display: none;
-      position: fixed; top: 1rem; left: 1rem; z-index: 30;
-      flex-direction: column; justify-content: center; align-items: center;
-      gap: 5px; width: 40px; height: 40px;
-      background: var(--dark2); border: 1px solid var(--border);
-      border-radius: var(--r-md); cursor: pointer; padding: 0;
-    }
-    .hamburger span {
-      display: block; width: 18px; height: 2px;
-      background: var(--amber); border-radius: 2px;
-      transition: all 0.25s;
-    }
-    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-    .hamburger.open span:nth-child(2) { opacity: 0; }
-    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-    .sidebar-backdrop {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.6); z-index: 19;
-      backdrop-filter: blur(2px);
+    /* ══ ANIMACIONES ══ */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ══ RESPONSIVE ══ */
+    @media (max-width: 900px) {
+      .filter-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .filter-btns { grid-column: 1 / -1; justify-content: flex-start; }
     }
 
     @media (max-width: 768px) {
+      /* Sidebar */
       .hamburger { display: flex; }
-
       .sidebar {
         transform: translateX(-100%);
-        transition: transform 0.28s ease;
-        z-index: 25;
+        box-shadow: none;
       }
       .sidebar.open {
         transform: translateX(0);
-        box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+        box-shadow: 8px 0 32px rgba(0,0,0,0.6);
       }
-      .sidebar-backdrop.open { display: block; }
 
+      /* Main */
       .main {
-        margin-left: 0 !important;
-        padding: 1rem;
+        margin-left: 0;
+        padding: 0.9rem 0.9rem 3rem;
         padding-top: 4rem;
       }
 
       /* KPIs */
-      .kpi-row { grid-template-columns: 1fr 1fr !important; gap: 0.65rem; }
-
-      /* Gráficas */
-      .charts-row  { grid-template-columns: 1fr !important; }
-      .bottom-row  { grid-template-columns: 1fr !important; }
-      .annual-card { grid-column: auto !important; }
-
-      /* Filtros */
-      .filter-row { grid-template-columns: 1fr 1fr !important; }
-      .filter-row > div:last-child { grid-column: 1 / -1; }
+      .kpi-row { grid-template-columns: 1fr 1fr; gap: 0.65rem; }
+      .kpi-val { font-size: 1.75rem; }
+      .kpi:last-child { grid-column: 1 / -1; }
 
       /* Topbar */
-      .topbar { flex-direction: column; gap: 0.5rem; }
-      .page-title { font-size: 1.2rem; }
+      .page-title { font-size: 1.35rem; }
 
-      /* Tablas */
-      .table-card { overflow-x: auto; }
-      table.insp, table.rk, table.rep, table.logs, table.users { min-width: 600px; }
-
-      /* Form */
-      .form-card { padding: 1.25rem; }
-      .form-row  { grid-template-columns: 1fr !important; }
-      .form-actions { flex-direction: column; }
-      .btn-save, .btn-back { width: 100%; justify-content: center; }
-
-      /* Modal */
-      .modal { padding: 1.25rem; margin: 1rem; }
-      .modal-grid { grid-template-columns: 1fr !important; }
-      .modal-field.full { grid-column: auto !important; }
+      /* Filtros */
+      .filter-grid { grid-template-columns: 1fr 1fr; gap: 0.55rem; }
+      .filter-btns { grid-column: 1 / -1; }
 
       /* Conductor banner */
       .conductor-banner { flex-wrap: wrap; }
 
-      /* Botones topbar */
-      .btn-new { font-size: 0.72rem; padding: 0.5rem 0.9rem; }
+      /* Tabla → cards */
+      .table-scroll { display: none; }
+      .cards-mobile { display: block; }
+      .rep-cards { display: block; }
+      .rep-desktop { display: none; }
+
+      /* Modal */
+      .modal { padding: 1.1rem; margin: 0.5rem; }
+      .modal-grid { grid-template-columns: 1fr; }
+      .modal-field.full { grid-column: auto; }
     }
 
-    @media (max-width: 420px) {
-      .kpi-row { grid-template-columns: 1fr !important; }
-      .kpi-val { font-size: 1.75rem; }
+    @media (max-width: 480px) {
+      .kpi-row { grid-template-columns: 1fr; }
+      .kpi:last-child { grid-column: auto; }
+      .filter-grid { grid-template-columns: 1fr; }
+      .filter-btns { grid-column: auto; }
     }
-</style>
+  </style>
 </head>
 <body>
-<!-- Hamburger (móvil) -->
-<button class="hamburger" onclick="toggleSidebar()" id="hamburgerBtn">
+<div class="layout">
+
+<!-- ══ HAMBURGER ══ -->
+<button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()" aria-label="Menú">
   <span></span><span></span><span></span>
 </button>
 <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
 
-
-<!-- SIDEBAR -->
-<aside class="sidebar">
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar" id="sidebar">
   <div class="sidebar-brand">
     <img src="/static/img/logotipo_01.png" alt="Incubant" class="brand-logo">
-    <div class="brand-texts">
+    <div>
       <div class="brand-name">Misionales</div>
       <div class="brand-sub">Incubant SST</div>
     </div>
   </div>
 
-  <div class="nav-section" style="margin-top:0.25rem;">Panel</div>
-  <a href="/admin"               class="nav-link"><span class="nav-icon">📊</span> Dashboard</a>
-  <a href="/admin/usuarios"      class="nav-link"><span class="nav-icon">👥</span> Usuarios</a>
-  <a href="/admin/inspecciones"  class="nav-link active"><span class="nav-icon">🔍</span> Inspecciones</a>
-  <a href="/admin/logs"          class="nav-link"><span class="nav-icon">📋</span> Auditoría</a>
+  <div class="nav-section">Panel</div>
+  <a href="/admin"              class="nav-link"><span class="nav-icon">📊</span> Dashboard</a>
+  <a href="/admin/usuarios"     class="nav-link"><span class="nav-icon">👥</span> Usuarios</a>
+  <a href="/admin/inspecciones" class="nav-link active"><span class="nav-icon">🔍</span> Inspecciones</a>
+  <a href="/admin/logs"         class="nav-link"><span class="nav-icon">📋</span> Auditoría</a>
 
   <div class="nav-section" style="margin-top:1.25rem;">Sistema</div>
   <a href="/" class="nav-link"><span class="nav-icon">🚗</span> Formulario</a>
@@ -294,7 +563,7 @@
   <div class="sidebar-footer">
     <div class="user-pill">
       <div class="user-avatar">{{ admin.nombre_visible[0]|upper if admin.nombre_visible else 'A' }}</div>
-      <div style="overflow:hidden;">
+      <div style="overflow:hidden;min-width:0;">
         <div class="user-name">{{ admin.nombre_visible or admin.nombre }}</div>
         <div class="user-role">Administrador</div>
       </div>
@@ -303,7 +572,7 @@
   </div>
 </aside>
 
-<!-- MAIN -->
+<!-- ══ MAIN ══ -->
 <main class="main">
 
   <!-- Topbar -->
@@ -313,7 +582,7 @@
         <div class="page-title">Inspecciones</div>
         <div class="page-sub">
           Historial de <strong style="color:var(--amber)">{{ usuario_filtro.nombre_visible or usuario_filtro.nombre }}</strong>
-          · <a href="/admin/inspecciones" style="color:var(--text3);font-size:0.75rem;">← Ver todas</a>
+          &nbsp;·&nbsp;<a href="/admin/inspecciones">← Ver todas</a>
         </div>
       {% else %}
         <div class="page-title">Inspecciones</div>
@@ -328,19 +597,19 @@
       <div class="kpi-label">Activas en sistema</div>
       <div class="kpi-val">{{ total_activas }}</div>
       <div class="kpi-sub">Pendientes de consolidar</div>
-      <div class="kpi-bg-icon">📄</div>
+      <div class="kpi-icon">📄</div>
     </div>
-    <div class="kpi ember" style="animation-delay:0.10s">
+    <div class="kpi ember" style="animation-delay:0.1s">
       <div class="kpi-label">Con aspectos M</div>
       <div class="kpi-val">{{ con_malo }}</div>
-      <div class="kpi-sub">En el resultado filtrado</div>
-      <div class="kpi-bg-icon">⚠</div>
+      <div class="kpi-sub">En resultado filtrado</div>
+      <div class="kpi-icon">⚠</div>
     </div>
     <div class="kpi golden" style="animation-delay:0.15s">
       <div class="kpi-label">{% if usuario_filtro %}Consolidados{% else %}Conductores activos{% endif %}</div>
       <div class="kpi-val">{% if usuario_filtro %}{{ reportes | length }}{% else %}{{ conductores_unicos }}{% endif %}</div>
       <div class="kpi-sub">{% if usuario_filtro %}PDFs generados{% else %}Con inspecciones{% endif %}</div>
-      <div class="kpi-bg-icon">{% if usuario_filtro %}📁{% else %}👤{% endif %}</div>
+      <div class="kpi-icon">{% if usuario_filtro %}📁{% else %}👤{% endif %}</div>
     </div>
   </div>
 
@@ -360,32 +629,32 @@
   <div class="filter-card" style="animation-delay:0.18s">
     <div class="filter-title">🔍 Filtrar inspecciones</div>
     <form method="GET" action="/admin/inspecciones">
-      <div class="filter-row">
-        <div>
+      <div class="filter-grid">
+        <div class="f-group">
           <label class="f-label">Conductor</label>
           <input name="conductor" class="f-input" placeholder="Nombre..." value="{{ filtros.conductor }}">
         </div>
-        <div>
+        <div class="f-group">
           <label class="f-label">Placa</label>
           <input name="placa" class="f-input" placeholder="ej: KSK45" value="{{ filtros.placa }}">
         </div>
-        <div>
-          <label class="f-label">Tipo vehículo</label>
+        <div class="f-group">
+          <label class="f-label">Tipo</label>
           <select name="tipo" class="f-select">
             <option value="">Todos</option>
             <option value="Moto"  {% if filtros.tipo == 'Moto'  %}selected{% endif %}>🏍 Moto</option>
             <option value="Carro" {% if filtros.tipo == 'Carro' %}selected{% endif %}>🚗 Carro</option>
           </select>
         </div>
-        <div>
+        <div class="f-group">
           <label class="f-label">Desde</label>
           <input name="fecha_desde" type="date" class="f-input" value="{{ filtros.fecha_desde }}">
         </div>
-        <div>
+        <div class="f-group">
           <label class="f-label">Hasta</label>
           <input name="fecha_hasta" type="date" class="f-input" value="{{ filtros.fecha_hasta }}">
         </div>
-        <div style="display:flex;gap:0.4rem;align-items:flex-end;">
+        <div class="filter-btns">
           <button type="submit" class="btn-filter">Filtrar</button>
           <a href="/admin/inspecciones" class="btn-clear">✕</a>
         </div>
@@ -401,15 +670,15 @@
         <div class="table-title">Inspecciones activas</div>
         <div class="table-count">
           {{ resultados | length }} resultado(s)
-          {% if filtros.conductor or filtros.placa or filtros.tipo or filtros.fecha_desde or filtros.fecha_hasta %}
-            · filtrado
-          {% endif %}
+          {% if filtros.conductor or filtros.placa or filtros.tipo or filtros.fecha_desde or filtros.fecha_hasta %}· filtrado{% endif %}
         </div>
       </div>
     </div>
 
     {% if resultados %}
-    <div style="overflow-x:auto;">
+
+    {# ——— TABLA DESKTOP ——— #}
+    <div class="table-scroll">
       <table class="insp">
         <thead>
           <tr>
@@ -439,18 +708,13 @@
             </td>
             <td>
               <div style="font-weight:700;font-size:0.85rem;">{{ inspeccion.nombre_conductor }}</div>
-              <div style="font-size:0.72rem;color:var(--text3);">@{{ usuario.nombre }}</div>
+              <div style="font-size:0.7rem;color:var(--text3);">@{{ usuario.nombre }}</div>
             </td>
             <td><span class="placa-chip">{{ inspeccion.placa }}</span></td>
-            <td>
-              <span class="tipo-chip">
-                {% if inspeccion.tipo_vehiculo == 'Carro' %}🚗{% else %}🏍{% endif %}
-                {{ inspeccion.tipo_vehiculo or "Moto" }}
-              </span>
-            </td>
+            <td><span class="tipo-chip">{% if inspeccion.tipo_vehiculo == 'Carro' %}🚗{% else %}🏍{% endif %} {{ inspeccion.tipo_vehiculo or "Moto" }}</span></td>
             <td><span class="proceso-chip">{{ inspeccion.proceso }}</span></td>
             <td style="font-size:0.78rem;color:var(--text3);white-space:nowrap;">
-              {{ inspeccion.desde }}<span class="ruta-arrow">→</span>{{ inspeccion.hasta }}
+              {{ inspeccion.desde }} <span style="color:var(--amber);">→</span> {{ inspeccion.hasta }}
             </td>
             <td>
               {% if inspeccion.condiciones_optimas == "SI" %}
@@ -466,18 +730,62 @@
                 <span class="ok-badge">✓ Todo B</span>
               {% endif %}
             </td>
-            <td>
-              <button class="btn-ver" onclick="verDetalle({{ loop.index0 }})">Ver</button>
-            </td>
+            <td><button class="btn-ver" onclick="verDetalle({{ loop.index0 }})">Ver</button></td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
+
+    {# ——— CARDS MÓVIL ——— #}
+    <div class="cards-mobile">
+      {% for inspeccion, usuario in resultados %}
+      {% set asp = inspeccion.aspectos_dict or {} %}
+      {% set malos = namespace(count=0) %}
+      {% for k, v in asp.items() %}
+        {% set val = v.get('valor') if v is mapping else v %}
+        {% if val == 'M' %}{% set malos.count = malos.count + 1 %}{% endif %}
+      {% endfor %}
+      <div class="insp-card">
+        <div class="insp-card-top">
+          <div>
+            <div class="insp-card-name">{{ inspeccion.nombre_conductor }}</div>
+            <div class="insp-card-user">@{{ usuario.nombre }}</div>
+          </div>
+          <div class="insp-card-date">
+            {{ inspeccion.fecha.strftime("%d/%m/%Y") }}<br>
+            {{ inspeccion.fecha.strftime("%H:%M") }}
+          </div>
+        </div>
+        <div class="insp-card-row">
+          <span class="placa-chip">{{ inspeccion.placa }}</span>
+          <span class="tipo-chip">{% if inspeccion.tipo_vehiculo == 'Carro' %}🚗{% else %}🏍{% endif %} {{ inspeccion.tipo_vehiculo or "Moto" }}</span>
+          <span class="proceso-chip">{{ inspeccion.proceso }}</span>
+        </div>
+        <div class="insp-card-row">
+          {% if inspeccion.condiciones_optimas == "SI" %}
+            <span class="condicion-ok">✓ Óptimas</span>
+          {% else %}
+            <span class="condicion-no">✕ No óptimas</span>
+          {% endif %}
+          {% if malos.count > 0 %}
+            <span class="malo-badge">⚠ {{ malos.count }} M</span>
+          {% else %}
+            <span class="ok-badge">✓ Todo B</span>
+          {% endif %}
+        </div>
+        <div class="insp-card-bottom">
+          <div class="insp-card-route">{{ inspeccion.desde }} <span>→</span> {{ inspeccion.hasta }}</div>
+          <button class="btn-ver" onclick="verDetalle({{ loop.index0 }})">Ver detalle</button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
     {% else %}
     <div class="empty-state">
       <div class="empty-icon">🐣</div>
-      <div>No hay inspecciones que coincidan con el filtro.</div>
+      <div>No hay inspecciones que coincidan.</div>
       {% if filtros.conductor or filtros.placa %}
       <div style="margin-top:0.5rem;font-size:0.78rem;">
         <a href="/admin/inspecciones" style="color:var(--amber);">← Ver todas</a>
@@ -487,73 +795,99 @@
     {% endif %}
   </div>
 
-  <!-- Historial de consolidados (solo cuando se filtra por conductor) -->
+  <!-- Consolidados (solo cuando se filtra por conductor) -->
   {% if usuario_filtro %}
   <div class="table-card" style="animation-delay:0.28s">
     <div class="table-header">
       <div>
-        <div class="table-title">📁 PDFs consolidados generados</div>
-        <div class="table-count">{{ reportes | length }} reporte(s) en historial</div>
+        <div class="table-title">📁 PDFs consolidados</div>
+        <div class="table-count">{{ reportes | length }} reporte(s)</div>
       </div>
     </div>
 
     {% if reportes %}
-    <table class="rep">
-      <thead>
-        <tr>
-          <th>Fecha generación</th>
-          <th>Conductor</th>
-          <th>Inspecciones incluidas</th>
-          <th>Estado archivo</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for r in reportes %}
-        {% set existe = r.archivo_pdf %}
-        <tr>
-          <td style="white-space:nowrap;">
-            <div style="font-weight:700;">{{ r.fecha_reporte.strftime("%d/%m/%Y") }}</div>
-            <div style="font-size:0.72rem;color:var(--text3);">{{ r.fecha_reporte.strftime("%H:%M") }}</div>
-          </td>
-          <td>{{ r.nombre_conductor }}</td>
-          <td style="text-align:center;">
-            <span style="background:rgba(245,156,0,0.1);color:var(--amber);padding:0.2rem 0.65rem;border-radius:20px;font-size:0.75rem;font-weight:700;">
-              {{ r.total_incluidas }}
-            </span>
-          </td>
-          <td>
-            {% if existe %}
-              <span style="color:#28c878;font-size:0.75rem;font-weight:700;">✓ Disponible</span>
+
+    {# Desktop #}
+    <div class="rep-desktop table-scroll">
+      <table class="rep">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Conductor</th>
+            <th>Inspecciones</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in reportes %}
+          <tr>
+            <td style="white-space:nowrap;">
+              <div style="font-weight:700;">{{ r.fecha_reporte.strftime("%d/%m/%Y") }}</div>
+              <div style="font-size:0.7rem;color:var(--text3);">{{ r.fecha_reporte.strftime("%H:%M") }}</div>
+            </td>
+            <td>{{ r.nombre_conductor }}</td>
+            <td style="text-align:center;">
+              <span style="background:rgba(245,156,0,0.1);color:var(--amber);padding:0.2rem 0.65rem;border-radius:20px;font-size:0.75rem;font-weight:700;">{{ r.total_incluidas }}</span>
+            </td>
+            <td>
+              {% if r.archivo_pdf %}
+                <span style="color:var(--green);font-size:0.75rem;font-weight:700;">✓ Disponible</span>
+              {% else %}
+                <span style="color:var(--text3);font-size:0.75rem;">— No disponible</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if r.archivo_pdf %}
+                <a href="/inspecciones/reporte-consolidado/{{ r.id }}" class="btn-dl" target="_blank">📄 Descargar</a>
+              {% else %}
+                <span class="btn-dl disabled">📄 Sin archivo</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {# Móvil #}
+    <div class="rep-cards">
+      {% for r in reportes %}
+      <div class="rep-card">
+        <div class="rep-card-info">
+          <div class="rep-card-date">{{ r.fecha_reporte.strftime("%d/%m/%Y %H:%M") }}</div>
+          <div class="rep-card-sub">
+            {{ r.total_incluidas }} inspecciones ·
+            {% if r.archivo_pdf %}
+              <span style="color:var(--green);">✓ Disponible</span>
             {% else %}
-              <span style="color:var(--text3);font-size:0.75rem;">— No disponible</span>
+              <span style="color:var(--text3);">Sin archivo</span>
             {% endif %}
-          </td>
-          <td>
-            {% if existe %}
-              <a href="/inspecciones/reporte-consolidado/{{ r.id }}"
-                 class="btn-dl" target="_blank">📄 Descargar</a>
-            {% else %}
-              <span class="btn-dl disabled">📄 Sin archivo</span>
-            {% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+          </div>
+        </div>
+        {% if r.archivo_pdf %}
+          <a href="/inspecciones/reporte-consolidado/{{ r.id }}" class="btn-dl" target="_blank">📄</a>
+        {% else %}
+          <span class="btn-dl disabled">📄</span>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+
     {% else %}
     <div class="empty-state" style="padding:2rem;">
       <div class="empty-icon" style="font-size:1.75rem;">📁</div>
-      <div style="font-size:0.85rem;">Este conductor aún no tiene PDFs consolidados generados.</div>
-      <div style="font-size:0.75rem;color:var(--text3);margin-top:0.4rem;">Se generan automáticamente al completar 15 inspecciones.</div>
+      <div style="font-size:0.85rem;">Sin consolidados aún.</div>
+      <div style="font-size:0.75rem;color:var(--text3);margin-top:0.4rem;">Se generan al completar 15 inspecciones.</div>
     </div>
     {% endif %}
   </div>
   {% endif %}
 
 </main>
+</div><!-- /layout -->
 
-<!-- Modal detalle inspección -->
+<!-- ══ MODAL DETALLE ══ -->
 <div id="modalOverlay" class="modal-overlay">
   <div class="modal">
     <div class="modal-head">
@@ -565,32 +899,32 @@
 </div>
 
 <script>
-// Datos para el modal — inyectados desde Jinja
+// Datos inyectados desde Jinja — usando tojson para escape seguro
 const INSPECCIONES = [
   {% for inspeccion, usuario in resultados %}
   {
-    fecha:        "{{ inspeccion.fecha.strftime('%d/%m/%Y %H:%M') }}",
-    conductor:    "{{ inspeccion.nombre_conductor }}",
-    usuario:      "@{{ usuario.nombre }}",
-    placa:        "{{ inspeccion.placa }}",
-    tipo:         "{{ inspeccion.tipo_vehiculo or 'Moto' }}",
-    proceso:      "{{ inspeccion.proceso }}",
-    desde:        "{{ inspeccion.desde }}",
-    hasta:        "{{ inspeccion.hasta }}",
-    marca:        "{{ inspeccion.marca }}",
-    modelo:       "{{ inspeccion.modelo }}",
-    gasolina:     "{{ inspeccion.gasolina }}",
-    motor:        "{{ inspeccion.motor }}",
-    condicion:    "{{ inspeccion.condiciones_optimas }}",
-    observaciones:"{{ inspeccion.observaciones | replace('"', '\\"') | replace('\n', ' ') }}",
+    fecha:        {{ inspeccion.fecha.strftime('%d/%m/%Y %H:%M') | tojson }},
+    conductor:    {{ inspeccion.nombre_conductor | tojson }},
+    usuario:      {{ ('@' ~ usuario.nombre) | tojson }},
+    placa:        {{ inspeccion.placa | tojson }},
+    tipo:         {{ (inspeccion.tipo_vehiculo or 'Moto') | tojson }},
+    proceso:      {{ (inspeccion.proceso or '') | tojson }},
+    desde:        {{ (inspeccion.desde or '') | tojson }},
+    hasta:        {{ (inspeccion.hasta or '') | tojson }},
+    marca:        {{ (inspeccion.marca or '') | tojson }},
+    modelo:       {{ (inspeccion.modelo or '') | tojson }},
+    gasolina:     {{ (inspeccion.gasolina or '') | tojson }},
+    motor:        {{ (inspeccion.motor | string) | tojson }},
+    condicion:    {{ (inspeccion.condiciones_optimas or '') | tojson }},
+    observaciones:{{ (inspeccion.observaciones or '') | tojson }},
     aspectos: {
       {% for k, v in (inspeccion.aspectos_dict or {}).items() %}
-      "{{ k }}": "{% if v is mapping %}{{ v.get('valor','') }}{% else %}{{ v }}{% endif %}",
+      {{ k | tojson }}: {{ (v.get('valor','') if v is mapping else v) | tojson }},
       {% endfor %}
     },
     aspectosLabel: {
       {% for k, v in (inspeccion.aspectos_dict or {}).items() %}
-      "{{ k }}": "{% if v is mapping %}{{ v.get('label', 'Aspecto ' ~ k) }}{% else %}Aspecto {{ k }}{% endif %}",
+      {{ k | tojson }}: {{ (v.get('label', 'Aspecto ' ~ k) if v is mapping else ('Aspecto ' ~ k)) | tojson }},
       {% endfor %}
     },
   },
@@ -601,17 +935,16 @@ function verDetalle(idx) {
   const d = INSPECCIONES[idx];
   if (!d) return;
 
-  let aspectosHtml = '';
-  const keys = Object.keys(d.aspectos).sort((a,b) => parseInt(a) - parseInt(b));
-  keys.forEach(k => {
+  const keys = Object.keys(d.aspectos).sort((a, b) => parseInt(a) - parseInt(b));
+  const aspectosHtml = keys.map(k => {
     const val   = d.aspectos[k];
     const label = d.aspectosLabel[k] || `Aspecto ${k}`;
     const cls   = val === 'M' ? 'malo' : 'bueno';
-    const valHtml = val === 'M'
+    const chip  = val === 'M'
       ? `<span class="asp-val-m">✖ M</span>`
       : `<span class="asp-val-b">✔ B</span>`;
-    aspectosHtml += `<div class="asp-row ${cls}"><span class="asp-label">${label}</span>${valHtml}</div>`;
-  });
+    return `<div class="asp-row ${cls}"><span class="asp-label">${label}</span>${chip}</div>`;
+  }).join('');
 
   document.getElementById('modalContent').innerHTML = `
     <div class="modal-grid">
@@ -621,7 +954,7 @@ function verDetalle(idx) {
       </div>
       <div class="modal-field">
         <div class="modal-field-label">Conductor</div>
-        <div class="modal-field-val">${d.conductor} <span style="color:var(--text3);font-size:0.78rem;">${d.usuario}</span></div>
+        <div class="modal-field-val">${d.conductor} <span style="color:var(--text3);font-size:0.76rem;">${d.usuario}</span></div>
       </div>
       <div class="modal-field">
         <div class="modal-field-label">Placa</div>
@@ -640,7 +973,7 @@ function verDetalle(idx) {
         <div class="modal-field-val">${d.desde} → ${d.hasta}</div>
       </div>
       <div class="modal-field">
-        <div class="modal-field-label">Marca / Modelo / Motor</div>
+        <div class="modal-field-label">Vehículo</div>
         <div class="modal-field-val">${d.marca} ${d.modelo} · ${d.motor}cc</div>
       </div>
       <div class="modal-field">
@@ -665,44 +998,42 @@ function verDetalle(idx) {
       ${aspectosHtml}
     </div>` : ''}
   `;
-
   document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
 
 function cerrarModal() {
   document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
 }
 
 document.getElementById('modalOverlay').addEventListener('click', e => {
   if (e.target === e.currentTarget) cerrarModal();
 });
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') cerrarModal();
-});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarModal(); });
 
 async function cerrarSesion() {
   try { await fetch("/auth/logout", { method: "POST" }); } catch(e) {}
   window.location.href = "/auth/logout";
 }
-</script>
 
-<script>
+// Sidebar móvil
 function toggleSidebar() {
-  const sidebar  = document.querySelector('.sidebar');
-  const backdrop = document.getElementById('sidebarBackdrop');
-  const btn      = document.getElementById('hamburgerBtn');
+  const sidebar   = document.getElementById('sidebar');
+  const backdrop  = document.getElementById('sidebarBackdrop');
+  const btn       = document.getElementById('hamburgerBtn');
   sidebar.classList.toggle('open');
   backdrop.classList.toggle('open');
   btn.classList.toggle('open');
+  document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
 }
+
+// Cierra sidebar al navegar en móvil
 document.querySelectorAll('.nav-link').forEach(link => {
   link.addEventListener('click', () => {
     if (window.innerWidth <= 768) {
-      setTimeout(() => {
-        const s = document.querySelector('.sidebar');
-        if (s.classList.contains('open')) toggleSidebar();
-      }, 150);
+      const s = document.getElementById('sidebar');
+      if (s.classList.contains('open')) toggleSidebar();
     }
   });
 });
