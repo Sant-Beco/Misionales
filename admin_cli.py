@@ -26,12 +26,32 @@ from typing import Optional
 
 # ─── Fix compatibilidad bcrypt 4.x + passlib ───────────────────────────────
 # passlib intenta leer bcrypt.__about__.__version__ que no existe en bcrypt 4.x
-# Este parche silencia el warning y evita el error de 72 bytes
+# y además usa bytes internamente para detectar el "wrap bug", lo que falla.
+# Este parche corrige ambos problemas antes de importar passlib.
 import bcrypt as _bcrypt_module
+
 if not hasattr(_bcrypt_module, '__about__'):
     class _FakeAbout:
         __version__ = '4.0.1'
     _bcrypt_module.__about__ = _FakeAbout()
+
+# Parchear hashpw para aceptar str además de bytes
+_original_hashpw = _bcrypt_module.hashpw
+def _patched_hashpw(password, salt):
+    if isinstance(password, str):
+        password = password.encode('utf-8')
+    return _original_hashpw(password, salt)
+_bcrypt_module.hashpw = _patched_hashpw
+
+# Parchear checkpw para aceptar str además de bytes
+_original_checkpw = _bcrypt_module.checkpw
+def _patched_checkpw(password, hashed):
+    if isinstance(password, str):
+        password = password.encode('utf-8')
+    if isinstance(hashed, str):
+        hashed = hashed.encode('utf-8')
+    return _original_checkpw(password, hashed)
+_bcrypt_module.checkpw = _patched_checkpw
 # ────────────────────────────────────────────────────────────────────────────
 
 from passlib.context import CryptContext
@@ -126,9 +146,8 @@ def create_user_db(
             warn(f"El usuario '{nombre}' ya existe (id={existing.id}, rol={existing.rol})")
             return None
 
-        # Hash seguro del PIN (solo dígitos → siempre < 72 bytes)
-        pin_bytes = pin.encode("utf-8")
-        pin_hash  = pwd_context.hash(pin_bytes)
+        # Hash seguro del PIN — pasar como string, no bytes
+        pin_hash = pwd_context.hash(pin)
 
         nuevo = Usuario(
             nombre         = nombre,
@@ -193,7 +212,7 @@ def update_pin_db(user_id: int, new_pin: str) -> bool:
         if not u:
             warn(f"No existe usuario con id={user_id}")
             return False
-        u.pin_hash = pwd_context.hash(new_pin.encode("utf-8"))
+        u.pin_hash = pwd_context.hash(new_pin)
         db.commit()
         logger.info("PIN actualizado: id=%s nombre=%s", user_id, u.nombre)
         return True
