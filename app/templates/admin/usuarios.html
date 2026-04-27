@@ -6,11 +6,12 @@
   <title>Usuarios · Misionales Incubant</title>
   <link rel="stylesheet" href="/static/css/incubant-theme.css">
   <link rel="icon" href="/static/img/logotipo_01.png" type="image/png">
+  <link rel="shortcut icon" href="/static/img/logotipo_01.png" type="image/png">
 
   <style>
     body { display: flex; min-height: 100vh; }
 
-    /* ── SIDEBAR (mismo en todas las páginas admin) ── */
+    /* ══ SIDEBAR ══ */
     .sidebar {
       width: 220px; flex-shrink: 0;
       background: var(--dark1); border-right: 1px solid var(--border);
@@ -26,11 +27,16 @@
     .brand-logo { height: 32px; filter: drop-shadow(0 2px 8px rgba(245,156,0,0.35)); }
     .brand-name {
       font-size: 0.95rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
-      background: var(--grad-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      background: var(--grad-brand);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
     .brand-sub { font-size: 0.62rem; color: var(--text3); letter-spacing: 0.06em; text-transform: uppercase; }
-    .nav-section { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em;
-      text-transform: uppercase; color: var(--text3); padding: 0 0.75rem; margin-bottom: 0.4rem; }
+
+    .nav-section {
+      font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--text3);
+      padding: 0 0.75rem; margin-bottom: 0.4rem;
+    }
     .nav-link {
       display: flex; align-items: center; gap: 0.6rem;
       padding: 0.6rem 0.75rem; border-radius: var(--r-md);
@@ -38,9 +44,17 @@
       font-size: 0.85rem; margin-bottom: 2px; transition: all 0.2s;
     }
     .nav-link:hover { background: var(--dark3); color: var(--text); }
-    .nav-link.active { background: rgba(245,156,0,0.1); color: var(--amber); border-left: 2px solid var(--amber); }
+    .nav-link.active {
+      background: rgba(245,156,0,0.1);
+      color: var(--amber);
+      border-left: 2px solid var(--amber);
+    }
     .nav-icon { font-size: 0.95rem; width: 18px; text-align: center; }
-    .sidebar-footer { margin-top: auto; padding-top: 1.25rem; border-top: 1px solid var(--border); }
+
+    .sidebar-footer {
+      margin-top: auto; padding-top: 1.25rem;
+      border-top: 1px solid var(--border);
+    }
     .user-pill {
       display: flex; align-items: center; gap: 0.6rem;
       padding: 0.65rem 0.75rem; border-radius: var(--r-md);
@@ -52,29 +66,39 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 0.72rem; font-weight: 700; color: #1a0f00; flex-shrink: 0;
     }
-    .user-name { font-size: 0.8rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-name {
+      font-size: 0.8rem; font-weight: 700; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
     .user-role { font-size: 0.65rem; color: var(--amber); letter-spacing: 0.06em; text-transform: uppercase; }
+
     .btn-logout {
       display: flex; align-items: center; justify-content: center; gap: 0.4rem;
       width: 100%; padding: 0.6rem;
       background: rgba(220,60,60,0.08); border: 1px solid rgba(220,60,60,0.2);
       border-radius: var(--r-md); color: #f07070;
-      text-decoration: none; font-size: 0.8rem; font-weight: 700;
+      cursor: pointer; font-family: 'Futura', sans-serif;
+      font-size: 0.8rem; font-weight: 700;
       letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.2s;
     }
     .btn-logout:hover { background: rgba(220,60,60,0.18); border-color: #f07070; }
 
-    /* ── MAIN ── */
+    /* ══ MAIN ══ */
     .main { margin-left: 220px; flex: 1; padding: 2rem 2.25rem; min-height: 100vh; }
-    .topbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; }
+
+    .topbar {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 2rem;
+    }
     .page-title {
       font-size: 1.6rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
-      background: var(--grad-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      background: var(--grad-brand);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
       line-height: 1;
     }
     .page-sub { font-size: 0.78rem; color: var(--text3); margin-top: 0.3rem; }
 
-    /* Alert de éxito */
+    /* ══ ALERTA ÉXITO ══ */
     .alert-success {
       background: rgba(40,200,120,0.08);
       border: 1px solid rgba(40,200,120,0.2);
@@ -84,19 +108,21 @@
       animation: fadeIn 0.3s ease both;
     }
 
-    /* Tabla usuarios */
+    /* ══ TABLA USUARIOS ══ */
     .table-card {
       background: var(--dark2); border: 1px solid var(--border);
-      border-radius: var(--r-lg); overflow: hidden;
+      border-radius: var(--r-lg);
+      overflow: hidden;
       animation: fadeUp 0.5s ease both;
     }
+    .table-card-scroll { overflow-x: auto; }
 
     .table-header {
       display: flex; justify-content: space-between; align-items: center;
       padding: 1.25rem 1.5rem;
       border-bottom: 1px solid var(--border);
+      flex-wrap: wrap; gap: 0.75rem;
     }
-
     .table-title { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text); }
     .table-count { font-size: 0.75rem; color: var(--text3); margin-top: 0.15rem; }
 
@@ -109,75 +135,81 @@
       font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase;
       text-decoration: none; cursor: pointer; transition: all 0.2s;
       box-shadow: 0 2px 12px rgba(245,156,0,0.2);
+      white-space: nowrap;
     }
     .btn-new:hover { filter: brightness(1.1); transform: translateY(-1px); }
 
-    table.users { width: 100%; border-collapse: collapse; }
+    table.users { width: 100%; border-collapse: collapse; min-width: 560px; }
     table.users thead th {
       font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
-      color: var(--text3); padding: 0.75rem 1.5rem;
+      color: var(--text3); padding: 0.75rem 1.25rem;
       border-bottom: 1px solid var(--border); text-align: left;
-      background: var(--dark1);
+      background: var(--dark1); white-space: nowrap;
     }
     table.users tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
     table.users tbody tr:last-child { border-bottom: none; }
     table.users tbody tr:hover { background: var(--dark3); }
-    table.users tbody td { padding: 0.9rem 1.5rem; font-size: 0.85rem; }
+    table.users tbody td { padding: 0.85rem 1.25rem; font-size: 0.84rem; }
 
     .rol-badge {
       display: inline-flex; align-items: center; gap: 0.3rem;
       padding: 0.2rem 0.65rem; border-radius: 20px;
       font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
     }
-    .rol-admin  { background: rgba(245,156,0,0.12);  color: var(--amber); }
-    .rol-user   { background: var(--dark3);           color: var(--text3); border: 1px solid var(--border); }
+    .rol-admin { background: rgba(245,156,0,0.12); color: var(--amber); }
+    .rol-user  { background: var(--dark3); color: var(--text3); border: 1px solid var(--border); }
 
-    .actions { display: flex; gap: 0.4rem; }
+    .actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
 
     .btn-edit {
       display: inline-flex; align-items: center; gap: 0.3rem;
-      padding: 0.35rem 0.75rem; border-radius: var(--r-sm);
+      padding: 0.35rem 0.7rem; border-radius: var(--r-sm);
       background: var(--dark3); border: 1px solid var(--border);
-      color: var(--text2); font-size: 0.75rem; font-weight: 700;
+      color: var(--text2); font-size: 0.73rem; font-weight: 700;
       letter-spacing: 0.06em; text-transform: uppercase;
       text-decoration: none; cursor: pointer; transition: all 0.2s;
-      font-family: 'Futura', sans-serif;
+      font-family: 'Futura', sans-serif; white-space: nowrap;
     }
     .btn-edit:hover { border-color: var(--amber); color: var(--amber); }
 
     .btn-del {
       display: inline-flex; align-items: center; gap: 0.3rem;
-      padding: 0.35rem 0.75rem; border-radius: var(--r-sm);
+      padding: 0.35rem 0.7rem; border-radius: var(--r-sm);
       background: rgba(220,60,60,0.06);
       border: 1px solid rgba(220,60,60,0.18);
-      color: #f07070; font-size: 0.75rem; font-weight: 700;
+      color: #f07070; font-size: 0.73rem; font-weight: 700;
       letter-spacing: 0.06em; text-transform: uppercase;
       cursor: pointer; transition: all 0.2s;
-      font-family: 'Futura', sans-serif;
+      font-family: 'Futura', sans-serif; white-space: nowrap;
     }
     .btn-del:hover { background: rgba(220,60,60,0.14); border-color: #f07070; }
 
     .stat-num { font-weight: 700; color: var(--amber); }
 
-    /* Modal */
+    /* ══ MODAL ELIMINAR ══ */
     .modal-overlay {
       display: none; position: fixed; inset: 0;
       background: rgba(0,0,0,0.65); backdrop-filter: blur(4px);
       z-index: 100; align-items: center; justify-content: center;
+      padding: 1rem;
     }
     .modal-overlay.open { display: flex; }
     .modal {
       background: var(--dark2); border: 1px solid var(--border);
-      border-radius: var(--r-xl); padding: 2rem; max-width: 380px; width: 90%;
+      border-radius: var(--r-xl); padding: 2rem;
+      max-width: 380px; width: 100%;
       animation: fadeUp 0.3s ease both;
       box-shadow: var(--shadow-lg);
     }
-    .modal h3 { font-size: 1rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.75rem; color: var(--text); }
+    .modal h3 {
+      font-size: 1rem; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; margin-bottom: 0.75rem; color: var(--text);
+    }
     .modal p  { font-size: 0.85rem; color: var(--text2); line-height: 1.5; margin-bottom: 0.5rem; }
     .modal-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem; }
     .modal-warn { color: #f07070; font-size: 0.78rem; margin-top: 0.25rem; }
-  
-    /* ══ RESPONSIVE MÓVIL ══ */
+
+    /* ══ HAMBURGER — MÓVIL ══ */
     .hamburger {
       display: none;
       position: fixed; top: 1rem; left: 1rem; z-index: 30;
@@ -201,9 +233,11 @@
       backdrop-filter: blur(2px);
     }
 
+    /* ══ RESPONSIVE ══ */
     @media (max-width: 768px) {
-      .hamburger { display: flex; }
 
+      /* Sidebar oculto por defecto, se abre con hamburger */
+      .hamburger { display: flex; }
       .sidebar {
         transform: translateX(-100%);
         transition: transform 0.28s ease;
@@ -215,77 +249,113 @@
       }
       .sidebar-backdrop.open { display: block; }
 
+      /* Main ocupa todo el ancho */
       .main {
         margin-left: 0 !important;
-        padding: 1rem;
-        padding-top: 4rem;
+        padding: 1rem 1rem 2rem;
+        padding-top: 4.5rem; /* espacio para el hamburger */
       }
 
-      /* KPIs */
-      .kpi-row { grid-template-columns: 1fr 1fr !important; gap: 0.65rem; }
+      /* Topbar apilado */
+      .topbar {
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+      }
+      .page-title { font-size: 1.3rem; }
 
-      /* Gráficas */
-      .charts-row  { grid-template-columns: 1fr !important; }
-      .bottom-row  { grid-template-columns: 1fr !important; }
-      .annual-card { grid-column: auto !important; }
+      /* Header tabla: título arriba, botón abajo */
+      .table-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 1rem;
+      }
+      .btn-new {
+        width: 100%;
+        justify-content: center;
+        font-size: 0.82rem;
+        padding: 0.65rem 1rem;
+      }
 
-      /* Filtros */
-      .filter-row { grid-template-columns: 1fr 1fr !important; }
-      .filter-row > div:last-child { grid-column: 1 / -1; }
+      /* Tabla con scroll horizontal */
+      .table-card-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      table.users { min-width: 420px; }
+      table.users thead th,
+      table.users tbody td { padding: 0.7rem 0.9rem; }
 
-      /* Topbar */
-      .topbar { flex-direction: column; gap: 0.5rem; }
-      .page-title { font-size: 1.2rem; }
+      /* Ocultar columna ID en móvil */
+      table.users th:first-child,
+      table.users td:first-child { display: none; }
 
-      /* Tablas */
-      .table-card { overflow-x: auto; }
-      table.insp, table.rk, table.rep, table.logs, table.users { min-width: 600px; }
+      /* Ocultar columna ROL en móvil — se ve en la fila */
+      table.users th:nth-child(4),
+      table.users td:nth-child(4) { display: none; }
 
-      /* Form */
-      .form-card { padding: 1.25rem; }
-      .form-row  { grid-template-columns: 1fr !important; }
-      .form-actions { flex-direction: column; }
-      .btn-save, .btn-back { width: 100%; justify-content: center; }
+      /* Padding compacto */
+      table.users thead th,
+      table.users tbody td { padding: 0.6rem 0.65rem; }
 
-      /* Modal */
-      .modal { padding: 1.25rem; margin: 1rem; }
-      .modal-grid { grid-template-columns: 1fr !important; }
-      .modal-field.full { grid-column: auto !important; }
+      /* Columna inspecciones compacta */
+      table.users th:nth-child(5),
+      table.users td:nth-child(5) { white-space: nowrap; font-size: 0.78rem; }
 
-      /* Conductor banner */
-      .conductor-banner { flex-wrap: wrap; }
+      /* Acciones — solo iconos en móvil */
+      .actions { flex-direction: row; gap: 0.25rem; }
+      .btn-edit .btn-label, .btn-del .btn-label { display: none; }
+      .btn-edit, .btn-del {
+        padding: 0.35rem 0.5rem;
+        font-size: 0.85rem;
+        letter-spacing: 0;
+        text-transform: none;
+      }
 
-      /* Botones topbar */
-      .btn-new { font-size: 0.72rem; padding: 0.5rem 0.9rem; }
+      /* Modal ajustado */
+      .modal { padding: 1.25rem; }
+      .modal-actions { flex-direction: column-reverse; }
+      .modal-actions .btn-edit,
+      .modal-actions .btn-del { width: 100%; justify-content: center; padding: 0.6rem; }
     }
 
     @media (max-width: 420px) {
-      .kpi-row { grid-template-columns: 1fr !important; }
-      .kpi-val { font-size: 1.75rem; }
+      .main { padding-top: 4rem; }
+      .page-title { font-size: 1.15rem; }
+
+      /* Ocultar Inspecciones en pantallas muy pequeñas */
+      table.users th:nth-child(5),
+      table.users td:nth-child(5) { display: none; }
+
+      table.users { min-width: 300px; }
     }
-</style>
+  </style>
 </head>
 <body>
-<!-- Hamburger (móvil) -->
+
+<!-- Hamburger (solo móvil) -->
 <button class="hamburger" onclick="toggleSidebar()" id="hamburgerBtn">
   <span></span><span></span><span></span>
 </button>
 <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
 
-
 <!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="sidebar-brand">
     <img src="/static/img/logotipo_01.png" alt="Incubant" class="brand-logo">
-    <div><div class="brand-name">Misionales</div><div class="brand-sub">Incubant SST</div></div>
+    <div>
+      <div class="brand-name">Misionales</div>
+      <div class="brand-sub">Incubant SST</div>
+    </div>
   </div>
+
   <div class="nav-section">Panel</div>
-  <a href="/admin"          class="nav-link"><span class="nav-icon">📊</span> Dashboard</a>
-  <a href="/admin/usuarios" class="nav-link active"><span class="nav-icon">👥</span> Usuarios</a>
+  <a href="/admin"              class="nav-link"><span class="nav-icon">📊</span> Dashboard</a>
+  <a href="/admin/usuarios"     class="nav-link active"><span class="nav-icon">👥</span> Usuarios</a>
   <a href="/admin/inspecciones" class="nav-link"><span class="nav-icon">🔍</span> Inspecciones</a>
-  <a href="/admin/logs"     class="nav-link"><span class="nav-icon">📋</span> Auditoría</a>
+  <a href="/admin/logs"         class="nav-link"><span class="nav-icon">📋</span> Auditoría</a>
+
   <div class="nav-section" style="margin-top:1.25rem;">Sistema</div>
-  <a href="/"               class="nav-link"><span class="nav-icon">🚗</span> Formulario</a>
+  <a href="/" class="nav-link"><span class="nav-icon">🚗</span> Formulario</a>
+
   <div class="sidebar-footer">
     <div class="user-pill">
       <div class="user-avatar">{{ admin.nombre_visible[0]|upper if admin.nombre_visible else 'A' }}</div>
@@ -294,12 +364,18 @@
         <div class="user-role">Administrador</div>
       </div>
     </div>
-    <a href="/auth/logout" class="btn-logout">⏻ Cerrar sesión</a>
+    <button onclick="cerrarSesion()" class="btn-logout">
+      <svg width="11" height="11" viewBox="0 0 11 11" fill="none" style="vertical-align:middle;margin-right:2px">
+        <path d="M5.5 1.5v3.5M2.8 2.8a4 4 0 1 0 5.4 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      Cerrar sesión
+    </button>
   </div>
 </aside>
 
 <!-- MAIN -->
 <main class="main">
+
   <div class="topbar">
     <div>
       <div class="page-title">Usuarios</div>
@@ -321,45 +397,47 @@
     </div>
 
     {% if usuarios %}
-    <table class="users">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Usuario</th>
-          <th>Nombre</th>
-          <th>Rol</th>
-          <th>Inspecciones</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for u in usuarios %}
-        <tr>
-          <td style="color:var(--text3);">#{{ u.id }}</td>
-          <td style="font-weight:700;">{{ u.nombre }}</td>
-          <td>{{ u.nombre_visible }}</td>
-          <td>
-            {% if u.rol == 'admin' %}
-              <span class="rol-badge rol-admin">★ Admin</span>
-            {% else %}
-              <span class="rol-badge rol-user">Conductor</span>
-            {% endif %}
-          </td>
-          <td><span class="stat-num">{{ stats.get(u.id, 0) }}</span> registros</td>
-          <td>
-            <div class="actions">
-              <a href="/admin/usuarios/{{ u.id }}/editar" class="btn-edit">✏ Editar</a>
-              {% if u.id != admin.id %}
-              <button onclick="confirmarEliminar({{ u.id }}, '{{ u.nombre }}')" class="btn-del">✕ Eliminar</button>
+    <div class="table-card-scroll">
+      <table class="users">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Usuario</th>
+            <th>Nombre</th>
+            <th>Rol</th>
+            <th>Inspecciones</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in usuarios %}
+          <tr>
+            <td style="color:var(--text3);font-size:0.75rem;">#{{ u.id }}</td>
+            <td style="font-weight:700;">{{ u.nombre }}</td>
+            <td>{{ u.nombre_visible }}</td>
+            <td>
+              {% if u.rol == 'admin' %}
+                <span class="rol-badge rol-admin">★ Admin</span>
               {% else %}
-              <button class="btn-edit" disabled style="opacity:0.4;cursor:default;">🔒 Tú</button>
+                <span class="rol-badge rol-user">Conductor</span>
               {% endif %}
-            </div>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+            </td>
+            <td><span class="stat-num">{{ stats.get(u.id, 0) }}</span> registros</td>
+            <td>
+              <div class="actions">
+                <a href="/admin/usuarios/{{ u.id }}/editar" class="btn-edit">✏<span class="btn-label"> Editar</span></a>
+                {% if u.id != admin.id %}
+                <button onclick="confirmarEliminar({{ u.id }}, '{{ u.nombre }}')" class="btn-del">✕<span class="btn-label"> Eliminar</span></button>
+                {% else %}
+                <button class="btn-edit" disabled style="opacity:0.4;cursor:default;">🔒<span class="btn-label"> Tú</span></button>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
     {% else %}
     <div style="padding:2.5rem; text-align:center; color:var(--text3);">
       <div style="font-size:2rem;margin-bottom:0.5rem;">🐣</div>
@@ -367,6 +445,7 @@
     </div>
     {% endif %}
   </div>
+
 </main>
 
 <!-- Modal eliminar -->
@@ -375,7 +454,9 @@
     <h3>⚠ Confirmar eliminación</h3>
     <p>¿Eliminar al usuario <strong id="modalNombre" style="color:var(--amber);"></strong>?</p>
     <p class="modal-warn">Esta acción no se puede deshacer.</p>
-    <form id="formEliminar" method="POST" style="display:none;"><input type="hidden" name="confirmar" value="1"></form>
+    <form id="formEliminar" method="POST" style="display:none;">
+      <input type="hidden" name="confirmar" value="1">
+    </form>
     <div class="modal-actions">
       <button onclick="cerrarModal()" class="btn-edit">Cancelar</button>
       <button onclick="eliminarUsuario()" class="btn-del">Sí, eliminar</button>
@@ -384,7 +465,9 @@
 </div>
 
 <script>
+  /* ── Modal eliminar ── */
   let idEliminar = null;
+
   function confirmarEliminar(id, nombre) {
     idEliminar = id;
     document.getElementById('modalNombre').textContent = nombre;
@@ -403,27 +486,37 @@
   document.getElementById('modalOverlay').addEventListener('click', e => {
     if (e.target === e.currentTarget) cerrarModal();
   });
-</script>
-
-<script>
-function toggleSidebar() {
-  const sidebar  = document.querySelector('.sidebar');
-  const backdrop = document.getElementById('sidebarBackdrop');
-  const btn      = document.getElementById('hamburgerBtn');
-  sidebar.classList.toggle('open');
-  backdrop.classList.toggle('open');
-  btn.classList.toggle('open');
-}
-document.querySelectorAll('.nav-link').forEach(link => {
-  link.addEventListener('click', () => {
-    if (window.innerWidth <= 768) {
-      setTimeout(() => {
-        const s = document.querySelector('.sidebar');
-        if (s.classList.contains('open')) toggleSidebar();
-      }, 150);
-    }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') cerrarModal();
   });
-});
+
+  /* ── Cerrar sesión ── */
+  async function cerrarSesion() {
+    try { await fetch("/auth/logout", { method: "POST" }); } catch(e) {}
+    window.location.href = "/auth/logout";
+  }
+
+  /* ── Sidebar responsive ── */
+  function toggleSidebar() {
+    const sidebar  = document.querySelector('.sidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    const btn      = document.getElementById('hamburgerBtn');
+    sidebar.classList.toggle('open');
+    backdrop.classList.toggle('open');
+    btn.classList.toggle('open');
+  }
+
+  /* Cerrar sidebar al navegar en móvil */
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 768) {
+        setTimeout(() => {
+          const s = document.querySelector('.sidebar');
+          if (s.classList.contains('open')) toggleSidebar();
+        }, 150);
+      }
+    });
+  });
 </script>
 </body>
 </html>
