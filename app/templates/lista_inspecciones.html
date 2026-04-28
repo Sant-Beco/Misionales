@@ -225,46 +225,83 @@
     .btn-ver-insp:hover { border-color:var(--amber); color:var(--amber); }
     @keyframes spin { to { transform:rotate(360deg); } }
     .spinner-sm { display:inline-block; width:12px; height:12px; border:2px solid rgba(26,15,0,0.3); border-top-color:#1a0f00; border-radius:50%; animation:spin 0.7s linear infinite; vertical-align:middle; }
-  
+
+    /* ══ TABLE SCROLL WRAPPER ══ */
+    .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table.hist { min-width: 480px; }
+
     /* ══ RESPONSIVE MÓVIL — lista_inspecciones ══ */
     @media (max-width: 640px) {
-      /* Topbar */
-      .topbar { padding: 0.65rem 1rem; flex-wrap: wrap; gap: 0.5rem; }
-      .topbar-right { gap: 0.4rem; flex-wrap: wrap; }
+      /* Topbar compacto */
+      .topbar { padding: 0.6rem 0.9rem; flex-wrap: wrap; gap: 0.4rem; }
+      .topbar-right { gap: 0.35rem; flex-wrap: wrap; }
       .user-chip { display: none; }
-      .btn-back, .btn-logout-top { font-size: 0.68rem; padding: 0.38rem 0.65rem; }
+      .btn-back, .btn-logout-top {
+        font-size: 0.66rem; padding: 0.35rem 0.6rem; letter-spacing: 0.04em;
+      }
 
       /* Contenido */
-      .page-wrap { padding: 1rem 0.75rem 3rem; }
+      .page-wrap { padding: 0.85rem 0.75rem 3rem; }
 
-      /* KPIs */
-      .kpi-row { grid-template-columns: 1fr 1fr !important; gap: 0.65rem; }
+      /* Hero */
+      .page-hero { padding: 1.1rem 1.25rem; margin-bottom: 1rem; }
+      .hero-title { font-size: 1rem; }
+      .hero-sub { font-size: 0.72rem; }
+
+      /* KPIs — 2 columnas */
+      .kpi-row { grid-template-columns: 1fr 1fr !important; gap: 0.6rem; margin-bottom: 1rem; }
       .kpi-val { font-size: 1.5rem; }
+      .kpi-label { font-size: 0.6rem; }
+      .kpi-sub { font-size: 0.65rem; }
 
-      /* Barra progreso */
-      .progress-card { padding: 1rem; }
+      /* Progreso */
+      .progress-card { padding: 0.9rem 1rem; margin-bottom: 1rem; }
+      .progress-label { font-size: 0.72rem; }
+      .progress-count { font-size: 0.75rem; }
+      .progress-hint { font-size: 0.68rem; }
 
-      /* Tabla */
-      .table-card { overflow-x: auto; }
-      table.hist { min-width: 520px; }
+      /* Tabla principal — scroll horizontal */
+      table.hist { min-width: 440px; }
       table.hist thead th,
-      table.hist tbody td { padding: 0.6rem 0.75rem; }
+      table.hist tbody td { padding: 0.55rem 0.65rem; font-size: 0.78rem; }
 
-      /* PDF15 */
-      .pdf15-wrap { flex-direction: column; gap: 0.75rem; text-align: center; }
-      .btn-pdf15 { width: 100%; justify-content: center; }
+      /* Ocultar columna Ruta en móvil */
+      table.hist thead th:nth-child(5),
+      table.hist tbody td:nth-child(5) { display: none; }
 
-      /* Modal */
-      .modal { padding: 1.1rem; }
-      .modal-grid { grid-template-columns: 1fr !important; }
+      /* Botón ver más compacto */
+      .btn-ver-insp { font-size: 0.65rem; padding: 0.22rem 0.5rem; }
+
+      /* PDF 15 */
+      .pdf15-wrap { flex-direction: column; gap: 0.75rem; text-align: center; padding: 1rem; }
+      .btn-pdf15 { width: 100%; justify-content: center; font-size: 0.78rem; }
+
+      /* Historial consolidados */
+      .table-card[style*="margin-top"] { margin-top: 1rem !important; }
+
+      /* Modal responsive */
+      .modal { padding: 1rem; margin: 0.5rem; max-width: calc(100vw - 1rem); }
+      .modal-grid { grid-template-columns: 1fr !important; gap: 0.4rem; }
       .modal-field.full { grid-column: auto !important; }
-      .modal-footer { flex-direction: column-reverse; }
-      .btn-dl-pdf, .btn-cerrar-modal { width: 100%; justify-content: center; }
+      .modal-footer { flex-direction: column-reverse; gap: 0.5rem; }
+      .btn-dl-pdf, .btn-cerrar-modal {
+        width: 100%; justify-content: center;
+        padding: 0.65rem; font-size: 0.82rem;
+      }
+      .modal-titulo { font-size: 0.88rem; }
+      .modal-section-title { font-size: 0.6rem; }
+      .asp-label { font-size: 0.72rem; }
     }
 
     @media (max-width: 380px) {
+      /* En pantallas muy pequeñas */
       .kpi-row { grid-template-columns: 1fr !important; }
-      .topbar-brand .topbar-title { font-size: 0.75rem; }
+      .topbar-brand .topbar-title { font-size: 0.76rem; }
+      table.hist { min-width: 360px; }
+
+      /* Ocultar también Proceso en pantallas muy pequeñas */
+      table.hist thead th:nth-child(4),
+      table.hist tbody td:nth-child(4) { display: none; }
     }
 
   </style>
@@ -347,6 +384,7 @@
       </div>
 
       {% if registros %}
+      <div class="table-scroll">
       <table class="hist">
         <thead>
           <tr>
@@ -396,6 +434,7 @@
         </tbody>
       </table>
 
+      </div><!-- /table-scroll -->
       {% if puede_generar_pdf15 %}
       <div class="pdf15-wrap">
         <div class="pdf15-info">
@@ -423,6 +462,7 @@
 
     <!-- ── HISTORIAL DE PDFs CONSOLIDADOS ── -->
     {% if reportes_consolidados %}
+    <div style="max-width:860px;margin:0 auto;padding:0 1.5rem 4rem;">
     <div class="table-card" style="animation-delay:0.28s; margin-top:1.25rem;">
       <div class="table-header">
         <div>
@@ -430,6 +470,7 @@
           <div class="table-count">{{ reportes_consolidados | length }} PDF(s) generado(s)</div>
         </div>
       </div>
+      <div class="table-scroll">
       <table class="hist">
         <thead>
           <tr>
@@ -464,6 +505,7 @@
           {% endfor %}
         </tbody>
       </table>
+      </div><!-- /table-scroll consolidados -->
       <div style="padding:0.75rem 1.5rem;border-top:1px solid var(--border);font-size:0.72rem;color:var(--text3);">
         ℹ Los PDFs se generan al completar 15 inspecciones. Una vez generados, el ciclo reinicia.
       </div>
