@@ -8,7 +8,7 @@
   <link rel="icon" href="/static/img/logotipo_01.png" type="image/png">
   <link rel="shortcut icon" href="/static/img/logotipo_01.png" type="image/png">
   <style>
-    /* ══ LAYOUT ══ */
+    /* ══ BASE ══ */
     body {
       min-height: 100vh;
       background: var(--night);
@@ -22,53 +22,54 @@
       border-bottom: 1px solid var(--border);
       padding: 0.75rem 2rem;
       display: flex; justify-content: space-between; align-items: center;
+      gap: 0.75rem; flex-wrap: wrap;
     }
-    .topbar-brand { display: flex; align-items: center; gap: 0.75rem; }
-    .topbar-logo { height: 30px; filter: drop-shadow(0 2px 8px rgba(245,156,0,0.35)); }
+    .topbar-brand { display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; }
+    .topbar-logo { height: 28px; filter: drop-shadow(0 2px 8px rgba(245,156,0,0.35)); }
     .topbar-title {
       font-size: 0.88rem; font-weight: 700;
       letter-spacing: 0.1em; text-transform: uppercase;
       background: var(--grad-brand);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
-    .topbar-sub { font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text3); }
-    .topbar-right { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
-    .user-chip {
-      display: flex; align-items: center; gap: 0.5rem;
-      background: var(--dark3); border: 1px solid var(--border);
-      border-radius: 20px; padding: 0.35rem 0.75rem;
+    .topbar-sub { font-size: 0.6rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text3); }
+    .topbar-right {
+      display: flex; align-items: center; gap: 0.45rem;
+      flex-wrap: wrap; flex: 1; justify-content: flex-end;
     }
-    .user-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); animation: pulse-amber 2s infinite; }
-    .user-text { font-size: 0.8rem; font-weight: 700; color: var(--text); }
-    .btn-admin-top {
-      display: inline-flex; align-items: center; gap: 0.35rem;
-      padding: 0.45rem 0.9rem;
-      background: rgba(245,156,0,0.08); border: 1px solid rgba(245,156,0,0.2);
-      border-radius: var(--r-md); color: var(--amber);
-      font-family: 'Futura', sans-serif; font-size: 0.75rem;
-      font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    .user-chip {
+      display: flex; align-items: center; gap: 0.45rem;
+      background: var(--dark3); border: 1px solid var(--border);
+      border-radius: 20px; padding: 0.3rem 0.65rem;
+    }
+    .user-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); animation: pulse-amber 2s infinite; flex-shrink: 0; }
+    .user-text { font-size: 0.78rem; font-weight: 700; color: var(--text); white-space: nowrap; max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
+    .btn-admin-top, .btn-logout-top {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      padding: 0.4rem 0.75rem;
+      border-radius: var(--r-md);
+      font-family: 'Futura', sans-serif; font-size: 0.72rem;
+      font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
       cursor: pointer; text-decoration: none; transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .btn-admin-top {
+      background: rgba(245,156,0,0.08); border: 1px solid rgba(245,156,0,0.2); color: var(--amber);
     }
     .btn-admin-top:hover { background: rgba(245,156,0,0.14); border-color: var(--amber); }
     .btn-logout-top {
-      display: inline-flex; align-items: center; gap: 0.35rem;
-      padding: 0.45rem 0.9rem;
-      background: rgba(220,60,60,0.07); border: 1px solid rgba(220,60,60,0.18);
-      border-radius: var(--r-md); color: #f07070;
-      font-family: 'Futura', sans-serif; font-size: 0.75rem;
-      font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
-      cursor: pointer; transition: all 0.2s;
+      background: rgba(220,60,60,0.07); border: 1px solid rgba(220,60,60,0.18); color: #f07070;
     }
     .btn-logout-top:hover { background: rgba(220,60,60,0.14); border-color: #f07070; }
 
     /* ══ CONTENEDOR ══ */
-    .page-wrap { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    .page-wrap { max-width: 860px; margin: 0 auto; padding: 1.75rem 1.5rem 4rem; }
 
     /* ══ HERO ══ */
     .form-hero {
       background: var(--dark2); border: 1px solid var(--border);
-      border-radius: var(--r-xl); padding: 1.75rem 2rem 1.25rem;
-      margin-bottom: 1.5rem;
+      border-radius: var(--r-xl); padding: 1.5rem 1.75rem 1.25rem;
+      margin-bottom: 1.25rem;
       display: flex; justify-content: space-between; align-items: flex-start;
       animation: fadeUp 0.5s ease both; position: relative; overflow: hidden;
     }
@@ -82,33 +83,35 @@
       border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
       background: linear-gradient(135deg, rgba(245,156,0,0.06), rgba(235,102,8,0.03));
       border: 1px solid rgba(245,156,0,0.05);
+      pointer-events: none;
     }
     .form-title-main {
-      font-size: 1.1rem; font-weight: 700;
-      letter-spacing: 0.08em; text-transform: uppercase;
+      font-size: 1rem; font-weight: 700;
+      letter-spacing: 0.07em; text-transform: uppercase;
       background: var(--grad-brand);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-      margin-bottom: 0.3rem;
+      margin-bottom: 0.3rem; line-height: 1.3;
     }
-    .form-meta-chips { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.6rem; }
+    .form-meta-chips { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.55rem; }
     .meta-chip {
-      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+      font-size: 0.64rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
       background: var(--dark3); border: 1px solid var(--border);
-      border-radius: 20px; padding: 0.2rem 0.65rem; color: var(--text3);
+      border-radius: 20px; padding: 0.18rem 0.6rem; color: var(--text3);
     }
     .meta-chip em { color: var(--amber); font-style: normal; }
 
     /* ══ SELECTOR TIPO VEHÍCULO ══ */
     .tipo-vehiculo-selector {
-      display: flex; gap: 0.75rem; margin-bottom: 1.5rem;
+      display: flex; gap: 0.65rem; margin-bottom: 1.25rem;
       animation: fadeUp 0.5s ease both;
     }
     .tipo-btn {
       flex: 1; display: flex; flex-direction: column; align-items: center;
-      gap: 0.5rem; padding: 1.1rem 1rem;
+      gap: 0.4rem; padding: 0.9rem 0.5rem;
       background: var(--dark2); border: 1.5px solid var(--border);
       border-radius: var(--r-lg); cursor: pointer;
       transition: all 0.2s; position: relative; overflow: hidden;
+      min-width: 0;
     }
     .tipo-btn::before {
       content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
@@ -121,64 +124,64 @@
       box-shadow: 0 4px 20px rgba(245,156,0,0.12);
     }
     .tipo-btn.active::before { opacity: 1; }
-    .tipo-btn-icon { font-size: 2rem; line-height: 1; }
+    .tipo-btn-icon { font-size: 1.75rem; line-height: 1; }
     .tipo-btn-label {
-      font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
-      color: var(--text2);
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--text2); text-align: center;
     }
     .tipo-btn.active .tipo-btn-label { color: var(--amber); }
     .tipo-btn-check {
-      position: absolute; top: 0.5rem; right: 0.6rem;
-      width: 16px; height: 16px; border-radius: 50%;
+      position: absolute; top: 0.4rem; right: 0.5rem;
+      width: 15px; height: 15px; border-radius: 50%;
       background: var(--amber); display: none;
       align-items: center; justify-content: center;
-      font-size: 0.6rem; color: #1a0f00; font-weight: 900;
+      font-size: 0.55rem; color: #1a0f00; font-weight: 900;
     }
     .tipo-btn.active .tipo-btn-check { display: flex; }
 
-    /* ══ TARJETAS DE SECCIÓN ══ */
+    /* ══ SECCIÓN CARDS ══ */
     .section-card {
       background: var(--dark2); border: 1px solid var(--border);
-      border-radius: var(--r-lg); margin-bottom: 1.25rem; overflow: hidden;
+      border-radius: var(--r-lg); margin-bottom: 1rem; overflow: hidden;
       animation: fadeUp 0.5s ease both;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
     .section-card:focus-within { border-color: rgba(245,156,0,0.2); box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
     .section-head {
-      display: flex; align-items: center; gap: 0.65rem;
-      padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);
-      background: var(--dark1); position: relative;
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.875rem 1.25rem; border-bottom: 1px solid var(--border);
+      background: var(--dark1); position: relative; flex-wrap: wrap;
     }
     .section-head::before {
       content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
       background: var(--grad-brand); border-radius: 0 2px 2px 0;
     }
     .section-icon {
-      width: 30px; height: 30px; border-radius: var(--r-sm);
+      width: 28px; height: 28px; border-radius: var(--r-sm);
       background: rgba(245,156,0,0.1); border: 1px solid rgba(245,156,0,0.2);
-      display: flex; align-items: center; justify-content: center; font-size: 0.9rem;
-      box-shadow: 0 2px 8px rgba(245,156,0,0.1); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 0.85rem;
+      flex-shrink: 0;
     }
-    .section-label { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text); }
-    .section-body { padding: 1.5rem; }
+    .section-label { font-size: 0.74rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text); flex: 1; }
+    .section-body { padding: 1.25rem; }
 
-    /* ══ GRID CAMPOS ══ */
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
-    @media (max-width: 600px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+    /* ══ GRIDS ══ */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.85rem; }
     .field { display: flex; flex-direction: column; }
 
     /* ══ INPUTS ══ */
-    .f-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.35rem; }
+    .f-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.3rem; }
     .f-input, .f-select {
-      padding: 0.7rem 0.9rem; background: var(--dark3); border: 1px solid var(--border);
+      padding: 0.65rem 0.85rem; background: var(--dark3); border: 1px solid var(--border);
       border-radius: var(--r-md); color: var(--text);
-      font-family: 'Futura', sans-serif; font-size: 0.88rem;
+      font-family: 'Futura', sans-serif; font-size: 0.85rem;
       outline: none; transition: border-color 0.2s, box-shadow 0.2s; appearance: none;
+      width: 100%; min-height: 44px;
     }
     .f-input:focus, .f-select:focus {
       border-color: var(--amber);
-      box-shadow: 0 0 0 3px rgba(245,156,0,0.12), 0 1px 6px rgba(245,156,0,0.08);
+      box-shadow: 0 0 0 3px rgba(245,156,0,0.12);
     }
     .f-input::placeholder { color: var(--text3); }
     .f-input.input-invalid { border-color: #f07070 !important; }
@@ -186,40 +189,39 @@
     .f-select.input-invalid { border-color: #f07070 !important; }
     .f-input:-webkit-autofill,
     .f-input:-webkit-autofill:hover,
-    .f-input:-webkit-autofill:focus,
-    .f-input:-webkit-autofill:active {
+    .f-input:-webkit-autofill:focus {
       -webkit-box-shadow: 0 0 0 1000px #222730 inset !important;
       -webkit-text-fill-color: #F0EDE8 !important;
-      caret-color: #F0EDE8; border-color: var(--border) !important;
+      caret-color: #F0EDE8;
       transition: background-color 9999s ease-in-out 0s;
     }
     .f-select {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236E6860'/%3E%3C/svg%3E");
-      background-repeat: no-repeat; background-position: right 0.9rem center; padding-right: 2.2rem;
+      background-repeat: no-repeat; background-position: right 0.85rem center; padding-right: 2.2rem;
     }
     .f-select option { background: var(--dark2); color: var(--text); }
-    .f-error { font-size: 0.72rem; color: #f07070; margin-top: 0.3rem; display: none; }
-    .f-hint  { font-size: 0.68rem; color: var(--text3); margin-top: 0.25rem; }
-    .mt { margin-top: 0.85rem; }
+    .f-error { font-size: 0.7rem; color: #f07070; margin-top: 0.25rem; display: none; }
+    .f-hint  { font-size: 0.65rem; color: var(--text3); margin-top: 0.2rem; }
+    .mt { margin-top: 0.75rem; }
 
     /* ══ ASPECTOS ══ */
-    .aspectos-grid { display: flex; flex-direction: column; gap: 0.5rem; }
+    .aspectos-grid { display: flex; flex-direction: column; gap: 0.4rem; }
     .aspecto-row {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0.7rem 0.9rem; background: var(--dark3); border: 1px solid var(--border);
-      border-radius: var(--r-md); transition: border-color 0.2s, background 0.2s, box-shadow 0.2s; gap: 1rem;
+      padding: 0.65rem 0.85rem; background: var(--dark3); border: 1px solid var(--border);
+      border-radius: var(--r-md); transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+      gap: 0.75rem;
     }
-    .aspecto-row:hover { border-color: rgba(245,156,0,0.2); background: rgba(245,156,0,0.025); }
+    .aspecto-row:hover { border-color: rgba(245,156,0,0.2); }
     .aspecto-row.has-m { border-color: rgba(235,102,8,0.45); background: rgba(235,102,8,0.05); box-shadow: inset 3px 0 0 var(--ember); }
-    /* Animación de entrada para filas nuevas */
     @keyframes rowIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
     .aspecto-row { animation: rowIn 0.18s ease both; }
-    .aspecto-num { font-size: 0.62rem; font-weight: 700; color: var(--amber); opacity: 0.5; min-width: 18px; text-align: right; font-variant-numeric: tabular-nums; }
-    .aspecto-label { flex: 1; font-size: 0.83rem; color: var(--text2); line-height: 1.4; }
-    .bm-toggle { display: flex; gap: 0; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+    .aspecto-num { font-size: 0.6rem; font-weight: 700; color: var(--amber); opacity: 0.5; min-width: 16px; text-align: right; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+    .aspecto-label { flex: 1; font-size: 0.8rem; color: var(--text2); line-height: 1.4; }
+    .bm-toggle { display: flex; gap: 0; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.3); flex-shrink: 0; }
     .bm-toggle input[type="radio"] { display: none; }
     .bm-toggle label {
-      padding: 0.38rem 0.9rem; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em; cursor: pointer;
+      padding: 0.38rem 0.8rem; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.1em; cursor: pointer;
       background: rgba(0,0,0,0.25); color: var(--text3); transition: all 0.15s;
       border: 1px solid var(--border); user-select: none;
     }
@@ -228,21 +230,21 @@
     .bm-b input:checked + label { background: rgba(40,200,120,0.18); color: #28c878; border-color: rgba(40,200,120,0.35); text-shadow: 0 0 8px rgba(40,200,120,0.4); }
     .bm-m input:checked + label { background: rgba(235,102,8,0.18); color: var(--ember); border-color: rgba(235,102,8,0.4); text-shadow: 0 0 8px rgba(235,102,8,0.4); }
 
-    /* Badge contador de M */
     .aspectos-badge {
-      margin-left: auto; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em;
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.05em;
       padding: 0.15rem 0.5rem; border-radius: 20px;
       background: rgba(235,102,8,0.1); border: 1px solid rgba(235,102,8,0.25); color: var(--ember);
       display: none;
     }
-    .aspectos-badge.visible { display: inline-flex; align-items: center; gap: 0.3rem; }
+    .aspectos-badge.visible { display: inline-flex; align-items: center; gap: 0.25rem; }
 
     /* ══ CONDICIONES ÓPTIMAS ══ */
     .optimas-toggle { display: flex; gap: 0; border-radius: var(--r-md); overflow: hidden; width: fit-content; }
     .optimas-toggle input[type="radio"] { display: none; }
     .optimas-toggle label {
-      padding: 0.55rem 1.5rem; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.06em; cursor: pointer;
+      padding: 0.55rem 1.4rem; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.06em; cursor: pointer;
       background: var(--dark4); color: var(--text3); border: 1px solid var(--border); transition: all 0.15s;
+      min-height: 44px; display: flex; align-items: center;
     }
     .optimas-toggle label:first-of-type { border-radius: var(--r-md) 0 0 var(--r-md); border-right: none; }
     .optimas-toggle label:last-of-type  { border-radius: 0 var(--r-md) var(--r-md) 0; }
@@ -263,70 +265,164 @@
       align-items: center; justify-content: center; pointer-events: none;
       color: var(--text3); gap: 0.3rem; transition: opacity 0.3s;
     }
-    .firma-placeholder-icon { font-size: 1.75rem; opacity: 0.35; }
-    .firma-placeholder-text { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; }
-    .firma-actions-row { display: flex; gap: 0.5rem; margin-top: 0.75rem; justify-content: flex-end; }
+    .firma-placeholder-icon { font-size: 1.6rem; opacity: 0.35; }
+    .firma-placeholder-text { font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; }
+    .firma-actions-row { display: flex; gap: 0.5rem; margin-top: 0.65rem; justify-content: flex-end; flex-wrap: wrap; }
     .btn-limpiar {
-      padding: 0.5rem 1rem; background: var(--dark3); border: 1px solid var(--border);
+      padding: 0.5rem 0.9rem; background: var(--dark3); border: 1px solid var(--border);
       border-radius: var(--r-md); color: var(--text2);
-      font-family: 'Futura', sans-serif; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
-      cursor: pointer; transition: all 0.2s;
+      font-family: 'Futura', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.2s; min-height: 40px;
     }
     .btn-limpiar:hover { border-color: var(--amber); color: var(--amber); }
     .btn-guardar-firma {
-      padding: 0.5rem 1.2rem; background: rgba(40,200,120,0.1); border: 1px solid rgba(40,200,120,0.25);
+      padding: 0.5rem 1.1rem; background: rgba(40,200,120,0.1); border: 1px solid rgba(40,200,120,0.25);
       border-radius: var(--r-md); color: #28c878;
-      font-family: 'Futura', sans-serif; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
-      cursor: pointer; transition: all 0.2s;
+      font-family: 'Futura', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.2s; min-height: 40px;
     }
     .btn-guardar-firma:hover { background: rgba(40,200,120,0.18); border-color: #28c878; }
-    .firma-preview { margin-top: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
-    .firma-preview img { border: 1px solid rgba(40,200,120,0.3); border-radius: var(--r-md); max-width: 120px; }
+    .firma-preview { margin-top: 0.65rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .firma-preview img { border: 1px solid rgba(40,200,120,0.3); border-radius: var(--r-md); max-width: 110px; }
     .firma-ok { font-size: 0.75rem; color: #28c878; }
 
     /* ══ OBSERVACIONES ══ */
     .f-textarea {
-      width: 100%; padding: 0.75rem 0.9rem; background: var(--dark3); border: 1px solid var(--border);
+      width: 100%; padding: 0.7rem 0.85rem; background: var(--dark3); border: 1px solid var(--border);
       border-radius: var(--r-md); color: var(--text);
-      font-family: 'Futura', sans-serif; font-size: 0.88rem;
+      font-family: 'Futura', sans-serif; font-size: 0.85rem;
       outline: none; resize: vertical; min-height: 80px; transition: border-color 0.2s;
     }
     .f-textarea:focus { border-color: var(--amber); box-shadow: 0 0 0 3px rgba(245,156,0,0.1); }
     .f-textarea::placeholder { color: var(--text3); }
 
-    /* ══ SUBMIT ══ */
+    /* ══ SUBMIT ROW ══ */
     .submit-row {
-      display: flex; gap: 0.75rem; align-items: center;
-      padding: 1.25rem 1.5rem; background: var(--dark1);
-      border-top: 1px solid var(--border); box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
+      display: flex; gap: 0.65rem; align-items: center; flex-wrap: wrap;
+      padding: 1.1rem 1.25rem; background: var(--dark2);
+      border: 1px solid var(--border); border-top: none;
+      border-radius: 0 0 var(--r-lg) var(--r-lg);
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
     }
     .btn-submit {
-      display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.85rem 2rem;
+      display: inline-flex; align-items: center; gap: 0.45rem;
+      padding: 0.8rem 1.75rem;
       background: var(--grad-brand); border: none; border-radius: var(--r-md); color: #1a0f00;
-      font-family: 'Futura', sans-serif; font-weight: 700; font-size: 0.88rem; letter-spacing: 0.1em; text-transform: uppercase;
+      font-family: 'Futura', sans-serif; font-weight: 700; font-size: 0.85rem;
+      letter-spacing: 0.09em; text-transform: uppercase;
       cursor: pointer; transition: all 0.25s; box-shadow: var(--shadow-amber);
+      min-height: 48px; flex: 1; justify-content: center;
     }
     .btn-submit:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 6px 28px rgba(245,156,0,0.45); }
     .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
     .btn-reset {
-      display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.85rem 1.4rem;
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      padding: 0.8rem 1.25rem;
       background: var(--dark3); border: 1px solid var(--border); border-radius: var(--r-md); color: var(--text2);
-      font-family: 'Futura', sans-serif; font-weight: 700; font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase;
-      cursor: pointer; transition: all 0.2s;
+      font-family: 'Futura', sans-serif; font-weight: 700; font-size: 0.8rem;
+      letter-spacing: 0.07em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.2s; min-height: 48px;
     }
     .btn-reset:hover { border-color: var(--amber); color: var(--amber); }
 
-    /* ══ MENSAJES GLOBALES ══ */
-    .msg-error { background: rgba(220,60,60,0.1); border: 1px solid rgba(220,60,60,0.25); border-radius: var(--r-md); padding: 0.7rem 1rem; font-size: 0.82rem; color: #f07070; }
-    .msg-ok    { background: rgba(40,200,120,0.1); border: 1px solid rgba(40,200,120,0.25); border-radius: var(--r-md); padding: 0.7rem 1rem; font-size: 0.82rem; color: #28c878; }
+    /* ══ MENSAJES ══ */
+    .msg-error { background: rgba(220,60,60,0.1); border: 1px solid rgba(220,60,60,0.25); border-radius: var(--r-md); padding: 0.65rem 0.9rem; font-size: 0.8rem; color: #f07070; }
+    .msg-ok    { background: rgba(40,200,120,0.1); border: 1px solid rgba(40,200,120,0.25); border-radius: var(--r-md); padding: 0.65rem 0.9rem; font-size: 0.8rem; color: #28c878; }
 
     @keyframes spin { to { transform: rotate(360deg); } }
     .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(26,15,0,0.3); border-top-color: #1a0f00; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; }
+
+    /* ══════════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════════ */
+
+    /* Tablet (< 768px) */
+    @media (max-width: 768px) {
+      .topbar { padding: 0.6rem 1rem; }
+      .topbar-sub { display: none; }
+      .user-text { max-width: 90px; }
+      .btn-admin-top span, .btn-logout-top span { display: none; }
+
+      .page-wrap { padding: 1.25rem 0.875rem 3rem; }
+
+      .form-hero { padding: 1.1rem 1.25rem 1rem; }
+      .form-title-main { font-size: 0.88rem; }
+      .hero-egg { display: none; }
+
+      .tipo-vehiculo-selector { gap: 0.5rem; }
+      .tipo-btn { padding: 0.75rem 0.4rem; }
+      .tipo-btn-icon { font-size: 1.5rem; }
+      .tipo-btn-label { font-size: 0.62rem; }
+
+      .section-body { padding: 1rem; }
+
+      .grid-2 { grid-template-columns: 1fr; gap: 0.75rem; }
+      .grid-3 { grid-template-columns: 1fr; gap: 0.75rem; }
+
+      .submit-row { padding: 1rem; }
+      .btn-submit { font-size: 0.8rem; padding: 0.75rem 1rem; }
+      .btn-reset  { font-size: 0.75rem; padding: 0.75rem 0.875rem; }
+    }
+
+    /* Móvil pequeño (< 480px) */
+    @media (max-width: 480px) {
+      .topbar { padding: 0.55rem 0.75rem; }
+      .topbar-logo { height: 24px; }
+      .topbar-title { font-size: 0.78rem; }
+      .user-chip { padding: 0.25rem 0.5rem; }
+      .user-text { max-width: 70px; font-size: 0.72rem; }
+      .btn-admin-top, .btn-logout-top { padding: 0.35rem 0.55rem; font-size: 0.65rem; }
+
+      .page-wrap { padding: 1rem 0.65rem 3rem; }
+
+      .form-hero { padding: 0.875rem 1rem 0.875rem; border-radius: var(--r-lg); }
+      .form-title-main { font-size: 0.8rem; }
+      .meta-chip { font-size: 0.58rem; }
+
+      .tipo-vehiculo-selector { gap: 0.4rem; }
+      .tipo-btn { padding: 0.65rem 0.3rem; border-radius: var(--r-md); }
+      .tipo-btn-icon { font-size: 1.35rem; }
+      .tipo-btn-label { font-size: 0.58rem; letter-spacing: 0.04em; }
+      .tipo-btn-check { width: 13px; height: 13px; font-size: 0.5rem; top: 0.3rem; right: 0.35rem; }
+
+      .section-card { border-radius: var(--r-md); }
+      .section-head { padding: 0.75rem 1rem; }
+      .section-label { font-size: 0.68rem; }
+      .section-body { padding: 0.875rem 0.875rem; }
+
+      .f-input, .f-select { font-size: 0.82rem; padding: 0.6rem 0.75rem; }
+      .f-label { font-size: 0.6rem; }
+
+      /* Aspectos en móvil: label más pequeño, toggle compacto */
+      .aspecto-row { padding: 0.55rem 0.65rem; gap: 0.5rem; }
+      .aspecto-label { font-size: 0.74rem; }
+      .aspecto-num { min-width: 14px; font-size: 0.55rem; }
+      .bm-toggle label { padding: 0.38rem 0.65rem; font-size: 0.65rem; }
+
+      .optimas-toggle label { padding: 0.5rem 1rem; font-size: 0.75rem; }
+
+      .firma-placeholder-text { font-size: 0.62rem; }
+      .btn-limpiar, .btn-guardar-firma { font-size: 0.68rem; padding: 0.45rem 0.75rem; }
+
+      .submit-row { padding: 0.875rem 0.875rem; gap: 0.5rem; flex-direction: column; }
+      .btn-submit { width: 100%; font-size: 0.82rem; }
+      .btn-reset  { width: 100%; font-size: 0.78rem; justify-content: center; }
+      #globalMessage { width: 100%; }
+    }
+
+    /* Móvil muy pequeño (< 360px) */
+    @media (max-width: 360px) {
+      .page-wrap { padding: 0.75rem 0.5rem 3rem; }
+      .tipo-btn-label { display: none; }
+      .tipo-btn { padding: 0.75rem 0.5rem; }
+      .tipo-btn-icon { font-size: 1.5rem; }
+      .bm-toggle label { padding: 0.38rem 0.55rem; }
+    }
   </style>
 </head>
 <body>
 
-  <!-- ══════════════ TOPBAR ══════════════ -->
+  <!-- ══ TOPBAR ══ -->
   <header class="topbar">
     <div class="topbar-brand">
       <img src="/static/img/logotipo_01.png" alt="Incubant" class="topbar-logo">
@@ -342,11 +438,14 @@
       </div>
       <a href="#" id="btnAdmin" class="btn-admin-top" style="display:none;" onclick="irAAdmin(event)">⚙ Admin</a>
       <a href="/inspecciones/mis-inspecciones" class="btn-admin-top">📋 Mis inspecciones</a>
-      <button class="btn-logout-top" onclick="cerrarSesion()"><svg width="11" height="11" viewBox="0 0 11 11" fill="none" style="vertical-align:middle;margin-right:2px"><path d="M5.5 1.5v3.5M2.8 2.8a4 4 0 1 0 5.4 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg> Salir</button>
+      <button class="btn-logout-top" onclick="cerrarSesion()">
+        <svg width="11" height="11" viewBox="0 0 11 11" fill="none" style="vertical-align:middle;"><path d="M5.5 1.5v3.5M2.8 2.8a4 4 0 1 0 5.4 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Salir
+      </button>
     </div>
   </header>
 
-  <!-- ══════════════ CONTENIDO ══════════════ -->
+  <!-- ══ CONTENIDO ══ -->
   <div class="page-wrap">
 
     <!-- Hero -->
@@ -362,7 +461,7 @@
       </div>
     </div>
 
-    <!-- ── SELECTOR TIPO DE VEHÍCULO ── -->
+    <!-- Selector tipo vehículo -->
     <div class="tipo-vehiculo-selector">
       <button type="button" class="tipo-btn active" id="btnMoto" onclick="setTipoVehiculo('Moto')">
         <div class="tipo-btn-check">✓</div>
@@ -397,14 +496,12 @@
         </div>
         <div class="section-body">
           <div class="grid-2">
-
             <div class="field">
               <label class="f-label">Placa <span style="color:var(--amber)">*</span></label>
               <input id="placa" name="placa" class="f-input" placeholder="ej: GSZ34F" autocomplete="off">
               <span id="error_placa" class="f-error"></span>
               <span class="f-hint">Letras y números, sin espacios</span>
             </div>
-
             <div class="field">
               <label class="f-label">Proceso <span style="color:var(--amber)">*</span></label>
               <select id="proceso" name="proceso" class="f-select">
@@ -416,7 +513,6 @@
               <span id="error_proceso" class="f-error"></span>
             </div>
 
-            <!-- datalist: sugerencias fijas + escritura libre -->
             <datalist id="lugares-list">
               <option value="La Esperanza">
               <option value="La Fe">
@@ -426,27 +522,19 @@
 
             <div class="field">
               <label class="f-label">Desde <span style="color:var(--amber)">*</span></label>
-              <input id="desde" name="desde" class="f-input"
-                list="lugares-list"
-                placeholder="Origen (ej: La Esperanza, Andes...)"
-                autocomplete="off">
+              <input id="desde" name="desde" class="f-input" list="lugares-list" placeholder="Origen..." autocomplete="off">
               <span id="error_desde" class="f-error"></span>
             </div>
-
             <div class="field">
               <label class="f-label">Hasta <span style="color:var(--amber)">*</span></label>
-              <input id="hasta" name="hasta" class="f-input"
-                list="lugares-list"
-                placeholder="Destino (ej: La Planta, Medellín...)"
-                autocomplete="off">
+              <input id="hasta" name="hasta" class="f-input" list="lugares-list" placeholder="Destino..." autocomplete="off">
               <span id="error_hasta" class="f-error"></span>
             </div>
-<div class="field">
+            <div class="field">
               <label class="f-label">Marca</label>
               <input id="marca" name="marca" class="f-input" placeholder="ej: Yamaha">
               <span id="error_marca" class="f-error"></span>
             </div>
-
             <div class="field">
               <label class="f-label">Gasolina</label>
               <select id="gasolina" name="gasolina" class="f-select">
@@ -458,25 +546,21 @@
               </select>
               <span id="error_gasolina" class="f-error"></span>
             </div>
-
             <div class="field">
               <label class="f-label">Modelo <span class="f-hint" style="display:inline">(año)</span></label>
               <input id="modelo" name="modelo" class="f-input" placeholder="ej: 2021" maxlength="4" inputmode="numeric">
               <span id="error_modelo" class="f-error"></span>
             </div>
-
             <div class="field">
               <label class="f-label">Motor</label>
               <input id="motor" name="motor" class="f-input" placeholder="ej: 125">
               <span id="error_motor" class="f-error"></span>
             </div>
-
             <div class="field">
               <label class="f-label">Línea</label>
               <input id="linea" name="linea" class="f-input" placeholder="ej: YBR">
               <span id="error_linea" class="f-error"></span>
             </div>
-
           </div>
         </div>
       </div>
@@ -525,12 +609,10 @@
           <div class="section-icon">🔍</div>
           <span class="section-label">Aspectos a revisar</span>
           <span id="aspectosBadge" class="aspectos-badge"></span>
-          <span style="margin-left:auto;font-size:0.68rem;color:var(--text3);letter-spacing:0.06em;">B = Bueno · M = Malo</span>
+          <span style="margin-left:auto;font-size:0.62rem;color:var(--text3);letter-spacing:0.05em;white-space:nowrap;">B = Bueno · M = Malo</span>
         </div>
         <div class="section-body">
-          <div class="aspectos-grid" id="aspectosContainer">
-            <!-- Generado dinámicamente por JS según tipo de vehículo -->
-          </div>
+          <div class="aspectos-grid" id="aspectosContainer"></div>
         </div>
       </div>
 
@@ -561,7 +643,7 @@
           <span class="section-label">Firma del conductor</span>
         </div>
         <div class="section-body">
-          <div class="firma-canvas-wrap" style="height:160px;">
+          <div class="firma-canvas-wrap" style="height:150px;">
             <canvas id="firmaCanvas"></canvas>
             <div class="firma-placeholder" id="firmaPlaceholder">
               <div class="firma-placeholder-icon">✍</div>
@@ -590,24 +672,22 @@
         </div>
       </div>
 
-      <!-- ── BOTONES SUBMIT ── -->
-      <div class="submit-row" style="border-radius:0 0 var(--r-lg) var(--r-lg); border:1px solid var(--border); border-top:none; background:var(--dark2);">
+      <!-- ── BOTONES ── -->
+      <div class="submit-row">
         <button id="submitBtn" type="submit" class="btn-submit">
           📄 Enviar y generar PDF
         </button>
         <button type="reset" id="resetBtn" class="btn-reset" onclick="onReset()">
           ↺ Limpiar todo
         </button>
-        <div id="globalMessage" style="margin-left:auto;"></div>
+        <div id="globalMessage" style="width:100%;margin-top:0.25rem;"></div>
       </div>
 
     </form>
-  </div><!-- /page-wrap -->
+  </div>
 
   <script>
-  /* ═══════════════════════════════════════════
-     INICIALIZACIÓN
-  ═══════════════════════════════════════════ */
+  /* ── INICIALIZACIÓN ── */
   const token = localStorage.getItem("token");
   if (!token) window.location.href = "/login";
 
@@ -622,9 +702,7 @@
     document.getElementById("btnAdmin").style.display = "inline-flex";
   }
 
-  /* ═══════════════════════════════════════════
-     LISTAS DE ASPECTOS POR TIPO DE VEHÍCULO
-  ═══════════════════════════════════════════ */
+  /* ── ASPECTOS POR TIPO ── */
   const ASPECTOS = {
     Moto: [
       "Estado de llantas y presión de aire",
@@ -682,53 +760,37 @@
     ]
   };
 
-  /* ═══════════════════════════════════════════
-     TIPO DE VEHÍCULO — selector y render aspectos
-  ═══════════════════════════════════════════ */
   let tipoActual = "Moto";
 
   function setTipoVehiculo(tipo) {
     tipoActual = tipo;
-
-    // Actualizar botones
     document.getElementById("btnMoto").classList.toggle("active",   tipo === "Moto");
     document.getElementById("btnCarro").classList.toggle("active",  tipo === "Carro");
     document.getElementById("btnCamion").classList.toggle("active", tipo === "Camion");
-
-    // Actualizar hidden input
     document.getElementById("tipoVehiculoInput").value = tipo;
-
-    // Actualizar hero title
     const titles = {
       Moto:   "Inspección Pre Operacional Motocicleta",
       Carro:  "Inspección Pre Operacional Automóvil",
       Camion: "Inspección Pre Operacional Camión"
     };
     document.getElementById("heroTitle").textContent = titles[tipo];
-
-    // Actualizar ícono y label de sección vehículo
     const icons  = { Moto: "🏍", Carro: "🚗", Camion: "🚛" };
     const labels = { Moto: "Datos de la motocicleta", Carro: "Datos del automóvil", Camion: "Datos del camión" };
     document.getElementById("vehiculoIcon").textContent  = icons[tipo];
     document.getElementById("vehiculoLabel").textContent = labels[tipo];
-
-    // Renderizar aspectos
     renderAspectos(tipo);
   }
 
   function renderAspectos(tipo) {
     const lista     = ASPECTOS[tipo];
     const container = document.getElementById("aspectosContainer");
-
     container.innerHTML = "";
-
     lista.forEach((texto, i) => {
       const uid = `aspecto_${i}`;
       const row = document.createElement("div");
       row.className = "aspecto-row";
       row.id = `row_aspecto_${i}`;
       row.style.animationDelay = `${i * 0.03}s`;
-
       row.innerHTML = `
         <span class="aspecto-num">${i + 1}</span>
         <span class="aspecto-label">${texto}</span>
@@ -745,17 +807,11 @@
       `;
       container.appendChild(row);
     });
-
-    // Reiniciar badge
     actualizarBadge();
   }
 
-  // Render inicial
   renderAspectos("Moto");
 
-  /* ═══════════════════════════════════════════
-     BADGE CONTADOR DE M
-  ═══════════════════════════════════════════ */
   function actualizarBadge() {
     const total = ASPECTOS[tipoActual].length;
     let countM = 0;
@@ -772,15 +828,12 @@
     }
   }
 
-  /* ═══════════════════════════════════════════
-     FIRMA — implementación propia sin firma.js
-  ═══════════════════════════════════════════ */
+  /* ── FIRMA ── */
   (function initFirma() {
     const canvas      = document.getElementById("firmaCanvas");
     const ctx         = canvas.getContext("2d");
     const wrapper     = canvas.parentElement;
     const placeholder = document.getElementById("firmaPlaceholder");
-
     let drawing = false;
     let hasMark = false;
 
@@ -845,9 +898,6 @@
     window.addEventListener("resize", resize);
   })();
 
-  /* ═══════════════════════════════════════════
-     FIRMA — botones limpiar / guardar
-  ═══════════════════════════════════════════ */
   function limpiarFirma() {
     window.firmaApp.refresh();
     document.getElementById("firmaPreview").style.display = "none";
@@ -871,9 +921,7 @@
     document.querySelector(".firma-canvas-wrap").classList.add("has-firma");
   }
 
-  /* ═══════════════════════════════════════════
-     ASPECTOS — resaltar fila si M + badge
-  ═══════════════════════════════════════════ */
+  /* ── ASPECTOS CAMBIO ── */
   function onAspectoChange(idx) {
     const mInput = document.getElementById("m_" + idx);
     const row    = document.getElementById("row_aspecto_" + idx);
@@ -882,9 +930,7 @@
     actualizarBadge();
   }
 
-  /* ═══════════════════════════════════════════
-     VALIDACIÓN INLINE
-  ═══════════════════════════════════════════ */
+  /* ── VALIDACIÓN ── */
   function showErr(id, msg) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -924,40 +970,30 @@
     else clearErr("error_placa");
   });
 
-  /* ═══════════════════════════════════════════
-     RESET
-  ═══════════════════════════════════════════ */
+  /* ── RESET ── */
   function onReset() {
     setTimeout(() => {
       limpiarFirma();
       clearAllErrors();
       document.querySelectorAll(".aspecto-row").forEach(r => r.classList.remove("has-m"));
       actualizarBadge();
-      // Volver a Moto al limpiar todo
       setTipoVehiculo("Moto");
     }, 10);
   }
 
-  /* ═══════════════════════════════════════════
-     NAVEGACIÓN ADMIN
-  ═══════════════════════════════════════════ */
+  /* ── NAVEGACIÓN ── */
   function irAAdmin(e) {
     e.preventDefault();
     window.location.href = "/admin";
   }
 
-  /* ═══════════════════════════════════════════
-     CERRAR SESIÓN
-  ═══════════════════════════════════════════ */
   async function cerrarSesion() {
     try { await fetch("/auth/logout", { method:"POST", headers: { "Authorization": `Bearer ${token}` } }); }
     catch(e) {}
     finally { localStorage.clear(); window.location.href = "/login"; }
   }
 
-  /* ═══════════════════════════════════════════
-     SUBMIT
-  ═══════════════════════════════════════════ */
+  /* ── SUBMIT ── */
   document.getElementById("inspeccionForm").addEventListener("submit", async (ev) => {
     ev.preventDefault();
     clearAllErrors();
@@ -965,9 +1001,6 @@
     const form     = ev.target;
     const formData = new FormData(form);
 
-    // Recolectar aspectos con texto de la etiqueta
-    // Formato: { "1": { valor: "B", label: "Estado de llantas..." }, ... }
-    // El backend guarda el JSON como string — el PDF lo puede usar
     const lista  = ASPECTOS[tipoActual];
     const aspectos = {};
     for (let i = 0; i < lista.length; i++) {
@@ -980,11 +1013,8 @@
     }
     formData.set("aspectos", JSON.stringify(aspectos));
     formData.set("tipo_vehiculo", tipoActual);
-
-    // Firma
     formData.set("firma_dataurl", window.firmaApp.getDataURL());
 
-    // Validaciones
     let hasError = false;
     const checks = [
       ["placa",               v => v.trim().toUpperCase().replace(/[^A-Z0-9]/g,"").length >= 5, "Placa inválida"],
@@ -1021,7 +1051,6 @@
       hasError = true;
     }
 
-    // Verificar si hay algún M usando el nuevo formato de objeto
     const anyM = Object.values(aspectos).some(a => a.valor === "M");
     if (anyM && (formData.get("observaciones") || "").trim().length < 6) {
       showErr("error_observaciones", "Obligatorio si hay aspectos en M");
@@ -1035,7 +1064,6 @@
       return;
     }
 
-    // Enviar
     const btn = document.getElementById("submitBtn");
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span>&nbsp;Generando PDF...';
@@ -1078,7 +1106,6 @@
         form.reset();
         onReset();
 
-        // ✅ Leer advertencia de licencia vencida del header
         const advertencia = resp.headers.get("X-Advertencias");
         if (advertencia) {
           try {
@@ -1103,9 +1130,6 @@
       btn.innerHTML = "📄 Enviar y generar PDF";
     }
   });
-
-  
-
   </script>
 
 </body>
