@@ -6,7 +6,6 @@
   <title>MISONALES · Incubant</title>
   <link rel="stylesheet" href="/static/css/incubant-theme.css">
   <link rel="icon" href="/static/img/logotipo_01.png" type="image/png">
-  <link rel="shortcut icon" href="/static/img/logotipo_01.png" type="image/png">
   <style>
     body {
       min-height: 100vh;
@@ -159,17 +158,80 @@
       animation: spin 0.7s linear infinite; vertical-align: middle;
     }
 
-    /* ── Autofill: evitar fondo blanco del browser ── */
-    .form-input:-webkit-autofill,
-    .form-input:-webkit-autofill:hover,
-    .form-input:-webkit-autofill:focus,
-    .form-input:-webkit-autofill:active {
-      -webkit-box-shadow: 0 0 0 1000px #222730 inset !important;
-      -webkit-text-fill-color: #F0EDE8 !important;
-      caret-color: #F0EDE8;
-      border-color: var(--border) !important;
-      transition: background-color 9999s ease-in-out 0s;
+    /* ══ RESPONSIVE ══ */
+
+    /* En móvil el body no debe estar overflow:hidden cuando el teclado virtual aparece */
+    @media (max-width: 480px) {
+      body {
+        align-items: flex-start;
+        overflow-y: auto;
+        padding: 1.5rem 0 2rem;
+      }
+
+      .login-wrap {
+        padding: 0.75rem;
+        max-width: 100%;
+      }
+
+      .login-card {
+        padding: 2rem 1.5rem 1.75rem;
+        border-radius: var(--r-lg);
+      }
+
+      .login-logo img {
+        height: 46px;
+      }
+
+      .login-title h1 {
+        font-size: 1.3rem;
+      }
+
+      .login-subtitle {
+        font-size: 0.7rem;
+        margin-bottom: 1.25rem;
+      }
+
+      .sst-badge {
+        font-size: 0.65rem;
+        padding: 0.25rem 0.7rem;
+        margin-bottom: 1.25rem;
+      }
+
+      .form-group { margin-bottom: 1rem; }
+
+      .form-input { padding: 0.7rem 0.9rem 0.7rem 2.5rem; font-size: 0.9rem; }
+      .input-icon { left: 0.8rem; font-size: 0.9rem; }
+
+      .btn-submit {
+        padding: 0.8rem;
+        font-size: 0.82rem;
+        letter-spacing: 0.08em;
+      }
+
+      /* Fondo decorativo más pequeño en móvil */
+      .bg-egg-1 { width: 280px; height: 330px; right: -80px; top: -60px; }
+      .bg-egg-2 { width: 160px; height: 190px; left: -50px; bottom: -40px; }
+      .bg-glow  { width: 360px; height: 360px; }
     }
+
+    @media (max-width: 360px) {
+      .login-card { padding: 1.5rem 1.1rem 1.5rem; }
+      .login-title h1 { font-size: 1.15rem; }
+      .login-logo img { height: 40px; }
+    }
+
+    /* Cuando el teclado virtual está activo (pantallas muy bajas) */
+    @media (max-height: 600px) {
+      body { align-items: flex-start; overflow-y: auto; padding: 1rem 0; }
+      .login-logo { margin-bottom: 1rem; }
+      .login-logo img { height: 40px; animation: none; }
+      .login-title { margin-bottom: 0.15rem; }
+      .login-subtitle { margin-bottom: 1rem; }
+      .sst-badge { margin-bottom: 1rem; }
+      .divider { margin-bottom: 1rem; }
+      .login-footer { margin-top: 1rem; }
+    }
+
   </style>
 </head>
 <body>
