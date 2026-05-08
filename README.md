@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="app/static/img/Logotipo_01.png>" alt="Incubant" height="72" />
+<img src="app/static/img/Logotipo_01.png" alt="Incubant" height="72" />
 
 # Misionales · Sistema de Inspección Vehicular
 
