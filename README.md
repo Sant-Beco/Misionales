@@ -301,7 +301,7 @@ Historial disponible en "Mis inspecciones"
 
 ## Licencia y soporte
 
-Desarrollado por **SanWeb Incubant · Antioqueña de Incubación S.A.S.**  
+Desarrollado por **SanWeb de Incubant · Antioqueña de Incubación S.A.S.**  
 Sistema propietario para gestión SST de conductores misionales.
 
 Para soporte técnico contactar al equipo de desarrollo interno de Incubant.
