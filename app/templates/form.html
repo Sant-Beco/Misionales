@@ -762,6 +762,35 @@
 
   let tipoActual = "Moto";
 
+  const PLACEHOLDERS = {
+  moto: {
+    marca:  "ej: Honda, Yamaha, AKT",
+    motor:  "ej: 125, 190, 250",
+    linea:  "ej: CB190, YBR, Discover",
+    modelo: "ej: 2021",
+  },
+  carro: {
+    marca:  "ej: Chevrolet, Renault, Toyota",
+    motor:  "ej: 1400, 1600, 2000",
+    linea:  "ej: Sail, Logan, Aveo",
+    modelo: "ej: 2021",
+  },
+  camion: {
+    marca:  "ej: Kenworth, Freightliner, Hino",
+    motor:  "ej: 6000, 7200, 8900",
+    linea:  "ej: T680, Cascadia, 700E",
+    modelo: "ej: 2019",
+  }
+};
+
+function actualizarPlaceholders(tipo) {
+  const p = PLACEHOLDERS[tipo] || PLACEHOLDERS.moto;
+  document.getElementById('marca').placeholder  = p.marca;
+  document.getElementById('motor').placeholder  = p.motor;
+  document.getElementById('linea').placeholder  = p.linea;
+  document.getElementById('modelo').placeholder = p.modelo;
+}
+
   function setTipoVehiculo(tipo) {
     tipoActual = tipo;
     document.getElementById("btnMoto").classList.toggle("active",   tipo === "Moto");
@@ -779,6 +808,7 @@
     document.getElementById("vehiculoIcon").textContent  = icons[tipo];
     document.getElementById("vehiculoLabel").textContent = labels[tipo];
     renderAspectos(tipo);
+    actualizarPlaceholders(tipo);
   }
 
   function renderAspectos(tipo) {
