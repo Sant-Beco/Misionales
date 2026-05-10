@@ -14,17 +14,40 @@
       background: var(--night);
       padding: 0;
     }
-
-    /* ══ TOPBAR ══ */
+ 
+    /* ════════════════════════════════════════
+       ▼▼▼  TOPBAR — REEMPLAZADO  ▼▼▼
+    ════════════════════════════════════════ */
     .topbar {
       position: sticky; top: 0; z-index: 50;
       background: var(--dark1);
       border-bottom: 1px solid var(--border);
-      padding: 0.75rem 2rem;
-      display: flex; justify-content: space-between; align-items: center;
-      gap: 0.75rem; flex-wrap: wrap;
+      display: flex; flex-direction: column;
     }
-    .topbar-brand { display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; }
+ 
+    /* Fila 1: siempre visible */
+    .topbar-row1 {
+      height: 56px; padding: 0 2rem;
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 0.75rem;
+    }
+ 
+    /* Fila 2: solo móvil */
+    .topbar-row2 {
+      display: none;
+      align-items: center; height: 40px;
+      padding: 0 1rem; gap: 0.4rem;
+      border-top: 1px solid var(--border);
+      background: rgba(255,255,255,0.012);
+      overflow-x: auto; -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .topbar-row2::-webkit-scrollbar { display: none; }
+ 
+    .topbar-brand {
+      display: flex; align-items: center; gap: 0.65rem;
+      flex-shrink: 0; text-decoration: none;
+    }
     .topbar-logo { height: 28px; filter: drop-shadow(0 2px 8px rgba(245,156,0,0.35)); }
     .topbar-title {
       font-size: 0.88rem; font-weight: 700;
@@ -32,39 +55,96 @@
       background: var(--grad-brand);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
-    .topbar-sub { font-size: 0.6rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text3); }
-    .topbar-right {
-      display: flex; align-items: center; gap: 0.45rem;
-      flex-wrap: wrap; flex: 1; justify-content: flex-end;
+    .topbar-sub {
+      font-size: 0.58rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--text3); margin-top: 1px;
     }
+ 
+    .topbar-actions { display: flex; align-items: center; gap: 0.4rem; }
+    .topbar-right   { display: flex; align-items: center; gap: 0.45rem; }
+    .topbar-sep { width: 1px; height: 20px; background: var(--border); flex-shrink: 0; }
+ 
     .user-chip {
-      display: flex; align-items: center; gap: 0.45rem;
+      display: flex; align-items: center; gap: 0.4rem;
       background: var(--dark3); border: 1px solid var(--border);
-      border-radius: 20px; padding: 0.3rem 0.65rem;
+      border-radius: 20px; padding: 0.28rem 0.7rem 0.28rem 0.45rem;
+      min-width: 0;
     }
-    .user-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); animation: pulse-amber 2s infinite; flex-shrink: 0; }
-    .user-text { font-size: 0.78rem; font-weight: 700; color: var(--text); white-space: nowrap; max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
-    .btn-admin-top, .btn-logout-top {
+    .user-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--amber); flex-shrink: 0;
+      animation: pulse-amber 2s infinite;
+    }
+    .user-text {
+      font-size: 0.78rem; font-weight: 700; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      max-width: 120px;
+    }
+ 
+    .btn-top {
       display: inline-flex; align-items: center; gap: 0.3rem;
-      padding: 0.4rem 0.75rem;
-      border-radius: var(--r-md);
+      padding: 0.38rem 0.85rem; border-radius: var(--r-md);
       font-family: 'Futura', sans-serif; font-size: 0.72rem;
       font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
-      cursor: pointer; text-decoration: none; transition: all 0.2s;
-      white-space: nowrap;
+      cursor: pointer; text-decoration: none; transition: all 0.18s;
+      white-space: nowrap; border: 1px solid transparent;
     }
-    .btn-admin-top {
-      background: rgba(245,156,0,0.08); border: 1px solid rgba(245,156,0,0.2); color: var(--amber);
+    .btn-top-ghost {
+      background: rgba(255,255,255,0.04); border-color: var(--border); color: var(--text2);
     }
-    .btn-admin-top:hover { background: rgba(245,156,0,0.14); border-color: var(--amber); }
-    .btn-logout-top {
-      background: rgba(220,60,60,0.07); border: 1px solid rgba(220,60,60,0.18); color: #f07070;
+    .btn-top-ghost:hover { border-color: rgba(245,156,0,0.35); color: var(--amber); }
+    .btn-top-amber {
+      background: rgba(245,156,0,0.08); border-color: rgba(245,156,0,0.22); color: var(--amber);
     }
-    .btn-logout-top:hover { background: rgba(220,60,60,0.14); border-color: #f07070; }
-
+    .btn-top-amber:hover { background: rgba(245,156,0,0.14); border-color: var(--amber); }
+    .btn-top-danger {
+      background: rgba(220,60,60,0.07); border-color: rgba(220,60,60,0.2); color: #f07070;
+    }
+    .btn-top-danger:hover { background: rgba(220,60,60,0.14); border-color: #f07070; }
+ 
+    /* Pills fila 2 */
+    .action-pill {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      padding: 0.25rem 0.7rem; border-radius: 20px;
+      font-family: 'Futura', sans-serif; font-size: 0.68rem;
+      font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+      white-space: nowrap; cursor: pointer; text-decoration: none;
+      transition: all 0.18s; border: 1px solid transparent; flex-shrink: 0;
+    }
+    .action-pill-ghost { background: rgba(255,255,255,0.04); border-color: var(--border); color: var(--text2); }
+    .action-pill-ghost:hover { border-color: rgba(245,156,0,0.35); color: var(--amber); }
+    .action-pill-amber { background: rgba(245,156,0,0.08); border-color: rgba(245,156,0,0.22); color: var(--amber); }
+    .action-pill-amber:hover { background: rgba(245,156,0,0.14); border-color: var(--amber); }
+    .pill-sep { width: 1px; height: 14px; background: var(--border); flex-shrink: 0; }
+ 
+    /* ══════════════════════════════════════
+       RESPONSIVE TOPBAR
+    ══════════════════════════════════════ */
+    @media (max-width: 768px) {
+      .topbar-row1   { height: 52px; padding: 0 1rem; }
+      .topbar-sub    { display: none; }
+      .topbar-title  { font-size: 0.82rem; }
+      .user-text     { max-width: 90px; }
+      .topbar-actions { display: none; }       /* acciones van a fila 2 */
+      .topbar-row2   { display: flex; }
+      .btn-top-text  { display: none; }        /* logout solo icono */
+      .btn-top-danger { padding: 0.38rem 0.55rem; }
+    }
+    @media (max-width: 480px) {
+      .topbar-logo   { height: 24px; }
+      .topbar-title  { font-size: 0.75rem; }
+      .user-text     { max-width: 80px; font-size: 0.74rem; }
+      .topbar-sep    { display: none; }
+    }
+    @media (max-width: 360px) {
+      .topbar-row1   { padding: 0 0.75rem; }
+      .user-text     { max-width: 64px; }
+    }
+    /* ▲▲▲  FIN TOPBAR  ▲▲▲ */
+ 
     /* ══ CONTENEDOR ══ */
     .page-wrap { max-width: 860px; margin: 0 auto; padding: 1.75rem 1.5rem 4rem; }
-
+ 
     /* ══ HERO ══ */
     .form-hero {
       background: var(--dark2); border: 1px solid var(--border);
@@ -99,7 +179,7 @@
       border-radius: 20px; padding: 0.18rem 0.6rem; color: var(--text3);
     }
     .meta-chip em { color: var(--amber); font-style: normal; }
-
+ 
     /* ══ SELECTOR TIPO VEHÍCULO ══ */
     .tipo-vehiculo-selector {
       display: flex; gap: 0.65rem; margin-bottom: 1.25rem;
@@ -138,7 +218,7 @@
       font-size: 0.55rem; color: #1a0f00; font-weight: 900;
     }
     .tipo-btn.active .tipo-btn-check { display: flex; }
-
+ 
     /* ══ SECCIÓN CARDS ══ */
     .section-card {
       background: var(--dark2); border: 1px solid var(--border);
@@ -164,12 +244,12 @@
     }
     .section-label { font-size: 0.74rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text); flex: 1; }
     .section-body { padding: 1.25rem; }
-
+ 
     /* ══ GRIDS ══ */
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; }
     .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.85rem; }
     .field { display: flex; flex-direction: column; }
-
+ 
     /* ══ INPUTS ══ */
     .f-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.3rem; }
     .f-input, .f-select {
@@ -203,7 +283,7 @@
     .f-error { font-size: 0.7rem; color: #f07070; margin-top: 0.25rem; display: none; }
     .f-hint  { font-size: 0.65rem; color: var(--text3); margin-top: 0.2rem; }
     .mt { margin-top: 0.75rem; }
-
+ 
     /* ══ ASPECTOS ══ */
     .aspectos-grid { display: flex; flex-direction: column; gap: 0.4rem; }
     .aspecto-row {
@@ -229,7 +309,7 @@
     .bm-toggle label:last-of-type  { border-radius: 0 6px 6px 0; }
     .bm-b input:checked + label { background: rgba(40,200,120,0.18); color: #28c878; border-color: rgba(40,200,120,0.35); text-shadow: 0 0 8px rgba(40,200,120,0.4); }
     .bm-m input:checked + label { background: rgba(235,102,8,0.18); color: var(--ember); border-color: rgba(235,102,8,0.4); text-shadow: 0 0 8px rgba(235,102,8,0.4); }
-
+ 
     .aspectos-badge {
       font-size: 0.65rem; font-weight: 700; letter-spacing: 0.05em;
       padding: 0.15rem 0.5rem; border-radius: 20px;
@@ -237,7 +317,7 @@
       display: none;
     }
     .aspectos-badge.visible { display: inline-flex; align-items: center; gap: 0.25rem; }
-
+ 
     /* ══ CONDICIONES ÓPTIMAS ══ */
     .optimas-toggle { display: flex; gap: 0; border-radius: var(--r-md); overflow: hidden; width: fit-content; }
     .optimas-toggle input[type="radio"] { display: none; }
@@ -250,7 +330,7 @@
     .optimas-toggle label:last-of-type  { border-radius: 0 var(--r-md) var(--r-md) 0; }
     .opt-si input:checked + label { background: rgba(40,200,120,0.12); color: #28c878; border-color: rgba(40,200,120,0.3); }
     .opt-no input:checked + label { background: rgba(235,102,8,0.12); color: var(--ember); border-color: rgba(235,102,8,0.3); }
-
+ 
     /* ══ FIRMA ══ */
     .firma-canvas-wrap {
       background: linear-gradient(135deg, rgba(245,156,0,0.02) 0%, transparent 60%);
@@ -285,7 +365,7 @@
     .firma-preview { margin-top: 0.65rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
     .firma-preview img { border: 1px solid rgba(40,200,120,0.3); border-radius: var(--r-md); max-width: 110px; }
     .firma-ok { font-size: 0.75rem; color: #28c878; }
-
+ 
     /* ══ OBSERVACIONES ══ */
     .f-textarea {
       width: 100%; padding: 0.7rem 0.85rem; background: var(--dark3); border: 1px solid var(--border);
@@ -295,7 +375,7 @@
     }
     .f-textarea:focus { border-color: var(--amber); box-shadow: 0 0 0 3px rgba(245,156,0,0.1); }
     .f-textarea::placeholder { color: var(--text3); }
-
+ 
     /* ══ SUBMIT ROW ══ */
     .submit-row {
       display: flex; gap: 0.65rem; align-items: center; flex-wrap: wrap;
@@ -324,130 +404,231 @@
       cursor: pointer; transition: all 0.2s; min-height: 48px;
     }
     .btn-reset:hover { border-color: var(--amber); color: var(--amber); }
-
+ 
     /* ══ MENSAJES ══ */
     .msg-error { background: rgba(220,60,60,0.1); border: 1px solid rgba(220,60,60,0.25); border-radius: var(--r-md); padding: 0.65rem 0.9rem; font-size: 0.8rem; color: #f07070; }
     .msg-ok    { background: rgba(40,200,120,0.1); border: 1px solid rgba(40,200,120,0.25); border-radius: var(--r-md); padding: 0.65rem 0.9rem; font-size: 0.8rem; color: #28c878; }
-
+ 
     @keyframes spin { to { transform: rotate(360deg); } }
     .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(26,15,0,0.3); border-top-color: #1a0f00; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; }
-
+ 
     /* ══════════════════════════════════════
-       RESPONSIVE
+       RESPONSIVE — CONTENIDO
+       Breakpoints:
+         900px  → grids pasan de 3→2 y 2 se mantiene
+         768px  → tablet compacto, offcanvas sidebar
+         600px  → grids 2→1, firma más alta
+         480px  → móvil medio, submit en columna
+         360px  → móvil pequeño, tipo-btn sin label
     ══════════════════════════════════════ */
-
-    /* Tablet (< 768px) */
-    @media (max-width: 768px) {
-      .topbar { padding: 0.6rem 1rem; }
-      .topbar-sub { display: none; }
-      .user-text { max-width: 90px; }
-      .btn-admin-top span, .btn-logout-top span { display: none; }
-
-      .page-wrap { padding: 1.25rem 0.875rem 3rem; }
-
-      .form-hero { padding: 1.1rem 1.25rem 1rem; }
-      .form-title-main { font-size: 0.88rem; }
-      .hero-egg { display: none; }
-
-      .tipo-vehiculo-selector { gap: 0.5rem; }
-      .tipo-btn { padding: 0.75rem 0.4rem; }
-      .tipo-btn-icon { font-size: 1.5rem; }
-      .tipo-btn-label { font-size: 0.62rem; }
-
-      .section-body { padding: 1rem; }
-
-      .grid-2 { grid-template-columns: 1fr; gap: 0.75rem; }
-      .grid-3 { grid-template-columns: 1fr; gap: 0.75rem; }
-
-      .submit-row { padding: 1rem; }
-      .btn-submit { font-size: 0.8rem; padding: 0.75rem 1rem; }
-      .btn-reset  { font-size: 0.75rem; padding: 0.75rem 0.875rem; }
+ 
+    /* ── 900px: grid-3 pasa a 2 columnas ── */
+    @media (max-width: 900px) {
+      .grid-3 { grid-template-columns: 1fr 1fr; gap: 0.8rem; }
     }
-
-    /* Móvil pequeño (< 480px) */
+ 
+    /* ── 768px: tablet compacto ── */
+    @media (max-width: 768px) {
+      .page-wrap    { padding: 1.1rem 0.875rem 3rem; }
+ 
+      /* Hero */
+      .form-hero        { padding: 1rem 1.25rem 0.875rem; }
+      .form-title-main  { font-size: 0.9rem; }
+      .hero-egg         { display: none; }
+      .form-meta-chips  { gap: 0.3rem; }
+ 
+      /* Selector tipo */
+      .tipo-vehiculo-selector { gap: 0.5rem; }
+      .tipo-btn       { padding: 0.75rem 0.4rem; }
+      .tipo-btn-icon  { font-size: 1.5rem; }
+      .tipo-btn-label { font-size: 0.62rem; }
+ 
+      /* Secciones */
+      .section-body   { padding: 1rem; }
+      .section-head   { gap: 0.5rem; }
+ 
+      /* En tablet los grid-2 se mantienen en 2 col —
+         solo colapsan en móvil pequeño (≤ 600px) */
+ 
+      /* Firma más alta en tablet táctil */
+      .firma-canvas-wrap { height: 170px !important; }
+ 
+      /* Botones submit */
+      .submit-row  { padding: 1rem; }
+      .btn-submit  { font-size: 0.8rem; padding: 0.75rem 1rem; }
+      .btn-reset   { font-size: 0.75rem; padding: 0.75rem 0.875rem; }
+    }
+ 
+    /* ── 600px: grids colapsan a 1 columna, firma más alta ── */
+    @media (max-width: 600px) {
+      .page-wrap  { padding: 1rem 0.75rem 3rem; }
+ 
+      .grid-2 { grid-template-columns: 1fr; gap: 0.7rem; }
+      .grid-3 { grid-template-columns: 1fr; gap: 0.7rem; }
+ 
+      /* Firma notablemente más alta para dedo */
+      .firma-canvas-wrap { height: 190px !important; }
+ 
+      /* Sección head: badge en segunda línea si no cabe */
+      .section-head { flex-wrap: wrap; row-gap: 0.35rem; }
+ 
+      /* Aspectos: compactar un poco */
+      .aspecto-row   { padding: 0.6rem 0.75rem; gap: 0.55rem; }
+      .aspecto-label { font-size: 0.78rem; }
+    }
+ 
+    /* ── 480px: móvil medio ── */
     @media (max-width: 480px) {
-      .topbar { padding: 0.55rem 0.75rem; }
-      .topbar-logo { height: 24px; }
-      .topbar-title { font-size: 0.78rem; }
-      .user-chip { padding: 0.25rem 0.5rem; }
-      .user-text { max-width: 70px; font-size: 0.72rem; }
-      .btn-admin-top, .btn-logout-top { padding: 0.35rem 0.55rem; font-size: 0.65rem; }
-
-      .page-wrap { padding: 1rem 0.65rem 3rem; }
-
-      .form-hero { padding: 0.875rem 1rem 0.875rem; border-radius: var(--r-lg); }
-      .form-title-main { font-size: 0.8rem; }
-      .meta-chip { font-size: 0.58rem; }
-
+      .page-wrap { padding: 0.875rem 0.65rem 3rem; }
+ 
+      /* Hero */
+      .form-hero       { padding: 0.875rem 1rem; border-radius: var(--r-lg); }
+      .form-title-main { font-size: 0.82rem; }
+      .meta-chip       { font-size: 0.58rem; padding: 0.15rem 0.5rem; }
+ 
+      /* Selector tipo */
       .tipo-vehiculo-selector { gap: 0.4rem; }
-      .tipo-btn { padding: 0.65rem 0.3rem; border-radius: var(--r-md); }
-      .tipo-btn-icon { font-size: 1.35rem; }
+      .tipo-btn       { padding: 0.65rem 0.3rem; border-radius: var(--r-md); }
+      .tipo-btn-icon  { font-size: 1.35rem; }
       .tipo-btn-label { font-size: 0.58rem; letter-spacing: 0.04em; }
       .tipo-btn-check { width: 13px; height: 13px; font-size: 0.5rem; top: 0.3rem; right: 0.35rem; }
-
-      .section-card { border-radius: var(--r-md); }
-      .section-head { padding: 0.75rem 1rem; }
-      .section-label { font-size: 0.68rem; }
-      .section-body { padding: 0.875rem 0.875rem; }
-
-      .f-input, .f-select { font-size: 0.82rem; padding: 0.6rem 0.75rem; }
-      .f-label { font-size: 0.6rem; }
-
-      /* Aspectos en móvil: label más pequeño, toggle compacto */
-      .aspecto-row { padding: 0.55rem 0.65rem; gap: 0.5rem; }
+ 
+      /* Secciones */
+      .section-card   { border-radius: var(--r-md); }
+      .section-head   { padding: 0.7rem 0.875rem; }
+      .section-label  { font-size: 0.68rem; }
+      .section-body   { padding: 0.875rem; }
+ 
+      /* Inputs */
+      .f-input, .f-select { font-size: 0.84rem; padding: 0.62rem 0.75rem; }
+      .f-label  { font-size: 0.6rem; }
+      .f-error  { font-size: 0.68rem; }
+      .f-hint   { font-size: 0.62rem; }
+ 
+      /* Aspectos */
+      .aspecto-row   { padding: 0.55rem 0.65rem; gap: 0.45rem; }
       .aspecto-label { font-size: 0.74rem; }
-      .aspecto-num { min-width: 14px; font-size: 0.55rem; }
-      .bm-toggle label { padding: 0.38rem 0.65rem; font-size: 0.65rem; }
-
-      .optimas-toggle label { padding: 0.5rem 1rem; font-size: 0.75rem; }
-
+      .aspecto-num   { min-width: 14px; font-size: 0.55rem; }
+      .bm-toggle label { padding: 0.4rem 0.65rem; font-size: 0.68rem; }
+ 
+      /* Condiciones óptimas */
+      .optimas-toggle label { padding: 0.5rem 1.1rem; font-size: 0.76rem; }
+ 
+      /* Firma */
+      .firma-canvas-wrap    { height: 200px !important; }
       .firma-placeholder-text { font-size: 0.62rem; }
+      .firma-actions-row    { gap: 0.4rem; }
       .btn-limpiar, .btn-guardar-firma { font-size: 0.68rem; padding: 0.45rem 0.75rem; }
-
-      .submit-row { padding: 0.875rem 0.875rem; gap: 0.5rem; flex-direction: column; }
-      .btn-submit { width: 100%; font-size: 0.82rem; }
-      .btn-reset  { width: 100%; font-size: 0.78rem; justify-content: center; }
-      #globalMessage { width: 100%; }
+ 
+      /* Submit — columna completa, separados visualmente */
+      .submit-row {
+        padding: 0.875rem; gap: 0.5rem;
+        flex-direction: column; align-items: stretch;
+      }
+      .btn-submit {
+        width: 100%; font-size: 0.84rem; min-height: 50px;
+        order: 1;
+      }
+      .btn-reset {
+        width: 100%; font-size: 0.76rem; justify-content: center;
+        order: 2;
+        /* reset más discreto que submit */
+        opacity: 0.85;
+      }
+      #globalMessage { width: 100%; order: 3; }
     }
-
-    /* Móvil muy pequeño (< 360px) */
+ 
+    /* ── 360px: móviles muy pequeños ── */
     @media (max-width: 360px) {
-      .page-wrap { padding: 0.75rem 0.5rem 3rem; }
+      .page-wrap { padding: 0.65rem 0.5rem 3rem; }
+ 
+      /* Hero mínimo */
+      .form-title-main { font-size: 0.76rem; }
+      .form-meta-chips { display: none; } /* sacrificamos chips, el espacio es crítico */
+ 
+      /* Tipo vehículo: solo icono, sin label */
       .tipo-btn-label { display: none; }
-      .tipo-btn { padding: 0.75rem 0.5rem; }
+      .tipo-btn { padding: 0.75rem 0.5rem; gap: 0; }
       .tipo-btn-icon { font-size: 1.5rem; }
-      .bm-toggle label { padding: 0.38rem 0.55rem; }
+ 
+      /* Aspectos ultra compactos */
+      .aspecto-row   { padding: 0.5rem 0.55rem; }
+      .aspecto-label { font-size: 0.7rem; }
+      .bm-toggle label { padding: 0.38rem 0.55rem; font-size: 0.64rem; }
+ 
+      /* Inputs un poco más pequeños */
+      .f-input, .f-select { font-size: 0.82rem; min-height: 42px; }
+ 
+      /* Firma canvas: máxima altura útil */
+      .firma-canvas-wrap { height: 180px !important; }
     }
   </style>
 </head>
 <body>
-
-  <!-- ══ TOPBAR ══ -->
+ 
+  <!-- ════════════════════════════════════════
+       ▼▼▼  TOPBAR — REEMPLAZADO  ▼▼▼
+  ════════════════════════════════════════ -->
   <header class="topbar">
-    <div class="topbar-brand">
-      <img src="/static/img/logotipo_01.png" alt="Incubant" class="topbar-logo">
-      <div>
-        <div class="topbar-title">Misionales</div>
-        <div class="topbar-sub">Inspección Vehicular · SST</div>
+ 
+    <!-- Fila 1: siempre visible -->
+    <div class="topbar-row1">
+ 
+      <a href="/" class="topbar-brand">
+        <img src="/static/img/logotipo_01.png" alt="Incubant" class="topbar-logo">
+        <div>
+          <div class="topbar-title">Misionales</div>
+          <div class="topbar-sub">Inspección Vehicular · SST</div>
+        </div>
+      </a>
+ 
+      <!-- Acciones desktop — se ocultan en ≤ 768px -->
+      <div class="topbar-actions">
+        <a href="/inspecciones/mis-inspecciones" class="btn-top btn-top-ghost">
+          📋 Mis inspecciones
+        </a>
+        <a href="#" id="btnAdmin" class="btn-top btn-top-amber"
+           style="display:none;" onclick="irAAdmin(event)">
+          ⚙ Admin
+        </a>
       </div>
-    </div>
-    <div class="topbar-right">
-      <div class="user-chip">
-        <div class="user-dot"></div>
-        <span class="user-text" id="headerNombre">—</span>
+ 
+      <!-- Derecha: usuario + logout -->
+      <div class="topbar-right">
+        <div class="topbar-sep"></div>
+        <div class="user-chip">
+          <div class="user-dot"></div>
+          <span class="user-text" id="headerNombre">—</span>
+        </div>
+        <button class="btn-top btn-top-danger" onclick="cerrarSesion()">
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+            <path d="M5.5 1.5v3.5M2.8 2.8a4 4 0 1 0 5.4 0"
+                  stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          <span class="btn-top-text">Salir</span>
+        </button>
       </div>
-      <a href="#" id="btnAdmin" class="btn-admin-top" style="display:none;" onclick="irAAdmin(event)">⚙ Admin</a>
-      <a href="/inspecciones/mis-inspecciones" class="btn-admin-top">📋 Mis inspecciones</a>
-      <button class="btn-logout-top" onclick="cerrarSesion()">
-        <svg width="11" height="11" viewBox="0 0 11 11" fill="none" style="vertical-align:middle;"><path d="M5.5 1.5v3.5M2.8 2.8a4 4 0 1 0 5.4 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-        Salir
-      </button>
+ 
     </div>
+ 
+    <!-- Fila 2: pills scrolleables — solo en ≤ 768px -->
+    <div class="topbar-row2">
+      <a href="/inspecciones/mis-inspecciones" class="action-pill action-pill-ghost">
+        📋 Mis inspecciones
+      </a>
+      <div class="pill-sep"></div>
+      <a href="#" id="btnAdminMobile" class="action-pill action-pill-amber"
+         style="display:none;" onclick="irAAdmin(event)">
+        ⚙ Admin
+      </a>
+    </div>
+ 
   </header>
-
+  <!-- ▲▲▲  FIN TOPBAR  ▲▲▲ -->
+ 
   <!-- ══ CONTENIDO ══ -->
   <div class="page-wrap">
-
+ 
     <!-- Hero -->
     <div class="form-hero">
       <div class="hero-egg"></div>
@@ -460,7 +641,7 @@
         </div>
       </div>
     </div>
-
+ 
     <!-- Selector tipo vehículo -->
     <div class="tipo-vehiculo-selector">
       <button type="button" class="tipo-btn active" id="btnMoto" onclick="setTipoVehiculo('Moto')">
@@ -479,7 +660,7 @@
         <div class="tipo-btn-label">Camión</div>
       </button>
     </div>
-
+ 
     <!-- Formulario -->
     <form id="inspeccionForm" method="post" action="/inspecciones/submit" novalidate>
       <input type="hidden" id="usuarioIdInput"       name="usuario_id">
@@ -487,7 +668,7 @@
       <input type="hidden" id="tipoVehiculoInput"    name="tipo_vehiculo" value="Moto">
       <input type="hidden" id="aspectosInput"        name="aspectos">
       <input type="hidden" name="firma_dataurl"      id="firmaDataInput">
-
+ 
       <!-- ── SECCIÓN 1: VEHÍCULO ── -->
       <div class="section-card" style="animation-delay:0.05s">
         <div class="section-head">
@@ -512,14 +693,14 @@
               </select>
               <span id="error_proceso" class="f-error"></span>
             </div>
-
+ 
             <datalist id="lugares-list">
               <option value="La Esperanza">
               <option value="La Fe">
               <option value="La Planta">
               <option value="Municipio">
             </datalist>
-
+ 
             <div class="field">
               <label class="f-label">Desde <span style="color:var(--amber)">*</span></label>
               <input id="desde" name="desde" class="f-input" list="lugares-list" placeholder="Origen..." autocomplete="off">
@@ -564,7 +745,7 @@
           </div>
         </div>
       </div>
-
+ 
       <!-- ── SECCIÓN 2: DOCUMENTOS ── -->
       <div class="section-card" style="animation-delay:0.10s">
         <div class="section-head">
@@ -602,7 +783,7 @@
           </div>
         </div>
       </div>
-
+ 
       <!-- ── SECCIÓN 3: ASPECTOS ── -->
       <div class="section-card" style="animation-delay:0.15s">
         <div class="section-head">
@@ -615,7 +796,7 @@
           <div class="aspectos-grid" id="aspectosContainer"></div>
         </div>
       </div>
-
+ 
       <!-- ── SECCIÓN 4: CONDICIONES ── -->
       <div class="section-card" style="animation-delay:0.20s">
         <div class="section-head">
@@ -635,7 +816,7 @@
           </div>
         </div>
       </div>
-
+ 
       <!-- ── SECCIÓN 5: FIRMA ── -->
       <div class="section-card" style="animation-delay:0.25s">
         <div class="section-head">
@@ -658,7 +839,7 @@
           <span id="error_firma" class="f-error"></span>
         </div>
       </div>
-
+ 
       <!-- ── SECCIÓN 6: OBSERVACIONES ── -->
       <div class="section-card" style="animation-delay:0.30s">
         <div class="section-head">
@@ -671,7 +852,7 @@
           <span id="error_observaciones" class="f-error"></span>
         </div>
       </div>
-
+ 
       <!-- ── BOTONES ── -->
       <div class="submit-row">
         <button id="submitBtn" type="submit" class="btn-submit">
@@ -682,26 +863,32 @@
         </button>
         <div id="globalMessage" style="width:100%;margin-top:0.25rem;"></div>
       </div>
-
+ 
     </form>
   </div>
-
+ 
   <script>
   /* ── INICIALIZACIÓN ── */
   const token = localStorage.getItem("token");
   if (!token) window.location.href = "/login";
-
+ 
   const nombre = localStorage.getItem("nombre") || "Conductor";
   const rol    = localStorage.getItem("rol")    || "user";
-
+ 
   document.getElementById("headerNombre").textContent = nombre;
   document.getElementById("usuarioIdInput").value = localStorage.getItem("usuario_id");
   document.getElementById("nombreConductorInput").value = nombre;
-
+ 
+  /* ════════════════════════════════════════
+     ▼▼▼  BLOQUE JS REEMPLAZADO  ▼▼▼
+     Activa botón admin en desktop Y en móvil
+  ════════════════════════════════════════ */
   if (rol === "admin") {
-    document.getElementById("btnAdmin").style.display = "inline-flex";
+    document.getElementById("btnAdmin").style.display       = "inline-flex";
+    document.getElementById("btnAdminMobile").style.display = "inline-flex";
   }
-
+  /* ▲▲▲  FIN BLOQUE JS  ▲▲▲ */
+ 
   /* ── ASPECTOS POR TIPO ── */
   const ASPECTOS = {
     Moto: [
@@ -759,38 +946,38 @@
       "Revisión de carga (aseguramiento y peso)"
     ]
   };
-
+ 
   let tipoActual = "Moto";
-
+ 
   const PLACEHOLDERS = {
-  moto: {
-    marca:  "ej: Honda, Yamaha, AKT",
-    motor:  "ej: 125, 190, 250",
-    linea:  "ej: CB190, YBR, Discover",
-    modelo: "ej: 2021",
-  },
-  carro: {
-    marca:  "ej: Chevrolet, Renault, Toyota",
-    motor:  "ej: 1400, 1600, 2000",
-    linea:  "ej: Sail, Logan, Aveo",
-    modelo: "ej: 2021",
-  },
-  camion: {
-    marca:  "ej: Kenworth, Freightliner, Hino",
-    motor:  "ej: 6000, 7200, 8900",
-    linea:  "ej: T680, Cascadia, 700E",
-    modelo: "ej: 2019",
+    moto: {
+      marca:  "ej: Honda, Yamaha, AKT",
+      motor:  "ej: 125, 190, 250",
+      linea:  "ej: CB190, YBR, Discover",
+      modelo: "ej: 2021",
+    },
+    carro: {
+      marca:  "ej: Chevrolet, Renault, Toyota",
+      motor:  "ej: 1400, 1600, 2000",
+      linea:  "ej: Sail, Logan, Aveo",
+      modelo: "ej: 2021",
+    },
+    camion: {
+      marca:  "ej: Kenworth, Freightliner, Hino",
+      motor:  "ej: 6000, 7200, 8900",
+      linea:  "ej: T680, Cascadia, 700E",
+      modelo: "ej: 2019",
+    }
+  };
+ 
+  function actualizarPlaceholders(tipo) {
+    const p = PLACEHOLDERS[tipo.toLowerCase()] || PLACEHOLDERS.moto;
+    document.getElementById('marca').placeholder  = p.marca;
+    document.getElementById('motor').placeholder  = p.motor;
+    document.getElementById('linea').placeholder  = p.linea;
+    document.getElementById('modelo').placeholder = p.modelo;
   }
-};
-
-function actualizarPlaceholders(tipo) {
-  const p = PLACEHOLDERS[tipo] || PLACEHOLDERS.moto;
-  document.getElementById('marca').placeholder  = p.marca;
-  document.getElementById('motor').placeholder  = p.motor;
-  document.getElementById('linea').placeholder  = p.linea;
-  document.getElementById('modelo').placeholder = p.modelo;
-}
-
+ 
   function setTipoVehiculo(tipo) {
     tipoActual = tipo;
     document.getElementById("btnMoto").classList.toggle("active",   tipo === "Moto");
@@ -810,7 +997,7 @@ function actualizarPlaceholders(tipo) {
     renderAspectos(tipo);
     actualizarPlaceholders(tipo);
   }
-
+ 
   function renderAspectos(tipo) {
     const lista     = ASPECTOS[tipo];
     const container = document.getElementById("aspectosContainer");
@@ -839,9 +1026,9 @@ function actualizarPlaceholders(tipo) {
     });
     actualizarBadge();
   }
-
+ 
   renderAspectos("Moto");
-
+ 
   function actualizarBadge() {
     const total = ASPECTOS[tipoActual].length;
     let countM = 0;
@@ -857,7 +1044,7 @@ function actualizarPlaceholders(tipo) {
       badge.classList.remove("visible");
     }
   }
-
+ 
   /* ── FIRMA ── */
   (function initFirma() {
     const canvas      = document.getElementById("firmaCanvas");
@@ -866,7 +1053,7 @@ function actualizarPlaceholders(tipo) {
     const placeholder = document.getElementById("firmaPlaceholder");
     let drawing = false;
     let hasMark = false;
-
+ 
     function resize() {
       const rect = wrapper.getBoundingClientRect();
       const dpr  = window.devicePixelRatio || 1;
@@ -886,7 +1073,7 @@ function actualizarPlaceholders(tipo) {
         img.src = snapshot;
       }
     }
-
+ 
     function getPos(e) {
       const rect = canvas.getBoundingClientRect();
       if (e.touches) {
@@ -895,15 +1082,15 @@ function actualizarPlaceholders(tipo) {
       }
       return { x: e.clientX - rect.left, y: e.clientY - rect.top };
     }
-
-    canvas.addEventListener("mousedown", e => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); placeholder.style.opacity = "0"; });
-    canvas.addEventListener("mousemove", e => { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x, p.y); hasMark = true; });
+ 
+    canvas.addEventListener("mousedown",  e => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); placeholder.style.opacity = "0"; });
+    canvas.addEventListener("mousemove",  e => { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x, p.y); hasMark = true; });
     canvas.addEventListener("mouseup",    () => { drawing = false; ctx.beginPath(); });
     canvas.addEventListener("mouseleave", () => { drawing = false; ctx.beginPath(); });
     canvas.addEventListener("touchstart", e => { e.preventDefault(); drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); placeholder.style.opacity = "0"; }, { passive: false });
     canvas.addEventListener("touchmove",  e => { e.preventDefault(); if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x, p.y); hasMark = true; }, { passive: false });
     canvas.addEventListener("touchend",   () => { drawing = false; ctx.beginPath(); });
-
+ 
     window.firmaApp = {
       isEmpty:    () => !hasMark,
       getDataURL: () => canvas.toDataURL("image/png"),
@@ -923,11 +1110,11 @@ function actualizarPlaceholders(tipo) {
         placeholder.style.opacity = "1";
       }
     };
-
+ 
     resize();
     window.addEventListener("resize", resize);
   })();
-
+ 
   function limpiarFirma() {
     window.firmaApp.refresh();
     document.getElementById("firmaPreview").style.display = "none";
@@ -935,7 +1122,7 @@ function actualizarPlaceholders(tipo) {
     document.getElementById("firmaDataInput").value = "";
     document.querySelector(".firma-canvas-wrap").classList.remove("has-firma");
   }
-
+ 
   function guardarFirma() {
     if (window.firmaApp.isEmpty()) {
       document.getElementById("error_firma").textContent = "⚠ Dibuja tu firma primero";
@@ -950,7 +1137,7 @@ function actualizarPlaceholders(tipo) {
     prev.innerHTML = `<img src="${dataURL}" alt="Firma guardada"><span class="firma-ok">✓ Firma guardada</span>`;
     document.querySelector(".firma-canvas-wrap").classList.add("has-firma");
   }
-
+ 
   /* ── ASPECTOS CAMBIO ── */
   function onAspectoChange(idx) {
     const mInput = document.getElementById("m_" + idx);
@@ -959,7 +1146,7 @@ function actualizarPlaceholders(tipo) {
     row.classList.toggle("has-m", mInput.checked);
     actualizarBadge();
   }
-
+ 
   /* ── VALIDACIÓN ── */
   function showErr(id, msg) {
     const el = document.getElementById(id);
@@ -972,7 +1159,7 @@ function actualizarPlaceholders(tipo) {
       prev.classList.remove("input-valid");
     }
   }
-
+ 
   function clearErr(id) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -984,7 +1171,7 @@ function actualizarPlaceholders(tipo) {
       prev.classList.add("input-valid");
     }
   }
-
+ 
   function clearAllErrors() {
     ["error_placa","error_proceso","error_desde","error_hasta",
      "error_marca","error_gasolina","error_modelo","error_motor",
@@ -993,13 +1180,13 @@ function actualizarPlaceholders(tipo) {
      "error_firma","error_observaciones"].forEach(clearErr);
     document.getElementById("globalMessage").innerHTML = "";
   }
-
+ 
   document.getElementById("placa").addEventListener("input", (e) => {
     const v = e.target.value.trim().toUpperCase().replace(/[^A-Z0-9]/g,"");
     if (v.length < 5) showErr("error_placa","Placa inválida");
     else clearErr("error_placa");
   });
-
+ 
   /* ── RESET ── */
   function onReset() {
     setTimeout(() => {
@@ -1010,27 +1197,27 @@ function actualizarPlaceholders(tipo) {
       setTipoVehiculo("Moto");
     }, 10);
   }
-
+ 
   /* ── NAVEGACIÓN ── */
   function irAAdmin(e) {
     e.preventDefault();
     window.location.href = "/admin";
   }
-
+ 
   async function cerrarSesion() {
     try { await fetch("/auth/logout", { method:"POST", headers: { "Authorization": `Bearer ${token}` } }); }
     catch(e) {}
     finally { localStorage.clear(); window.location.href = "/login"; }
   }
-
+ 
   /* ── SUBMIT ── */
   document.getElementById("inspeccionForm").addEventListener("submit", async (ev) => {
     ev.preventDefault();
     clearAllErrors();
-
+ 
     const form     = ev.target;
     const formData = new FormData(form);
-
+ 
     const lista  = ASPECTOS[tipoActual];
     const aspectos = {};
     for (let i = 0; i < lista.length; i++) {
@@ -1044,7 +1231,7 @@ function actualizarPlaceholders(tipo) {
     formData.set("aspectos", JSON.stringify(aspectos));
     formData.set("tipo_vehiculo", tipoActual);
     formData.set("firma_dataurl", window.firmaApp.getDataURL());
-
+ 
     let hasError = false;
     const checks = [
       ["placa",               v => v.trim().toUpperCase().replace(/[^A-Z0-9]/g,"").length >= 5, "Placa inválida"],
@@ -1063,62 +1250,62 @@ function actualizarPlaceholders(tipo) {
       ["certificado_emision", v => v.trim() !== "", "Campo requerido"],
       ["poliza_seguro",       v => v.trim() !== "", "Campo requerido"],
     ];
-
+ 
     const errorMap = {
       "licencia_num":"error_licencianum", "porte_propiedad":"error_porte",
       "certificado_emision":"error_emision", "poliza_seguro":"error_poliza",
     };
-
+ 
     for (const [name, validator, msg] of checks) {
       if (!validator(formData.get(name) || "")) {
         showErr(errorMap[name] || `error_${name}`, msg);
         hasError = true;
       }
     }
-
+ 
     if (window.firmaApp.isEmpty()) {
       showErr("error_firma", "Debes firmar antes de enviar");
       hasError = true;
     }
-
+ 
     const anyM = Object.values(aspectos).some(a => a.valor === "M");
     if (anyM && (formData.get("observaciones") || "").trim().length < 6) {
       showErr("error_observaciones", "Obligatorio si hay aspectos en M");
       hasError = true;
     }
-
+ 
     if (hasError) {
       document.getElementById("globalMessage").innerHTML =
         '<div class="msg-error">Revisa los campos marcados en rojo.</div>';
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
-
+ 
     const btn = document.getElementById("submitBtn");
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span>&nbsp;Generando PDF...';
-
+ 
     try {
       const resp = await fetch(form.action, {
         method: "POST",
         body: formData,
         headers: { "Authorization": `Bearer ${token}` }
       });
-
+ 
       if (resp.status === 401) {
         alert("Sesión expirada. Vuelve a iniciar sesión.");
         localStorage.clear();
         window.location.href = "/login";
         return;
       }
-
+ 
       if (!resp.ok) {
         const errData = await resp.json().catch(() => ({}));
         document.getElementById("globalMessage").innerHTML =
           `<div class="msg-error">Error: ${errData.error || errData.detail || "Error del servidor"}</div>`;
         return;
       }
-
+ 
       const contentType = resp.headers.get("content-type") || "";
       if (contentType.includes("application/pdf")) {
         const blob = await resp.blob();
@@ -1132,10 +1319,10 @@ function actualizarPlaceholders(tipo) {
         a.href = url; a.download = filename;
         document.body.appendChild(a); a.click(); a.remove();
         URL.revokeObjectURL(url);
-
+ 
         form.reset();
         onReset();
-
+ 
         const advertencia = resp.headers.get("X-Advertencias");
         if (advertencia) {
           try {
@@ -1150,7 +1337,7 @@ function actualizarPlaceholders(tipo) {
           setTimeout(() => document.getElementById("globalMessage").innerHTML = "", 4000);
         }
       }
-
+ 
     } catch(e) {
       console.error(e);
       document.getElementById("globalMessage").innerHTML =
@@ -1161,6 +1348,6 @@ function actualizarPlaceholders(tipo) {
     }
   });
   </script>
-
+ 
 </body>
 </html>
