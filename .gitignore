@@ -24,14 +24,12 @@ dist/
 build/
 
 # ===== DATOS GENERADOS =====
-app/data/generated_pdfs/*.pdf
-app/data/firmas/*.png
-app/logs/*.log
+data/generated_pdfs/**/*.pdf
+data/firmas/**/*.png
 
-# Mantener estructura de carpetas pero no contenido
-!app/data/generated_pdfs/.gitkeep
-!app/data/firmas/.gitkeep
-!app/logs/.gitkeep
+# Mantener estructura de carpetas
+!data/generated_pdfs/.gitkeep
+!data/firmas/.gitkeep
 
 # ===== BACKUPS =====
 *_OLD.py
