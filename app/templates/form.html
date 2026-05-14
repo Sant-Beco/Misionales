@@ -412,6 +412,49 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(26,15,0,0.3); border-top-color: #1a0f00; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; }
  
+    /* ══ FIRMA — TABS Y UPLOAD ══ */
+    .firma-tabs {
+      display: flex; gap: 0; border-radius: var(--r-md); overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .firma-tab {
+      padding: 0.3rem 0.75rem;
+      background: var(--dark3); color: var(--text3);
+      font-family: 'Futura', sans-serif; font-size: 0.68rem;
+      font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+      border: none; cursor: pointer; transition: all 0.18s;
+      white-space: nowrap;
+    }
+    .firma-tab:first-child { border-right: 1px solid var(--border); }
+    .firma-tab.active {
+      background: rgba(245,156,0,0.1); color: var(--amber);
+    }
+    .firma-tab:hover:not(.active) { color: var(--text2); background: var(--dark4); }
+ 
+    /* Área upload imagen */
+    .firma-upload-area {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 0.4rem; padding: 2rem 1rem;
+      border: 1.5px dashed rgba(245,156,0,0.25); border-radius: var(--r-lg);
+      cursor: pointer; transition: all 0.2s;
+      background: linear-gradient(135deg, rgba(245,156,0,0.02) 0%, transparent 60%);
+      text-align: center;
+    }
+    .firma-upload-area:hover {
+      border-color: rgba(245,156,0,0.5);
+      background: rgba(245,156,0,0.04);
+    }
+    .firma-upload-area.drag-over {
+      border-color: var(--amber);
+      background: rgba(245,156,0,0.08);
+    }
+    .firma-upload-icon { font-size: 2rem; opacity: 0.5; }
+    .firma-upload-text {
+      font-size: 0.8rem; font-weight: 700; color: var(--text2);
+      letter-spacing: 0.04em;
+    }
+    .firma-upload-hint { font-size: 0.65rem; color: var(--text3); }
+ 
     /* ══════════════════════════════════════
        RESPONSIVE — CONTENIDO
        Breakpoints:
@@ -822,19 +865,46 @@
         <div class="section-head">
           <div class="section-icon">✍</div>
           <span class="section-label">Firma del conductor</span>
+          <!-- Tabs modo firma -->
+          <div class="firma-tabs" style="margin-left:auto;">
+            <button type="button" class="firma-tab active" id="tabDibujar" onclick="setFirmaMode('dibujar')">✍ Dibujar</button>
+            <button type="button" class="firma-tab" id="tabImagen" onclick="setFirmaMode('imagen')">🖼 Subir imagen</button>
+          </div>
         </div>
         <div class="section-body">
-          <div class="firma-canvas-wrap" style="height:150px;">
-            <canvas id="firmaCanvas"></canvas>
-            <div class="firma-placeholder" id="firmaPlaceholder">
-              <div class="firma-placeholder-icon">✍</div>
-              <div class="firma-placeholder-text">Firme aquí con el dedo o mouse</div>
+ 
+          <!-- Panel: dibujar -->
+          <div id="panelDibujar">
+            <div class="firma-canvas-wrap" style="height:150px;">
+              <canvas id="firmaCanvas"></canvas>
+              <div class="firma-placeholder" id="firmaPlaceholder">
+                <div class="firma-placeholder-icon">✍</div>
+                <div class="firma-placeholder-text">Firme aquí con el dedo o mouse</div>
+              </div>
+            </div>
+            <div class="firma-actions-row">
+              <button type="button" class="btn-limpiar" onclick="limpiarFirma()">✕ Limpiar</button>
+              <button type="button" class="btn-guardar-firma" onclick="guardarFirma()">✓ Guardar firma</button>
             </div>
           </div>
-          <div class="firma-actions-row">
-            <button type="button" id="limpiarBtn" class="btn-limpiar" onclick="limpiarFirma()">✕ Limpiar</button>
-            <button type="button" id="guardarBtn" class="btn-guardar-firma" onclick="guardarFirma()">✓ Guardar firma</button>
+ 
+          <!-- Panel: subir imagen -->
+          <div id="panelImagen" style="display:none;">
+            <label class="firma-upload-area" id="firmaUploadArea" for="firmaImagenInput">
+              <div class="firma-upload-icon">🖼</div>
+              <div class="firma-upload-text">Toca para seleccionar imagen de firma</div>
+              <div class="firma-upload-hint">JPG, PNG o WebP · Fondo blanco recomendado</div>
+              <input type="file" id="firmaImagenInput" accept="image/jpeg,image/png,image/webp"
+                     style="display:none;" onchange="cargarImagenFirma(this)">
+            </label>
+            <div id="imagenPreviewWrap" style="display:none; margin-top:0.75rem;">
+              <img id="imagenPreviewImg" src="" alt="Firma cargada"
+                   style="max-height:120px; border:1px solid rgba(40,200,120,0.3); border-radius:var(--r-md); display:block;">
+              <button type="button" class="btn-limpiar" style="margin-top:0.5rem;"
+                      onclick="limpiarImagenFirma()">✕ Quitar imagen</button>
+            </div>
           </div>
+ 
           <div id="firmaPreview" class="firma-preview" style="display:none;"></div>
           <span id="error_firma" class="f-error"></span>
         </div>
@@ -984,18 +1054,37 @@
     document.getElementById("btnCarro").classList.toggle("active",  tipo === "Carro");
     document.getElementById("btnCamion").classList.toggle("active", tipo === "Camion");
     document.getElementById("tipoVehiculoInput").value = tipo;
+ 
     const titles = {
       Moto:   "Inspección Pre Operacional Motocicleta",
       Carro:  "Inspección Pre Operacional Automóvil",
       Camion: "Inspección Pre Operacional Camión"
     };
     document.getElementById("heroTitle").textContent = titles[tipo];
+ 
     const icons  = { Moto: "🏍", Carro: "🚗", Camion: "🚛" };
     const labels = { Moto: "Datos de la motocicleta", Carro: "Datos del automóvil", Camion: "Datos del camión" };
     document.getElementById("vehiculoIcon").textContent  = icons[tipo];
     document.getElementById("vehiculoLabel").textContent = labels[tipo];
+ 
     renderAspectos(tipo);
     actualizarPlaceholders(tipo);
+ 
+    /* ── FIX: limpiar campos del vehículo al cambiar tipo ── */
+    ["placa","proceso","desde","hasta","marca","gasolina","modelo","motor","linea"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = "";
+    });
+ 
+    /* ── FIX: resetear condiciones a "SI" ── */
+    const optSi = document.getElementById("opt_si");
+    if (optSi) optSi.checked = true;
+ 
+    /* ── FIX: limpiar firma completamente ── */
+    limpiarFirmaCompleta();
+ 
+    /* ── Limpiar errores ── */
+    clearAllErrors();
   }
  
   function renderAspectos(tipo) {
@@ -1045,7 +1134,33 @@
     }
   }
  
-  /* ── FIRMA ── */
+  /* ════════════════════════════════════════
+     FIRMA — MODO: dibujar | imagen
+  ════════════════════════════════════════ */
+  let firmaMode = "dibujar"; /* "dibujar" | "imagen" */
+  let imagenFirmaCargada = false;
+ 
+  function setFirmaMode(mode) {
+    firmaMode = mode;
+    document.getElementById("tabDibujar").classList.toggle("active", mode === "dibujar");
+    document.getElementById("tabImagen").classList.toggle("active",  mode === "imagen");
+    document.getElementById("panelDibujar").style.display = mode === "dibujar" ? "" : "none";
+    document.getElementById("panelImagen").style.display  = mode === "imagen"  ? "" : "none";
+    /* Limpiar preview compartido al cambiar de tab */
+    document.getElementById("firmaPreview").style.display = "none";
+    document.getElementById("firmaPreview").innerHTML = "";
+    document.getElementById("firmaDataInput").value = "";
+    document.getElementById("error_firma").style.display = "none";
+    if (mode === "dibujar") {
+      window.firmaApp.refresh();
+      document.querySelector(".firma-canvas-wrap").classList.remove("has-firma");
+    }
+    if (mode === "imagen") {
+      limpiarImagenFirma();
+    }
+  }
+ 
+  /* ── CANVAS: dibujar ── */
   (function initFirma() {
     const canvas      = document.getElementById("firmaCanvas");
     const ctx         = canvas.getContext("2d");
@@ -1115,6 +1230,59 @@
     window.addEventListener("resize", resize);
   })();
  
+  /* ── Drag & drop sobre el área de upload ── */
+  (function initDragDrop() {
+    const area = document.getElementById("firmaUploadArea");
+    if (!area) return;
+    area.addEventListener("dragover",  e => { e.preventDefault(); area.classList.add("drag-over"); });
+    area.addEventListener("dragleave", () => area.classList.remove("drag-over"));
+    area.addEventListener("drop", e => {
+      e.preventDefault(); area.classList.remove("drag-over");
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith("image/")) procesarImagenFirma(file);
+    });
+  })();
+ 
+  /* ── Cargar imagen desde input file ── */
+  function cargarImagenFirma(input) {
+    const file = input.files[0];
+    if (!file) return;
+    procesarImagenFirma(file);
+  }
+ 
+  function procesarImagenFirma(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataURL = e.target.result;
+      /* Mostrar preview */
+      const previewImg = document.getElementById("imagenPreviewImg");
+      previewImg.src = dataURL;
+      document.getElementById("imagenPreviewWrap").style.display = "block";
+      /* Guardar en el input oculto */
+      document.getElementById("firmaDataInput").value = dataURL;
+      imagenFirmaCargada = true;
+      document.getElementById("error_firma").style.display = "none";
+      /* Preview compartido */
+      const prev = document.getElementById("firmaPreview");
+      prev.style.display = "flex";
+      prev.innerHTML = `<img src="${dataURL}" alt="Firma cargada"><span class="firma-ok">✓ Imagen de firma cargada</span>`;
+      /* Marcar área */
+      document.getElementById("firmaUploadArea").style.borderColor = "rgba(40,200,120,0.4)";
+    };
+    reader.readAsDataURL(file);
+  }
+ 
+  function limpiarImagenFirma() {
+    const input = document.getElementById("firmaImagenInput");
+    if (input) input.value = "";
+    document.getElementById("imagenPreviewWrap").style.display = "none";
+    document.getElementById("imagenPreviewImg").src = "";
+    imagenFirmaCargada = false;
+    const area = document.getElementById("firmaUploadArea");
+    if (area) area.style.borderColor = "";
+  }
+ 
+  /* ── Limpiar firma canvas ── */
   function limpiarFirma() {
     window.firmaApp.refresh();
     document.getElementById("firmaPreview").style.display = "none";
@@ -1123,6 +1291,19 @@
     document.querySelector(".firma-canvas-wrap").classList.remove("has-firma");
   }
  
+  /* ── Limpiar TODO (canvas + imagen) — usada al cambiar tipo vehículo y en reset ── */
+  function limpiarFirmaCompleta() {
+    limpiarFirma();
+    limpiarImagenFirma();
+    document.getElementById("firmaPreview").style.display = "none";
+    document.getElementById("firmaPreview").innerHTML = "";
+    document.getElementById("firmaDataInput").value = "";
+    document.querySelector(".firma-canvas-wrap").classList.remove("has-firma");
+    /* Volver al tab de dibujar */
+    setFirmaMode("dibujar");
+  }
+ 
+  /* ── Guardar firma canvas ── */
   function guardarFirma() {
     if (window.firmaApp.isEmpty()) {
       document.getElementById("error_firma").textContent = "⚠ Dibuja tu firma primero";
@@ -1136,6 +1317,12 @@
     prev.style.display = "flex";
     prev.innerHTML = `<img src="${dataURL}" alt="Firma guardada"><span class="firma-ok">✓ Firma guardada</span>`;
     document.querySelector(".firma-canvas-wrap").classList.add("has-firma");
+  }
+ 
+  /* ── Validación de firma (considera ambos modos) ── */
+  function firmaVacia() {
+    if (firmaMode === "imagen") return !imagenFirmaCargada;
+    return window.firmaApp.isEmpty();
   }
  
   /* ── ASPECTOS CAMBIO ── */
@@ -1190,7 +1377,7 @@
   /* ── RESET ── */
   function onReset() {
     setTimeout(() => {
-      limpiarFirma();
+      limpiarFirmaCompleta();
       clearAllErrors();
       document.querySelectorAll(".aspecto-row").forEach(r => r.classList.remove("has-m"));
       actualizarBadge();
@@ -1263,7 +1450,7 @@
       }
     }
  
-    if (window.firmaApp.isEmpty()) {
+    if (firmaVacia()) {
       showErr("error_firma", "Debes firmar antes de enviar");
       hasError = true;
     }
@@ -1351,3 +1538,4 @@
  
 </body>
 </html>
+ 
