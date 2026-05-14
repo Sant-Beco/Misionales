@@ -994,26 +994,73 @@
       "Estado de la carrocería / estructura"
     ],
     Camion: [
-      "Estado de llantas y presión de aire (todas las ruedas)",
-      "Funcionamiento de luces, direccionales y pito",
-      "Espejos retrovisores y laterales",
-      "Sistema de frenos de servicio",
-      "Sistema de frenos de emergencia / parqueo",
-      "Nivel de líquido de freno",
-      "Nivel de aceite de motor",
-      "Nivel de aceite de transmisión / diferencial",
-      "Nivel de líquido refrigerante",
-      "Fugas de combustible, aceites o líquidos",
-      "Revisión tablero e instrumentos",
-      "Funcionamiento de limpiaparabrisas",
-      "Estado de correas, mangueras y filtros",
-      "Estado de la dirección y columna",
-      "Funcionamiento de puertas, seguros y espejos",
-      "Estado de la carrocería y tolva / furgón",
+      /* 1. ESTADO DE LLANTAS */
+      "Llantas delanteras — estado y presión de aire",
+      "Llantas traseras — estado y presión de aire",
+      "Llanta de repuesto — estado y presión de aire",
+      /* 2. CARROCERÍA Y PINTURA */
+      "Estado de carrocería y pintura — golpes y deterioros",
+      /* 3. NIVELES */
+      "Niveles de aceite y refrigerante — fugas",
+      /* 4. FRENOS */
+      "Frenos — fugas de aire o líquido, estado del frenado",
+      /* 5. MOTOR */
+      "Motor — ruidos anormales",
+      /* 6. DIRECCIÓN */
+      "Dirección — normal o dura anormal",
+      /* 7. LUCES */
+      "Luces altas — encienden y funcionan correctamente",
+      "Luces bajas — encienden y funcionan correctamente",
+      "Direccional delantera derecha",
+      "Direccional delantera izquierda",
+      "Direccional trasera derecha",
+      "Direccional trasera izquierda",
+      "Luces de parqueo delanteras",
+      "Luces de parqueo traseras",
+      "Stop de freno",
+      /* 8. BATERÍA */
+      "Batería — estado y funcionamiento",
+      /* 9. PLUMILLAS */
+      "Plumillas — las tiene y funcionan correctamente",
+      /* 10. PITO */
+      "Pito — funciona correctamente",
+      /* 11. SILLAS */
+      "Sillas — apoya cabezas, estado general",
+      "Sillas delanteras y traseras — estado",
+      /* 12. CINTURONES */
       "Cinturones de seguridad",
-      "Extintor y kit de carretera",
-      "Estado de la batería y sistema eléctrico",
-      "Revisión de carga (aseguramiento y peso)"
+      /* 13. EQUIPO DE PREVENCIÓN Y SEGURIDAD */
+      "Botiquín — vigente y en buen estado",
+      "Caja de herramientas — vigente y en buen estado",
+      "Cruceta — vigente y en buen estado",
+      "Tacos de parqueo — vigentes y en buen estado",
+      "Triángulo de parqueo — vigente y en buen estado",
+      "Gato — vigente y en buen estado",
+      "Chaleco reflectivo — vigente y en buen estado",
+      /* 14. ESPEJOS */
+      "Espejo lateral derecho",
+      "Espejo lateral izquierdo",
+      "Espejo retrovisor",
+      /* 15. EXTINTOR ABC */
+      "Extintor ABC — fecha de vencimiento vigente",
+      "Extintor ABC — manómetro en zona verde",
+      "Extintor ABC — sello de seguridad intacto",
+      "Extintor ABC — pasador de seguridad",
+      "Extintor ABC — boquilla en buen estado",
+      "Extintor ABC — etiqueta legible",
+      "Extintor ABC — sin óxido, golpes ni averías",
+      /* 16. DOCUMENTACIÓN */
+      "Documento de identidad — vigente",
+      "Licencia de tránsito — vigente",
+      "Licencia de conducción — vigente",
+      "SOAT — vigente",
+      "Revisión tecnomecánica — vigente",
+      /* 17. MANTENIMIENTO */
+      "Último cambio de aceite — fecha al día",
+      "Última sincronización — fecha al día",
+      "Última alineación y balanceo — fecha al día",
+      "Último cambio de batería — fecha al día",
+      "Último cambio de llantas — fecha al día"
     ]
   };
  
@@ -1253,21 +1300,55 @@
   function procesarImagenFirma(file) {
     const reader = new FileReader();
     reader.onload = (e) => {
-      const dataURL = e.target.result;
-      /* Mostrar preview */
-      const previewImg = document.getElementById("imagenPreviewImg");
-      previewImg.src = dataURL;
-      document.getElementById("imagenPreviewWrap").style.display = "block";
-      /* Guardar en el input oculto */
-      document.getElementById("firmaDataInput").value = dataURL;
-      imagenFirmaCargada = true;
-      document.getElementById("error_firma").style.display = "none";
-      /* Preview compartido */
-      const prev = document.getElementById("firmaPreview");
-      prev.style.display = "flex";
-      prev.innerHTML = `<img src="${dataURL}" alt="Firma cargada"><span class="firma-ok">✓ Imagen de firma cargada</span>`;
-      /* Marcar área */
-      document.getElementById("firmaUploadArea").style.borderColor = "rgba(40,200,120,0.4)";
+      const img = new Image();
+      img.onload = () => {
+        /* Normalizar en canvas: fondo transparente, max 600×200px
+           mantiene relación de aspecto, produce PNG limpio como
+           el canvas de firma dibujada — compatible con WeasyPrint */
+        const MAX_W = 600;
+        const MAX_H = 200;
+        let w = img.naturalWidth;
+        let h = img.naturalHeight;
+        if (w > MAX_W) { h = Math.round(h * MAX_W / w); w = MAX_W; }
+        if (h > MAX_H) { w = Math.round(w * MAX_H / h); h = MAX_H; }
+ 
+        const cv  = document.createElement("canvas");
+        cv.width  = w;
+        cv.height = h;
+        const ctx = cv.getContext("2d");
+ 
+        /* Si la imagen tiene fondo blanco la dejamos tal cual
+           (WeasyPrint renderiza bien sobre blanco en PDF).
+           No intentamos hacer fondo transparente porque puede
+           recortar trazos del borde en imágenes con fondo oscuro. */
+        ctx.drawImage(img, 0, 0, w, h);
+        const dataURL = cv.toDataURL("image/png");
+ 
+        /* Mostrar preview en el área de upload */
+        const previewImg = document.getElementById("imagenPreviewImg");
+        previewImg.src = dataURL;
+        document.getElementById("imagenPreviewWrap").style.display = "block";
+ 
+        /* ← Este es el valor que llega al backend como firma_dataurl */
+        document.getElementById("firmaDataInput").value = dataURL;
+        imagenFirmaCargada = true;
+        document.getElementById("error_firma").style.display = "none";
+ 
+        /* Preview compartido (mismo formato que firma dibujada) */
+        const prev = document.getElementById("firmaPreview");
+        prev.style.display = "flex";
+        prev.innerHTML = `<img src="${dataURL}" alt="Firma cargada" style="max-height:60px;border:1px solid rgba(40,200,120,0.3);border-radius:var(--r-md);">
+                          <span class="firma-ok">✓ Imagen de firma lista</span>`;
+ 
+        /* Marcar área con verde */
+        const area = document.getElementById("firmaUploadArea");
+        if (area) {
+          area.style.borderColor  = "rgba(40,200,120,0.45)";
+          area.style.borderStyle  = "solid";
+          area.style.background   = "rgba(40,200,120,0.03)";
+        }
+      };
+      img.src = e.target.result;
     };
     reader.readAsDataURL(file);
   }
@@ -1417,7 +1498,9 @@
     }
     formData.set("aspectos", JSON.stringify(aspectos));
     formData.set("tipo_vehiculo", tipoActual);
-    formData.set("firma_dataurl", window.firmaApp.getDataURL());
+    /* Usar siempre firmaDataInput: contiene canvas dibujado O imagen subida */
+    const firmaVal = document.getElementById("firmaDataInput").value;
+    formData.set("firma_dataurl", firmaVal);
  
     let hasError = false;
     const checks = [
@@ -1529,11 +1612,7 @@
       console.error(e);
       document.getElementById("globalMessage").innerHTML =
         '<div class="msg-error">Error de conexión. Intenta nuevamente.</div>';
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = "📄 Enviar y generar PDF";
-    }
-  });
+    } 
   </script>
  
 </body>
