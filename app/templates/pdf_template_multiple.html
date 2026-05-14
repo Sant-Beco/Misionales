@@ -4,14 +4,14 @@
   <meta charset="UTF-8">
   <style>
     @page { size: A4 landscape; margin: 8mm; }
-
+ 
     body {
       font-family: DejaVu Sans, Arial, sans-serif;
       font-size: 10px;
       margin: 0;
       color: #000;
     }
-
+ 
     .encabezado {
       display: flex;
       align-items: center;
@@ -19,9 +19,9 @@
       padding: 6px 0;
       border-bottom: 2px solid #000;
     }
-
+ 
     .logo { width: 90px; }
-
+ 
     .titulo {
       flex: 1;
       text-align: center;
@@ -29,36 +29,36 @@
       font-size: 18px;
       text-transform: uppercase;
     }
-
+ 
     .subinfo {
       text-align: center;
       font-size: 11px;
       margin: 6px 0;
     }
-
+ 
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 6px;
     }
-
+ 
     th, td {
       border: 1px solid #222;
       padding: 4px;
       vertical-align: middle;
       text-align: center;
     }
-
+ 
     th {
       background: #eee;
       font-weight: 700;
       font-size: 10px;
       text-transform: uppercase;
     }
-
+ 
     .aspectos td { text-align: center; }
     .aspectos .left { text-align: left; padding-left: 8px; }
-
+ 
     .box {
       display: inline-block;
       width: 18px;
@@ -69,21 +69,41 @@
       font-weight: 700;
       font-size: 12px;
     }
-
+ 
     td[colspan="2"] {
       text-align: center;
       width: 36px;
     }
-
+ 
+    /* ══ FIRMA en consolidado ══
+       En el consolidado la firma va pequeña (col lateral).
+       Soporta tanto canvas dibujado como imagen subida.
+    */
     .firma { margin-top: 10px; }
+ 
     .firma img {
-      width: 80px;
+      display: block;
+      max-width: 120px;
+      max-height: 60px;
+      width: auto;
       height: auto;
       border: 1px solid #222;
-      display: block;
+      margin-top: 6px;
+      /* Fondo blanco por si imagen tiene transparencia */
+      background: #fff;
+    }
+ 
+    .firma-vacia {
+      border: 1px dashed #aaa;
+      padding: 6px;
+      display: inline-block;
+      width: 80px;
+      text-align: center;
+      color: #777;
+      font-size: 9px;
       margin-top: 6px;
     }
-
+ 
     .nota {
       font-size: 9px;
       margin-top: 8px;
@@ -92,9 +112,9 @@
     }
   </style>
 </head>
-
+ 
 <body>
-
+ 
   <!-- ENCABEZADO -->
   <div class="encabezado">
     <img class="logo" src="{{ logo_path }}" alt="Logo">
@@ -102,14 +122,14 @@
       {{ titulo_tipo or "Inspección Pre Operacional Motocicleta" | upper }}
     </div>
   </div>
-
+ 
   <!-- INFO SUPERIOR -->
   <div class="subinfo">
     Código: {{ codigo }} — Versión: {{ version }} — Fecha consolidado: {{ fecha }}
     — Tipo: <strong>{{ registros[0].tipo_vehiculo or "Moto" }}</strong><br>
     Registros desde: <strong>{{ desde }}</strong> hasta <strong>{{ hasta }}</strong>
   </div>
-
+ 
   <!-- INFO DEL CONDUCTOR (primer registro) -->
   <table>
     <tr>
@@ -137,13 +157,10 @@
       <td colspan="3">{{ registros[0].linea }}</td>
     </tr>
   </table>
-
-  <!-- TABLA DE ASPECTOS
-       aspectos_lista viene del contexto según tipo_vehiculo del primer registro.
-       Cada registro tiene aspectos_parsed ya normalizado a {"1": "B"/"M"}.
-  -->
+ 
+  <!-- TABLA DE ASPECTOS -->
   <table class="aspectos">
-
+ 
     <!-- ENCABEZADO: número de registro (1..15) -->
     <tr>
       <th rowspan="2" style="width:22%;">Aspectos a revisar</th>
@@ -156,7 +173,7 @@
         {% endfor %}
       {% endif %}
     </tr>
-
+ 
     <!-- Subencabezado B / M -->
     <tr>
       {% for i in range(15) %}
@@ -164,17 +181,17 @@
         <th>M</th>
       {% endfor %}
     </tr>
-
+ 
     <!-- Una fila por aspecto -->
     {% for aspecto in aspectos_lista %}
     {% set idx = loop.index|string %}
     <tr>
       <td class="left">{{ aspecto }}</td>
-
+ 
       {% for i in range(15) %}
         {% set reg = registros[i] if i < registros|length else None %}
         {% set val = (reg.aspectos_parsed or {}).get(idx, '') if reg else '' %}
-
+ 
         <td>
           {% if val == 'B' %}
             <span class="box">✔</span>
@@ -184,7 +201,7 @@
             <span style="color:#ddd;">—</span>
           {% endif %}
         </td>
-
+ 
         <td>
           {% if val == 'M' %}
             <span class="box">✖</span>
@@ -194,13 +211,13 @@
             <span style="color:#ddd;">—</span>
           {% endif %}
         </td>
-
+ 
       {% endfor %}
     </tr>
     {% endfor %}
-
+ 
   </table>
-
+ 
   <!-- CONDICIONES ÓPTIMAS -->
   <table class="aspectos" style="margin-top:6px;">
     <tr>
@@ -221,8 +238,13 @@
       {% endfor %}
     </tr>
   </table>
-
-  <!-- FIRMA -->
+ 
+  <!-- FIRMA
+       Prioridad: firma_base64 (data-URI inyectado por utils_pdf.py)
+                  > firma_path (ruta en disco)
+                  > sin firma
+       Funciona igual para firma dibujada e imagen subida.
+  -->
   <div class="firma">
     <strong>Firma del conductor</strong><br>
     {% if registros[0].firma_base64 %}
@@ -230,17 +252,16 @@
     {% elif registros[0].firma_path %}
       <img src="{{ registros[0].firma_path }}" alt="Firma del conductor">
     {% else %}
-      <span style="border:1px dashed #aaa; padding:6px; display:inline-block; width:80px; text-align:center;">
-        (sin firma)
-      </span>
+      <div class="firma-vacia">(sin firma)</div>
     {% endif %}
   </div>
-
+ 
   <!-- NOTA -->
   <div class="nota">
     <strong>Nota:</strong> Inspeccione todos los elementos que apliquen.
     Detenga el vehículo cuando observe una condición insegura y notifique al responsable.
   </div>
-
+ 
 </body>
 </html>
+ 

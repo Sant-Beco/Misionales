@@ -7,20 +7,20 @@
     size: A4 portrait;
     margin: 10mm 10mm 12mm 10mm;
   }
-
+ 
   body {
     font-family: DejaVu Sans, Arial, sans-serif;
     font-size: 10px;
     margin: 0;
     color: #000;
   }
-
+ 
   :root {
     --azul: #003366;
     --gris: #f4f4f4;
     --gris-borde: #999;
   }
-
+ 
   /* --- ENCABEZADO --- */
   .encabezado {
     display: flex;
@@ -28,9 +28,9 @@
     border-bottom: 2px solid var(--azul);
     padding-bottom: 6px;
   }
-
+ 
   .logo { width: 90px; }
-
+ 
   .titulo {
     flex: 1;
     text-align: center;
@@ -39,40 +39,40 @@
     color: var(--azul);
     text-transform: uppercase;
   }
-
+ 
   .meta {
     text-align: center;
     font-size: 10px;
     margin: 4px 0 8px 0;
     color: #333;
   }
-
+ 
   /* --- TABLAS --- */
   table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 5px;
   }
-
+ 
   th, td {
     border: 1px solid var(--gris-borde);
     padding: 3px 5px;
   }
-
+ 
   th {
     background: var(--gris);
     text-transform: uppercase;
     font-size: 9.5px;
     color: var(--azul);
   }
-
+ 
   .aspectos td {
     text-align: center;
     font-size: 9.5px;
   }
-
+ 
   .aspectos .left { text-align: left; }
-
+ 
   .box {
     display: inline-block;
     width: 14px;
@@ -83,22 +83,47 @@
     font-size: 10px;
     font-weight: bold;
   }
-
+ 
   .seccion { margin-top: 6px; }
-
+ 
   .observ-box {
     border: 1px solid #bbb;
     min-height: 40px;
     padding: 5px;
     font-size: 9.5px;
   }
-
-  .firma img {
-    max-width: 140px;
+ 
+  /* ══ FIRMA ══
+     Soporta tanto firma dibujada (canvas PNG ~300px ancho)
+     como imagen subida (puede ser más ancha/alta).
+     max-width contiene ambas sin deformar el PDF.
+  */
+  .firma-wrap {
+    margin-top: 6px;
+  }
+ 
+  .firma-wrap img {
+    display: block;
+    max-width: 200px;   /* suficiente para canvas dibujado y fotos de firma */
+    max-height: 80px;   /* evita que una imagen subida muy alta rompa el layout */
+    width: auto;
+    height: auto;
     border: 1px solid #333;
     margin-top: 4px;
+    /* Fondo blanco por si la imagen tiene transparencia */
+    background: #fff;
   }
-
+ 
+  .firma-vacia {
+    color: #777;
+    border: 1px dashed #aaa;
+    padding: 8px;
+    width: 140px;
+    margin-top: 4px;
+    text-align: center;
+    display: inline-block;
+  }
+ 
   .nota {
     margin-top: 8px;
     font-size: 9px;
@@ -106,25 +131,11 @@
     padding-top: 4px;
     color: #444;
   }
-
-  /* Badge tipo vehículo */
-  .tipo-badge {
-    font-size: 9px;
-    background: #e8f0fe;
-    border: 1px solid #003366;
-    border-radius: 3px;
-    padding: 1px 5px;
-    color: #003366;
-    font-weight: 700;
-    text-transform: uppercase;
-    margin-left: 8px;
-    vertical-align: middle;
-  }
 </style>
 </head>
-
+ 
 <body>
-
+ 
   <!-- ENCABEZADO -->
   <div class="encabezado">
     <img class="logo" src="{{ logo_path }}" alt="Logo">
@@ -132,54 +143,51 @@
       {{ titulo_tipo or "Inspección Pre Operacional Motocicleta" }}
     </div>
   </div>
-
+ 
   <div class="meta">
     Código: {{ codigo }} — Fecha: {{ fecha }} — Versión: {{ version }}
     — Tipo: <strong>{{ registro.tipo_vehiculo or "Moto" }}</strong>
   </div>
-
+ 
   <!-- INFORMACIÓN GENERAL -->
   <table>
     <tr>
       <th>Conductor</th> <td>{{ registro.nombre_conductor }}</td>
-      <th>Placa</th> <td>{{ registro.placa }}</td>
+      <th>Placa</th>     <td>{{ registro.placa }}</td>
     </tr>
     <tr>
-      <th>Proceso</th> <td>{{ registro.proceso }}</td>
+      <th>Proceso</th>        <td>{{ registro.proceso }}</td>
       <th>Desde / Hasta</th> <td>{{ registro.desde }} - {{ registro.hasta }}</td>
     </tr>
     <tr>
-      <th>Marca</th> <td>{{ registro.marca }}</td>
+      <th>Marca</th>    <td>{{ registro.marca }}</td>
       <th>Gasolina</th> <td>{{ registro.gasolina }}</td>
     </tr>
     <tr>
       <th>Modelo</th> <td>{{ registro.modelo }}</td>
-      <th>Motor</th> <td>{{ registro.motor }}</td>
+      <th>Motor</th>  <td>{{ registro.motor }}</td>
     </tr>
   </table>
-
+ 
   <!-- DOCUMENTOS -->
   <table>
     <tr>
-      <th>Licencia Nº</th> <td>{{ registro.licencia_num }}</td>
-      <th>Vencimiento</th> <td>{{ registro.licencia_venc }}</td>
+      <th>Licencia Nº</th>    <td>{{ registro.licencia_num }}</td>
+      <th>Vencimiento</th>    <td>{{ registro.licencia_venc }}</td>
     </tr>
     <tr>
       <th>Tarjeta Propiedad</th> <td>{{ registro.porte_propiedad }}</td>
-      <th>SOAT</th> <td>{{ registro.soat }}</td>
+      <th>SOAT</th>              <td>{{ registro.soat }}</td>
     </tr>
     <tr>
       <th>Emisión</th> <td>{{ registro.certificado_emision }}</td>
-      <th>Póliza</th> <td>{{ registro.poliza_seguro }}</td>
+      <th>Póliza</th>  <td>{{ registro.poliza_seguro }}</td>
     </tr>
   </table>
-
-  <!-- ASPECTOS
-       aspectos_lista viene del contexto (backend) según tipo_vehiculo.
-       aspectos_parsed es {"1": "B", "1": "M"} ya normalizado por prepare_registro().
-  -->
+ 
+  <!-- ASPECTOS -->
   {% set aspectos_data = registro.aspectos_parsed or {} %}
-
+ 
   <table class="aspectos">
     <tr>
       <th style="width:4%">N°</th>
@@ -187,53 +195,26 @@
       <th style="width:18%">B</th>
       <th style="width:18%">M</th>
     </tr>
-
+ 
     {% for aspecto in aspectos_lista %}
     <tr>
       <td>{{ loop.index }}</td>
       <td class="left">{{ aspecto }}</td>
-
+ 
       {% set val = aspectos_data.get(loop.index|string, '') %}
-
+ 
       <td>
-        {% if val == 'B' %}
-          <span class="box">✔</span>
-        {% else %}
-          <span class="box"></span>
-        {% endif %}
+        {% if val == 'B' %}<span class="box">✔</span>
+        {% else %}<span class="box"></span>{% endif %}
       </td>
-
       <td>
-        {% if val == 'M' %}
-          <span class="box">✖</span>
-        {% else %}
-          <span class="box"></span>
-        {% endif %}
+        {% if val == 'M' %}<span class="box">✖</span>
+        {% else %}<span class="box"></span>{% endif %}
       </td>
     </tr>
     {% endfor %}
-
   </table>
-
-  <!-- OBSERVACIONES Y FIRMA -->
-  <div class="seccion">
-    <strong>Observaciones:</strong>
-    <div class="observ-box">{{ registro.observaciones }}</div>
-
-    <div class="firma" style="margin-top:6px;">
-      <strong>Firma Conductor:</strong><br>
-      {% if registro.firma_base64 %}
-        <img src="{{ registro.firma_base64 }}" alt="Firma">
-      {% elif registro.firma_path %}
-        <img src="{{ registro.firma_path }}" alt="Firma">
-      {% else %}
-        <div style="color:#777; border:1px dashed #aaa; padding:8px; width:140px; margin-top:4px; text-align:center;">
-          (sin firma)
-        </div>
-      {% endif %}
-    </div>
-  </div>
-
+ 
   <!-- CONDICIONES ÓPTIMAS -->
   <div class="seccion">
     <strong>¿El vehículo está en óptimas condiciones?</strong>
@@ -243,12 +224,36 @@
       <span class="box">✖</span> No
     {% endif %}
   </div>
-
+ 
+  <!-- OBSERVACIONES -->
+  <div class="seccion">
+    <strong>Observaciones:</strong>
+    <div class="observ-box">{{ registro.observaciones }}</div>
+  </div>
+ 
+  <!-- FIRMA
+       Prioridad: firma_base64 (data-URI inyectado por utils_pdf.py)
+                  > firma_path (ruta en disco)
+                  > sin firma
+       Funciona igual para firma dibujada e imagen subida —
+       ambas llegan como PNG base64 desde el frontend.
+  -->
+  <div class="seccion firma-wrap">
+    <strong>Firma Conductor:</strong><br>
+    {% if registro.firma_base64 %}
+      <img src="{{ registro.firma_base64 }}" alt="Firma del conductor">
+    {% elif registro.firma_path %}
+      <img src="{{ registro.firma_path }}" alt="Firma del conductor">
+    {% else %}
+      <div class="firma-vacia">(sin firma)</div>
+    {% endif %}
+  </div>
+ 
   <!-- NOTA -->
   <div class="nota">
     <strong>Nota:</strong> Antes de iniciar el recorrido verifique que el vehículo cuente con todos
     los elementos en buen estado. Reporte cualquier condición insegura.
   </div>
-
+ 
 </body>
 </html>
