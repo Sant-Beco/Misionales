@@ -801,26 +801,51 @@
               <label class="f-label">Licencia No.</label>
               <input id="licencia_num" name="licencia_num" class="f-input" placeholder="Número de licencia">
               <span id="error_licencianum" class="f-error"></span>
-              <label class="f-label mt">Fecha de vencimiento</label>
+            </div>
+            <div class="field">
+              <label class="f-label">Vencimiento licencia</label>
               <input id="licencia_venc" name="licencia_venc" type="date" class="f-input">
               <span id="error_licencia_venc" class="f-error"></span>
             </div>
             <div class="field">
               <label class="f-label">Tarjeta de propiedad</label>
-              <input id="porte_propiedad" name="porte_propiedad" class="f-input">
+              <select id="porte_propiedad" name="porte_propiedad" class="f-select">
+                <option value="">Seleccione...</option>
+                <option value="Vigente">✓ Vigente</option>
+                <option value="Vencida">✕ Vencida</option>
+                <option value="No tiene">✕ No tiene</option>
+              </select>
               <span id="error_porte" class="f-error"></span>
-              <label class="f-label mt">SOAT</label>
-              <input id="soat" name="soat" class="f-input">
-              <span id="error_soat" class="f-error"></span>
             </div>
             <div class="field">
-              <label class="f-label">Emisión de gases</label>
-              <input id="certificado_emision" name="certificado_emision" class="f-input">
+              <label class="f-label">SOAT</label>
+              <select id="soat" name="soat" class="f-select">
+                <option value="">Seleccione...</option>
+                <option value="Vigente">✓ Vigente</option>
+                <option value="Vencido">✕ Vencido</option>
+                <option value="No tiene">✕ No tiene</option>
+              </select>
+              <span id="error_soat" class="f-error"></span>
+            </div>
+            <!-- Emisión de gases: solo visible en Carro y Camion -->
+            <div class="field" id="campoEmision" style="display:none;">
+              <label class="f-label">Certificado de emisión de gases</label>
+              <select id="certificado_emision" name="certificado_emision" class="f-select">
+                <option value="N/A">N/A — No aplica</option>
+                <option value="Vigente">✓ Vigente</option>
+                <option value="Vencido">✕ Vencido</option>
+                <option value="No tiene">✕ No tiene</option>
+              </select>
               <span id="error_emision" class="f-error"></span>
             </div>
             <div class="field">
               <label class="f-label">Póliza de seguro</label>
-              <input id="poliza_seguro" name="poliza_seguro" class="f-input">
+              <select id="poliza_seguro" name="poliza_seguro" class="f-select">
+                <option value="">Seleccione...</option>
+                <option value="Vigente">✓ Vigente</option>
+                <option value="Vencida">✕ Vencida</option>
+                <option value="No tiene">✕ No tiene</option>
+              </select>
               <span id="error_poliza" class="f-error"></span>
             </div>
           </div>
@@ -962,36 +987,72 @@
   /* ── ASPECTOS POR TIPO ── */
   const ASPECTOS = {
     Moto: [
-      "Estado de llantas y presión de aire",
-      "Encendido eléctrico y de crank",
-      "Luces y pito",
-      "Espejos retrovisores",
-      "Manijas de freno y clutch",
-      "Sistema de frenos",
-      "Estado de freno de disco",
+      /* 1. LLANTAS */
+      "Llantas — estado y presión de aire (delantera y trasera)",
+      "Llanta de repuesto o kit de pinchazo",
+      /* 2. ENCENDIDO */
+      "Encendido eléctrico y arranque (crank)",
+      /* 3. LUCES — separadas para detectar fallas individuales */
+      "Faro delantero — enciende y funciona correctamente",
+      "Luces traseras y stop — encienden y funcionan correctamente",
+      "Direccionales — encienden y funcionan correctamente",
+      /* 4. PITO — independiente de luces */
+      "Pito / bocina — funciona correctamente",
+      /* 5. ESPEJOS */
+      "Espejos retrovisores — estado y ajuste",
+      /* 6. CONTROLES */
+      "Manijas de freno y clutch — estado y recorrido",
+      /* 7. FRENOS — separados para detectar fallas por eje */
+      "Sistema de frenos delantero — estado del frenado",
+      "Sistema de frenos trasero — estado del frenado",
       "Nivel de líquido de freno",
-      "Revisión sistema tablero",
+      /* 8. TRANSMISIÓN */
+      "Cadena o correa de transmisión — estado y tensión",
+      /* 9. SUSPENSIÓN */
+      "Estado de suspensión delantera y trasera",
+      /* 10. MOTOR Y FLUIDOS */
       "Fugas de combustible y/o aceites",
-      "Kit de arrastre",
-      "Estado de suspensión",
-      "Nivel de aceites"
+      "Nivel de aceite de motor",
+      /* 11. TABLERO */
+      "Revisión tablero e instrumentos",
+      /* 12. SEGURIDAD */
+      "Kit de arrastre (herramienta básica)"
     ],
     Carro: [
-      "Estado de llantas y presión de aire",
-      "Funcionamiento de luces y bocina",
-      "Espejos retrovisores",
-      "Sistema de frenos",
+      /* 1. LLANTAS */
+      "Llantas — estado y presión de aire (4 ruedas)",
+      "Llanta de repuesto — estado y presión de aire",
+      /* 2. LUCES — separadas para detectar fallas individuales */
+      "Luces altas y bajas — encienden y funcionan correctamente",
+      "Luces de stop — encienden y funcionan correctamente",
+      "Direccionales — encienden y funcionan correctamente",
+      "Luces de parqueo y reversa — encienden y funcionan",
+      /* 3. BOCINA — independiente de luces */
+      "Bocina / pito — funciona correctamente",
+      /* 4. ESPEJOS */
+      "Espejos retrovisores y laterales — estado y ajuste",
+      /* 5. FRENOS */
+      "Sistema de frenos — estado del frenado",
       "Nivel de líquido de freno",
-      "Nivel de aceites",
+      /* 6. FLUIDOS */
+      "Nivel de aceite de motor",
       "Nivel de líquido refrigerante",
-      "Fugas de combustible y/o aceites",
+      "Nivel de líquido de dirección hidráulica",
+      "Fugas de combustible, aceites o líquidos",
+      /* 7. MECÁNICA */
+      "Estado de correas y mangueras",
+      /* 8. TABLERO E INTERIORES */
       "Revisión tablero e instrumentos",
       "Funcionamiento de limpiaparabrisas",
-      "Estado de correas y mangueras",
-      "Funcionamiento de puertas y seguros",
+      "Funcionamiento de puertas, seguros y vidrios",
+      /* 9. DIRECCIÓN */
       "Estado de la dirección",
-      "Cinturón de seguridad",
-      "Estado de la carrocería / estructura"
+      /* 10. SEGURIDAD PASIVA */
+      "Cinturones de seguridad (todos los puestos)",
+      /* 11. CARROCERÍA */
+      "Estado de la carrocería / estructura",
+      /* 12. EXTINTOR */
+      "Extintor — vigente y en buen estado"
     ],
     Camion: [
       /* 1. ESTADO DE LLANTAS */
