@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════
    INCUBANT — SISTEMA DE DISEÑO MISIONALES
-   Dark mode · Avícola · SST
+   Light mode (predeterminado) + Dark mode toggle
    ═══════════════════════════════════════════════════════════ */
 
 @font-face {
@@ -28,62 +28,125 @@
     font-style: italic;
 }
 
+/* ══════════════════════════════════════════
+   PALETA DE MARCA (invariante)
+   ══════════════════════════════════════════ */
 :root {
-    /* Paleta Incubant */
-    --amber:      #F59C00;
-    --golden:     #FFCC00;
-    --ember:      #EB6608;
-    --orange:     #EF7D00;
+    --amber:  #F59C00;
+    --golden: #FFCC00;
+    --ember:  #EB6608;
+    --orange: #EF7D00;
 
-    /* Dark mode base */
-    --night:      #0D0E10;
-    --dark1:      #13151A;
-    --dark2:      #1A1D24;
-    --dark3:      #222730;
-    --dark4:      #2C323E;
-    --border:     #2E3444;
-    --border2:    #3A4155;
-
-    /* Texto */
-    --text:       #F0EDE8;
-    --text2:      #B8B0A4;
-    --text3:      #6E6860;
-
-    /* Gradientes de marca */
     --grad-brand: linear-gradient(135deg, #FFCC00 0%, #F59C00 40%, #EB6608 100%);
     --grad-warm:  linear-gradient(135deg, #EF7D00 0%, #EB6608 100%);
-    --grad-glow:  radial-gradient(ellipse at center, rgba(245,156,0,0.15) 0%, transparent 70%);
 
-    /* Sombras */
-    --shadow-sm:  0 2px 8px rgba(0,0,0,0.4);
-    --shadow-md:  0 4px 20px rgba(0,0,0,0.5);
-    --shadow-lg:  0 8px 40px rgba(0,0,0,0.6);
-    --shadow-amber: 0 4px 24px rgba(245,156,0,0.25);
-
-    /* Radio */
     --r-sm: 6px;
     --r-md: 10px;
     --r-lg: 16px;
     --r-xl: 24px;
 }
 
+/* ══════════════════════════════════════════
+   LIGHT MODE — predeterminado
+   ══════════════════════════════════════════ */
+:root,
+[data-theme="light"] {
+    --bg-base:    #F5F3EE;
+    --bg-1:       #FFFFFF;
+    --bg-2:       #FAFAF8;
+    --bg-3:       #F0EDE6;
+    --bg-4:       #E8E4DC;
+
+    --border:     #E2DDD4;
+    --border2:    #CCC7BC;
+
+    --text:       #1A1510;
+    --text2:      #5C5044;
+    --text3:      #9C9088;
+
+    --shadow-sm:  0 2px 8px rgba(0,0,0,0.08);
+    --shadow-md:  0 4px 20px rgba(0,0,0,0.10);
+    --shadow-lg:  0 8px 40px rgba(0,0,0,0.12);
+    --shadow-amber: 0 4px 24px rgba(245,156,0,0.30);
+
+    --grad-glow:  radial-gradient(ellipse at center, rgba(245,156,0,0.12) 0%, transparent 70%);
+
+    /* Aliases para compatibilidad con componentes existentes */
+    --night:  var(--bg-base);
+    --dark1:  var(--bg-1);
+    --dark2:  var(--bg-2);
+    --dark3:  var(--bg-3);
+    --dark4:  var(--bg-4);
+
+    /* Decoradores huevo en light */
+    --egg-fill: linear-gradient(135deg, rgba(245,156,0,0.08), rgba(235,102,8,0.05));
+    --egg-border: rgba(245,156,0,0.12);
+    --dots-color: rgba(245,156,0,0.18);
+
+    /* Card brand text */
+    --card-bg:    #FFFFFF;
+    --input-bg:   #F5F2EC;
+}
+
+/* ══════════════════════════════════════════
+   DARK MODE
+   ══════════════════════════════════════════ */
+[data-theme="dark"] {
+    --bg-base:    #0D0E10;
+    --bg-1:       #13151A;
+    --bg-2:       #1A1D24;
+    --bg-3:       #222730;
+    --bg-4:       #2C323E;
+
+    --border:     #2E3444;
+    --border2:    #3A4155;
+
+    --text:       #F0EDE8;
+    --text2:      #B8B0A4;
+    --text3:      #6E6860;
+
+    --shadow-sm:  0 2px 8px rgba(0,0,0,0.4);
+    --shadow-md:  0 4px 20px rgba(0,0,0,0.5);
+    --shadow-lg:  0 8px 40px rgba(0,0,0,0.6);
+    --shadow-amber: 0 4px 24px rgba(245,156,0,0.25);
+
+    --grad-glow:  radial-gradient(ellipse at center, rgba(245,156,0,0.15) 0%, transparent 70%);
+
+    --night:  var(--bg-base);
+    --dark1:  var(--bg-1);
+    --dark2:  var(--bg-2);
+    --dark3:  var(--bg-3);
+    --dark4:  var(--bg-4);
+
+    --egg-fill: linear-gradient(135deg, rgba(245,156,0,0.07), rgba(235,102,8,0.04));
+    --egg-border: rgba(245,156,0,0.06);
+    --dots-color: rgba(245,156,0,0.12);
+
+    --card-bg:    var(--bg-2);
+    --input-bg:   var(--bg-3);
+}
+
+/* ══════════════════════════════════════════
+   TRANSICIÓN SUAVE AL CAMBIAR TEMA
+   ══════════════════════════════════════════ */
 *, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.2s ease, box-shadow 0.3s ease;
 }
 
 html { scroll-behavior: smooth; }
 
 body {
     font-family: 'Futura', 'Trebuchet MS', sans-serif;
-    background: var(--night);
+    background: var(--bg-base);
     color: var(--text);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
 }
 
-/* ── Decoradores orgánicos (huevo/pollito shapes) ── */
+/* ── Decoradores orgánicos ── */
 .egg-deco {
     position: absolute;
     border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
@@ -91,7 +154,6 @@ body {
     opacity: 0.06;
     pointer-events: none;
 }
-
 .egg-deco-outline {
     position: absolute;
     border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
@@ -116,31 +178,29 @@ body {
     text-transform: uppercase;
     cursor: pointer;
     text-decoration: none;
-    transition: all 0.25s ease;
 }
-
 .btn-primary {
     background: var(--grad-brand);
     color: #1A0F00;
     box-shadow: var(--shadow-amber);
+    transition: filter 0.25s, transform 0.25s, box-shadow 0.25s !important;
 }
 .btn-primary:hover {
     filter: brightness(1.1);
     transform: translateY(-1px);
     box-shadow: 0 6px 28px rgba(245,156,0,0.4);
 }
-
 .btn-ghost {
     background: transparent;
     border: 1px solid var(--border2);
     color: var(--text2);
+    transition: border-color 0.2s, color 0.2s, background 0.2s !important;
 }
 .btn-ghost:hover {
     border-color: var(--amber);
     color: var(--amber);
     background: rgba(245,156,0,0.06);
 }
-
 .btn-danger {
     background: rgba(220,60,60,0.12);
     border: 1px solid rgba(220,60,60,0.3);
@@ -153,7 +213,6 @@ body {
 
 /* ── Inputs ── */
 .form-group { margin-bottom: 1.25rem; }
-
 .form-label {
     display: block;
     font-size: 0.75rem;
@@ -163,35 +222,31 @@ body {
     color: var(--text2);
     margin-bottom: 0.4rem;
 }
-
 .form-input,
 .form-select,
 .form-textarea {
     width: 100%;
     padding: 0.75rem 1rem;
-    background: var(--dark3);
+    background: var(--input-bg);
     border: 1px solid var(--border);
     border-radius: var(--r-md);
     color: var(--text);
     font-family: 'Futura', sans-serif;
     font-size: 0.9rem;
-    transition: border-color 0.2s, box-shadow 0.2s;
     outline: none;
     appearance: none;
 }
-
 .form-input:focus,
 .form-select:focus,
 .form-textarea:focus {
     border-color: var(--amber);
     box-shadow: 0 0 0 3px rgba(245,156,0,0.12);
 }
-
 .form-input::placeholder { color: var(--text3); }
 
 /* ── Cards ── */
 .card {
-    background: var(--dark2);
+    background: var(--card-bg);
     border: 1px solid var(--border);
     border-radius: var(--r-lg);
     padding: 1.5rem;
@@ -212,7 +267,53 @@ body {
 .badge-amber  { background: rgba(245,156,0,0.15);  color: var(--amber); }
 .badge-green  { background: rgba(40,200,120,0.15); color: #28c878; }
 .badge-red    { background: rgba(220,60,60,0.15);  color: #f07070; }
-.badge-muted  { background: var(--dark3); color: var(--text3); }
+.badge-muted  { background: var(--bg-3); color: var(--text3); }
+
+/* ══════════════════════════════════════════
+   THEME TOGGLE — componente navbar
+   ══════════════════════════════════════════ */
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    border: 1px solid var(--border2);
+    background: var(--bg-3);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text2);
+    user-select: none;
+}
+.theme-toggle:hover {
+    border-color: var(--amber);
+    color: var(--amber);
+}
+.theme-toggle-track {
+    width: 32px;
+    height: 18px;
+    border-radius: 9px;
+    background: var(--border2);
+    position: relative;
+    transition: background 0.25s !important;
+}
+.theme-toggle-thumb {
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border-radius: 50%;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    transition: transform 0.25s !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+[data-theme="dark"] .theme-toggle-track { background: var(--amber); }
+[data-theme="dark"] .theme-toggle-thumb { transform: translateX(14px); }
+[data-theme="dark"] .theme-toggle { background: var(--bg-3); }
 
 /* ── Animaciones ── */
 @keyframes fadeUp {
@@ -231,14 +332,312 @@ body {
     0%, 100% { transform: translateY(0px); }
     50%       { transform: translateY(-6px); }
 }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-.anim-fade-up   { animation: fadeUp  0.5s ease both; }
-.anim-fade-in   { animation: fadeIn  0.4s ease both; }
-.anim-float     { animation: float   3s   ease-in-out infinite; }
+.anim-fade-up { animation: fadeUp 0.5s ease both; }
+.anim-fade-in { animation: fadeIn 0.4s ease both; }
+.anim-float   { animation: float  3s ease-in-out infinite; }
 
-/* Stagger delays */
 .delay-1 { animation-delay: 0.05s; }
 .delay-2 { animation-delay: 0.10s; }
 .delay-3 { animation-delay: 0.15s; }
 .delay-4 { animation-delay: 0.20s; }
 .delay-5 { animation-delay: 0.25s; }
+
+/* ══════════════════════════════════════════
+   LOGIN PAGE — page-login.html
+   ══════════════════════════════════════════ */
+
+/* Layout */
+body.page-login {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Fondo decorativo */
+.bg-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.bg-egg-1 {
+    width: 520px; height: 620px;
+    right: -140px; top: -80px;
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    background: var(--egg-fill);
+    border: 1px solid var(--egg-border);
+    position: absolute;
+}
+.bg-egg-2 {
+    width: 280px; height: 330px;
+    left: -80px; bottom: -60px;
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    background: var(--egg-fill);
+    border: 1px solid var(--egg-border);
+    position: absolute;
+}
+.bg-glow {
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: var(--grad-glow);
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+}
+.bg-dots {
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle, var(--dots-color) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.4;
+}
+
+/* Toggle de tema flotante */
+.theme-btn-wrap {
+    position: fixed;
+    top: 1.25rem;
+    right: 1.25rem;
+    z-index: 100;
+}
+
+/* Contenedor del card */
+.login-wrap {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 420px;
+    padding: 1rem;
+}
+
+.login-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--r-xl);
+    padding: 2.75rem 2.5rem 2.5rem;
+    box-shadow: var(--shadow-lg), 0 0 60px rgba(245,156,0,0.06);
+    animation: fadeUp 0.6s ease both;
+}
+
+/* Logo */
+.login-logo {
+    text-align: center;
+    margin-bottom: 1.75rem;
+}
+.login-logo img {
+    height: 56px;
+    animation: float 3s ease-in-out infinite;
+    filter: drop-shadow(0 4px 16px rgba(245,156,0,0.3));
+}
+
+/* Título */
+.login-title {
+    text-align: center;
+    margin-bottom: 0.25rem;
+}
+.login-title h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: var(--grad-brand);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.login-subtitle {
+    text-align: center;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    color: var(--text3);
+    text-transform: uppercase;
+    margin-bottom: 1.75rem;
+}
+
+/* Badge SST */
+.sst-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: rgba(245,156,0,0.08);
+    border: 1px solid rgba(245,156,0,0.15);
+    border-radius: 20px;
+    padding: 0.3rem 0.85rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin: 0 auto 1.75rem;
+    width: fit-content;
+}
+.sst-dot {
+    width: 6px; height: 6px;
+    background: var(--amber);
+    border-radius: 50%;
+    flex-shrink: 0;
+    animation: pulse-amber 2s infinite;
+}
+
+/* Divider */
+.divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+.divider-line { flex: 1; height: 1px; background: var(--border); }
+.divider span {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+}
+
+/* Banners de mensaje */
+.session-banner {
+    display: none;
+    background: rgba(245,156,0,0.08);
+    border: 1px solid rgba(245,156,0,0.2);
+    border-radius: var(--r-md);
+    padding: 0.75rem 1rem;
+    font-size: 0.82rem;
+    color: var(--amber);
+    margin-bottom: 1.25rem;
+    text-align: center;
+    line-height: 1.5;
+}
+.error-box {
+    display: none;
+    background: rgba(220,60,60,0.10);
+    border: 1px solid rgba(220,60,60,0.25);
+    border-radius: var(--r-md);
+    padding: 0.75rem 1rem;
+    font-size: 0.83rem;
+    color: #f07070;
+    margin-bottom: 1.25rem;
+}
+
+/* Input con ícono */
+.input-wrapper { position: relative; }
+.input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    opacity: 0.45;
+    pointer-events: none;
+}
+.input-wrapper .form-input { padding-left: 2.75rem; }
+
+/* Botón submit */
+.btn-submit {
+    width: 100%;
+    padding: 0.9rem;
+    background: var(--grad-brand);
+    border: none;
+    border-radius: var(--r-md);
+    color: #1a0f00;
+    font-family: 'Futura', sans-serif;
+    font-weight: 700;
+    font-size: 0.88rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: var(--shadow-amber);
+    margin-top: 0.5rem;
+    transition: filter 0.25s, transform 0.25s, box-shadow 0.25s !important;
+}
+.btn-submit:hover:not(:disabled) {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 28px rgba(245,156,0,0.45);
+}
+.btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Footer */
+.login-footer {
+    margin-top: 1.75rem;
+    text-align: center;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    color: var(--text3);
+    text-transform: uppercase;
+}
+.login-footer em { color: var(--amber); font-style: normal; }
+
+/* Spinner de carga */
+.spinner {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid rgba(26,15,0,0.3);
+    border-top-color: #1a0f00;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+}
+
+/* ── Responsive login ── */
+@media (max-width: 480px) {
+    body.page-login { align-items: flex-start; overflow-y: auto; padding: 1.5rem 0 2rem; }
+    .login-wrap { padding: 0.75rem; max-width: 100%; }
+    .login-card { padding: 2rem 1.5rem 1.75rem; border-radius: var(--r-lg); }
+    .login-logo img { height: 46px; }
+    .login-title h1 { font-size: 1.3rem; }
+    .login-subtitle { font-size: 0.7rem; margin-bottom: 1.25rem; }
+    .sst-badge { font-size: 0.65rem; padding: 0.25rem 0.7rem; margin-bottom: 1.25rem; }
+    .form-group { margin-bottom: 1rem; }
+    .form-input { padding: 0.7rem 0.9rem 0.7rem 2.5rem; font-size: 0.9rem; }
+    .input-icon { left: 0.8rem; font-size: 0.9rem; }
+    .btn-submit { padding: 0.8rem; font-size: 0.82rem; letter-spacing: 0.08em; }
+    .bg-egg-1 { width: 280px; height: 330px; right: -80px; top: -60px; }
+    .bg-egg-2 { width: 160px; height: 190px; left: -50px; bottom: -40px; }
+    .bg-glow  { width: 360px; height: 360px; }
+    .theme-btn-wrap { top: 0.75rem; right: 0.75rem; }
+}
+@media (max-width: 360px) {
+    .login-card { padding: 1.5rem 1.1rem 1.5rem; }
+    .login-title h1 { font-size: 1.15rem; }
+    .login-logo img { height: 40px; }
+}
+@media (max-height: 600px) {
+    body.page-login { align-items: flex-start; overflow-y: auto; padding: 1rem 0; }
+    .login-logo { margin-bottom: 1rem; }
+    .login-logo img { height: 40px; animation: none; }
+    .login-title { margin-bottom: 0.15rem; }
+    .login-subtitle { margin-bottom: 1rem; }
+    .sst-badge { margin-bottom: 1rem; }
+    .divider { margin-bottom: 1rem; }
+    .login-footer { margin-top: 1rem; }
+}
+
+/* ══════════════════════════════════════════
+   SNIPPET — theme-toggle.js (inline uso)
+   Pegar en cualquier HTML que use este CSS:
+
+   <script>
+     (function(){
+       const root = document.documentElement;
+       const saved = localStorage.getItem('incubant-theme') || 'light';
+       root.setAttribute('data-theme', saved);
+       document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+         btn.addEventListener('click', () => {
+           const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+           root.setAttribute('data-theme', next);
+           localStorage.setItem('incubant-theme', next);
+         });
+       });
+     })();
+   </script>
+
+   En cualquier HTML agregar:
+   <button class="theme-toggle" data-theme-toggle>
+     <div class="theme-toggle-track"><div class="theme-toggle-thumb"></div></div>
+     <span class="toggle-label">Tema</span>
+   </button>
+   ══════════════════════════════════════════ */
