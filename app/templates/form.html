@@ -13,9 +13,9 @@
   
   <!-- Aplica el tema guardado ANTES de pintar (evita flash) -->
   <script>
-    (function() {
-      const saved = localStorage.getItem('incubant-theme') || 'light';
-      document.documentElement.setAttribute('data-theme', saved);
+    (function(){
+      var t = localStorage.getItem('incubant-theme') || 'light';
+      document.documentElement.setAttribute('data-theme', t);
     })();
   </script>
 </head>
@@ -37,13 +37,6 @@
         <a href="#" id="btnAdmin" class="btn-top btn-top-amber" style="display:none;">⚙ Admin</a>
       </div>
 
-      <div class="topbar-right">
-        <!-- Botón de cambio de tema (estilo unificado) -->
-        <button class="theme-toggle" data-theme-toggle type="button">
-          <div class="theme-toggle-track"><div class="theme-toggle-thumb"></div></div>
-          <span id="themeLabel">Oscuro</span>
-        </button>
-        <div class="topbar-sep"></div>
         <div class="user-chip">
           <div class="user-dot"></div>
           <span class="user-text" id="headerNombre">—</span>
@@ -335,26 +328,6 @@
 
   <!-- ================== JAVASCRIPT COMPLETO ================== -->
   <script>
-    // ===========================
-    // 1. THEME MANAGER (unificado)
-    // ===========================
-    (function() {
-      const root = document.documentElement;
-      const label = document.getElementById('themeLabel');
-      function applyTheme(theme) {
-        root.setAttribute('data-theme', theme);
-        localStorage.setItem('incubant-theme', theme);
-        if (label) label.textContent = theme === 'dark' ? 'Claro' : 'Oscuro';
-      }
-      const current = root.getAttribute('data-theme') || 'light';
-      applyTheme(current);
-      document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-          applyTheme(next);
-        });
-      });
-    })();
 
     // ===========================
     // 2. INICIALIZACIÓN GENERAL
