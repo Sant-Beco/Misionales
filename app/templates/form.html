@@ -1498,9 +1498,7 @@
     }
     formData.set("aspectos", JSON.stringify(aspectos));
     formData.set("tipo_vehiculo", tipoActual);
-    /* Usar siempre firmaDataInput: contiene canvas dibujado O imagen subida */
-    const firmaVal = document.getElementById("firmaDataInput").value;
-    formData.set("firma_dataurl", firmaVal);
+    formData.set("firma_dataurl", window.firmaApp.getDataURL());
  
     let hasError = false;
     const checks = [
@@ -1612,9 +1610,12 @@
       console.error(e);
       document.getElementById("globalMessage").innerHTML =
         '<div class="msg-error">Error de conexión. Intenta nuevamente.</div>';
-    } 
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = "📄 Enviar y generar PDF";
+    }
+  });
   </script>
  
 </body>
 </html>
- 
