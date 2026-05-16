@@ -7,6 +7,13 @@
   <link rel="stylesheet" href="/static/css/incubant-theme.css">
   <link rel="icon" href="/static/img/logotipo_01.png" type="image/png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+ <script>
+    (function(){
+      var t = localStorage.getItem('incubant-theme') || 'light';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+</head>
   <style>
     body { display: flex; min-height: 100vh; margin: 0; }
 
@@ -350,12 +357,12 @@ const GOLDEN = '#FFCC00';
 const EMBER  = '#EB6608';
 const ORANGE = '#EF7D00';
 const MUTED  = '#6E6860';
-const BORDER = '#2E3444';
-const SURFACE= '#1A1D24';
+const BORDER  = getComputedStyle(document.documentElement).getPropertyValue('--border').trim();
+const SURFACE = getComputedStyle(document.documentElement).getPropertyValue('--bg-2').trim();
 const PALETTE = [AMBER, GOLDEN, EMBER, ORANGE, '#f0c040', '#e8882a', '#ffdd55'];
 
-Chart.defaults.color       = MUTED;
-Chart.defaults.borderColor = BORDER;
+Chart.defaults.color       = getComputedStyle(document.documentElement).getPropertyValue('--text3').trim();
+Chart.defaults.borderColor = getComputedStyle(document.documentElement).getPropertyValue('--border').trim();
 Chart.defaults.font.family = "'Futura', 'Trebuchet MS', sans-serif";
 
 const usuariosActivos = [
@@ -519,7 +526,7 @@ setPeriod(14, document.querySelector('.period-btn.active'));
     type: 'doughnut',
     data: {
       labels: top5.map(u => u.nombre.split(' ')[0]),
-      datasets: [{ data: top5.map(u => u.total), backgroundColor: PALETTE.slice(0, top5.length).map(c => c + 'cc'), borderColor: '#13151A', borderWidth: 3, hoverOffset: 8 }]
+      datasets: [{ data: top5.map(u => u.total), backgroundColor: PALETTE.slice(0, top5.length).map(c => c + 'cc'), borderColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-1').trim(), borderWidth: 3, hoverOffset: 8 }]
     },
     options: {
       responsive: false, cutout: '68%',
