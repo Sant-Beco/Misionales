@@ -6,6 +6,13 @@
   <title>Auditoría · Misionales Incubant</title>
   <link rel="stylesheet" href="/static/css/incubant-theme.css">
   <link rel="icon" href="/static/img/logotipo_01.png" type="image/png">
+  <script>
+    (function(){
+      var t = localStorage.getItem('incubant-theme') || 'light';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+</head>
   <style>
     /* ── LAYOUT ── */
     body { display: flex; min-height: 100vh; }
