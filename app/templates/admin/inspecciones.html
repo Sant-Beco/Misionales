@@ -6,6 +6,13 @@
   <title>Inspecciones · Misionales Incubant</title>
   <link rel="stylesheet" href="/static/css/incubant-theme.css">
   <link rel="icon" href="/static/img/logotipo_01.png" type="image/png">
+  <script>
+    (function(){
+      var t = localStorage.getItem('incubant-theme') || 'light';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+</head>
   <style>
     /* FIX: keyframes inline — redundante pero seguro si theme.css falla */
     @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
