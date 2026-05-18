@@ -12,220 +12,218 @@
       document.documentElement.setAttribute('data-theme', t);
     })();
   </script>
-</head>
-
   <style>
     body { display: flex; min-height: 100vh; }
 
-    /* Sidebar */
-    .sidebar { width: 220px; flex-shrink: 0; background: var(--dark1); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 1.5rem 0.875rem; position: fixed; top: 0; left: 0; bottom: 0; z-index: 20; }
-    .sidebar-brand { display: flex; align-items: center; gap: 0.6rem; padding: 0 0.5rem 1.5rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+    /* ══ SIDEBAR — usa variables del tema ══ */
+    .sidebar {
+      width: 220px; flex-shrink: 0;
+      background: var(--bg-1); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      padding: 1.5rem 0.875rem;
+      position: fixed; top: 0; left: 0; bottom: 0; z-index: 20;
+      transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+      overflow-y: auto; overscroll-behavior: contain;
+    }
+    .sidebar-brand { display: flex; align-items: center; gap: 0.6rem; padding: 0 0.5rem 1.5rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; flex-shrink: 0; }
     .brand-logo { height: 32px; filter: drop-shadow(0 2px 8px rgba(245,156,0,0.35)); }
     .brand-name { font-size: 0.95rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; background: var(--grad-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .brand-sub { font-size: 0.62rem; color: var(--text3); letter-spacing: 0.06em; text-transform: uppercase; }
     .nav-section { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); padding: 0 0.75rem; margin-bottom: 0.4rem; }
-    .nav-link { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.75rem; border-radius: var(--r-md); color: var(--text2); text-decoration: none; font-size: 0.85rem; margin-bottom: 2px; transition: all 0.2s; }
-    .nav-link:hover { background: var(--dark3); color: var(--text); }
+    .nav-link { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.75rem; border-radius: var(--r-md); color: var(--text2); text-decoration: none; font-size: 0.85rem; margin-bottom: 2px; transition: all 0.2s; min-height: 44px; }
+    .nav-link:hover { background: var(--bg-3); color: var(--text); }
     .nav-link.active { background: rgba(245,156,0,0.1); color: var(--amber); border-left: 2px solid var(--amber); }
-    .nav-icon { font-size: 0.95rem; width: 18px; text-align: center; }
-    .sidebar-footer { margin-top: auto; padding-top: 1.25rem; border-top: 1px solid var(--border); }
-    .user-pill { display: flex; align-items: center; gap: 0.6rem; padding: 0.65rem 0.75rem; border-radius: var(--r-md); background: var(--dark3); margin-bottom: 0.75rem; }
+    .nav-icon { font-size: 0.95rem; width: 18px; text-align: center; flex-shrink: 0; }
+    .sidebar-footer { margin-top: auto; padding-top: 1.25rem; border-top: 1px solid var(--border); flex-shrink: 0; }
+    .user-pill { display: flex; align-items: center; gap: 0.6rem; padding: 0.65rem 0.75rem; border-radius: var(--r-md); background: var(--bg-3); margin-bottom: 0.75rem; }
     .user-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--grad-brand); display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; color: #1a0f00; flex-shrink: 0; }
     .user-name { font-size: 0.8rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .user-role { font-size: 0.65rem; color: var(--amber); letter-spacing: 0.06em; text-transform: uppercase; }
-    .btn-logout { display: flex; align-items: center; justify-content: center; gap: 0.4rem; width: 100%; padding: 0.6rem; background: rgba(220,60,60,0.08); border: 1px solid rgba(220,60,60,0.2); border-radius: var(--r-md); color: #f07070; text-decoration: none; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.2s; }
+
+    /* Theme toggle en sidebar footer */
+    .sidebar-theme-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+    .sidebar-theme-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); }
+
+    .btn-logout { display: flex; align-items: center; justify-content: center; gap: 0.4rem; width: 100%; padding: 0.6rem; background: rgba(220,60,60,0.08); border: 1px solid rgba(220,60,60,0.2); border-radius: var(--r-md); color: #f07070; cursor: pointer; font-family: 'Futura', sans-serif; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.2s; min-height: 44px; }
     .btn-logout:hover { background: rgba(220,60,60,0.18); border-color: #f07070; }
 
-    /* Main */
-    .main { margin-left: 220px; flex: 1; padding: 2rem 2.25rem; min-height: 100vh; }
-    .topbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; }
-    .page-title { font-size: 1.6rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; background: var(--grad-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; }
-    .page-sub { font-size: 0.78rem; color: var(--text3); margin-top: 0.3rem; }
-
-    /* Formulario card */
-    .form-card {
-      background: var(--dark2); border: 1px solid var(--border);
-      border-radius: var(--r-lg); padding: 2rem;
-      max-width: 560px;
-      animation: fadeUp 0.5s ease both;
-    }
-
-    .alert-info {
-      background: rgba(245,156,0,0.07);
-      border: 1px solid rgba(245,156,0,0.2);
-      border-radius: var(--r-md); padding: 0.75rem 1rem;
-      font-size: 0.82rem; color: var(--amber); margin-bottom: 1.5rem;
-    }
-
-    .alert-warn {
-      background: rgba(220,60,60,0.07);
-      border: 1px solid rgba(220,60,60,0.2);
-      border-radius: var(--r-md); padding: 0.75rem 1rem;
-      font-size: 0.82rem; color: #f07070; margin-bottom: 1.5rem;
-    }
-
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-
-    .form-hint { font-size: 0.72rem; color: var(--text3); margin-top: 0.3rem; }
-    .required { color: var(--amber); }
-
-    .form-actions { display: flex; gap: 0.75rem; margin-top: 1.75rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
-
-    .btn-back {
-      display: inline-flex; align-items: center; gap: 0.4rem;
-      padding: 0.6rem 1.2rem;
-      background: var(--dark3); border: 1px solid var(--border);
-      border-radius: var(--r-md); color: var(--text2);
-      font-family: 'Futura', sans-serif; font-weight: 700;
-      font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase;
-      text-decoration: none; cursor: pointer; transition: all 0.2s;
-    }
-    .btn-back:hover { border-color: var(--amber); color: var(--amber); }
-
-    .btn-save {
-      display: inline-flex; align-items: center; gap: 0.4rem;
-      padding: 0.6rem 1.5rem;
-      background: var(--grad-brand); border: none;
-      border-radius: var(--r-md); color: #1a0f00;
-      font-family: 'Futura', sans-serif; font-weight: 700;
-      font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase;
-      cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-amber);
-    }
-    .btn-save:hover { filter: brightness(1.1); transform: translateY(-1px); }
-
-    /* Select custom */
-    .form-select option { background: var(--dark2); color: var(--text); }
-
-    /* PIN strength */
-    .pin-feedback { font-size: 0.72rem; margin-top: 0.3rem; }
-    .pin-ok  { color: #28c878; }
-    .pin-bad { color: #f07070; }
-  
-    /* ══ RESPONSIVE MÓVIL ══ */
-    .hamburger {
-      display: none;
-      position: fixed; top: 1rem; left: 1rem; z-index: 30;
-      flex-direction: column; justify-content: center; align-items: center;
-      gap: 5px; width: 40px; height: 40px;
-      background: var(--dark2); border: 1px solid var(--border);
-      border-radius: var(--r-md); cursor: pointer; padding: 0;
-    }
-    .hamburger span {
-      display: block; width: 18px; height: 2px;
-      background: var(--amber); border-radius: 2px;
-      transition: all 0.25s;
-    }
+    /* ══ HAMBURGER ══ */
+    .hamburger { display: none; position: fixed; top: 0.9rem; left: 0.9rem; z-index: 30; flex-direction: column; justify-content: center; align-items: center; gap: 5px; width: 44px; height: 44px; background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r-md); cursor: pointer; padding: 0; }
+    .hamburger span { display: block; width: 18px; height: 2px; background: var(--amber); border-radius: 2px; transition: all 0.25s; }
     .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
     .hamburger.open span:nth-child(2) { opacity: 0; }
     .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    .sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 19; backdrop-filter: blur(2px); }
 
-    .sidebar-backdrop {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.6); z-index: 19;
-      backdrop-filter: blur(2px);
+    /* ══ MAIN ══ */
+    .main { margin-left: 220px; flex: 1; padding: 2rem 2.25rem; min-height: 100vh; background: var(--bg-base); }
+
+    /* ══ TOPBAR ══ */
+    .topbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; gap: 1rem; flex-wrap: wrap; }
+    .page-title { font-size: 1.6rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; background: var(--grad-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; }
+    .page-sub { font-size: 0.78rem; color: var(--text3); margin-top: 0.3rem; }
+
+    /* ══ BOTÓN VOLVER ══ */
+    .btn-back {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.6rem 1.2rem;
+      background: var(--bg-3); border: 1px solid var(--border);
+      border-radius: var(--r-md); color: var(--text2);
+      font-family: 'Futura', sans-serif; font-weight: 700;
+      font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase;
+      text-decoration: none; cursor: pointer; transition: all 0.2s; min-height: 40px;
+    }
+    .btn-back:hover { border-color: var(--amber); color: var(--amber); }
+
+    /* ══ FORM CARD — usa var(--card-bg) para responder al tema ══ */
+    .form-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 2rem;
+      max-width: 560px;
+      box-shadow: var(--shadow-sm);
+      animation: fadeUp 0.5s ease both;
     }
 
+    /* ══ ALERTAS ══ */
+    .alert-info { background: rgba(245,156,0,0.07); border: 1px solid rgba(245,156,0,0.2); border-radius: var(--r-md); padding: 0.75rem 1rem; font-size: 0.82rem; color: var(--amber); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .alert-warn { background: rgba(220,60,60,0.07); border: 1px solid rgba(220,60,60,0.2); border-radius: var(--r-md); padding: 0.75rem 1rem; font-size: 0.82rem; color: #f07070; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; }
+
+    /* ══ SECTION DIVIDER dentro del card ══ */
+    .form-section-title {
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--text3);
+      padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);
+      margin-bottom: 1.25rem; margin-top: 1.5rem;
+    }
+    .form-section-title:first-of-type { margin-top: 0; }
+
+    /* ══ FORM GROUPS ══ */
+    .form-group { margin-bottom: 1.25rem; }
+    .form-hint { font-size: 0.72rem; color: var(--text3); margin-top: 0.3rem; }
+    .required { color: var(--amber); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    /* ══ PIN FEEDBACK ══ */
+    .pin-ok  { color: #28c878; font-size: 0.72rem; margin-top: 0.3rem; }
+    .pin-bad { color: #f07070; font-size: 0.72rem; margin-top: 0.3rem; }
+
+    /* ══ ROL SELECTOR — pill buttons ══ */
+    .rol-selector { display: flex; gap: 0.65rem; }
+    .rol-option { flex: 1; }
+    .rol-option input[type="radio"] { display: none; }
+    .rol-option label {
+      display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+      padding: 0.875rem 1rem;
+      background: var(--bg-3); border: 1.5px solid var(--border);
+      border-radius: var(--r-lg); cursor: pointer;
+      transition: all 0.2s; text-align: center;
+    }
+    .rol-option label:hover { border-color: rgba(245,156,0,0.35); background: rgba(245,156,0,0.03); }
+    .rol-option input:checked + label {
+      border-color: var(--amber);
+      background: rgba(245,156,0,0.06);
+      box-shadow: 0 2px 12px rgba(245,156,0,0.12);
+    }
+    .rol-icon { font-size: 1.5rem; line-height: 1; }
+    .rol-name { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); }
+    .rol-desc { font-size: 0.65rem; color: var(--text3); line-height: 1.4; }
+    .rol-option input:checked + label .rol-name { color: var(--amber); }
+
+    /* ══ ACTIONS ══ */
+    .form-actions {
+      display: flex; gap: 0.75rem; margin-top: 1.75rem;
+      padding-top: 1.5rem; border-top: 1px solid var(--border);
+    }
+    .btn-save {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.7rem 1.75rem; flex: 1; justify-content: center;
+      background: var(--grad-brand); border: none;
+      border-radius: var(--r-md); color: #1a0f00;
+      font-family: 'Futura', sans-serif; font-weight: 700;
+      font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-amber);
+      min-height: 44px;
+    }
+    .btn-save:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+    /* ══ RESPONSIVE ══ */
     @media (max-width: 768px) {
       .hamburger { display: flex; }
-
-      .sidebar {
-        transform: translateX(-100%);
-        transition: transform 0.28s ease;
-        z-index: 25;
-      }
-      .sidebar.open {
-        transform: translateX(0);
-        box-shadow: 4px 0 24px rgba(0,0,0,0.5);
-      }
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); box-shadow: 4px 0 32px rgba(0,0,0,0.3); }
       .sidebar-backdrop.open { display: block; }
-
-      .main {
-        margin-left: 0 !important;
-        padding: 1rem;
-        padding-top: 4rem;
-      }
-
-      /* KPIs */
-      .kpi-row { grid-template-columns: 1fr 1fr !important; gap: 0.65rem; }
-
-      /* Gráficas */
-      .charts-row  { grid-template-columns: 1fr !important; }
-      .bottom-row  { grid-template-columns: 1fr !important; }
-      .annual-card { grid-column: auto !important; }
-
-      /* Filtros */
-      .filter-row { grid-template-columns: 1fr 1fr !important; }
-      .filter-row > div:last-child { grid-column: 1 / -1; }
-
-      /* Topbar */
-      .topbar { flex-direction: column; gap: 0.5rem; }
-      .page-title { font-size: 1.2rem; }
-
-      /* Tablas */
-      .table-card { overflow-x: auto; }
-      table.insp, table.rk, table.rep, table.logs, table.users { min-width: 600px; }
-
-      /* Form */
+      .main { margin-left: 0 !important; padding: 1rem; padding-top: 4.5rem; }
+      .topbar { flex-direction: column; gap: 0.75rem; margin-bottom: 1.25rem; }
+      .page-title { font-size: 1.3rem; }
+      .btn-back { width: 100%; justify-content: center; }
       .form-card { padding: 1.25rem; }
-      .form-row  { grid-template-columns: 1fr !important; }
+      .form-row { grid-template-columns: 1fr; }
+      .rol-selector { gap: 0.5rem; }
+      .rol-option label { padding: 0.75rem 0.5rem; }
+      .rol-icon { font-size: 1.25rem; }
       .form-actions { flex-direction: column; }
-      .btn-save, .btn-back { width: 100%; justify-content: center; }
-
-      /* Modal */
-      .modal { padding: 1.25rem; margin: 1rem; }
-      .modal-grid { grid-template-columns: 1fr !important; }
-      .modal-field.full { grid-column: auto !important; }
-
-      /* Conductor banner */
-      .conductor-banner { flex-wrap: wrap; }
-
-      /* Botones topbar */
-      .btn-new { font-size: 0.72rem; padding: 0.5rem 0.9rem; }
+      .btn-save, .btn-back { width: 100%; }
     }
 
     @media (max-width: 420px) {
-      .kpi-row { grid-template-columns: 1fr !important; }
-      .kpi-val { font-size: 1.75rem; }
+      .page-title { font-size: 1.1rem; }
+      .form-card { padding: 1rem; border-radius: var(--r-md); }
     }
-</style>
+  </style>
 </head>
 <body>
-<!-- Hamburger (móvil) -->
-<button class="hamburger" onclick="toggleSidebar()" id="hamburgerBtn">
+
+<button class="hamburger" onclick="toggleSidebar()" id="hamburgerBtn" aria-label="Menú">
   <span></span><span></span><span></span>
 </button>
 <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
 
-
-<aside class="sidebar">
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
   <div class="sidebar-brand">
     <img src="/static/img/logotipo_01.png" alt="Incubant" class="brand-logo">
-    <div><div class="brand-name">Misionales</div><div class="brand-sub">Incubant SST</div></div>
+    <div>
+      <div class="brand-name">Misionales</div>
+      <div class="brand-sub">Incubant SST</div>
+    </div>
   </div>
+
   <div class="nav-section">Panel</div>
-  <a href="/admin"          class="nav-link"><span class="nav-icon">📊</span> Dashboard</a>
-  <a href="/admin/usuarios" class="nav-link active"><span class="nav-icon">👥</span> Usuarios</a>
-  <a href="/admin/inspecciones" class="nav-link"><span class="nav-icon">🔍</span> Inspecciones</a>
-  <a href="/admin/logs"     class="nav-link"><span class="nav-icon">📋</span> Auditoría</a>
+  <a href="/admin"               class="nav-link"><span class="nav-icon">📊</span> Dashboard</a>
+  <a href="/admin/usuarios"      class="nav-link active"><span class="nav-icon">👥</span> Usuarios</a>
+  <a href="/admin/inspecciones"  class="nav-link"><span class="nav-icon">🔍</span> Inspecciones</a>
+  <a href="/admin/logs"          class="nav-link"><span class="nav-icon">📋</span> Auditoría</a>
   <div class="nav-section" style="margin-top:1.25rem;">Sistema</div>
-  <a href="/"               class="nav-link"><span class="nav-icon">🚗</span> Formulario</a>
+  <a href="/" class="nav-link"><span class="nav-icon">🚗</span> Formulario</a>
+
   <div class="sidebar-footer">
     <div class="user-pill">
       <div class="user-avatar">{{ admin.nombre_visible[0]|upper if admin.nombre_visible else 'A' }}</div>
-      <div style="overflow:hidden;">
+      <div style="overflow:hidden;min-width:0;">
         <div class="user-name">{{ admin.nombre_visible or admin.nombre }}</div>
         <div class="user-role">Administrador</div>
       </div>
     </div>
-    <a href="/auth/logout" class="btn-logout">⏻ Cerrar sesión</a>
+    <!-- Theme toggle -->
+    <div class="sidebar-theme-row">
+      <span class="sidebar-theme-label">Tema</span>
+      <button class="theme-toggle" data-theme-toggle aria-label="Cambiar tema">
+        <div class="theme-toggle-track"><div class="theme-toggle-thumb"></div></div>
+        <span id="themeLabel">Oscuro</span>
+      </button>
+    </div>
+    <button onclick="cerrarSesion()" class="btn-logout">⏻ Cerrar sesión</button>
   </div>
 </aside>
 
+<!-- MAIN -->
 <main class="main">
   <div class="topbar">
     <div>
       <div class="page-title">{{ '+ Nuevo usuario' if modo == 'crear' else '✏ Editar usuario' }}</div>
-      <div class="page-sub">{{ 'Registrar nuevo conductor o administrador' if modo == 'crear' else 'Modificar datos del usuario' }}</div>
+      <div class="page-sub">{{ 'Registrar nuevo conductor o administrador' if modo == 'crear' else 'Modificar datos de ' + (usuario.nombre_visible or usuario.nombre) }}</div>
     </div>
     <a href="/admin/usuarios" class="btn-back">← Volver</a>
   </div>
@@ -233,20 +231,18 @@
   <div class="form-card">
 
     {% if modo == 'editar' %}
-    <div class="alert-info">
-      ℹ Editando: <strong>{{ usuario.nombre }}</strong>
-    </div>
+    <div class="alert-info">ℹ️ Editando: <strong>{{ usuario.nombre }}</strong></div>
     {% endif %}
-
     {% if modo == 'editar' and usuario.id == admin.id %}
-    <div class="alert-warn">
-      ⚠ Estás editando tu propio usuario. No te quites permisos de admin.
-    </div>
+    <div class="alert-warn">⚠️ Estás editando tu propio usuario. No te quites permisos de admin.</div>
     {% endif %}
 
     <form method="POST"
       action="{{ '/admin/usuarios/crear' if modo == 'crear' else '/admin/usuarios/' + usuario.id|string + '/actualizar' }}"
       onsubmit="return validar()">
+
+      <!-- SECCIÓN: Identidad -->
+      <div class="form-section-title">Identidad</div>
 
       {% if modo == 'crear' %}
       <div class="form-group">
@@ -271,6 +267,9 @@
           value="{{ usuario.nombre_visible if modo == 'editar' else '' }}" required>
       </div>
 
+      <!-- SECCIÓN: Seguridad -->
+      <div class="form-section-title">Seguridad</div>
+
       <div class="form-row">
         <div class="form-group">
           <label class="form-label" for="pin">
@@ -280,30 +279,42 @@
             placeholder="Mínimo 4 dígitos" inputmode="numeric"
             {% if modo == 'crear' %}required{% endif %} minlength="4"
             oninput="checkPin()">
-          <div class="form-hint" id="pinFeedback">
+          <div id="pinFeedback" class="form-hint">
             {% if modo == 'editar' %}Deja vacío para no cambiar el PIN.{% endif %}
           </div>
         </div>
-
         <div class="form-group">
           <label class="form-label" for="pin_confirmar">Confirmar PIN</label>
           <input type="password" id="pin_confirmar" name="pin_confirmar" class="form-input"
-            placeholder="Repite el PIN" inputmode="numeric"
-            oninput="checkPin()">
-          <div class="form-hint" id="pinMatch"></div>
+            placeholder="Repite el PIN" inputmode="numeric" oninput="checkPin()">
+          <div id="pinMatch" class="form-hint"></div>
         </div>
       </div>
 
+      <!-- SECCIÓN: Rol -->
+      <div class="form-section-title">Rol del usuario</div>
+
       <div class="form-group">
-        <label class="form-label" for="rol">Rol <span class="required">*</span></label>
-        <select id="rol" name="rol" class="form-input form-select" required>
-          <option value="user" {{ 'selected' if (modo == 'editar' and usuario.rol == 'user') or modo == 'crear' }}>
-            Conductor — Solo inspecciones
-          </option>
-          <option value="admin" {{ 'selected' if modo == 'editar' and usuario.rol == 'admin' }}>
-            Administrador — Gestión completa
-          </option>
-        </select>
+        <div class="rol-selector">
+          <div class="rol-option">
+            <input type="radio" name="rol" id="rol_user" value="user"
+              {{ 'checked' if (modo == 'editar' and usuario.rol == 'user') or modo == 'crear' }}>
+            <label for="rol_user">
+              <div class="rol-icon">🚗</div>
+              <div class="rol-name">Conductor</div>
+              <div class="rol-desc">Solo puede crear y ver sus inspecciones</div>
+            </label>
+          </div>
+          <div class="rol-option">
+            <input type="radio" name="rol" id="rol_admin" value="admin"
+              {{ 'checked' if modo == 'editar' and usuario.rol == 'admin' }}>
+            <label for="rol_admin">
+              <div class="rol-icon">⚙️</div>
+              <div class="rol-name">Admin</div>
+              <div class="rol-desc">Gestión completa del sistema</div>
+            </label>
+          </div>
+        </div>
       </div>
 
       <div class="form-actions">
@@ -318,68 +329,93 @@
 </main>
 
 <script>
-  function checkPin() {
-    const pin  = document.getElementById('pin').value;
-    const conf = document.getElementById('pin_confirmar').value;
-    const fb   = document.getElementById('pinFeedback');
-    const fm   = document.getElementById('pinMatch');
+function checkPin() {
+  const pin  = document.getElementById('pin').value;
+  const conf = document.getElementById('pin_confirmar').value;
+  const fb   = document.getElementById('pinFeedback');
+  const fm   = document.getElementById('pinMatch');
 
-    if (pin.length > 0 && pin.length < 4) {
-      fb.innerHTML = '<span style="color:#f07070;">Mínimo 4 dígitos</span>';
-    } else if (pin.length >= 4) {
-      fb.innerHTML = '<span style="color:#28c878;">✓ PIN válido</span>';
-    } else {
-      fb.textContent = '{{ "Deja vacío para no cambiar el PIN." if modo == "editar" else "" }}';
-    }
-
-    if (conf.length > 0) {
-      fm.innerHTML = pin === conf
-        ? '<span style="color:#28c878;">✓ Coincide</span>'
-        : '<span style="color:#f07070;">✕ No coincide</span>';
-    } else {
-      fm.textContent = '';
-    }
+  if (pin.length > 0 && pin.length < 4) {
+    fb.innerHTML = '<span style="color:#f07070;">Mínimo 4 dígitos</span>';
+  } else if (pin.length >= 4) {
+    fb.innerHTML = '<span style="color:#28c878;">✓ PIN válido</span>';
+  } else {
+    fb.textContent = '{{ "Deja vacío para no cambiar el PIN." if modo == "editar" else "" }}';
   }
 
-  function validar() {
-    const pin  = document.getElementById('pin').value;
-    const conf = document.getElementById('pin_confirmar').value;
-    const modo = {{ 'true' if modo == 'crear' else 'false' }};
-
-    if (modo && !pin) { alert('⚠ El PIN es obligatorio'); return false; }
-    if (pin && pin.length < 4) { alert('⚠ El PIN debe tener al menos 4 dígitos'); return false; }
-    if (pin && pin !== conf) { alert('⚠ Los PINs no coinciden'); return false; }
-
-    {% if modo == 'crear' %}
-    const nombre = document.getElementById('nombre').value;
-    if (!/^[a-z0-9_]+$/.test(nombre)) {
-      alert('⚠ El nombre solo puede tener letras minúsculas, números y guión bajo');
-      return false;
-    }
-    {% endif %}
-    return true;
+  if (conf.length > 0) {
+    fm.innerHTML = pin === conf
+      ? '<span style="color:#28c878;">✓ Coincide</span>'
+      : '<span style="color:#f07070;">✕ No coincide</span>';
+  } else {
+    fm.textContent = '';
   }
-</script>
+}
 
-<script>
+function validar() {
+  const pin  = document.getElementById('pin').value;
+  const conf = document.getElementById('pin_confirmar').value;
+  const esModo = {{ 'true' if modo == 'crear' else 'false' }};
+
+  if (esModo && !pin) { alert('⚠ El PIN es obligatorio'); return false; }
+  if (pin && pin.length < 4) { alert('⚠ El PIN debe tener al menos 4 dígitos'); return false; }
+  if (pin && pin !== conf) { alert('⚠ Los PINs no coinciden'); return false; }
+
+  {% if modo == 'crear' %}
+  const nombre = document.getElementById('nombre').value;
+  if (!/^[a-z0-9_]+$/.test(nombre)) {
+    alert('⚠ El nombre solo puede tener letras minúsculas, números y guión bajo');
+    return false;
+  }
+  {% endif %}
+  return true;
+}
+
+async function cerrarSesion() {
+  try { await fetch("/auth/logout", { method: "POST" }); } catch(e) {}
+  window.location.href = "/auth/logout";
+}
+
+/* ── Sidebar ── */
 function toggleSidebar() {
-  const sidebar  = document.querySelector('.sidebar');
+  const sidebar  = document.getElementById('sidebar');
   const backdrop = document.getElementById('sidebarBackdrop');
   const btn      = document.getElementById('hamburgerBtn');
   sidebar.classList.toggle('open');
   backdrop.classList.toggle('open');
   btn.classList.toggle('open');
+  document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
 }
+
 document.querySelectorAll('.nav-link').forEach(link => {
   link.addEventListener('click', () => {
     if (window.innerWidth <= 768) {
-      setTimeout(() => {
-        const s = document.querySelector('.sidebar');
-        if (s.classList.contains('open')) toggleSidebar();
-      }, 150);
+      const s = document.getElementById('sidebar');
+      if (s.classList.contains('open')) toggleSidebar();
     }
   });
 });
+
+/* ── Theme manager ── */
+(function () {
+  const root  = document.documentElement;
+  const label = document.getElementById('themeLabel');
+
+  function applyTheme(t) {
+    root.setAttribute('data-theme', t);
+    localStorage.setItem('incubant-theme', t);
+    if (label) label.textContent = t === 'dark' ? 'Claro' : 'Oscuro';
+  }
+
+  applyTheme(root.getAttribute('data-theme') || 'light');
+
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      applyTheme(next);
+    });
+  });
+})();
 </script>
 </body>
 </html>
