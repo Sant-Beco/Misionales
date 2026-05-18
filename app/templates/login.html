@@ -2,181 +2,243 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MISIONALES · Incubant</title>  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>MISIONALES · Incubant</title>
   <link rel="stylesheet" href="/static/css/incubant-theme.css">
   <link rel="icon" href="/static/img/logotipo_01.png" type="image/png">
-
-  <!-- Aplicar tema guardado ANTES de pintar — evita flash de tema incorrecto -->
+ 
+  <!-- Aplicar tema ANTES de pintar — evita flash -->
   <script>
     (function(){
       var t = localStorage.getItem('incubant-theme') || 'light';
       document.documentElement.setAttribute('data-theme', t);
     })();
   </script>
+   <style>
+    /* PIN — estilo exclusivo de este login */
+    .pin-input {
+      font-size: 1.4rem;
+      letter-spacing: 0.35em;
+      text-align: center;
+      padding-left: 1rem;
+      font-family: monospace;
+    }
+    @media (max-width: 480px) {
+      .pin-input { font-size: 1.6rem; letter-spacing: 0.4em; }
+      .form-input { min-height: 60px; font-size: 1.05rem; }
+      .btn-submit  { min-height: 64px; }
+    }
+    @media (max-width: 360px) {
+      .form-input { min-height: 54px; }
+      .btn-submit  { min-height: 58px; }
+    }
+    @media (max-height: 580px) {
+      .sst-badge { display: none; }
+      .login-logo img { height: 44px; animation: none; }
+      .form-input { min-height: 48px; }
+      .btn-submit  { min-height: 52px; margin-top: 0.5rem; }
+    }
+  </style>
 </head>
-
-<!-- body.page-login activa los estilos de layout del login en incubant-theme.css -->
 <body class="page-login">
-
-  <!-- Fondo decorativo -->
+ 
+  <!-- Fondo -->
   <div class="bg-layer">
     <div class="bg-dots"></div>
     <div class="bg-glow"></div>
     <div class="bg-egg-1"></div>
     <div class="bg-egg-2"></div>
   </div>
-
-  <!-- Toggle de tema (esquina superior derecha) -->
+ 
+  <!-- Toggle tema -->
   <div class="theme-btn-wrap">
     <button class="theme-toggle" data-theme-toggle aria-label="Cambiar tema">
-      <div class="theme-toggle-track">
-        <div class="theme-toggle-thumb"></div>
-      </div>
+      <div class="theme-toggle-track"><div class="theme-toggle-thumb"></div></div>
       <span id="themeLabel">Oscuro</span>
     </button>
   </div>
-
-  <!-- Card principal -->
+ 
+  <!-- Card -->
   <div class="login-wrap">
     <div class="login-card">
-
+ 
       <div class="login-logo">
         <img src="/static/img/logotipo_01.png" alt="Incubant">
       </div>
-
-      <div class="login-title">
-        <h1>Misionales</h1>
-      </div>
+ 
+      <div class="login-title"><h1>Misionales</h1></div>
       <p class="login-subtitle">Sistema de Inspección Vehicular</p>
-
+ 
       <div class="sst-badge">
         <div class="sst-dot"></div>
         SST · Conductores
       </div>
-
+ 
       <div class="divider">
         <div class="divider-line"></div>
         <span>Acceso</span>
         <div class="divider-line"></div>
       </div>
-
+ 
       <div id="sessionBanner" class="session-banner"></div>
       <div id="errorBox" class="error-box"></div>
-
+ 
       <form id="loginForm">
+ 
+        <!-- Usuario -->
         <div class="form-group">
           <label class="form-label" for="nombre">Usuario</label>
           <div class="input-wrapper">
             <span class="input-icon">👤</span>
-            <input type="text" id="nombre" name="nombre" class="form-input"
-              placeholder="Tu nombre de usuario" required autocomplete="username">
+            <input
+              type="text"
+              id="nombre"
+              name="nombre"
+              class="form-input"
+              placeholder="Tu nombre de usuario"
+              required
+              autocomplete="username"
+              autocorrect="off"
+              autocapitalize="none"
+              spellcheck="false"
+              enterkeyhint="next"
+            >
           </div>
         </div>
-
+ 
+        <!-- PIN — teclado numérico nativo -->
         <div class="form-group">
           <label class="form-label" for="pin">PIN de acceso</label>
           <div class="input-wrapper">
-            <span class="input-icon">🔐</span>
-            <input type="password" id="pin" name="pin" class="form-input"
-              placeholder="••••••" required inputmode="numeric" autocomplete="current-password">
+            <input
+              type="password"
+              id="pin"
+              name="pin"
+              class="form-input pin-input"
+              placeholder="• • • •"
+              required
+              inputmode="numeric"
+              pattern="[0-9]*"
+              autocomplete="current-password"
+              enterkeyhint="go"
+              maxlength="6"
+            >
           </div>
         </div>
-
+ 
         <button type="submit" id="btnLogin" class="btn-submit">
           Ingresar al sistema
         </button>
+ 
       </form>
-
+ 
       <div class="login-footer">
         <em>Incubant</em> · Antioqueña de Incubación S.A.S.
       </div>
-
+ 
     </div>
   </div>
-
+ 
   <script>
-    /* ══ THEME MANAGER ══
-       Mismo bloque para TODOS los HTML del sistema. */
-    (function () {
-      var root  = document.documentElement;
-      var label = document.getElementById('themeLabel');
-
-      function applyTheme(t) {
-        root.setAttribute('data-theme', t);
-        localStorage.setItem('incubant-theme', t);
-        if (label) label.textContent = t === 'dark' ? 'Claro' : 'Oscuro';
-      }
-
-      // Sincronizar label con el tema ya aplicado desde <head>
-      applyTheme(root.getAttribute('data-theme') || 'light');
-
-      // Conectar el toggle
-      document.querySelectorAll('[data-theme-toggle]').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-          applyTheme(next);
-        });
+  /* ══ THEME MANAGER ══ */
+  (function () {
+    const root  = document.documentElement;
+    const label = document.getElementById('themeLabel');
+ 
+    function applyTheme(t) {
+      root.setAttribute('data-theme', t);
+      localStorage.setItem('incubant-theme', t);
+      if (label) label.textContent = t === 'dark' ? 'Claro' : 'Oscuro';
+    }
+ 
+    applyTheme(root.getAttribute('data-theme') || 'light');
+ 
+    document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        applyTheme(next);
       });
-    })();
-
-    /* ══ LOGIN LOGIC ══ */
-    ['token', 'usuario_id', 'nombre', 'rol'].forEach(function(k){ localStorage.removeItem(k); });
-
-    var form = document.getElementById('loginForm');
-    var btn  = document.getElementById('btnLogin');
-    var err  = document.getElementById('errorBox');
-
-    function showError(msg) {
-      err.textContent = '⚠ ' + msg;
-      err.style.display = 'block';
-      setTimeout(function () { err.style.display = 'none'; }, 5000);
-    }
-
-    var _params = new URLSearchParams(window.location.search);
-    var _razon  = _params.get('razon');
-    var _next   = _params.get('next') || '/';
-
-    if (_razon) {
-      var banner = document.getElementById('sessionBanner');
-      banner.style.display = 'block';
-      banner.textContent = _razon === '403'
-        ? '⚠ No tienes permiso para acceder a esa sección.'
-        : '⚠ Tu sesión expiró o no estás autenticado. Inicia sesión para continuar.';
-    }
-
-    form.addEventListener('submit', async function (e) {
+    });
+  })();
+ 
+  /* ══ LOGIN LOGIC ══ */
+  ['token','usuario_id','nombre','rol'].forEach(k => localStorage.removeItem(k));
+ 
+  const form = document.getElementById('loginForm');
+  const btn  = document.getElementById('btnLogin');
+  const err  = document.getElementById('errorBox');
+ 
+  // Pasar al campo PIN al presionar Enter en usuario
+  document.getElementById('nombre').addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
       e.preventDefault();
-      btn.disabled = true;
-      btn.innerHTML = '<span class="spinner"></span>&nbsp;Verificando...';
-      err.style.display = 'none';
-
-      try {
-        var res  = await fetch('/auth/login', { method: 'POST', body: new FormData(form) });
-        var data = await res.json();
-
-        if (res.ok) {
-          localStorage.setItem('token',      data.access_token);
-          localStorage.setItem('usuario_id', data.usuario_id);
-          localStorage.setItem('nombre',     data.nombre);
-          localStorage.setItem('rol',        data.rol || 'user');
-          btn.innerHTML = '✓ Acceso concedido';
-          btn.style.background = 'linear-gradient(135deg,#28c878,#1a9c57)';
-          setTimeout(function () {
-            window.location.href = _next !== '/' ? _next : (data.rol === 'admin' ? '/admin' : '/');
-          }, 600);
-        } else {
-          showError(data.detail || 'Usuario o PIN incorrecto');
-          btn.disabled = false;
-          btn.innerHTML = 'Ingresar al sistema';
-        }
-      } catch (ex) {
-        showError('Error de conexión. Intenta de nuevo.');
+      document.getElementById('pin').focus();
+    }
+  });
+ 
+  function showError(msg) {
+    err.textContent = '⚠ ' + msg;
+    err.style.display = 'block';
+    // Vibrar en móvil como feedback de error
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+    setTimeout(() => { err.style.display = 'none'; }, 5000);
+  }
+ 
+  const _params = new URLSearchParams(window.location.search);
+  const _razon  = _params.get('razon');
+  const _next   = _params.get('next') || '/';
+ 
+  if (_razon) {
+    const banner = document.getElementById('sessionBanner');
+    banner.style.display = 'block';
+    banner.textContent = _razon === '403'
+      ? '⚠ No tienes permiso para acceder a esa sección.'
+      : '⚠ Tu sesión expiró. Inicia sesión para continuar.';
+  }
+ 
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>&nbsp;Verificando...';
+    err.style.display = 'none';
+ 
+    try {
+      const res  = await fetch('/auth/login', { method: 'POST', body: new FormData(form) });
+      const data = await res.json();
+ 
+      if (res.ok) {
+        localStorage.setItem('token',      data.access_token);
+        localStorage.setItem('usuario_id', data.usuario_id);
+        localStorage.setItem('nombre',     data.nombre);
+        localStorage.setItem('rol',        data.rol || 'user');
+ 
+        btn.innerHTML = '✓ Acceso concedido';
+        btn.style.background = 'linear-gradient(135deg,#28c878,#1a9c57)';
+ 
+        // Vibración de éxito
+        if (navigator.vibrate) navigator.vibrate(80);
+ 
+        setTimeout(() => {
+          window.location.href = _next !== '/' ? _next : (data.rol === 'admin' ? '/admin' : '/');
+        }, 500);
+      } else {
+        showError(data.detail || 'Usuario o PIN incorrecto');
         btn.disabled = false;
         btn.innerHTML = 'Ingresar al sistema';
+        // Limpiar PIN en error — UX estándar
+        document.getElementById('pin').value = '';
+        document.getElementById('pin').focus();
       }
-    });
+    } catch (ex) {
+      showError('Sin conexión. Verifica tu red e intenta de nuevo.');
+      btn.disabled = false;
+      btn.innerHTML = 'Ingresar al sistema';
+    }
+  });
   </script>
-
+ 
 </body>
 </html>
