@@ -7,6 +7,7 @@ v3.1:
   - Usa hash_pin / verify_pin de app.security directamente
   - PIN mínimo 4 dígitos (compatibilidad), recomendado 6+
   - validate_pin actualizado para aceptar 4-20 dígitos
+  - Sistema de login basado en CÉDULA (5-12 dígitos numéricos)
  
 Uso (desde el repo raíz):
   python admin_cli.py
@@ -84,8 +85,9 @@ def validate_nombre_visible(nombre: str) -> bool:
         return False
     return bool(re.match(r"^[A-Za-zÁÉÍÓÚáéíóúÑñÜü ]+$", nombre.strip()))
  
-def validate_login(nombre: str) -> bool:
-    return bool(nombre) and bool(re.match(r"^[A-Za-z0-9_]{2,30}$", nombre.strip()))
+def validate_cedula(cedula: str) -> bool:
+    """Valida que la cédula sea solo dígitos, entre 5 y 12 caracteres"""
+    return bool(cedula) and bool(re.match(r"^\d{5,12}$", cedula.strip()))
  
 # ════════════════════════════════════════════════════════════════════════════
 # FUNCIONES DE BASE DE DATOS
@@ -106,23 +108,23 @@ def get_stats() -> dict:
  
  
 def create_user_db(
-    nombre: str,
+    cedula: str,
     nombre_visible: str,
     pin: str,
     rol: str = "user",
 ) -> Optional[Usuario]:
     db = SessionLocal()
     try:
-        existing = db.query(Usuario).filter(Usuario.nombre == nombre).first()
+        existing = db.query(Usuario).filter(Usuario.cedula == cedula).first()
         if existing:
-            warn(f"El login '{nombre}' ya está en uso.")
+            warn(f"La cédula '{cedula}' ya está registrada.")
             return None
  
         # ▸ Usa hash_pin de security.py (SHA-256 + bcrypt, sin passlib)
         pin_hash = hash_pin(pin)
  
         nuevo = Usuario(
-            nombre         = nombre,
+            cedula         = cedula,
             nombre_visible = nombre_visible,
             pin_hash       = pin_hash,
             rol            = rol,
@@ -131,7 +133,7 @@ def create_user_db(
         db.add(nuevo)
         db.commit()
         db.refresh(nuevo)
-        logger.info("Usuario creado: id=%s nombre=%s rol=%s", nuevo.id, nuevo.nombre, nuevo.rol)
+        logger.info("Usuario creado: id=%s cedula=%s rol=%s", nuevo.id, nuevo.cedula, nuevo.rol)
         return nuevo
  
     except Exception as e:
@@ -161,10 +163,10 @@ def delete_user_db(user_id: int) -> bool:
         if not u:
             warn(f"No existe usuario con id={user_id}")
             return False
-        nombre = u.nombre
+        cedula = u.cedula
         db.delete(u)
         db.commit()
-        logger.info("Usuario borrado: id=%s nombre=%s", user_id, nombre)
+        logger.info("Usuario borrado: id=%s cedula=%s", user_id, cedula)
         return True
     except Exception as e:
         db.rollback()
@@ -184,7 +186,7 @@ def update_pin_db(user_id: int, new_pin: str) -> bool:
         # ▸ Usa hash_pin de security.py
         u.pin_hash = hash_pin(new_pin)
         db.commit()
-        logger.info("PIN actualizado: id=%s nombre=%s", user_id, u.nombre)
+        logger.info("PIN actualizado: id=%s cedula=%s", user_id, u.cedula)
         return True
     except Exception as e:
         db.rollback()
@@ -242,7 +244,7 @@ def toggle_activo_db(user_id: int) -> Optional[bool]:
             return None
         u.activo = not u.activo
         db.commit()
-        logger.info("Activo toggled: id=%s nombre=%s activo=%s", user_id, u.nombre, u.activo)
+        logger.info("Activo toggled: id=%s cedula=%s activo=%s", user_id, u.cedula, u.activo)
         return u.activo
     except Exception as e:
         db.rollback()
@@ -275,13 +277,13 @@ def mostrar_tabla_usuarios(usuarios: list):
     if not usuarios:
         info("No hay usuarios registrados.")
         return
-    print(f"\n{DIM}{'ID':>4}  {'Login':15}  {'Nombre Visible':28}  {'Rol':8}  {'Activo'}{RST}")
+    print(f"\n{DIM}{'ID':>4}  {'Cédula':15}  {'Nombre Visible':28}  {'Rol':8}  {'Activo'}{RST}")
     separador("-", 70)
     for u in usuarios:
         rol_icon = f"{Y}👑 admin{RST}" if u.rol == "admin" else f"{C}👤 user{RST} "
         activo   = f"{G}✓{RST}" if getattr(u, 'activo', True) else f"{R}✗{RST}"
         nv = (u.nombre_visible or "")[:28]
-        print(f"{u.id:>4}  {u.nombre:15}  {nv:28}  {rol_icon}  {activo}")
+        print(f"{u.id:>4}  {u.cedula:15}  {nv:28}  {rol_icon}  {activo}")
     separador("-", 70)
     print(f"  Total: {len(usuarios)} usuarios\n")
  
@@ -333,22 +335,22 @@ def prompt_create_user(force_admin=False):
     titulo("📝  CREAR NUEVO USUARIO")
  
     while True:
-        nombre = input(f"{W}👤 Login (único, sin espacios): {RST}").strip()
-        if not validate_login(nombre):
-            err("Login inválido — usa letras, números y _ (mín. 2 caracteres).")
+        cedula = input(f"{W}🪪 Cédula del usuario (solo dígitos): {RST}").strip()
+        if not validate_cedula(cedula):
+            err("Cédula inválida — solo dígitos, entre 5 y 12 caracteres.")
             continue
         db = SessionLocal()
-        existe = db.query(Usuario).filter(Usuario.nombre == nombre).first()
+        existe = db.query(Usuario).filter(Usuario.cedula == cedula).first()
         db.close()
         if existe:
-            warn(f"El login '{nombre}' ya está en uso.")
+            warn(f"La cédula '{cedula}' ya está registrada.")
             continue
         break
  
     while True:
-        nv_input = input(f"{W}📛 Nombre completo (Enter = mismo que login): {RST}").strip()
-        nombre_visible = nv_input if nv_input else nombre
-        if not validate_nombre_visible(nombre_visible):
+        nv_input = input(f"{W}📛 Nombre completo (Enter = usar cédula): {RST}").strip()
+        nombre_visible = nv_input if nv_input else cedula
+        if not validate_nombre_visible(nombre_visible) and nv_input:
             err("Nombre inválido — usa solo letras y espacios.")
             continue
         nombre_visible = nombre_visible.strip().title()
@@ -365,7 +367,7 @@ def prompt_create_user(force_admin=False):
         rol = pedir_rol()
  
     print(f"\n{W}📋 Resumen:{RST}")
-    print(f"   Login  : {C}{nombre}{RST}")
+    print(f"   Cédula : {C}{cedula}{RST}")
     print(f"   Nombre : {nombre_visible}")
     print(f"   Rol    : {Y if rol == 'admin' else C}{'👑 admin' if rol == 'admin' else '👤 user'}{RST}")
     print(f"   PIN    : {'*' * len(pin)}")
@@ -375,9 +377,9 @@ def prompt_create_user(force_admin=False):
         warn("Operación cancelada.")
         return
  
-    u = create_user_db(nombre, nombre_visible, pin, rol)
+    u = create_user_db(cedula, nombre_visible, pin, rol)
     if u:
-        ok(f"Usuario creado — ID: {u.id} | Login: {u.nombre} | Rol: {u.rol}")
+        ok(f"Usuario creado — ID: {u.id} | Cédula: {u.cedula} | Rol: {u.rol}")
     else:
         err("No se pudo crear el usuario. Revisa app/logs/admin.log")
  
@@ -401,7 +403,7 @@ def prompt_delete_user():
         err(f"No existe usuario con ID {uid}")
         return
  
-    warn(f"Vas a borrar permanentemente a '{u.nombre}' ({u.nombre_visible})")
+    warn(f"Vas a borrar permanentemente a cédula '{u.cedula}' ({u.nombre_visible})")
     conf = input("Escribe BORRAR para confirmar: ").strip()
     if conf != "BORRAR":
         warn("Operación cancelada.")
@@ -424,7 +426,7 @@ def prompt_change_pin():
         err(f"No existe usuario con ID {uid}")
         return
  
-    info(f"Cambiando PIN de '{u.nombre}' ({u.nombre_visible})")
+    info(f"Cambiando PIN de cédula '{u.cedula}' ({u.nombre_visible})")
     pin = pedir_pin()
     if pin is None: return
  
@@ -471,14 +473,14 @@ def prompt_change_rol():
         err(f"No existe usuario con ID {uid}")
         return
  
-    info(f"Rol actual de '{u.nombre}': {u.rol}")
+    info(f"Rol actual de cédula '{u.cedula}': {u.rol}")
     nuevo_rol = pedir_rol(default=u.rol)
  
     if nuevo_rol == u.rol:
         info("El rol seleccionado es el mismo. Sin cambios.")
         return
  
-    warn(f"Cambiar rol de '{u.nombre}': {u.rol} → {nuevo_rol}")
+    warn(f"Cambiar rol de cédula '{u.cedula}': {u.rol} → {nuevo_rol}")
     conf = input("¿Confirmar? (S/n): ").strip().lower()
     if conf and conf != "s":
         warn("Cancelado.")
@@ -503,7 +505,7 @@ def prompt_toggle_activo():
  
     estado_actual = "ACTIVO" if getattr(u, 'activo', True) else "INACTIVO"
     estado_nuevo  = "INACTIVO" if getattr(u, 'activo', True) else "ACTIVO"
-    warn(f"'{u.nombre}' está {estado_actual} → pasará a {estado_nuevo}")
+    warn(f"Cédula '{u.cedula}' está {estado_actual} → pasará a {estado_nuevo}")
  
     conf = input("¿Confirmar? (S/n): ").strip().lower()
     if conf and conf != "s":
@@ -514,9 +516,9 @@ def prompt_toggle_activo():
     if nuevo is None:
         err("No se pudo cambiar el estado.")
     elif nuevo:
-        ok(f"Usuario '{u.nombre}' ACTIVADO.")
+        ok(f"Usuario cédula '{u.cedula}' ACTIVADO.")
     else:
-        warn(f"Usuario '{u.nombre}' DESACTIVADO. No podrá iniciar sesión.")
+        warn(f"Usuario cédula '{u.cedula}' DESACTIVADO. No podrá iniciar sesión.")
  
  
 # ════════════════════════════════════════════════════════════════════════════
@@ -603,4 +605,3 @@ if __name__ == "__main__":
         logger.exception("Error fatal: %s", e)
         err(f"Error fatal: {e}")
         sys.exit(1)
- 
