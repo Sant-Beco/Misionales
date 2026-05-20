@@ -1,540 +1,606 @@
-# app/routes_admin.py
+#!/usr/bin/env python3
 """
-Panel de administración web para gestionar usuarios
-
-Funcionalidades:
-- Listar usuarios
-- Crear usuarios
-- Editar usuarios (cambiar PIN, rol)
-- Eliminar usuarios
-- Ver logs de auditoría
+CLI de administración de usuarios — Misionales v3.1
+=====================================================
+v3.1:
+  - Eliminado passlib completamente (incompatible con bcrypt 4.x)
+  - Usa hash_pin / verify_pin de app.security directamente
+  - PIN mínimo 4 dígitos (compatibilidad), recomendado 6+
+  - validate_pin actualizado para aceptar 4-20 dígitos
+ 
+Uso (desde el repo raíz):
+  python admin_cli.py
+  python -m app.admin_cli
+ 
+Registra en: app/logs/admin.log
 """
-
-from pathlib import Path
-from fastapi import APIRouter, Depends, HTTPException, Form, Request
-from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
-from sqlalchemy.orm import Session
-from datetime import datetime
-
+ 
+import os
+import sys
+import logging
+import re
+from getpass import getpass
+from typing import Optional
+ 
+# ─── Importar hash/verify desde security.py (sin passlib) ──────────────────
+from app.security import hash_pin, verify_pin, validar_pin
 from app.database import SessionLocal
-from app import models
-from app.security import get_current_user, hash_pin
-
-router = APIRouter()
-
-# ── Templates (instancia única — no crear una por request) ──
-from fastapi.templating import Jinja2Templates as _J2T
-_templates_admin = _J2T(directory=str(Path(__file__).resolve().parent / "templates"))
-
-
-# ===============================
-# DEPENDENCY: Solo administradores
-# ===============================
-
-def require_admin(usuario_actual: models.Usuario = Depends(get_current_user)):
-    if usuario_actual.rol != "admin":
-        raise HTTPException(status_code=403, detail="No tienes permisos de administrador")
-    return usuario_actual
-
-
-def get_db():
+from app.models import Usuario
+# ────────────────────────────────────────────────────────────────────────────
+ 
+# ─── Logging ────────────────────────────────────────────────────────────────
+LOG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app", "logs")
+os.makedirs(LOG_DIR, exist_ok=True)
+LOG_FILE = os.path.join(LOG_DIR, "admin.log")
+ 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(message)s",
+    handlers=[
+        logging.FileHandler(LOG_FILE, encoding="utf-8"),
+        logging.StreamHandler(sys.stdout),
+    ],
+)
+logger = logging.getLogger("admin_cli")
+ 
+# ─── Colores consola ────────────────────────────────────────────────────────
+G  = "\033[92m"
+R  = "\033[91m"
+Y  = "\033[93m"
+C  = "\033[96m"
+W  = "\033[97m"
+DIM= "\033[2m"
+RST= "\033[0m"
+ 
+def ok(msg):   print(f"{G}✅ {msg}{RST}")
+def err(msg):  print(f"{R}❌ {msg}{RST}")
+def warn(msg): print(f"{Y}⚠️  {msg}{RST}")
+def info(msg): print(f"{C}ℹ️  {msg}{RST}")
+ 
+# ════════════════════════════════════════════════════════════════════════════
+# VALIDADORES
+# ════════════════════════════════════════════════════════════════════════════
+ 
+def validate_pin_cli(pin: str) -> tuple[bool, str]:
+    """
+    Validación de PIN para el CLI.
+    Delega en security.validar_pin() para consistencia total.
+    Si el PIN tiene 4-5 dígitos (compatibilidad con usuarios existentes)
+    también lo acepta aunque security.py prefiera 6+.
+    """
+    if not pin or not pin.isdigit():
+        return False, "El PIN solo debe contener dígitos (0-9)."
+    if len(pin) < 4:
+        return False, "El PIN debe tener al menos 4 dígitos."
+    if len(pin) > 20:
+        return False, "El PIN no puede superar 20 dígitos."
+    if len(set(pin)) == 1:
+        return False, "El PIN no puede tener todos los dígitos iguales."
+    # Aviso (no error) si es corto
+    return True, ""
+ 
+def validate_nombre_visible(nombre: str) -> bool:
+    if not nombre or not nombre.strip():
+        return False
+    return bool(re.match(r"^[A-Za-zÁÉÍÓÚáéíóúÑñÜü ]+$", nombre.strip()))
+ 
+def validate_login(nombre: str) -> bool:
+    return bool(nombre) and bool(re.match(r"^[A-Za-z0-9_]{2,30}$", nombre.strip()))
+ 
+# ════════════════════════════════════════════════════════════════════════════
+# FUNCIONES DE BASE DE DATOS
+# ════════════════════════════════════════════════════════════════════════════
+ 
+def get_stats() -> dict:
     db = SessionLocal()
     try:
-        yield db
+        total   = db.query(Usuario).count()
+        admins  = db.query(Usuario).filter(Usuario.rol == "admin").count()
+        activos = db.query(Usuario).filter(Usuario.activo == True).count()
+        return {"total": total, "admins": admins, "activos": activos}
+    except Exception as e:
+        logger.exception("Error leyendo stats: %s", e)
+        return {"total": 0, "admins": 0, "activos": 0}
     finally:
         db.close()
-
-
-# ===============================
-# MODELO: Log de Auditoría
-# ===============================
-
-def registrar_accion(db: Session, admin_id: int, accion: str, detalles: str):
-    log = models.LogAuditoria(
-        admin_id=admin_id,
-        accion=accion,
-        detalles=detalles,
-        fecha=datetime.now()
-    )
-    db.add(log)
-    db.commit()
-
-
-# ===============================
-# RUTAS: Panel de Administración
-# ===============================
-
-@router.get("/admin", response_class=HTMLResponse)
-async def admin_dashboard(
-    request: Request,
-    usuario_admin: models.Usuario = Depends(require_admin),
-    db: Session = Depends(get_db)
-):
-    templates = _templates_admin
-    total_usuarios = db.query(models.Usuario).count()
-    total_inspecciones = db.query(models.Inspeccion).count()
-
-    from sqlalchemy import func, desc
-    usuarios_activos = (
-        db.query(
-            models.Usuario.nombre_visible,
-            func.count(models.Inspeccion.id).label("total")
+ 
+ 
+def create_user_db(
+    nombre: str,
+    nombre_visible: str,
+    pin: str,
+    rol: str = "user",
+) -> Optional[Usuario]:
+    db = SessionLocal()
+    try:
+        existing = db.query(Usuario).filter(Usuario.nombre == nombre).first()
+        if existing:
+            warn(f"El login '{nombre}' ya está en uso.")
+            return None
+ 
+        # ▸ Usa hash_pin de security.py (SHA-256 + bcrypt, sin passlib)
+        pin_hash = hash_pin(pin)
+ 
+        nuevo = Usuario(
+            nombre         = nombre,
+            nombre_visible = nombre_visible,
+            pin_hash       = pin_hash,
+            rol            = rol,
+            activo         = True,
         )
-        .join(models.Inspeccion)
-        .group_by(models.Usuario.id)
-        .order_by(desc("total"))
-        .limit(5)
-        .all()
-    )
-
-    # ── Inspecciones por día — TODO el historial ──
-    # El frontend filtra según el chip (7d/30d/90d/Todo)
-    from datetime import date, timedelta
-    from sqlalchemy import cast, Date as SADate
-    hoy = date.today()
-
-    primera = db.query(func.min(cast(models.Inspeccion.fecha, SADate))).scalar()
-
-    if primera:
-        delta = (hoy - primera).days + 1
-        rows = (
-            db.query(
-                cast(models.Inspeccion.fecha, SADate).label("dia"),
-                func.count(models.Inspeccion.id).label("total")
-            )
-            .group_by("dia")
-            .order_by("dia")
-            .all()
-        )
-        totales_dia = {r.dia: r.total for r in rows}
-        inspecciones_por_dia = [
-            {
-                "fecha":     (primera + timedelta(days=i)).strftime("%d/%m/%y"),
-                "fecha_iso": (primera + timedelta(days=i)).isoformat(),
-                "total":     totales_dia.get(primera + timedelta(days=i), 0)
-            }
-            for i in range(delta)
-        ]
+        db.add(nuevo)
+        db.commit()
+        db.refresh(nuevo)
+        logger.info("Usuario creado: id=%s nombre=%s rol=%s", nuevo.id, nuevo.nombre, nuevo.rol)
+        return nuevo
+ 
+    except Exception as e:
+        db.rollback()
+        logger.exception("Error creando usuario: %s", e)
+        err(f"Error interno: {e}")
+        return None
+    finally:
+        db.close()
+ 
+ 
+def list_users_db() -> list:
+    db = SessionLocal()
+    try:
+        return db.query(Usuario).order_by(Usuario.id).all()
+    except Exception as e:
+        logger.exception("Error listando usuarios: %s", e)
+        return []
+    finally:
+        db.close()
+ 
+ 
+def delete_user_db(user_id: int) -> bool:
+    db = SessionLocal()
+    try:
+        u = db.query(Usuario).filter(Usuario.id == user_id).first()
+        if not u:
+            warn(f"No existe usuario con id={user_id}")
+            return False
+        nombre = u.nombre
+        db.delete(u)
+        db.commit()
+        logger.info("Usuario borrado: id=%s nombre=%s", user_id, nombre)
+        return True
+    except Exception as e:
+        db.rollback()
+        logger.exception("Error borrando id=%s: %s", user_id, e)
+        return False
+    finally:
+        db.close()
+ 
+ 
+def update_pin_db(user_id: int, new_pin: str) -> bool:
+    db = SessionLocal()
+    try:
+        u = db.query(Usuario).filter(Usuario.id == user_id).first()
+        if not u:
+            warn(f"No existe usuario con id={user_id}")
+            return False
+        # ▸ Usa hash_pin de security.py
+        u.pin_hash = hash_pin(new_pin)
+        db.commit()
+        logger.info("PIN actualizado: id=%s nombre=%s", user_id, u.nombre)
+        return True
+    except Exception as e:
+        db.rollback()
+        logger.exception("Error actualizando PIN id=%s: %s", user_id, e)
+        return False
+    finally:
+        db.close()
+ 
+ 
+def update_nombre_visible_db(user_id: int, nombre_visible: str) -> bool:
+    db = SessionLocal()
+    try:
+        u = db.query(Usuario).filter(Usuario.id == user_id).first()
+        if not u:
+            warn(f"No existe usuario con id={user_id}")
+            return False
+        u.nombre_visible = nombre_visible
+        db.commit()
+        logger.info("nombre_visible actualizado: id=%s → %s", user_id, nombre_visible)
+        return True
+    except Exception as e:
+        db.rollback()
+        logger.exception("Error actualizando nombre_visible id=%s: %s", user_id, e)
+        return False
+    finally:
+        db.close()
+ 
+ 
+def update_rol_db(user_id: int, nuevo_rol: str) -> bool:
+    db = SessionLocal()
+    try:
+        u = db.query(Usuario).filter(Usuario.id == user_id).first()
+        if not u:
+            warn(f"No existe usuario con id={user_id}")
+            return False
+        anterior = u.rol
+        u.rol = nuevo_rol
+        db.commit()
+        logger.info("Rol actualizado: id=%s %s → %s", user_id, anterior, nuevo_rol)
+        return True
+    except Exception as e:
+        db.rollback()
+        logger.exception("Error actualizando rol id=%s: %s", user_id, e)
+        return False
+    finally:
+        db.close()
+ 
+ 
+def toggle_activo_db(user_id: int) -> Optional[bool]:
+    db = SessionLocal()
+    try:
+        u = db.query(Usuario).filter(Usuario.id == user_id).first()
+        if not u:
+            warn(f"No existe usuario con id={user_id}")
+            return None
+        u.activo = not u.activo
+        db.commit()
+        logger.info("Activo toggled: id=%s nombre=%s activo=%s", user_id, u.nombre, u.activo)
+        return u.activo
+    except Exception as e:
+        db.rollback()
+        logger.exception("Error toggling activo id=%s: %s", user_id, e)
+        return None
+    finally:
+        db.close()
+ 
+ 
+# ════════════════════════════════════════════════════════════════════════════
+# HELPERS DE UI
+# ════════════════════════════════════════════════════════════════════════════
+ 
+def separador(char="═", n=60):
+    print(f"{DIM}{char * n}{RST}")
+ 
+def titulo(texto):
+    separador()
+    print(f"{W}{texto}{RST}")
+    separador()
+ 
+def pedir_id(prompt="ID del usuario: ") -> Optional[int]:
+    try:
+        return int(input(prompt).strip())
+    except ValueError:
+        err("ID inválido — debe ser un número.")
+        return None
+ 
+def mostrar_tabla_usuarios(usuarios: list):
+    if not usuarios:
+        info("No hay usuarios registrados.")
+        return
+    print(f"\n{DIM}{'ID':>4}  {'Login':15}  {'Nombre Visible':28}  {'Rol':8}  {'Activo'}{RST}")
+    separador("-", 70)
+    for u in usuarios:
+        rol_icon = f"{Y}👑 admin{RST}" if u.rol == "admin" else f"{C}👤 user{RST} "
+        activo   = f"{G}✓{RST}" if getattr(u, 'activo', True) else f"{R}✗{RST}"
+        nv = (u.nombre_visible or "")[:28]
+        print(f"{u.id:>4}  {u.nombre:15}  {nv:28}  {rol_icon}  {activo}")
+    separador("-", 70)
+    print(f"  Total: {len(usuarios)} usuarios\n")
+ 
+ 
+def pedir_pin(prompt="Nuevo PIN: ") -> Optional[str]:
+    """
+    Pide y valida el PIN con confirmación.
+    Acepta 4-20 dígitos. Muestra aviso si es menor a 6.
+    """
+    for intento in range(3):
+        pin  = getpass(f"🔐 {prompt}").strip()
+        pin2 = getpass("🔐 Confirmar PIN: ").strip()
+ 
+        if pin != pin2:
+            err("Los PIN no coinciden.")
+            continue
+ 
+        valido, mensaje = validate_pin_cli(pin)
+        if not valido:
+            err(mensaje)
+            continue
+ 
+        # Aviso de seguridad para PINs cortos (no bloquea)
+        if len(pin) < 6:
+            warn(f"PIN de {len(pin)} dígitos aceptado, pero se recomienda 6 o más para mayor seguridad.")
+ 
+        return pin
+ 
+    err("Demasiados intentos. Operación cancelada.")
+    return None
+ 
+ 
+def pedir_rol(default="user") -> str:
+    print(f"\n{W}👥 Selecciona el rol:{RST}")
+    print(f"  1) {C}👤 user{RST}  — Solo puede crear inspecciones")
+    print(f"  2) {Y}👑 admin{RST} — Puede gestionar usuarios y ver todo")
+    while True:
+        choice = input(f"Opción (1/2, Enter = {default}): ").strip() or ("1" if default == "user" else "2")
+        if choice == "1": return "user"
+        if choice == "2": return "admin"
+        err("Opción inválida.")
+ 
+ 
+# ════════════════════════════════════════════════════════════════════════════
+# ACCIONES DEL MENÚ
+# ════════════════════════════════════════════════════════════════════════════
+ 
+def prompt_create_user(force_admin=False):
+    titulo("📝  CREAR NUEVO USUARIO")
+ 
+    while True:
+        nombre = input(f"{W}👤 Login (único, sin espacios): {RST}").strip()
+        if not validate_login(nombre):
+            err("Login inválido — usa letras, números y _ (mín. 2 caracteres).")
+            continue
+        db = SessionLocal()
+        existe = db.query(Usuario).filter(Usuario.nombre == nombre).first()
+        db.close()
+        if existe:
+            warn(f"El login '{nombre}' ya está en uso.")
+            continue
+        break
+ 
+    while True:
+        nv_input = input(f"{W}📛 Nombre completo (Enter = mismo que login): {RST}").strip()
+        nombre_visible = nv_input if nv_input else nombre
+        if not validate_nombre_visible(nombre_visible):
+            err("Nombre inválido — usa solo letras y espacios.")
+            continue
+        nombre_visible = nombre_visible.strip().title()
+        break
+ 
+    pin = pedir_pin()
+    if pin is None:
+        return
+ 
+    if force_admin:
+        rol = "admin"
+        info("Rol asignado automáticamente: admin (primer usuario del sistema)")
     else:
-        inspecciones_por_dia = []
-
-    # ── Gráfica anual comparativa ──
-    from sqlalchemy import extract
-    rows_anual = (
-        db.query(
-            extract("year",  models.Inspeccion.fecha).label("anio"),
-            extract("month", models.Inspeccion.fecha).label("mes"),
-            func.count(models.Inspeccion.id).label("total")
-        )
-        .group_by("anio", "mes")
-        .order_by("anio", "mes")
-        .all()
-    )
-
-    anual_dict: dict = {}
-    for row in rows_anual:
-        anio = int(row.anio)
-        mes  = int(row.mes)
-        if anio not in anual_dict:
-            anual_dict[anio] = [0] * 12
-        anual_dict[anio][mes - 1] = int(row.total)
-
-    anios_disponibles = sorted(anual_dict.keys())
-    inspecciones_anual = [
-        {"anio": anio, "meses": anual_dict[anio]}
-        for anio in anios_disponibles
-    ]
-
-    return templates.TemplateResponse("admin/dashboard.html", {
-        "request": request,
-        "admin": usuario_admin,
-        "total_usuarios": total_usuarios,
-        "total_inspecciones": total_inspecciones,
-        "usuarios_activos": usuarios_activos,
-        "inspecciones_por_dia": inspecciones_por_dia,
-        "inspecciones_anual": inspecciones_anual,
-    })
-
-
-@router.get("/admin/usuarios", response_class=HTMLResponse)
-async def admin_usuarios_list(
-    request: Request,
-    usuario_admin: models.Usuario = Depends(require_admin),
-    db: Session = Depends(get_db)
-):
-    templates = _templates_admin
-    usuarios = db.query(models.Usuario).all()
-
-    from sqlalchemy import func
-    stats = dict(
-        db.query(
-            models.Inspeccion.usuario_id,
-            func.count(models.Inspeccion.id)
-        )
-        .group_by(models.Inspeccion.usuario_id)
-        .all()
-    )
-
-    return templates.TemplateResponse("admin/usuarios.html", {
-        "request": request,
-        "admin": usuario_admin,
-        "usuarios": usuarios,
-        "stats": stats,
-    })
-
-
-@router.get("/admin/usuarios/nuevo", response_class=HTMLResponse)
-async def admin_usuario_nuevo_form(
-    request: Request,
-    usuario_admin: models.Usuario = Depends(require_admin)
-):
-    templates = _templates_admin
-    return templates.TemplateResponse("admin/usuario_form.html", {
-        "request": request,
-        "admin": usuario_admin,
-        "modo": "crear",
-        "usuario": None,
-    })
-
-
-@router.post("/admin/usuarios/crear")
-async def admin_usuario_crear(
-    usuario_admin: models.Usuario = Depends(require_admin),
-    db: Session = Depends(get_db),
-    cedula: str = Form(...),
-    nombre_visible: str = Form(...),
-    pin: str = Form(...),
-    rol: str = Form("user")
-):
-    if not cedula.strip().isdigit() or not (5 <= len(cedula.strip()) <= 12):
-        raise HTTPException(400, "Cédula inválida (5-12 dígitos numéricos)")
-    if len(pin) < 4:
-        raise HTTPException(400, "PIN debe tener al menos 4 dígitos")
-    if rol not in ["user", "admin"]:
-        raise HTTPException(400, "Rol inválido")
-
-    existe = db.query(models.Usuario).filter_by(cedula=cedula.strip()).first()
-    if existe:
-        raise HTTPException(400, f"Cédula '{cedula}' ya está registrada")
-
-    nuevo_usuario = models.Usuario(
-        cedula=cedula.strip(),
-        nombre_visible=nombre_visible.strip(),
-        pin_hash=hash_pin(pin),
-        rol=rol
-    )
-    db.add(nuevo_usuario)
-    db.commit()
-    db.refresh(nuevo_usuario)
-
-    registrar_accion(db, admin_id=usuario_admin.id, accion="CREAR_USUARIO",
-                     detalles=f"Cédula '{cedula}' creada con rol '{rol}'")
-
-    return RedirectResponse(url="/admin/usuarios?mensaje=Usuario creado exitosamente", status_code=303)
-
-
-@router.get("/admin/usuarios/{usuario_id}/editar", response_class=HTMLResponse)
-async def admin_usuario_editar_form(
-    request: Request,
-    usuario_id: int,
-    usuario_admin: models.Usuario = Depends(require_admin),
-    db: Session = Depends(get_db)
-):
-    templates = _templates_admin
-    usuario = db.query(models.Usuario).filter_by(id=usuario_id).first()
-    if not usuario:
-        raise HTTPException(404, "Usuario no encontrado")
-
-    return templates.TemplateResponse("admin/usuario_form.html", {
-        "request": request,
-        "admin": usuario_admin,
-        "modo": "editar",
-        "usuario": usuario,
-    })
-
-
-@router.post("/admin/usuarios/{usuario_id}/actualizar")
-async def admin_usuario_actualizar(
-    usuario_id: int,
-    usuario_admin: models.Usuario = Depends(require_admin),
-    db: Session = Depends(get_db),
-    nombre_visible: str = Form(...),
-    pin: str = Form(None),
-    rol: str = Form(...)
-):
-    usuario = db.query(models.Usuario).filter_by(id=usuario_id).first()
-    if not usuario:
-        raise HTTPException(404, "Usuario no encontrado")
-    if usuario.id == usuario_admin.id and rol != "admin":
-        raise HTTPException(400, "No puedes quitarte permisos de admin")
-
-    cambios = []
-    if nombre_visible.strip() != usuario.nombre_visible:
-        usuario.nombre_visible = nombre_visible.strip()
-        cambios.append("nombre_visible")
-    if rol != usuario.rol:
-        usuario.rol = rol
-        cambios.append(f"rol → {rol}")
-    if pin and len(pin) >= 4:
-        usuario.pin_hash = hash_pin(pin)
-        cambios.append("PIN")
-
-    db.commit()
-
-    if cambios:
-        registrar_accion(db, admin_id=usuario_admin.id, accion="EDITAR_USUARIO",
-                         detalles=f"Usuario cédula '{usuario.cedula}': {', '.join(cambios)}")
-
-    return RedirectResponse(url="/admin/usuarios?mensaje=Usuario actualizado", status_code=303)
-
-
-@router.post("/admin/usuarios/{usuario_id}/eliminar")
-async def admin_usuario_eliminar(
-    usuario_id: int,
-    usuario_admin: models.Usuario = Depends(require_admin),
-    db: Session = Depends(get_db)
-):
-    usuario = db.query(models.Usuario).filter_by(id=usuario_id).first()
-    if not usuario:
-        raise HTTPException(404, "Usuario no encontrado")
-    if usuario.id == usuario_admin.id:
-        raise HTTPException(400, "No puedes eliminarte a ti mismo")
-
-    tiene_inspecciones = db.query(models.Inspeccion).filter_by(usuario_id=usuario_id).first()
-    if tiene_inspecciones:
-        raise HTTPException(400, "No se puede eliminar: el usuario tiene inspecciones registradas")
-
-    usuario.token = None
-    usuario.token_expira = None
-    cedula_eliminada = usuario.cedula
-    db.delete(usuario)
-    db.commit()
-
-    registrar_accion(db, admin_id=usuario_admin.id, accion="ELIMINAR_USUARIO",
-                     detalles=f"Usuario cédula '{cedula_eliminada}' eliminado")
-
-    return RedirectResponse(url="/admin/usuarios?mensaje=Usuario eliminado", status_code=303)
-
-
-@router.get("/admin/logs", response_class=HTMLResponse)
-async def admin_logs(
-    request: Request,
-    usuario_admin: models.Usuario = Depends(require_admin),
-    db: Session = Depends(get_db)
-):
-    templates = _templates_admin
-    from sqlalchemy import desc
-
-    logs = (
-        db.query(models.LogAuditoria)
-        .order_by(desc(models.LogAuditoria.fecha))
-        .limit(100)
-        .all()
-    )
-
-    for log in logs:
-        admin = db.query(models.Usuario).filter_by(id=log.admin_id).first()
-        log.admin_nombre = admin.nombre_visible or admin.cedula if admin else "Desconocido"
-
-    return templates.TemplateResponse("admin/logs.html", {
-        "request": request,
-        "admin": usuario_admin,
-        "logs": logs,
-    })
-
-
-@router.post("/admin/usuarios/{usuario_id}/suspender")
-async def admin_usuario_suspender(
-    usuario_id: int,
-    usuario_admin: models.Usuario = Depends(require_admin),
-    db: Session = Depends(get_db)
-):
-    usuario = db.query(models.Usuario).filter_by(id=usuario_id).first()
-    if not usuario:
-        raise HTTPException(404, "Usuario no encontrado")
-    if usuario.id == usuario_admin.id:
-        raise HTTPException(400, "No puedes suspenderte a ti mismo")
-    usuario.activo = 0
-    usuario.token = None
-    usuario.token_expira = None
-    db.commit()
-    registrar_accion(db, usuario_admin.id, "SUSPENDER_USUARIO",
-                     f"Usuario cédula '{usuario.cedula}' suspendido")
-    return RedirectResponse(url="/admin/usuarios?mensaje=Usuario suspendido", status_code=303)
-
-
-@router.post("/admin/usuarios/{usuario_id}/reactivar")
-async def admin_usuario_reactivar(
-    usuario_id: int,
-    usuario_admin: models.Usuario = Depends(require_admin),
-    db: Session = Depends(get_db)
-):
-    usuario = db.query(models.Usuario).filter_by(id=usuario_id).first()
-    if not usuario:
-        raise HTTPException(404, "Usuario no encontrado")
-    usuario.activo = 1
-    db.commit()
-    registrar_accion(db, usuario_admin.id, "REACTIVAR_USUARIO",
-                     f"Usuario cédula '{usuario.cedula}' reactivado")
-    return RedirectResponse(url="/admin/usuarios?mensaje=Usuario reactivado", status_code=303)
-
-
-# ===============================
-# RUTAS: INSPECCIONES
-# ===============================
-
-@router.get("/admin/inspecciones", response_class=HTMLResponse)
-async def admin_inspecciones(
-    request: Request,
-    usuario_admin: models.Usuario = Depends(require_admin),
-    db: Session = Depends(get_db),
-    conductor: str = "",
-    placa: str = "",
-    tipo: str = "",
-    fecha_desde: str = "",
-    fecha_hasta: str = "",
-):
-    from sqlalchemy import or_
-    from datetime import datetime as _dt, timedelta
-
-    q = (
-        db.query(models.Inspeccion, models.Usuario)
-        .join(models.Usuario, models.Inspeccion.usuario_id == models.Usuario.id)
-    )
-
-    if conductor.strip():
-        q = q.filter(models.Inspeccion.nombre_conductor.ilike(f"%{conductor.strip()}%"))
-    if placa.strip():
-        q = q.filter(models.Inspeccion.placa.ilike(f"%{placa.strip()}%"))
-    if tipo.strip():
-        q = q.filter(models.Inspeccion.tipo_vehiculo == tipo.strip())
-    if fecha_desde.strip():
-        try:
-            q = q.filter(models.Inspeccion.fecha >= _dt.strptime(fecha_desde.strip(), "%Y-%m-%d"))
-        except ValueError:
-            pass
-    if fecha_hasta.strip():
-        try:
-            limite = _dt.strptime(fecha_hasta.strip(), "%Y-%m-%d") + timedelta(days=1)
-            q = q.filter(models.Inspeccion.fecha < limite)
-        except ValueError:
-            pass
-
-    resultados = q.order_by(models.Inspeccion.fecha.desc()).limit(300).all()
-
-    total_activas = db.query(models.Inspeccion).count()
-    conductores_unicos = db.query(models.Inspeccion.usuario_id).distinct().count()
-
-    def _tiene_malo(inspeccion):
-        asp = inspeccion.aspectos_dict or {}
-        for v in asp.values():
-            val = v.get("valor") if isinstance(v, dict) else v
-            if val == "M":
-                return True
-        return False
-
-    con_malo = sum(1 for r, u in resultados if _tiene_malo(r))
-
-    templates = _templates_admin
-    return templates.TemplateResponse("admin/inspecciones.html", {
-        "request":            request,
-        "admin":              usuario_admin,
-        "resultados":         resultados,
-        "total_activas":      total_activas,
-        "con_malo":           con_malo,
-        "conductores_unicos": conductores_unicos,
-        "usuario_filtro":     None,
-        "reportes":           [],
-        "filtros": {
-            "conductor":   conductor,
-            "placa":       placa,
-            "tipo":        tipo,
-            "fecha_desde": fecha_desde,
-            "fecha_hasta": fecha_hasta,
-        },
-    })
-
-
-@router.get("/admin/usuarios/{usuario_id}/inspecciones", response_class=HTMLResponse)
-async def admin_usuario_inspecciones(
-    request: Request,
-    usuario_id: int,
-    usuario_admin: models.Usuario = Depends(require_admin),
-    db: Session = Depends(get_db),
-):
-    usuario = db.query(models.Usuario).filter_by(id=usuario_id).first()
-    if not usuario:
-        raise HTTPException(404, "Usuario no encontrado")
-
-    inspecciones = (
-        db.query(models.Inspeccion)
-        .filter(models.Inspeccion.usuario_id == usuario_id)
-        .order_by(models.Inspeccion.fecha.desc())
-        .all()
-    )
-
-    nombre_visible = usuario.nombre_visible or usuario.cedula
-    reportes = (
-        db.query(models.ReporteInspeccion)
-        .filter(models.ReporteInspeccion.nombre_conductor == nombre_visible)
-        .order_by(models.ReporteInspeccion.fecha_reporte.desc())
-        .all()
-    )
-
-    def _tiene_malo(inspeccion):
-        asp = inspeccion.aspectos_dict or {}
-        for v in asp.values():
-            val = v.get("valor") if isinstance(v, dict) else v
-            if val == "M":
-                return True
-        return False
-
-    con_malo = sum(1 for i in inspecciones if _tiene_malo(i))
-    resultados = [(i, usuario) for i in inspecciones]
-
-    templates = _templates_admin
-    return templates.TemplateResponse("admin/inspecciones.html", {
-        "request":            request,
-        "admin":              usuario_admin,
-        "resultados":         resultados,
-        "total_activas":      db.query(models.Inspeccion).count(),
-        "con_malo":           con_malo,
-        "conductores_unicos": 1,
-        "usuario_filtro":     usuario,
-        "reportes":           reportes,
-        "filtros": {
-            "conductor":   nombre_visible,
-            "placa":       "",
-            "tipo":        "",
-            "fecha_desde": "",
-            "fecha_hasta": "",
-        },
-    })
-
-
-# ===============================
-# API REST
-# ===============================
-
-@router.get("/api/admin/usuarios")
-async def api_usuarios_list(
-    usuario_admin: models.Usuario = Depends(require_admin),
-    db: Session = Depends(get_db)
-):
-    usuarios = db.query(models.Usuario).all()
-    return {
-        "ok": True,
-        "usuarios": [
-            {"id": u.id, "cedula": u.cedula, "nombre_visible": u.nombre_visible, "rol": u.rol}
-            for u in usuarios
-        ]
-    }
-
-
-@router.post("/api/admin/usuarios")
-async def api_usuario_crear(
-    usuario_admin: models.Usuario = Depends(require_admin),
-    db: Session = Depends(get_db),
-    datos: dict = None
-):
-    pass
+        rol = pedir_rol()
+ 
+    print(f"\n{W}📋 Resumen:{RST}")
+    print(f"   Login  : {C}{nombre}{RST}")
+    print(f"   Nombre : {nombre_visible}")
+    print(f"   Rol    : {Y if rol == 'admin' else C}{'👑 admin' if rol == 'admin' else '👤 user'}{RST}")
+    print(f"   PIN    : {'*' * len(pin)}")
+ 
+    conf = input(f"\n{W}¿Crear usuario? (S/n): {RST}").strip().lower()
+    if conf and conf != "s":
+        warn("Operación cancelada.")
+        return
+ 
+    u = create_user_db(nombre, nombre_visible, pin, rol)
+    if u:
+        ok(f"Usuario creado — ID: {u.id} | Login: {u.nombre} | Rol: {u.rol}")
+    else:
+        err("No se pudo crear el usuario. Revisa app/logs/admin.log")
+ 
+ 
+def prompt_list_users():
+    titulo("📋  LISTA DE USUARIOS")
+    mostrar_tabla_usuarios(list_users_db())
+ 
+ 
+def prompt_delete_user():
+    titulo("🗑️   BORRAR USUARIO")
+    mostrar_tabla_usuarios(list_users_db())
+ 
+    uid = pedir_id("ID del usuario a borrar: ")
+    if uid is None: return
+ 
+    db = SessionLocal()
+    u = db.query(Usuario).filter(Usuario.id == uid).first()
+    db.close()
+    if not u:
+        err(f"No existe usuario con ID {uid}")
+        return
+ 
+    warn(f"Vas a borrar permanentemente a '{u.nombre}' ({u.nombre_visible})")
+    conf = input("Escribe BORRAR para confirmar: ").strip()
+    if conf != "BORRAR":
+        warn("Operación cancelada.")
+        return
+ 
+    ok("Usuario borrado.") if delete_user_db(uid) else err("No se pudo borrar.")
+ 
+ 
+def prompt_change_pin():
+    titulo("🔐  CAMBIAR PIN")
+    mostrar_tabla_usuarios(list_users_db())
+ 
+    uid = pedir_id("ID del usuario: ")
+    if uid is None: return
+ 
+    db = SessionLocal()
+    u = db.query(Usuario).filter(Usuario.id == uid).first()
+    db.close()
+    if not u:
+        err(f"No existe usuario con ID {uid}")
+        return
+ 
+    info(f"Cambiando PIN de '{u.nombre}' ({u.nombre_visible})")
+    pin = pedir_pin()
+    if pin is None: return
+ 
+    ok("PIN actualizado.") if update_pin_db(uid, pin) else err("No se pudo actualizar.")
+ 
+ 
+def prompt_change_nombre():
+    titulo("📛  CAMBIAR NOMBRE VISIBLE")
+    mostrar_tabla_usuarios(list_users_db())
+ 
+    uid = pedir_id("ID del usuario: ")
+    if uid is None: return
+ 
+    db = SessionLocal()
+    u = db.query(Usuario).filter(Usuario.id == uid).first()
+    db.close()
+    if not u:
+        err(f"No existe usuario con ID {uid}")
+        return
+ 
+    info(f"Nombre actual: {u.nombre_visible}")
+    nv = input("Nuevo nombre completo: ").strip()
+    if not nv:
+        warn("Cancelado.")
+        return
+    if not validate_nombre_visible(nv):
+        err("Nombre inválido — solo letras y espacios.")
+        return
+ 
+    ok("Nombre actualizado.") if update_nombre_visible_db(uid, nv.title()) else err("No se pudo actualizar.")
+ 
+ 
+def prompt_change_rol():
+    titulo("👥  CAMBIAR ROL")
+    mostrar_tabla_usuarios(list_users_db())
+ 
+    uid = pedir_id("ID del usuario: ")
+    if uid is None: return
+ 
+    db = SessionLocal()
+    u = db.query(Usuario).filter(Usuario.id == uid).first()
+    db.close()
+    if not u:
+        err(f"No existe usuario con ID {uid}")
+        return
+ 
+    info(f"Rol actual de '{u.nombre}': {u.rol}")
+    nuevo_rol = pedir_rol(default=u.rol)
+ 
+    if nuevo_rol == u.rol:
+        info("El rol seleccionado es el mismo. Sin cambios.")
+        return
+ 
+    warn(f"Cambiar rol de '{u.nombre}': {u.rol} → {nuevo_rol}")
+    conf = input("¿Confirmar? (S/n): ").strip().lower()
+    if conf and conf != "s":
+        warn("Cancelado.")
+        return
+ 
+    ok(f"Rol actualizado a '{nuevo_rol}'.") if update_rol_db(uid, nuevo_rol) else err("No se pudo actualizar.")
+ 
+ 
+def prompt_toggle_activo():
+    titulo("🔛  ACTIVAR / DESACTIVAR USUARIO")
+    mostrar_tabla_usuarios(list_users_db())
+ 
+    uid = pedir_id("ID del usuario: ")
+    if uid is None: return
+ 
+    db = SessionLocal()
+    u = db.query(Usuario).filter(Usuario.id == uid).first()
+    db.close()
+    if not u:
+        err(f"No existe usuario con ID {uid}")
+        return
+ 
+    estado_actual = "ACTIVO" if getattr(u, 'activo', True) else "INACTIVO"
+    estado_nuevo  = "INACTIVO" if getattr(u, 'activo', True) else "ACTIVO"
+    warn(f"'{u.nombre}' está {estado_actual} → pasará a {estado_nuevo}")
+ 
+    conf = input("¿Confirmar? (S/n): ").strip().lower()
+    if conf and conf != "s":
+        warn("Cancelado.")
+        return
+ 
+    nuevo = toggle_activo_db(uid)
+    if nuevo is None:
+        err("No se pudo cambiar el estado.")
+    elif nuevo:
+        ok(f"Usuario '{u.nombre}' ACTIVADO.")
+    else:
+        warn(f"Usuario '{u.nombre}' DESACTIVADO. No podrá iniciar sesión.")
+ 
+ 
+# ════════════════════════════════════════════════════════════════════════════
+# MENÚ PRINCIPAL
+# ════════════════════════════════════════════════════════════════════════════
+ 
+MENU = {
+    "1": ("📝  Crear usuario",               prompt_create_user),
+    "2": ("📋  Listar usuarios",              prompt_list_users),
+    "3": ("🔐  Cambiar PIN",                  prompt_change_pin),
+    "4": ("📛  Cambiar nombre visible",       prompt_change_nombre),
+    "5": ("👥  Cambiar rol",                  prompt_change_rol),
+    "6": ("🔛  Activar / Desactivar usuario", prompt_toggle_activo),
+    "7": ("🗑️   Borrar usuario",              prompt_delete_user),
+    "0": ("👋  Salir",                        None),
+}
+ 
+def show_header():
+    stats = get_stats()
+    print(f"\n{W}")
+    separador("═")
+    print(f"  🔧  MISIONALES — Admin CLI  v3.1")
+    separador("─", 60)
+    print(f"  {C}Usuarios: {stats['total']}{RST}  |  "
+          f"  {Y}Admins: {stats['admins']}{RST}  |  "
+          f"  {G}Activos: {stats['activos']}{RST}")
+    separador("═")
+ 
+def main_menu():
+    show_header()
+ 
+    while True:
+        print(f"\n{W}=== MENÚ ==={RST}")
+        for k, (label, _) in MENU.items():
+            print(f"  {C}{k}{RST}) {label}")
+ 
+        choice = input(f"\n{W}Selecciona opción: {RST}").strip()
+ 
+        if choice == "0":
+            print(f"\n{G}👋 Hasta luego.{RST}\n")
+            break
+        elif choice in MENU:
+            _, action = MENU[choice]
+            if action:
+                try:
+                    action()
+                except KeyboardInterrupt:
+                    warn("\nOperación cancelada.")
+                except Exception as e:
+                    logger.exception("Error en acción: %s", e)
+                    err(f"Error inesperado: {e}")
+        else:
+            err("Opción inválida.")
+ 
+ 
+# ════════════════════════════════════════════════════════════════════════════
+# PUNTO DE ENTRADA
+# ════════════════════════════════════════════════════════════════════════════
+ 
+if __name__ == "__main__":
+    try:
+        stats = get_stats()
+ 
+        if stats["total"] == 0:
+            print(f"\n{Y}{'═'*60}{RST}")
+            print(f"{Y}  🚀  PRIMERA EJECUCIÓN — No hay usuarios en el sistema{RST}")
+            print(f"{Y}  Crea el usuario administrador para continuar.{RST}")
+            print(f"{Y}{'═'*60}{RST}\n")
+            prompt_create_user(force_admin=True)
+            print(f"\n{G}✅ Admin creado. Ahora puedes iniciar sesión en Misionales.{RST}\n")
+ 
+        elif stats["admins"] == 0:
+            warn("Hay usuarios pero ningún administrador.")
+            info("Asigna el rol admin a un usuario existente o crea uno nuevo.")
+            main_menu()
+ 
+        else:
+            main_menu()
+ 
+    except KeyboardInterrupt:
+        print(f"\n\n{Y}⚠️  Interrumpido. Saliendo...{RST}\n")
+        sys.exit(0)
+    except Exception as e:
+        logger.exception("Error fatal: %s", e)
+        err(f"Error fatal: {e}")
+        sys.exit(1)
+ 

@@ -77,7 +77,7 @@ async def admin_dashboard(
     from sqlalchemy import func, desc
     usuarios_activos = (
         db.query(
-            models.Usuario.nombre,
+            models.Usuario.nombre_visible,
             func.count(models.Inspeccion.id).label("total")
         )
         .join(models.Inspeccion)
@@ -201,24 +201,24 @@ async def admin_usuario_nuevo_form(
 async def admin_usuario_crear(
     usuario_admin: models.Usuario = Depends(require_admin),
     db: Session = Depends(get_db),
-    nombre: str = Form(...),
+    cedula: str = Form(...),
     nombre_visible: str = Form(...),
     pin: str = Form(...),
     rol: str = Form("user")
 ):
-    if len(nombre.strip()) < 2:
-        raise HTTPException(400, "Nombre muy corto")
+    if not cedula.strip().isdigit() or not (5 <= len(cedula.strip()) <= 12):
+        raise HTTPException(400, "Cédula inválida (5-12 dígitos numéricos)")
     if len(pin) < 4:
         raise HTTPException(400, "PIN debe tener al menos 4 dígitos")
     if rol not in ["user", "admin"]:
         raise HTTPException(400, "Rol inválido")
 
-    existe = db.query(models.Usuario).filter_by(nombre=nombre).first()
+    existe = db.query(models.Usuario).filter_by(cedula=cedula.strip()).first()
     if existe:
-        raise HTTPException(400, f"Usuario '{nombre}' ya existe")
+        raise HTTPException(400, f"Cédula '{cedula}' ya está registrada")
 
     nuevo_usuario = models.Usuario(
-        nombre=nombre.strip(),
+        cedula=cedula.strip(),
         nombre_visible=nombre_visible.strip(),
         pin_hash=hash_pin(pin),
         rol=rol
@@ -228,7 +228,7 @@ async def admin_usuario_crear(
     db.refresh(nuevo_usuario)
 
     registrar_accion(db, admin_id=usuario_admin.id, accion="CREAR_USUARIO",
-                     detalles=f"Usuario '{nombre}' creado con rol '{rol}'")
+                     detalles=f"Cédula '{cedula}' creada con rol '{rol}'")
 
     return RedirectResponse(url="/admin/usuarios?mensaje=Usuario creado exitosamente", status_code=303)
 
@@ -283,7 +283,7 @@ async def admin_usuario_actualizar(
 
     if cambios:
         registrar_accion(db, admin_id=usuario_admin.id, accion="EDITAR_USUARIO",
-                         detalles=f"Usuario '{usuario.nombre}': {', '.join(cambios)}")
+                         detalles=f"Usuario cédula '{usuario.cedula}': {', '.join(cambios)}")
 
     return RedirectResponse(url="/admin/usuarios?mensaje=Usuario actualizado", status_code=303)
 
@@ -306,12 +306,12 @@ async def admin_usuario_eliminar(
 
     usuario.token = None
     usuario.token_expira = None
-    nombre_eliminado = usuario.nombre
+    cedula_eliminada = usuario.cedula
     db.delete(usuario)
     db.commit()
 
     registrar_accion(db, admin_id=usuario_admin.id, accion="ELIMINAR_USUARIO",
-                     detalles=f"Usuario '{nombre_eliminado}' eliminado")
+                     detalles=f"Usuario cédula '{cedula_eliminada}' eliminado")
 
     return RedirectResponse(url="/admin/usuarios?mensaje=Usuario eliminado", status_code=303)
 
@@ -334,7 +334,7 @@ async def admin_logs(
 
     for log in logs:
         admin = db.query(models.Usuario).filter_by(id=log.admin_id).first()
-        log.admin_nombre = admin.nombre if admin else "Desconocido"
+        log.admin_nombre = admin.nombre_visible or admin.cedula if admin else "Desconocido"
 
     return templates.TemplateResponse("admin/logs.html", {
         "request": request,
@@ -359,7 +359,7 @@ async def admin_usuario_suspender(
     usuario.token_expira = None
     db.commit()
     registrar_accion(db, usuario_admin.id, "SUSPENDER_USUARIO",
-                     f"Usuario '{usuario.nombre}' suspendido")
+                     f"Usuario cédula '{usuario.cedula}' suspendido")
     return RedirectResponse(url="/admin/usuarios?mensaje=Usuario suspendido", status_code=303)
 
 
@@ -375,7 +375,7 @@ async def admin_usuario_reactivar(
     usuario.activo = 1
     db.commit()
     registrar_accion(db, usuario_admin.id, "REACTIVAR_USUARIO",
-                     f"Usuario '{usuario.nombre}' reactivado")
+                     f"Usuario cédula '{usuario.cedula}' reactivado")
     return RedirectResponse(url="/admin/usuarios?mensaje=Usuario reactivado", status_code=303)
 
 
@@ -473,7 +473,7 @@ async def admin_usuario_inspecciones(
         .all()
     )
 
-    nombre_visible = usuario.nombre_visible or usuario.nombre
+    nombre_visible = usuario.nombre_visible or usuario.cedula
     reportes = (
         db.query(models.ReporteInspeccion)
         .filter(models.ReporteInspeccion.nombre_conductor == nombre_visible)
@@ -525,7 +525,7 @@ async def api_usuarios_list(
     return {
         "ok": True,
         "usuarios": [
-            {"id": u.id, "nombre": u.nombre, "nombre_visible": u.nombre_visible, "rol": u.rol}
+            {"id": u.id, "cedula": u.cedula, "nombre_visible": u.nombre_visible, "rol": u.rol}
             for u in usuarios
         ]
     }
