@@ -90,7 +90,7 @@
  
         <!-- Usuario -->
         <div class="form-group">
-          <label class="form-label" for="nombre">Usuario</label>
+          <label class="form-label" for="cedula">Cédula</label>
           <div class="input-wrapper">
             <span class="input-icon">👤</span>
             <input
@@ -172,12 +172,12 @@
   const err  = document.getElementById('errorBox');
  
   // Pasar al campo PIN al presionar Enter en usuario
-  document.getElementById('nombre').addEventListener('keydown', e => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      document.getElementById('pin').focus();
-    }
-  });
+  document.getElementById('cedula').addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    document.getElementById('pin').focus();
+  }
+});
  
   function showError(msg) {
     err.textContent = '⚠ ' + msg;
