@@ -408,7 +408,7 @@
         <thead>
           <tr>
             <th>ID</th>
-            <th>Usuario</th>
+            <th>Cédula</th>
             <th>Nombre</th>
             <th>Rol</th>
             <th>Inspecciones</th>
@@ -419,8 +419,8 @@
           {% for u in usuarios %}
           <tr>
             <td style="color:var(--text3);font-size:0.75rem;">#{{ u.id }}</td>
-            <td style="font-weight:700;">{{ u.nombre }}</td>
-            <td>{{ u.nombre_visible }}</td>
+            <td style="font-weight:700;"><span class="placa-chip">{{ u.cedula }}</span></td>
+            <td>{{ u.nombre_visible or u.nombre }}</td>
             <td>
               {% if u.rol == 'admin' %}
                 <span class="rol-badge rol-admin">★ Admin</span>
