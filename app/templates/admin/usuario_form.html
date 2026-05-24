@@ -14,7 +14,7 @@
   </script>
   <style>
     body { display: flex; min-height: 100vh; }
-
+ 
     /* ══ SIDEBAR — usa variables del tema ══ */
     .sidebar {
       width: 220px; flex-shrink: 0;
@@ -39,14 +39,14 @@
     .user-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--grad-brand); display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; color: #1a0f00; flex-shrink: 0; }
     .user-name { font-size: 0.8rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .user-role { font-size: 0.65rem; color: var(--amber); letter-spacing: 0.06em; text-transform: uppercase; }
-
+ 
     /* Theme toggle en sidebar footer */
     .sidebar-theme-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
     .sidebar-theme-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); }
-
+ 
     .btn-logout { display: flex; align-items: center; justify-content: center; gap: 0.4rem; width: 100%; padding: 0.6rem; background: rgba(220,60,60,0.08); border: 1px solid rgba(220,60,60,0.2); border-radius: var(--r-md); color: #f07070; cursor: pointer; font-family: 'Futura', sans-serif; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.2s; min-height: 44px; }
     .btn-logout:hover { background: rgba(220,60,60,0.18); border-color: #f07070; }
-
+ 
     /* ══ HAMBURGER ══ */
     .hamburger { display: none; position: fixed; top: 0.9rem; left: 0.9rem; z-index: 30; flex-direction: column; justify-content: center; align-items: center; gap: 5px; width: 44px; height: 44px; background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r-md); cursor: pointer; padding: 0; }
     .hamburger span { display: block; width: 18px; height: 2px; background: var(--amber); border-radius: 2px; transition: all 0.25s; }
@@ -54,15 +54,15 @@
     .hamburger.open span:nth-child(2) { opacity: 0; }
     .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
     .sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 19; backdrop-filter: blur(2px); }
-
+ 
     /* ══ MAIN ══ */
     .main { margin-left: 220px; flex: 1; padding: 2rem 2.25rem; min-height: 100vh; background: var(--bg-base); }
-
+ 
     /* ══ TOPBAR ══ */
     .topbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; gap: 1rem; flex-wrap: wrap; }
     .page-title { font-size: 1.6rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; background: var(--grad-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; }
     .page-sub { font-size: 0.78rem; color: var(--text3); margin-top: 0.3rem; }
-
+ 
     /* ══ BOTÓN VOLVER ══ */
     .btn-back {
       display: inline-flex; align-items: center; gap: 0.4rem;
@@ -74,8 +74,8 @@
       text-decoration: none; cursor: pointer; transition: all 0.2s; min-height: 40px;
     }
     .btn-back:hover { border-color: var(--amber); color: var(--amber); }
-
-    /* ══ FORM CARD — usa var(--card-bg) para responder al tema ══ */
+ 
+    /* ══ FORM CARD ══ */
     .form-card {
       background: var(--card-bg);
       border: 1px solid var(--border);
@@ -85,12 +85,12 @@
       box-shadow: var(--shadow-sm);
       animation: fadeUp 0.5s ease both;
     }
-
+ 
     /* ══ ALERTAS ══ */
     .alert-info { background: rgba(245,156,0,0.07); border: 1px solid rgba(245,156,0,0.2); border-radius: var(--r-md); padding: 0.75rem 1rem; font-size: 0.82rem; color: var(--amber); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; }
     .alert-warn { background: rgba(220,60,60,0.07); border: 1px solid rgba(220,60,60,0.2); border-radius: var(--r-md); padding: 0.75rem 1rem; font-size: 0.82rem; color: #f07070; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; }
-
-    /* ══ SECTION DIVIDER dentro del card ══ */
+ 
+    /* ══ SECTION DIVIDER ══ */
     .form-section-title {
       font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em;
       text-transform: uppercase; color: var(--text3);
@@ -98,17 +98,21 @@
       margin-bottom: 1.25rem; margin-top: 1.5rem;
     }
     .form-section-title:first-of-type { margin-top: 0; }
-
+ 
     /* ══ FORM GROUPS ══ */
     .form-group { margin-bottom: 1.25rem; }
+    .form-label { display: block; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); margin-bottom: 0.4rem; }
+    .form-input { width: 100%; padding: 0.75rem 1rem; background: var(--bg-3); border: 1px solid var(--border); border-radius: var(--r-md); color: var(--text); font-family: inherit; font-size: 0.9rem; transition: all 0.2s; }
+    .form-input:focus { outline: none; border-color: var(--amber); background: var(--bg-2); box-shadow: 0 0 0 3px rgba(245,156,0,0.08); }
+    .form-input:disabled { opacity: 0.5; cursor: not-allowed; }
     .form-hint { font-size: 0.72rem; color: var(--text3); margin-top: 0.3rem; }
     .required { color: var(--amber); }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-
+ 
     /* ══ PIN FEEDBACK ══ */
     .pin-ok  { color: #28c878; font-size: 0.72rem; margin-top: 0.3rem; }
     .pin-bad { color: #f07070; font-size: 0.72rem; margin-top: 0.3rem; }
-
+ 
     /* ══ ROL SELECTOR — pill buttons ══ */
     .rol-selector { display: flex; gap: 0.65rem; }
     .rol-option { flex: 1; }
@@ -130,7 +134,7 @@
     .rol-name { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); }
     .rol-desc { font-size: 0.65rem; color: var(--text3); line-height: 1.4; }
     .rol-option input:checked + label .rol-name { color: var(--amber); }
-
+ 
     /* ══ ACTIONS ══ */
     .form-actions {
       display: flex; gap: 0.75rem; margin-top: 1.75rem;
@@ -147,7 +151,7 @@
       min-height: 44px;
     }
     .btn-save:hover { filter: brightness(1.1); transform: translateY(-1px); }
-
+ 
     /* ══ RESPONSIVE ══ */
     @media (max-width: 768px) {
       .hamburger { display: flex; }
@@ -166,7 +170,7 @@
       .form-actions { flex-direction: column; }
       .btn-save, .btn-back { width: 100%; }
     }
-
+ 
     @media (max-width: 420px) {
       .page-title { font-size: 1.1rem; }
       .form-card { padding: 1rem; border-radius: var(--r-md); }
@@ -174,12 +178,12 @@
   </style>
 </head>
 <body>
-
+ 
 <button class="hamburger" onclick="toggleSidebar()" id="hamburgerBtn" aria-label="Menú">
   <span></span><span></span><span></span>
 </button>
 <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
-
+ 
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-brand">
@@ -189,7 +193,7 @@
       <div class="brand-sub">Incubant SST</div>
     </div>
   </div>
-
+ 
   <div class="nav-section">Panel</div>
   <a href="/admin"               class="nav-link"><span class="nav-icon">📊</span> Dashboard</a>
   <a href="/admin/usuarios"      class="nav-link active"><span class="nav-icon">👥</span> Usuarios</a>
@@ -197,12 +201,12 @@
   <a href="/admin/logs"          class="nav-link"><span class="nav-icon">📋</span> Auditoría</a>
   <div class="nav-section" style="margin-top:1.25rem;">Sistema</div>
   <a href="/" class="nav-link"><span class="nav-icon">🚗</span> Formulario</a>
-
+ 
   <div class="sidebar-footer">
     <div class="user-pill">
       <div class="user-avatar">{{ admin.nombre_visible[0]|upper if admin.nombre_visible else 'A' }}</div>
       <div style="overflow:hidden;min-width:0;">
-        <div class="user-name">{{ admin.nombre_visible or admin.nombre }}</div>
+        <div class="user-name">{{ admin.nombre_visible or admin.cedula }}</div>
         <div class="user-role">Administrador</div>
       </div>
     </div>
@@ -217,59 +221,63 @@
     <button onclick="cerrarSesion()" class="btn-logout">⏻ Cerrar sesión</button>
   </div>
 </aside>
-
+ 
 <!-- MAIN -->
 <main class="main">
   <div class="topbar">
     <div>
       <div class="page-title">{{ '+ Nuevo usuario' if modo == 'crear' else '✏ Editar usuario' }}</div>
-      <div class="page-sub">{{ 'Registrar nuevo conductor o administrador' if modo == 'crear' else 'Modificar datos de ' + (usuario.nombre_visible or usuario.nombre) }}</div>
+      <div class="page-sub">{{ 'Registrar nuevo conductor o administrador' if modo == 'crear' else 'Modificar datos de ' + (usuario.nombre_visible or usuario.cedula) }}</div>
     </div>
     <a href="/admin/usuarios" class="btn-back">← Volver</a>
   </div>
-
+ 
   <div class="form-card">
-
+ 
     {% if modo == 'editar' %}
-    <div class="alert-info">ℹ️ Editando: <strong>{{ usuario.nombre }}</strong></div>
+    <div class="alert-info">ℹ️ Editando: <strong>{{ usuario.cedula }}</strong> — {{ usuario.nombre_visible or usuario.cedula }}</div>
     {% endif %}
     {% if modo == 'editar' and usuario.id == admin.id %}
     <div class="alert-warn">⚠️ Estás editando tu propio usuario. No te quites permisos de admin.</div>
     {% endif %}
-
+ 
     <form method="POST"
       action="{{ '/admin/usuarios/crear' if modo == 'crear' else '/admin/usuarios/' + usuario.id|string + '/actualizar' }}"
       onsubmit="return validar()">
-
+ 
       <!-- SECCIÓN: Identidad -->
-      <div class="form-section-title">Identidad</div>
-
+      <div class="form-section-title">🪪 Identidad</div>
+ 
+      <!-- ✅ CÉDULA — ahora es el campo principal en crear -->
       {% if modo == 'crear' %}
       <div class="form-group">
-        <label class="form-label" for="nombre">Nombre de usuario <span class="required">*</span></label>
-        <input type="text" id="nombre" name="nombre" class="form-input"
-          placeholder="ej: conductor01" required autocomplete="off">
-        <div class="form-hint">Solo letras minúsculas, números y guiones bajos.</div>
+        <label class="form-label" for="cedula">Cédula <span class="required">*</span></label>
+        <input type="text" id="cedula" name="cedula" class="form-input"
+          placeholder="ej: 1234567890" required inputmode="numeric" pattern="[0-9]*"
+          minlength="5" maxlength="12" autocomplete="off" oninput="validarCedula()">
+        <div class="form-hint">5-12 dígitos numéricos. Identificador único de login.</div>
+        <div id="cedulaFeedback"></div>
       </div>
       {% else %}
       <div class="form-group">
-        <label class="form-label">Nombre de usuario</label>
-        <input type="text" class="form-input" value="{{ usuario.nombre }}" disabled
-          style="opacity:0.5; cursor:not-allowed;">
-        <div class="form-hint">El nombre de usuario no se puede modificar.</div>
+        <label class="form-label">Cédula</label>
+        <input type="text" class="form-input" value="{{ usuario.cedula }}" disabled
+          style="opacity:0.6; cursor:not-allowed;">
+        <div class="form-hint">La cédula no se puede modificar una vez creada.</div>
       </div>
       {% endif %}
-
+ 
       <div class="form-group">
         <label class="form-label" for="nombre_visible">Nombre completo <span class="required">*</span></label>
         <input type="text" id="nombre_visible" name="nombre_visible" class="form-input"
-          placeholder="ej: Juan Carlos Bedoya"
+          placeholder="ej: Juan Carlos Bedoya Pérez"
           value="{{ usuario.nombre_visible if modo == 'editar' else '' }}" required>
+        <div class="form-hint">Nombre real del conductor para reportes y auditoría.</div>
       </div>
-
+ 
       <!-- SECCIÓN: Seguridad -->
-      <div class="form-section-title">Seguridad</div>
-
+      <div class="form-section-title">🔐 Seguridad</div>
+ 
       <div class="form-row">
         <div class="form-group">
           <label class="form-label" for="pin">
@@ -277,23 +285,23 @@
           </label>
           <input type="password" id="pin" name="pin" class="form-input"
             placeholder="Mínimo 4 dígitos" inputmode="numeric"
-            {% if modo == 'crear' %}required{% endif %} minlength="4"
+            {% if modo == 'crear' %}required{% endif %} minlength="4" maxlength="12"
             oninput="checkPin()">
           <div id="pinFeedback" class="form-hint">
-            {% if modo == 'editar' %}Deja vacío para no cambiar el PIN.{% endif %}
+            {% if modo == 'editar' %}Deja vacío para no cambiar el PIN.{% else %}4-12 dígitos numéricos.{% endif %}
           </div>
         </div>
         <div class="form-group">
           <label class="form-label" for="pin_confirmar">Confirmar PIN</label>
           <input type="password" id="pin_confirmar" name="pin_confirmar" class="form-input"
-            placeholder="Repite el PIN" inputmode="numeric" oninput="checkPin()">
+            placeholder="Repite el PIN" inputmode="numeric" maxlength="12" oninput="checkPin()">
           <div id="pinMatch" class="form-hint"></div>
         </div>
       </div>
-
+ 
       <!-- SECCIÓN: Rol -->
-      <div class="form-section-title">Rol del usuario</div>
-
+      <div class="form-section-title">👥 Rol del usuario</div>
+ 
       <div class="form-group">
         <div class="rol-selector">
           <div class="rol-option">
@@ -302,7 +310,7 @@
             <label for="rol_user">
               <div class="rol-icon">🚗</div>
               <div class="rol-name">Conductor</div>
-              <div class="rol-desc">Solo puede crear y ver sus inspecciones</div>
+              <div class="rol-desc">Solo crea y ve sus inspecciones</div>
             </label>
           </div>
           <div class="rol-option">
@@ -316,33 +324,50 @@
           </div>
         </div>
       </div>
-
+ 
       <div class="form-actions">
         <button type="submit" class="btn-save">
           {{ '+ Crear usuario' if modo == 'crear' else '✓ Guardar cambios' }}
         </button>
         <a href="/admin/usuarios" class="btn-back">Cancelar</a>
       </div>
-
+ 
     </form>
   </div>
 </main>
-
+ 
 <script>
+function validarCedula() {
+  const cedula = document.getElementById('cedula').value;
+  const fb = document.getElementById('cedulaFeedback');
+  
+  if (cedula.length === 0) {
+    fb.textContent = '';
+  } else if (!/^\d+$/.test(cedula)) {
+    fb.innerHTML = '<span style="color:#f07070;">✕ Solo dígitos</span>';
+  } else if (cedula.length < 5) {
+    fb.innerHTML = '<span style="color:#f07070;">✕ Mínimo 5 dígitos</span>';
+  } else if (cedula.length > 12) {
+    fb.innerHTML = '<span style="color:#f07070;">✕ Máximo 12 dígitos</span>';
+  } else {
+    fb.innerHTML = '<span style="color:#28c878;">✓ Cédula válida</span>';
+  }
+}
+ 
 function checkPin() {
   const pin  = document.getElementById('pin').value;
   const conf = document.getElementById('pin_confirmar').value;
   const fb   = document.getElementById('pinFeedback');
   const fm   = document.getElementById('pinMatch');
-
+ 
   if (pin.length > 0 && pin.length < 4) {
-    fb.innerHTML = '<span style="color:#f07070;">Mínimo 4 dígitos</span>';
+    fb.innerHTML = '<span style="color:#f07070;">✕ Mínimo 4 dígitos</span>';
   } else if (pin.length >= 4) {
     fb.innerHTML = '<span style="color:#28c878;">✓ PIN válido</span>';
   } else {
-    fb.textContent = '{{ "Deja vacío para no cambiar el PIN." if modo == "editar" else "" }}';
+    fb.textContent = '{{ "Deja vacío para no cambiar el PIN." if modo == "editar" else "4-12 dígitos numéricos." }}';
   }
-
+ 
   if (conf.length > 0) {
     fm.innerHTML = pin === conf
       ? '<span style="color:#28c878;">✓ Coincide</span>'
@@ -351,31 +376,36 @@ function checkPin() {
     fm.textContent = '';
   }
 }
-
+ 
 function validar() {
+  const esModo = {{ 'true' if modo == 'crear' else 'false' }};
+ 
+  {% if modo == 'crear' %}
+  // Validar cédula (solo en crear)
+  const cedula = document.getElementById('cedula').value;
+  if (!cedula) { alert('⚠ La cédula es obligatoria'); return false; }
+  if (!/^\d{5,12}$/.test(cedula)) { alert('⚠ La cédula debe tener 5-12 dígitos'); return false; }
+  {% endif %}
+ 
+  // Validar PIN
   const pin  = document.getElementById('pin').value;
   const conf = document.getElementById('pin_confirmar').value;
-  const esModo = {{ 'true' if modo == 'crear' else 'false' }};
-
-  if (esModo && !pin) { alert('⚠ El PIN es obligatorio'); return false; }
+  
+  {% if modo == 'crear' %}
+  if (!pin) { alert('⚠ El PIN es obligatorio'); return false; }
+  {% endif %}
+  
   if (pin && pin.length < 4) { alert('⚠ El PIN debe tener al menos 4 dígitos'); return false; }
   if (pin && pin !== conf) { alert('⚠ Los PINs no coinciden'); return false; }
-
-  {% if modo == 'crear' %}
-  const nombre = document.getElementById('nombre').value;
-  if (!/^[a-z0-9_]+$/.test(nombre)) {
-    alert('⚠ El nombre solo puede tener letras minúsculas, números y guión bajo');
-    return false;
-  }
-  {% endif %}
+ 
   return true;
 }
-
+ 
 async function cerrarSesion() {
   try { await fetch("/auth/logout", { method: "POST" }); } catch(e) {}
   window.location.href = "/auth/logout";
 }
-
+ 
 /* ── Sidebar ── */
 function toggleSidebar() {
   const sidebar  = document.getElementById('sidebar');
@@ -386,7 +416,7 @@ function toggleSidebar() {
   btn.classList.toggle('open');
   document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
 }
-
+ 
 document.querySelectorAll('.nav-link').forEach(link => {
   link.addEventListener('click', () => {
     if (window.innerWidth <= 768) {
@@ -395,20 +425,20 @@ document.querySelectorAll('.nav-link').forEach(link => {
     }
   });
 });
-
+ 
 /* ── Theme manager ── */
 (function () {
   const root  = document.documentElement;
   const label = document.getElementById('themeLabel');
-
+ 
   function applyTheme(t) {
     root.setAttribute('data-theme', t);
     localStorage.setItem('incubant-theme', t);
     if (label) label.textContent = t === 'dark' ? 'Claro' : 'Oscuro';
   }
-
+ 
   applyTheme(root.getAttribute('data-theme') || 'light');
-
+ 
   document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
     btn.addEventListener('click', () => {
       const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
