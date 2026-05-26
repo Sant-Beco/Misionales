@@ -1,5 +1,5 @@
-# app/routes_inspecciones.py - VERSIÓN CORREGIDA CON RUTAS DE FIRMA ARREGLADAS
-
+# app/routes_inspecciones.py - VERSIÓN CORREGIDA CON VALIDACIONES CRÍTICAS
+ 
 from fastapi import APIRouter, Form, Depends, Request
 from fastapi.responses import FileResponse, JSONResponse, Response, HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -14,66 +14,66 @@ import base64
 import json
 import mimetypes
 import secrets
-
+ 
 router = APIRouter()
-
+ 
 # Templates — mismo directorio que usa main.py
 _TEMPLATES = Jinja2Templates(directory=str(Path(__file__).resolve().parent / "templates"))
-
+ 
 # ===============================
 #   DIRECTORIOS PRINCIPALES
 # ===============================
-
+ 
 # ✅ FIX: Rutas absolutas basadas en la ubicación de este archivo
 #    Evita roturas cuando uvicorn no corre desde la raíz del proyecto
 _HERE = Path(__file__).resolve().parent
-
+ 
 BASE_PDF_DIR = _HERE / "data" / "generated_pdfs"
 BASE_PDF_DIR.mkdir(parents=True, exist_ok=True)
-
+ 
 # Directorio de firmas separado
 BASE_FIRMAS_DIR = _HERE / "data" / "firmas"
 BASE_FIRMAS_DIR.mkdir(parents=True, exist_ok=True)
-
+ 
 LEGACY_DIR = BASE_PDF_DIR
-
+ 
 # ✅ FIX: logotipo_01.png (lowercase, archivo correcto)
 LOGO_PATH = (_HERE / "static" / "img" / "logotipo_01.png").resolve()
-
+ 
 DELETE_AFTER_CONSOLIDATION = True
-
-
+ 
+ 
 # ===============================
 #   UTILIDADES PDF
 # ===============================
-
+ 
 def safe_return_pdf(path: Path, filename: str):
     """ Retorna un PDF siempre con tipo correcto y evitando .pdf_ """
     path = path.resolve()
-
+ 
     if not path.exists():
         return Response("PDF no encontrado", status_code=500)
-
+ 
     mime = mimetypes.guess_type(path)[0] or "application/pdf"
-
+ 
     headers = {
         "Content-Disposition": f'attachment; filename="{filename}"',
         "Content-Type": mime,
         "X-Content-Type-Options": "nosniff",
     }
-
+ 
     return FileResponse(
         path,
         media_type=mime,
         filename=filename,
         headers=headers,
     )
-
-
+ 
+ 
 # ===============================
 #  NORMALIZACIÓN
 # ===============================
-
+ 
 def normalize_name(name: str):
     """
     Capitaliza correctamente nombre completo sin recortar.
@@ -82,20 +82,20 @@ def normalize_name(name: str):
         return ""
     clean = " ".join(name.strip().split())
     return clean.title()
-
-
+ 
+ 
 def normalize_placa(s: str):
     """ Limpia placa y evita valores corruptos """
     if not s:
         return ""
     s = s.upper().strip()
     return "".join([c for c in s if c.isalnum()])[:7]
-
-
+ 
+ 
 # ===============================
 #   RUTAS DE ARCHIVOS POR USUARIO - ✅ CORREGIDO
 # ===============================
-
+ 
 def get_user_paths(usuario_id: int):
     """
     Crea y retorna carpetas:
@@ -110,30 +110,30 @@ def get_user_paths(usuario_id: int):
     
     # ✅ Firmas en directorio separado
     user_firmas_dir = BASE_FIRMAS_DIR / "usuarios" / str(usuario_id)
-
+ 
     # Crear directorios
     for p in (user_pdf_base, inspecciones_dir, reportes_dir, user_firmas_dir):
         p.mkdir(parents=True, exist_ok=True)
-
+ 
     return {
         "base": user_pdf_base,
         "inspecciones": inspecciones_dir,
         "firmas": user_firmas_dir,  # ✅ Ahora apunta a app/data/firmas/usuarios/<id>/
         "reportes": reportes_dir,
     }
-
-
+ 
+ 
 def build_file_uri(path: Path):
     return "file:///" + path.as_posix()
-
-
+ 
+ 
 def _guess_firma_path_for_record(r):
     """
     Busca firma en múltiples ubicaciones para compatibilidad
     """
     if not getattr(r, "firma_file", None):
         return None
-
+ 
     # ✅ PRIORIDAD 1: Nueva estructura (firmas separadas)
     try:
         nueva = BASE_FIRMAS_DIR / "usuarios" / str(r.usuario_id) / r.firma_file
@@ -141,7 +141,7 @@ def _guess_firma_path_for_record(r):
             return nueva
     except:
         pass
-
+ 
     # PRIORIDAD 2: Estructura con duplicación (legacy de tus firmas actuales)
     try:
         duplicada = BASE_FIRMAS_DIR / "usuarios" / str(r.usuario_id) / "firmas" / r.firma_file
@@ -149,7 +149,7 @@ def _guess_firma_path_for_record(r):
             return duplicada
     except:
         pass
-
+ 
     # PRIORIDAD 3: Legacy en generated_pdfs
     try:
         legacy_user = BASE_PDF_DIR / "usuarios" / str(r.usuario_id) / "firmas" / r.firma_file
@@ -157,85 +157,127 @@ def _guess_firma_path_for_record(r):
             return legacy_user
     except:
         pass
-
+ 
     # PRIORIDAD 4: Legacy root
     legacy = LEGACY_DIR / r.firma_file
     if legacy.exists():
         return legacy
-
+ 
     # PRIORIDAD 5: Ruta directa
     direct = Path(r.firma_file)
     if direct.exists():
         return direct
-
+ 
     return None
-
-
+ 
+ 
 # Listas de aspectos por tipo de vehículo — fuente única de verdad
 ASPECTOS_MOTO = [
-    "Estado de llantas y presión de aire",
-    "Encendido eléctrico y de crank",
-    "Luces y pito",
-    "Espejos retrovisores",
-    "Manijas de freno y clutch",
-    "Sistema de frenos",
-    "Estado de freno de disco",
+    "Llantas — estado y presión de aire (delantera y trasera)",
+    "Llanta de repuesto o kit de pinchazo",
+    "Encendido eléctrico y arranque (crank)",
+    "Faro delantero — enciende y funciona correctamente",
+    "Luces traseras y stop — encienden y funcionan correctamente",
+    "Direccionales — encienden y funcionan correctamente",
+    "Pito / bocina — funciona correctamente",
+    "Espejos retrovisores — estado y ajuste",
+    "Manijas de freno y clutch — estado y recorrido",
+    "Sistema de frenos delantero — estado del frenado",
+    "Sistema de frenos trasero — estado del frenado",
     "Nivel de líquido de freno",
-    "Revisión sistema tablero",
+    "Cadena o correa de transmisión — estado y tensión",
+    "Estado de suspensión delantera y trasera",
     "Fugas de combustible y/o aceites",
-    "Kit de arrastre",
-    "Estado de suspensión",
-    "Nivel de aceites",
-]
-
-ASPECTOS_CARRO = [
-    "Estado de llantas y presión de aire",
-    "Funcionamiento de luces y bocina",
-    "Espejos retrovisores",
-    "Sistema de frenos",
-    "Nivel de líquido de freno",
-    "Nivel de aceites",
-    "Nivel de líquido refrigerante",
-    "Fugas de combustible y/o aceites",
+    "Nivel de aceite de motor",
     "Revisión tablero e instrumentos",
-    "Funcionamiento de limpiaparabrisas",
-    "Estado de correas y mangueras",
-    "Funcionamiento de puertas y seguros",
-    "Estado de la dirección",
-    "Cinturón de seguridad",
-    "Estado de la carrocería / estructura",
+    "Kit de arrastre (herramienta básica)"
 ]
-
-ASPECTOS_CAMION = [
-    "Estado de llantas y presión de aire (todas las ruedas)",
-    "Funcionamiento de luces, direccionales y pito",
-    "Espejos retrovisores y laterales",
-    "Sistema de frenos de servicio",
-    "Sistema de frenos de emergencia / parqueo",
+ 
+ASPECTOS_CARRO = [
+    "Llantas — estado y presión de aire (4 ruedas)",
+    "Llanta de repuesto — estado y presión de aire",
+    "Luces altas y bajas — encienden y funcionan correctamente",
+    "Luces de stop — encienden y funcionan correctamente",
+    "Direccionales — encienden y funcionan correctamente",
+    "Luces de parqueo y reversa — encienden y funcionan",
+    "Bocina / pito — funciona correctamente",
+    "Espejos retrovisores y laterales — estado y ajuste",
+    "Sistema de frenos — estado del frenado",
     "Nivel de líquido de freno",
     "Nivel de aceite de motor",
-    "Nivel de aceite de transmisión / diferencial",
     "Nivel de líquido refrigerante",
+    "Nivel de líquido de dirección hidráulica",
     "Fugas de combustible, aceites o líquidos",
+    "Estado de correas y mangueras",
     "Revisión tablero e instrumentos",
     "Funcionamiento de limpiaparabrisas",
-    "Estado de correas, mangueras y filtros",
-    "Estado de la dirección y columna",
-    "Funcionamiento de puertas, seguros y espejos",
-    "Estado de la carrocería y tolva / furgón",
-    "Cinturones de seguridad",
-    "Extintor y kit de carretera",
-    "Estado de la batería y sistema eléctrico",
-    "Revisión de carga (aseguramiento y peso)",
+    "Funcionamiento de puertas, seguros y vidrios",
+    "Estado de la dirección",
+    "Cinturones de seguridad (todos los puestos)",
+    "Estado de la carrocería / estructura",
+    "Extintor — vigente y en buen estado"
 ]
-
+ 
+ASPECTOS_CAMION = [
+    "Llantas delanteras — estado y presión de aire",
+    "Llantas traseras — estado y presión de aire",
+    "Llanta de repuesto — estado y presión de aire",
+    "Estado de carrocería y pintura — golpes y deterioros",
+    "Niveles de aceite y refrigerante — fugas",
+    "Frenos — fugas de aire o líquido, estado del frenado",
+    "Motor — ruidos anormales",
+    "Dirección — normal o dura anormal",
+    "Luces altas — encienden y funcionan correctamente",
+    "Luces bajas — encienden y funcionan correctamente",
+    "Direccional delantera derecha",
+    "Direccional delantera izquierda",
+    "Direccional trasera derecha",
+    "Direccional trasera izquierda",
+    "Luces de parqueo delanteras",
+    "Luces de parqueo traseras",
+    "Stop de freno",
+    "Batería — estado y funcionamiento",
+    "Plumillas — las tiene y funcionan correctamente",
+    "Pito — funciona correctamente",
+    "Sillas — apoya cabezas, estado general",
+    "Sillas delanteras y traseras — estado",
+    "Cinturones de seguridad",
+    "Botiquín — vigente y en buen estado",
+    "Caja de herramientas — vigente y en buen estado",
+    "Cruceta — vigente y en buen estado",
+    "Tacos de parqueo — vigentes y en buen estado",
+    "Triángulo de parqueo — vigente y en buen estado",
+    "Gato — vigente y en buen estado",
+    "Chaleco reflectivo — vigente y en buen estado",
+    "Espejo lateral derecho",
+    "Espejo lateral izquierdo",
+    "Espejo retrovisor",
+    "Extintor ABC — fecha de vencimiento vigente",
+    "Extintor ABC — manómetro en zona verde",
+    "Extintor ABC — sello de seguridad intacto",
+    "Extintor ABC — pasador de seguridad",
+    "Extintor ABC — boquilla en buen estado",
+    "Extintor ABC — etiqueta legible",
+    "Extintor ABC — sin óxido, golpes ni averías",
+    "Documento de identidad — vigente",
+    "Licencia de tránsito — vigente",
+    "Licencia de conducción — vigente",
+    "SOAT — vigente",
+    "Revisión tecnomecánica — vigente",
+    "Último cambio de aceite — fecha al día",
+    "Última sincronización — fecha al día",
+    "Última alineación y balanceo — fecha al día",
+    "Último cambio de batería — fecha al día",
+    "Último cambio de llantas — fecha al día"
+]
+ 
 ASPECTOS_POR_TIPO = {
     "Moto":   ASPECTOS_MOTO,
     "Carro":  ASPECTOS_CARRO,
     "Camion": ASPECTOS_CAMION,
 }
-
-
+ 
+ 
 def prepare_registro(r):
     """
     Prepara campos para PDF y templates:
@@ -252,7 +294,7 @@ def prepare_registro(r):
             raw_parsed = json.loads(r.aspectos)
     except Exception:
         raw_parsed = {}
-
+ 
     # Normalizar: {"1": {"valor":"B","label":"..."}} → {"1": "B"}
     normalized = {}
     for k, v in raw_parsed.items():
@@ -260,13 +302,13 @@ def prepare_registro(r):
             normalized[k] = v.get("valor", "")
         else:
             normalized[k] = v  # formato viejo, ya es string
-
+ 
     r.aspectos_parsed = normalized
-
+ 
     # ── Lista de aspectos para el template ─────────────────────────
     tipo = getattr(r, "tipo_vehiculo", None) or "Moto"
     r.aspectos_lista = ASPECTOS_POR_TIPO.get(tipo, ASPECTOS_MOTO)
-
+ 
     # ── Título según tipo ──────────────────────────────────────────
     titulos = {
         "Moto":   "Inspección Pre Operacional Motocicleta",
@@ -274,7 +316,7 @@ def prepare_registro(r):
         "Camion": "Inspección Pre Operacional Camión",
     }
     r.titulo_tipo = titulos.get(tipo, "Inspección Pre Operacional")
-
+ 
     r.firma_path = None
     r.firma_base64 = None
     if r.firma_file:
@@ -292,18 +334,18 @@ def prepare_registro(r):
         except Exception as e:
             print(f"⚠️ Error buscando firma: {e}")
             pass
-
+ 
     return r
-
-
+ 
+ 
 # ===============================
-#   ENDPOINT SUBMIT - ✅ SEGURO
+#   ENDPOINT SUBMIT - ✅ CON VALIDACIONES CRÍTICAS
 # ===============================
-
+ 
 @router.post("/submit")
 async def submit_inspeccion(
     usuario_actual: models.Usuario = Depends(get_current_user),
-    db: Session = Depends(get_db),  # ✅ FIX: sin connection leak
+    db: Session = Depends(get_db),
     placa: str = Form(""),
     proceso: str = Form(""),
     desde: str = Form(""),
@@ -325,49 +367,219 @@ async def submit_inspeccion(
     observaciones: str = Form(""),
     condiciones_optimas: str = Form("SI"),
 ):
-    # ✅ FIX: db ya inyectada por FastAPI como dependency — sin connection leak
+    """
+    ✅ VALIDACIÓN 1-15: Críticas para producción
+    Todos los errores retornan HTTP 422 (Unprocessable Entity)
+    """
+    
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-
     usuario_id = usuario_actual.id
     nombre_conductor = normalize_name(usuario_actual.nombre_visible or usuario_actual.nombre)
     placa = normalize_placa(placa)
-
-    # Validaciones
+ 
+    # ========== VALIDACIÓN 1: PLACA ==========
     if not placa or len(placa) < 5:
-        return JSONResponse({"error": "Placa inválida"}, status_code=400)
-
+        return JSONResponse(
+            {"error": "Placa inválida. Ejemplo: GSZ34F"},
+            status_code=422
+        )
+ 
+    # ========== VALIDACIÓN 2: PROCESO ==========
     if not proceso.strip():
-        return JSONResponse({"error": "Proceso requerido"}, status_code=400)
-
+        return JSONResponse(
+            {"error": "Proceso es requerido"},
+            status_code=422
+        )
+ 
+    # ========== VALIDACIÓN 3: ORIGEN/DESTINO ==========
     if not desde.strip() or not hasta.strip():
-        return JSONResponse({"error": "Origen/destino requerido"}, status_code=400)
-
-    if not firma_dataurl or len(firma_dataurl) < 40:
-        return JSONResponse({"error": "Firma inválida"}, status_code=400)
-
-    if modelo and (not modelo.isdigit() or len(modelo) != 4):
-        return JSONResponse({"error": "Modelo inválido"}, status_code=400)
-
-    if licencia_num and len(licencia_num) < 6:
-        return JSONResponse({"error": "Licencia inválida"}, status_code=400)
-
+        return JSONResponse(
+            {"error": "Origen y destino son requeridos"},
+            status_code=422
+        )
+ 
+    # ========== VALIDACIÓN 4: MARCA ==========
+    if not marca or len(marca.strip()) < 2:
+        return JSONResponse(
+            {"error": "Marca es requerida (mínimo 2 caracteres)"},
+            status_code=422
+        )
+ 
+    # ========== VALIDACIÓN 5: GASOLINA ==========
+    if not gasolina.strip():
+        return JSONResponse(
+            {"error": "Nivel de gasolina es requerido"},
+            status_code=422
+        )
+ 
+    # ========== VALIDACIÓN 6: MODELO (año) ==========
+    if modelo:
+        if not modelo.isdigit() or len(modelo) != 4:
+            return JSONResponse(
+                {"error": "Modelo debe ser año (ej: 2021)"},
+                status_code=422
+            )
+ 
+    # ========== VALIDACIÓN 7: MOTOR ==========
+    if motor:
+        if not motor.isdigit() or not (2 <= len(motor) <= 4):
+            return JSONResponse(
+                {"error": "Motor inválido. Ejemplos: 125, 1400, 6000"},
+                status_code=422
+            )
+ 
+    # ========== VALIDACIÓN 8: LÍNEA ==========
+    if not linea or len(linea.strip()) < 2:
+        return JSONResponse(
+            {"error": "Línea es requerida"},
+            status_code=422
+        )
+ 
+    # ========== VALIDACIÓN 9: LICENCIA ==========
+    if licencia_num and len(licencia_num.strip()) < 6:
+        return JSONResponse(
+            {"error": "Número de licencia inválido (mínimo 6 caracteres)"},
+            status_code=422
+        )
+ 
+    # ========== VALIDACIÓN 10: FECHA VENCIMIENTO > HOY ==========
+    if licencia_venc:
+        try:
+            venc_date = None
+            for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y"):
+                try:
+                    venc_date = datetime.strptime(licencia_venc.strip(), fmt).date()
+                    break
+                except ValueError:
+                    continue
+            
+            if venc_date is None:
+                return JSONResponse(
+                    {"error": "Formato de fecha inválido. Use YYYY-MM-DD"},
+                    status_code=422
+                )
+            
+            if venc_date < datetime.now().date():
+                return JSONResponse(
+                    {"error": f"Licencia vencida desde {licencia_venc}. Debe estar vigente."},
+                    status_code=422
+                )
+        except Exception as e:
+            return JSONResponse(
+                {"error": f"Error validando fecha: {str(e)}"},
+                status_code=422
+            )
+ 
+    # ========== VALIDACIÓN 11: DOCUMENTOS REQUERIDOS ==========
+    if not porte_propiedad.strip():
+        return JSONResponse(
+            {"error": "Tarjeta de propiedad es requerida"},
+            status_code=422
+        )
+ 
+    if not soat.strip():
+        return JSONResponse(
+            {"error": "SOAT es requerido"},
+            status_code=422
+        )
+ 
+    if not poliza_seguro.strip():
+        return JSONResponse(
+            {"error": "Póliza de seguro es requerida"},
+            status_code=422
+        )
+ 
+    # Para Carro/Camión, emisión de gases es obligatoria
+    if tipo_vehiculo in ["Carro", "Camion"]:
+        if not certificado_emision.strip():
+            return JSONResponse(
+                {"error": "Certificado de emisión de gases es requerido para Carros y Camiones"},
+                status_code=422
+            )
+ 
+    # ========== VALIDACIÓN 12: ASPECTOS COMPLETOS ==========
     try:
         asp_json = json.loads(aspectos)
-    except:
-        return JSONResponse({"error": "Aspectos inválidos"}, status_code=400)
-
-    # ✅ Compatibilidad: formato nuevo {"1": {"valor":"M","label":"..."}} y viejo {"1": "M"}
+    except json.JSONDecodeError:
+        return JSONResponse(
+            {"error": "Aspectos JSON inválido"},
+            status_code=422
+        )
+ 
+    # Contar aspectos esperados según tipo
+    aspectos_esperados = {
+        "Moto": 18,
+        "Carro": 22,
+        "Camion": 50
+    }
+    num_esperados = aspectos_esperados.get(tipo_vehiculo, 18)
+ 
+    # Función auxiliar para extraer valor de aspecto
     def _asp_valor(v):
         return v.get("valor") if isinstance(v, dict) else v
-
-    if "M" in [_asp_valor(v) for v in asp_json.values()] and len(observaciones.strip()) < 6:
+ 
+    # Validar que todos los aspectos tengan B o M
+    aspectos_validos = [
+        v for v in asp_json.values()
+        if _asp_valor(v) in ["B", "M"]
+    ]
+ 
+    if len(aspectos_validos) != num_esperados:
         return JSONResponse(
-            {"error": "Debes agregar observaciones si algún aspecto está en M"},
-            status_code=400
+            {
+                "error": f"Debes revisar todos los {num_esperados} aspectos. "
+                         f"Solo {len(aspectos_validos)} completados."
+            },
+            status_code=422
         )
-
+ 
+    # ========== VALIDACIÓN 13: FIRMA NO VACÍA ==========
+    if not firma_dataurl or len(firma_dataurl) < 100:  # data-URI mínimo ~100 chars
+        return JSONResponse(
+            {"error": "Firma es obligatoria. Dibuja o carga una imagen."},
+            status_code=422
+        )
+ 
+    # ========== VALIDACIÓN 14: TAMAÑO FIRMA < 2MB ==========
+    try:
+        if "," not in firma_dataurl:
+            return JSONResponse(
+                {"error": "Formato de firma inválido"},
+                status_code=422
+            )
+        
+        _, b64_data = firma_dataurl.split(",", 1)
+        decoded_size = len(base64.b64decode(b64_data))
+        MAX_FIRMA_SIZE = 2 * 1024 * 1024  # 2MB
+        
+        if decoded_size > MAX_FIRMA_SIZE:
+            size_mb = decoded_size / (1024 * 1024)
+            return JSONResponse(
+                {"error": f"Firma muy grande ({size_mb:.2f}MB). Máximo 2MB."},
+                status_code=422
+            )
+    except ValueError:
+        return JSONResponse(
+            {"error": "Formato de firma inválido (no es base64)"},
+            status_code=422
+        )
+ 
+    # ========== VALIDACIÓN 15: OBSERVACIONES SI HAY M ==========
+    has_m = any(_asp_valor(v) == "M" for v in asp_json.values())
+    if has_m:
+        obs_len = len(observaciones.strip())
+        if obs_len < 10:
+            return JSONResponse(
+                {
+                    "error": f"Observaciones obligatorias si hay aspectos en M. "
+                             f"Mínimo 10 caracteres ({obs_len}/10)."
+                },
+                status_code=422
+            )
+ 
+    # ========== TODO VALIDADO: PROCEDER CON GUARDADO ==========
     user_paths = get_user_paths(usuario_id)
-
+ 
     try:
         # Guardar firma
         firma_filename = None
@@ -377,13 +589,13 @@ async def submit_inspeccion(
                 data = base64.b64decode(b64)
                 rnd = secrets.token_hex(4)
                 firma_filename = f"firma_{timestamp}_{rnd}.png"
-                firma_path = user_paths["firmas"] / firma_filename  # ✅ Ruta corregida
+                firma_path = user_paths["firmas"] / firma_filename
                 firma_path.write_bytes(data)
                 print(f"✅ Firma guardada en: {firma_path}")
             except Exception as e:
                 print(f"❌ Error guardando firma: {e}")
                 firma_filename = None
-
+ 
         # Guardar registro DB
         inspeccion = models.Inspeccion(
             fecha=datetime.now(),
@@ -410,39 +622,38 @@ async def submit_inspeccion(
             condiciones_optimas=condiciones_optimas,
             firma_file=firma_filename,
         )
-
+ 
         db.add(inspeccion)
         db.commit()
         db.refresh(inspeccion)
-
+ 
         inspeccion = prepare_registro(inspeccion)
-
+ 
         # ── Advertencia licencia vencida ──────────────────────────────
         _licencia_advertencia = None
         if licencia_venc:
             try:
-                for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y", "%m/%Y"):
+                for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y"):
                     try:
-                        from datetime import datetime as _dt
-                        _venc = _dt.strptime(licencia_venc.strip(), fmt)
-                        if _venc.date() < _dt.now().date():
-                            _licencia_advertencia = f"⚠️ Licencia de conducción vencida desde {licencia_venc}"
+                        _venc = datetime.strptime(licencia_venc.strip(), fmt)
+                        if _venc.date() < datetime.now().date():
+                            _licencia_advertencia = f"⚠️ Licencia vencida desde {licencia_venc}"
                         break
                     except ValueError:
                         continue
             except Exception:
                 pass
-
+ 
         total = (
             db.query(models.Inspeccion)
             .filter(models.Inspeccion.usuario_id == usuario_id)
             .count()
         )
-
+ 
         # PDF individual
         safe_pdf_name = f"inspeccion_{timestamp}.pdf"
         pdf_path = user_paths["inspecciones"] / safe_pdf_name
-
+ 
         render_pdf_from_template(
             "pdf_template.html",
             {
@@ -451,13 +662,12 @@ async def submit_inspeccion(
                 "codigo": "FO-SST-063",
                 "version": "01",
                 "logo_path": build_file_uri(LOGO_PATH),
-                # ✅ Lista correcta según tipo_vehiculo para el template
                 "aspectos_lista": inspeccion.aspectos_lista,
                 "titulo_tipo": inspeccion.titulo_tipo,
             },
             output_path=str(pdf_path),
         )
-
+ 
         # Consolidado a 15
         if total == 15:
             registros = (
@@ -470,18 +680,16 @@ async def submit_inspeccion(
             
             # ✅ Preparar TODOS los registros
             registros = list(reversed([prepare_registro(r) for r in registros]))
-
+ 
             fecha_desde = registros[0].fecha.strftime("%d-%m-%Y")
             fecha_hasta = registros[-1].fecha.strftime("%d-%m-%Y")
-
+ 
             reporte_filename = (
                 f"reporte15_{usuario_id}_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf"
             )
             reporte_path = user_paths["reportes"] / reporte_filename
-
-            # ✅ FIX #6: generar PDF ANTES de tocar la BD
-            # Si render_pdf_from_template falla, la excepción sube y
-            # no se llega nunca al delete — los datos quedan intactos
+ 
+            # ✅ FIX: generar PDF ANTES de tocar la BD
             render_pdf_from_template(
                 "pdf_template_multiple.html",
                 {
@@ -492,17 +700,16 @@ async def submit_inspeccion(
                     "desde": fecha_desde,
                     "hasta": fecha_hasta,
                     "logo_path": build_file_uri(LOGO_PATH),
-                    # ✅ Lista y título según tipo del primer registro
                     "aspectos_lista": registros[0].aspectos_lista,
                     "titulo_tipo": registros[0].titulo_tipo,
                 },
                 output_path=str(reporte_path),
             )
-
+ 
             # ✅ Verificar que el PDF existe y tiene contenido antes de borrar BD
             if not reporte_path.exists() or reporte_path.stat().st_size < 1000:
                 raise RuntimeError(f"PDF consolidado inválido: {reporte_path}")
-
+ 
             # Solo si el PDF es válido → guardar historial
             hist = models.ReporteInspeccion(
                 nombre_conductor=nombre_conductor,
@@ -512,7 +719,7 @@ async def submit_inspeccion(
             )
             db.add(hist)
             db.commit()
-
+ 
             # Solo si el PDF es válido → borrar inspecciones + firmas
             if DELETE_AFTER_CONSOLIDATION:
                 for r in registros:
@@ -524,16 +731,16 @@ async def submit_inspeccion(
                                 print(f"🗑️ Firma eliminada: {path}")
                     except Exception as e:
                         print(f"⚠️ Error eliminando firma: {e}")
-
+ 
                     try:
                         db.delete(r)
                     except Exception as e:
                         print(f"⚠️ Error eliminando registro: {e}")
                         
                 db.commit()
-
+ 
             return safe_return_pdf(reporte_path, reporte_filename)
-
+ 
         # Construir respuesta con advertencias en header
         _pdf_response = safe_return_pdf(pdf_path, safe_pdf_name)
         if _licencia_advertencia:
@@ -541,24 +748,24 @@ async def submit_inspeccion(
             _pdf_response.headers["X-Advertencias"] = quote(_licencia_advertencia)
             _pdf_response.headers["Access-Control-Expose-Headers"] = "X-Advertencias"
         return _pdf_response
-
+ 
     except Exception:
         raise  # FastAPI devuelve HTTP 500 automáticamente
-
-
+ 
+ 
 # ===============================
 #   ENDPOINT MANUAL REPORTE 15
 # ===============================
-
+ 
 @router.get("/reporte15/{nombre_conductor}")
 async def generar_pdf15(
     nombre_conductor: str,
     usuario_actual: models.Usuario = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    # ✅ FIX: db inyectada por FastAPI
+    """Genera PDF consolidado de 15 inspecciones manualmente"""
     nombre_conductor = normalize_name(nombre_conductor)
-
+ 
     try:
         registros = (
             db.query(models.Inspeccion)
@@ -570,22 +777,22 @@ async def generar_pdf15(
             .limit(15)
             .all()
         )
-
+ 
         if not registros:
             return JSONResponse({"mensaje": "No hay inspecciones"}, status_code=404)
-
+ 
         registros = list(reversed([prepare_registro(r) for r in registros]))
-
+ 
         fecha_desde = registros[0].fecha.strftime("%d-%m-%Y")
         fecha_hasta = registros[-1].fecha.strftime("%d-%m-%Y")
-
+ 
         pdf_filename = (
             f"reporte15_{nombre_conductor}_{datetime.now().strftime('%Y%m%d%H%M')}.pdf"
         )
-
+ 
         user_paths = get_user_paths(usuario_actual.id)
         pdf_path = user_paths["reportes"] / pdf_filename
-
+ 
         render_pdf_from_template(
             "pdf_template_multiple.html",
             {
@@ -596,22 +803,22 @@ async def generar_pdf15(
                 "desde": fecha_desde,
                 "hasta": fecha_hasta,
                 "logo_path": build_file_uri(LOGO_PATH),
-                # ✅ Lista y título según tipo del primer registro
                 "aspectos_lista": registros[0].aspectos_lista,
                 "titulo_tipo": registros[0].titulo_tipo,
             },
             output_path=str(pdf_path),
         )
-
+ 
         return safe_return_pdf(pdf_path, pdf_filename)
-
+ 
     except Exception:
-        raise  # FastAPI devuelve HTTP 500 automáticamente
-
+        raise
+ 
+ 
 # ==========================================================
 #   RUTA: MIS INSPECCIONES (historial del conductor)
 # ==========================================================
-
+ 
 @router.get("/mis-inspecciones", response_class=HTMLResponse)
 async def mis_inspecciones(
     request: Request,
@@ -625,16 +832,15 @@ async def mis_inspecciones(
     nombre_conductor = normalize_name(
         usuario_actual.nombre_visible or usuario_actual.nombre
     )
-
+ 
     # ✅ BLOQUEANTE #3: filtrar por usuario_id, no por nombre
-    # Evita que dos conductores con el mismo nombre vean las inspecciones del otro
     registros = (
         db.query(models.Inspeccion)
         .filter(models.Inspeccion.usuario_id == usuario_actual.id)
         .order_by(models.Inspeccion.fecha.asc())
         .all()
     )
-
+ 
     return _TEMPLATES.TemplateResponse(
         "lista_inspecciones.html",
         {
@@ -650,11 +856,12 @@ async def mis_inspecciones(
             ),
         },
     )
-
+ 
+ 
 # ==========================================================
 #   RUTA: DESCARGA PDF CONSOLIDADO (por id de reporte)
 # ==========================================================
-
+ 
 @router.get("/reporte-consolidado/{reporte_id}")
 async def descargar_reporte_consolidado(
     reporte_id: int,
@@ -669,31 +876,31 @@ async def descargar_reporte_consolidado(
     reporte = db.query(models.ReporteInspeccion).filter_by(id=reporte_id).first()
     if not reporte:
         return JSONResponse({"error": "Reporte no encontrado"}, status_code=404)
-
+ 
     nombre_conductor = normalize_name(
         usuario_actual.nombre_visible or usuario_actual.nombre
     )
     if usuario_actual.rol != "admin" and reporte.nombre_conductor != nombre_conductor:
         return JSONResponse({"error": "Sin acceso a este reporte"}, status_code=403)
-
+ 
     pdf_path = Path(reporte.archivo_pdf)
     if not pdf_path.exists():
         return JSONResponse(
             {"error": "El archivo PDF ya no existe en el servidor"},
             status_code=404
         )
-
+ 
     filename = pdf_path.name
     if not filename.lower().endswith(".pdf"):
         filename += ".pdf"
-
+ 
     return safe_return_pdf(pdf_path, filename)
-
-
+ 
+ 
 # ==========================================================
 #   RUTA: DETALLE + DESCARGA PDF DE INSPECCIÓN INDIVIDUAL
 # ==========================================================
-
+ 
 @router.get("/detalle/{inspeccion_id}")
 async def detalle_inspeccion(
     inspeccion_id: int,
@@ -711,18 +918,18 @@ async def detalle_inspeccion(
     inspeccion = db.query(models.Inspeccion).filter_by(id=inspeccion_id).first()
     if not inspeccion:
         return JSONResponse({"error": "Inspección no encontrada"}, status_code=404)
-
+ 
     if usuario_actual.rol != "admin" and inspeccion.usuario_id != usuario_actual.id:
         return JSONResponse({"error": "Sin acceso a esta inspección"}, status_code=403)
-
+ 
     inspeccion = prepare_registro(inspeccion)
-
+ 
     if formato == "pdf":
         timestamp  = inspeccion.fecha.strftime("%Y%m%d_%H%M%S")
         pdf_filename = f"inspeccion_{inspeccion.nombre_conductor.replace(' ','_')}_{timestamp}.pdf"
         user_paths = get_user_paths(inspeccion.usuario_id)
         pdf_path   = user_paths["inspecciones"] / pdf_filename
-
+ 
         render_pdf_from_template(
             "pdf_template.html",
             {
@@ -737,16 +944,16 @@ async def detalle_inspeccion(
             output_path=str(pdf_path),
         )
         return safe_return_pdf(pdf_path, pdf_filename)
-
+ 
     # Formato JSON — datos completos para el modal
     asp   = inspeccion.aspectos_parsed or {}
     lista = inspeccion.aspectos_lista  or []
-
+ 
     aspectos_detalle = [
         {"num": i, "label": label, "valor": asp.get(str(i), "B")}
         for i, label in enumerate(lista, 1)
     ]
-
+ 
     return JSONResponse({
         "id":                  inspeccion.id,
         "fecha":               inspeccion.fecha.strftime("%d/%m/%Y %H:%M"),
