@@ -9,7 +9,7 @@
   <title>MISIONALES · Incubant</title>
   <link rel="stylesheet" href="/static/css/incubant-theme.css">
   <link rel="icon" href="/static/img/logotipo_01.png" type="image/png">
-
+ 
   <!-- Aplicar tema ANTES de pintar — evita flash -->
   <script>
     (function(){
@@ -17,7 +17,7 @@
       document.documentElement.setAttribute('data-theme', t);
     })();
   </script>
-  <style>
+   <style>
     /* PIN — estilo exclusivo de este login */
     .pin-input {
       font-size: 1.4rem;
@@ -44,7 +44,7 @@
   </style>
 </head>
 <body class="page-login">
-
+ 
   <!-- Fondo -->
   <div class="bg-layer">
     <div class="bg-dots"></div>
@@ -52,7 +52,7 @@
     <div class="bg-egg-1"></div>
     <div class="bg-egg-2"></div>
   </div>
-
+ 
   <!-- Toggle tema -->
   <div class="theme-btn-wrap">
     <button class="theme-toggle" data-theme-toggle aria-label="Cambiar tema">
@@ -60,40 +60,40 @@
       <span id="themeLabel">Oscuro</span>
     </button>
   </div>
-
+ 
   <!-- Card -->
   <div class="login-wrap">
     <div class="login-card">
-
+ 
       <div class="login-logo">
         <img src="/static/img/logotipo_01.png" alt="Incubant">
       </div>
-
+ 
       <div class="login-title"><h1>Misionales</h1></div>
       <p class="login-subtitle">Sistema de Inspección Vehicular</p>
-
+ 
       <div class="sst-badge">
         <div class="sst-dot"></div>
         SST · Conductores
       </div>
-
+ 
       <div class="divider">
         <div class="divider-line"></div>
         <span>Acceso</span>
         <div class="divider-line"></div>
       </div>
-
+ 
       <div id="sessionBanner" class="session-banner"></div>
       <div id="errorBox" class="error-box"></div>
-
-      <!-- ✅ method="POST" para fallback si JS falla -->
-      <form id="loginForm" method="POST" action="/auth/login">
-
-        <!-- ✅ CÉDULA — id, name y placeholder corregidos -->
+ 
+      <!-- ✅ CORREGIDO: method="POST" explícito -->
+      <form id="loginForm" method="POST">
+ 
+        <!-- ✅ CORREGIDO: id="cedula" y name="cedula" (no "nombre") -->
         <div class="form-group">
           <label class="form-label" for="cedula">Cédula</label>
           <div class="input-wrapper">
-            <span class="input-icon">🪪</span>
+            <span class="input-icon">👤</span>
             <input
               type="text"
               id="cedula"
@@ -102,17 +102,16 @@
               placeholder="Tu número de cédula"
               required
               inputmode="numeric"
-              pattern="[0-9]*"
+              pattern="[0-9]{5,12}"
               autocomplete="username"
               autocorrect="off"
               autocapitalize="none"
               spellcheck="false"
               enterkeyhint="next"
-              maxlength="12"
             >
           </div>
         </div>
-
+ 
         <!-- PIN — teclado numérico nativo -->
         <div class="form-group">
           <label class="form-label" for="pin">PIN de acceso</label>
@@ -128,38 +127,38 @@
               pattern="[0-9]*"
               autocomplete="current-password"
               enterkeyhint="go"
-              maxlength="12"
+              maxlength="6"
             >
           </div>
         </div>
-
+ 
         <button type="submit" id="btnLogin" class="btn-submit">
           Ingresar al sistema
         </button>
-
+ 
       </form>
-
+ 
       <div class="login-footer">
         <em>Incubant</em> · Antioqueña de Incubación S.A.S.
       </div>
-
+ 
     </div>
   </div>
-
+ 
   <script>
   /* ══ THEME MANAGER ══ */
   (function () {
     const root  = document.documentElement;
     const label = document.getElementById('themeLabel');
-
+ 
     function applyTheme(t) {
       root.setAttribute('data-theme', t);
       localStorage.setItem('incubant-theme', t);
       if (label) label.textContent = t === 'dark' ? 'Claro' : 'Oscuro';
     }
-
+ 
     applyTheme(root.getAttribute('data-theme') || 'light');
-
+ 
     document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
       btn.addEventListener('click', () => {
         const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
@@ -167,33 +166,34 @@
       });
     });
   })();
-
+ 
   /* ══ LOGIN LOGIC ══ */
   ['token','usuario_id','nombre','rol'].forEach(k => localStorage.removeItem(k));
-
+ 
   const form = document.getElementById('loginForm');
   const btn  = document.getElementById('btnLogin');
-  const errBox = document.getElementById('errorBox');
-
-  // ✅ Enter en cédula → foco al PIN
+  const err  = document.getElementById('errorBox');
+ 
+  // ✅ CORREGIDO: getElementById('cedula') en lugar de getElementById('nombre')
   document.getElementById('cedula').addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       e.preventDefault();
       document.getElementById('pin').focus();
     }
   });
-
+ 
   function showError(msg) {
-    errBox.textContent = '⚠ ' + msg;
-    errBox.style.display = 'block';
+    err.textContent = '⚠ ' + msg;
+    err.style.display = 'block';
+    // Vibrar en móvil como feedback de error
     if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-    setTimeout(() => { errBox.style.display = 'none'; }, 5000);
+    setTimeout(() => { err.style.display = 'none'; }, 5000);
   }
-
+ 
   const _params = new URLSearchParams(window.location.search);
   const _razon  = _params.get('razon');
   const _next   = _params.get('next') || '/';
-
+ 
   if (_razon) {
     const banner = document.getElementById('sessionBanner');
     banner.style.display = 'block';
@@ -201,28 +201,29 @@
       ? '⚠ No tienes permiso para acceder a esa sección.'
       : '⚠ Tu sesión expiró. Inicia sesión para continuar.';
   }
-
-  // ✅ Submit via fetch (intercepta el POST nativo)
+ 
   form.addEventListener('submit', async function (e) {
     e.preventDefault();
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span>&nbsp;Verificando...';
-    errBox.style.display = 'none';
-
+    err.style.display = 'none';
+ 
     try {
       const res  = await fetch('/auth/login', { method: 'POST', body: new FormData(form) });
       const data = await res.json();
-
+ 
       if (res.ok) {
         localStorage.setItem('token',      data.access_token);
         localStorage.setItem('usuario_id', data.usuario_id);
         localStorage.setItem('nombre',     data.nombre);
         localStorage.setItem('rol',        data.rol || 'user');
-
+ 
         btn.innerHTML = '✓ Acceso concedido';
         btn.style.background = 'linear-gradient(135deg,#28c878,#1a9c57)';
+ 
+        // Vibración de éxito
         if (navigator.vibrate) navigator.vibrate(80);
-
+ 
         setTimeout(() => {
           window.location.href = _next !== '/' ? _next : (data.rol === 'admin' ? '/admin' : '/');
         }, 500);
@@ -230,6 +231,7 @@
         showError(data.detail || 'Cédula o PIN incorrecto');
         btn.disabled = false;
         btn.innerHTML = 'Ingresar al sistema';
+        // Limpiar PIN en error — UX estándar
         document.getElementById('pin').value = '';
         document.getElementById('pin').focus();
       }
@@ -240,6 +242,6 @@
     }
   });
   </script>
-
+ 
 </body>
 </html>

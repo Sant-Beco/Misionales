@@ -5,9 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Inspección Preoperacional · Misionales Incubant</title>
   
-  <!-- Temas: base + específico del formulario -->
+  <!-- Temas: base (incluye estilos del formulario) -->
   <link rel="stylesheet" href="/static/css/incubant-theme.css">
-  <link rel="stylesheet" href="/static/css/form.css">
   
   <link rel="icon" href="/static/img/logotipo_01.png" type="image/png">
   
@@ -20,7 +19,7 @@
   </script>
 </head>
 <body>
-
+ 
   <!-- TOPBAR (barra superior) -->
   <header class="topbar">
     <div class="topbar-row1">
@@ -31,12 +30,12 @@
           <div class="topbar-sub">Inspección Vehicular · SST</div>
         </div>
       </a>
-
+ 
       <div class="topbar-actions">
         <a href="/inspecciones/mis-inspecciones" class="btn-top btn-top-ghost">📋 Mis inspecciones</a>
         <a href="#" id="btnAdmin" class="btn-top btn-top-amber" style="display:none;">⚙ Admin</a>
       </div>
-
+ 
         <div class="user-chip">
           <div class="user-dot"></div>
           <span class="user-text" id="headerNombre">—</span>
@@ -50,10 +49,10 @@
       <a href="#" id="btnAdminMobile" class="action-pill action-pill-amber" style="display:none;">⚙ Admin</a>
     </div>
   </header>
-
+ 
   <!-- CONTENIDO PRINCIPAL -->
   <div class="page-wrap">
-
+ 
     <!-- Hero -->
     <div class="form-hero">
       <div class="hero-egg"></div>
@@ -66,7 +65,7 @@
         </div>
       </div>
     </div>
-
+ 
     <!-- Selector tipo vehículo -->
     <div class="tipo-vehiculo-selector">
       <button type="button" class="tipo-btn active" data-tipo="Moto">
@@ -85,7 +84,7 @@
         <div class="tipo-btn-label">Camión</div>
       </button>
     </div>
-
+ 
     <!-- Formulario principal -->
     <form id="inspeccionForm" method="post" action="/inspecciones/submit" novalidate>
       <input type="hidden" id="usuarioIdInput" name="usuario_id">
@@ -93,7 +92,7 @@
       <input type="hidden" id="tipoVehiculoInput" name="tipo_vehiculo" value="Moto">
       <input type="hidden" id="aspectosInput" name="aspectos">
       <input type="hidden" name="firma_dataurl" id="firmaDataInput">
-
+ 
       <!-- SECCIÓN VEHÍCULO -->
       <div class="section-card" data-animate="0.05s">
         <div class="section-head">
@@ -168,7 +167,7 @@
           </div>
         </div>
       </div>
-
+ 
       <!-- SECCIÓN DOCUMENTOS -->
       <div class="section-card" data-animate="0.10s">
         <div class="section-head">
@@ -230,7 +229,7 @@
           </div>
         </div>
       </div>
-
+ 
       <!-- SECCIÓN ASPECTOS (B/M) -->
       <div class="section-card" data-animate="0.15s">
         <div class="section-head">
@@ -243,7 +242,7 @@
           <div class="aspectos-grid" id="aspectosContainer"></div>
         </div>
       </div>
-
+ 
       <!-- SECCIÓN CONDICIONES ÓPTIMAS -->
       <div class="section-card" data-animate="0.20s">
         <div class="section-head">
@@ -263,7 +262,7 @@
           </div>
         </div>
       </div>
-
+ 
       <!-- SECCIÓN FIRMA -->
       <div class="section-card" data-animate="0.25s">
         <div class="section-head">
@@ -304,7 +303,7 @@
           <span id="error_firma" class="f-error"></span>
         </div>
       </div>
-
+ 
       <!-- SECCIÓN OBSERVACIONES -->
       <div class="section-card" data-animate="0.30s">
         <div class="section-head">
@@ -316,7 +315,7 @@
           <span id="error_observaciones" class="f-error"></span>
         </div>
       </div>
-
+ 
       <!-- BOTONES DE ENVÍO -->
       <div class="submit-row">
         <button id="submitBtn" type="submit" class="btn-submit">📄 Enviar y generar PDF</button>
@@ -325,32 +324,32 @@
       </div>
     </form>
   </div>
-
+ 
   <!-- ================== JAVASCRIPT COMPLETO ================== -->
   <script>
-
+ 
     // ===========================
     // 2. INICIALIZACIÓN GENERAL
     // ===========================
     const token = localStorage.getItem("token");
     if (!token) window.location.href = "/login";
-
+ 
     const nombre = localStorage.getItem("nombre") || "Conductor";
     const rol    = localStorage.getItem("rol")    || "user";
-
+ 
     document.getElementById("headerNombre").textContent = nombre;
     document.getElementById("usuarioIdInput").value = localStorage.getItem("usuario_id");
     document.getElementById("nombreConductorInput").value = nombre;
-
+ 
     if (rol === "admin") {
       document.getElementById("btnAdmin").style.display = "inline-flex";
       document.getElementById("btnAdminMobile").style.display = "inline-flex";
     }
-
+ 
     // Fecha actual para el hero
     const hoy = new Date().toLocaleDateString('es-CO');
     document.getElementById("fechaActual").textContent = hoy;
-
+ 
     // ===========================
     // 3. ASPECTOS POR TIPO DE VEHÍCULO
     // ===========================
@@ -452,15 +451,15 @@
         "Último cambio de llantas — fecha al día"
       ]
     };
-
+ 
     const PLACEHOLDERS = {
       moto: { marca: "ej: Honda, Yamaha, AKT", motor: "ej: 125, 190, 250", linea: "ej: CB190, YBR", modelo: "ej: 2021" },
       carro: { marca: "ej: Chevrolet, Renault", motor: "ej: 1400, 1600", linea: "ej: Sail, Logan", modelo: "ej: 2021" },
       camion: { marca: "ej: Kenworth, Freightliner", motor: "ej: 6000, 7200", linea: "ej: T680, Cascadia", modelo: "ej: 2019" }
     };
-
+ 
     let tipoActual = "Moto";
-
+ 
     // ===========================
     // 4. FUNCIONES DE RENDERIZADO (ASPECTOS)
     // ===========================
@@ -471,7 +470,7 @@
       document.getElementById('linea').placeholder  = p.linea;
       document.getElementById('modelo').placeholder = p.modelo;
     }
-
+ 
     function renderAspectos(tipo) {
       const lista = ASPECTOS[tipo];
       const container = document.getElementById("aspectosContainer");
@@ -507,7 +506,7 @@
         if (bRad) bRad.addEventListener('change', () => onAspectoChange(i));
       }
     }
-
+ 
     function actualizarBadge() {
       const total = ASPECTOS[tipoActual].length;
       let countM = 0;
@@ -523,56 +522,56 @@
         badge.classList.remove("visible");
       }
     }
-
+ 
     function onAspectoChange(idx) {
       const mInput = document.getElementById("m_" + idx);
       const row    = document.getElementById("row_aspecto_" + idx);
       if (mInput && row) row.classList.toggle("has-m", mInput.checked);
       actualizarBadge();
     }
-
+ 
     function setTipoVehiculo(tipo) {
       tipoActual = tipo;
       document.querySelectorAll('.tipo-btn').forEach(btn => {
         btn.classList.toggle('active', btn.getAttribute('data-tipo') === tipo);
       });
       document.getElementById("tipoVehiculoInput").value = tipo;
-
+ 
       const titles = {
         Moto: "Inspección Pre Operacional Motocicleta",
         Carro: "Inspección Pre Operacional Automóvil",
         Camion: "Inspección Pre Operacional Camión"
       };
       document.getElementById("heroTitle").textContent = titles[tipo];
-
+ 
       const icons  = { Moto: "🏍", Carro: "🚗", Camion: "🚛" };
       const labels = { Moto: "Datos de la motocicleta", Carro: "Datos del automóvil", Camion: "Datos del camión" };
       document.getElementById("vehiculoIcon").textContent  = icons[tipo];
       document.getElementById("vehiculoLabel").textContent = labels[tipo];
-
+ 
       renderAspectos(tipo);
       actualizarPlaceholders(tipo);
-
+ 
       // Limpiar campos del vehículo
       ["placa","proceso","desde","hasta","marca","gasolina","modelo","motor","linea"].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = "";
       });
-
+ 
       // Resetear condiciones óptimas a "SI"
       const optSi = document.getElementById("opt_si");
       if (optSi) optSi.checked = true;
-
+ 
       // Limpiar firma completamente
       limpiarFirmaCompleta();
-
+ 
       // Ocultar campo de emisión si no es carro/camión
       const campoEmision = document.getElementById("campoEmision");
       if (campoEmision) campoEmision.style.display = (tipo === "Carro" || tipo === "Camion") ? "block" : "none";
-
+ 
       clearAllErrors();
     }
-
+ 
     // ===========================
     // 5. FIRMA (CANVAS + IMAGEN)
     // ===========================
@@ -581,14 +580,14 @@
     let canvasFirmaHasMark = false;
     let canvasContext = null;
     let canvasDrawing = false;
-
+ 
     function initCanvas() {
       const canvas = document.getElementById("firmaCanvas");
       if (!canvas) return;
       const ctx = canvas.getContext("2d");
       const wrapper = canvas.parentElement;
       const placeholder = document.getElementById("firmaPlaceholder");
-
+ 
       function resizeCanvas() {
         const rect = wrapper.getBoundingClientRect();
         const dpr = window.devicePixelRatio || 1;
@@ -611,7 +610,7 @@
         canvasFirmaHasMark = !!snapshot;
         if (!snapshot && placeholder) placeholder.style.opacity = "1";
       }
-
+ 
       function getPos(e) {
         const rect = canvas.getBoundingClientRect();
         if (e.touches) {
@@ -620,7 +619,7 @@
         }
         return { x: e.clientX - rect.left, y: e.clientY - rect.top };
       }
-
+ 
       function startDrawing(e) {
         e.preventDefault();
         canvasDrawing = true;
@@ -640,7 +639,7 @@
         canvasFirmaHasMark = true;
       }
       function stopDrawing() { canvasDrawing = false; ctx.beginPath(); }
-
+ 
       canvas.addEventListener("mousedown", startDrawing);
       canvas.addEventListener("mousemove", draw);
       canvas.addEventListener("mouseup", stopDrawing);
@@ -648,7 +647,7 @@
       canvas.addEventListener("touchstart", startDrawing, { passive: false });
       canvas.addEventListener("touchmove", draw, { passive: false });
       canvas.addEventListener("touchend", stopDrawing);
-
+ 
       window.firmaCanvasAPI = {
         isEmpty: () => !canvasFirmaHasMark,
         getDataURL: () => canvas.toDataURL("image/png"),
@@ -662,7 +661,7 @@
       window.addEventListener("resize", resizeCanvas);
       resizeCanvas();
     }
-
+ 
     function setFirmaMode(mode) {
       firmaMode = mode;
       const tabDibujar = document.getElementById("tabDibujar");
@@ -681,7 +680,7 @@
       }
       if (mode === "imagen") limpiarImagenFirma();
     }
-
+ 
     function limpiarFirma() {
       if (window.firmaCanvasAPI) {
         window.firmaCanvasAPI.refresh();
@@ -691,7 +690,7 @@
         document.querySelector(".firma-canvas-wrap")?.classList.remove("has-firma");
       }
     }
-
+ 
     function guardarFirma() {
       if (!window.firmaCanvasAPI || window.firmaCanvasAPI.isEmpty()) {
         const err = document.getElementById("error_firma");
@@ -709,7 +708,7 @@
       prev.innerHTML = `<img src="${dataURL}" alt="Firma guardada"><span class="firma-ok">✓ Firma guardada</span>`;
       document.querySelector(".firma-canvas-wrap")?.classList.add("has-firma");
     }
-
+ 
     function procesarImagenFirma(file) {
       if (!file || !file.type.startsWith("image/")) return;
       const reader = new FileReader();
@@ -744,12 +743,12 @@
       };
       reader.readAsDataURL(file);
     }
-
+ 
     function cargarImagenFirma(inputEl) {
       const file = inputEl.files[0];
       if (file) procesarImagenFirma(file);
     }
-
+ 
     function limpiarImagenFirma() {
       const input = document.getElementById("firmaImagenInput");
       if (input) input.value = "";
@@ -759,7 +758,7 @@
       const area = document.getElementById("firmaUploadArea");
       if (area) area.style.borderColor = "";
     }
-
+ 
     function limpiarFirmaCompleta() {
       limpiarFirma();
       limpiarImagenFirma();
@@ -769,12 +768,12 @@
       document.querySelector(".firma-canvas-wrap")?.classList.remove("has-firma");
       setFirmaMode("dibujar");
     }
-
+ 
     function firmaVacia() {
       if (firmaMode === "imagen") return !imagenFirmaCargada;
       return window.firmaCanvasAPI ? window.firmaCanvasAPI.isEmpty() : true;
     }
-
+ 
     // ===========================
     // 6. VALIDACIONES Y UTILIDADES
     // ===========================
@@ -789,7 +788,7 @@
         prev.classList.remove("input-valid");
       }
     }
-
+ 
     function clearErr(id) {
       const el = document.getElementById(id);
       if (!el) return;
@@ -801,7 +800,7 @@
         prev.classList.add("input-valid");
       }
     }
-
+ 
     function clearAllErrors() {
       const errorIds = [
         "error_placa","error_proceso","error_desde","error_hasta","error_marca",
@@ -812,7 +811,7 @@
       errorIds.forEach(clearErr);
       document.getElementById("globalMessage").innerHTML = "";
     }
-
+ 
     function onReset() {
       setTimeout(() => {
         limpiarFirmaCompleta();
@@ -822,12 +821,12 @@
         setTipoVehiculo("Moto");
       }, 10);
     }
-
+ 
     function irAAdmin(e) {
       e.preventDefault();
       window.location.href = "/admin";
     }
-
+ 
     async function cerrarSesion() {
       try {
         await fetch("/auth/logout", { method: "POST", headers: { "Authorization": `Bearer ${token}` } });
@@ -835,17 +834,17 @@
       localStorage.clear();
       window.location.href = "/login";
     }
-
+ 
     // ===========================
     // 7. SUBMIT DEL FORMULARIO
     // ===========================
     document.getElementById("inspeccionForm").addEventListener("submit", async (ev) => {
       ev.preventDefault();
       clearAllErrors();
-
+ 
       const form = ev.target;
       const formData = new FormData(form);
-
+ 
       const lista = ASPECTOS[tipoActual];
       const aspectos = {};
       for (let i = 0; i < lista.length; i++) {
@@ -861,7 +860,7 @@
       if (firmaMode === "dibujar" && window.firmaCanvasAPI) {
         formData.set("firma_dataurl", window.firmaCanvasAPI.getDataURL());
       }
-
+ 
       let hasError = false;
       const checks = [
         ["placa", v => v.trim().toUpperCase().replace(/[^A-Z0-9]/g,"").length >= 5, "Placa inválida"],
@@ -880,12 +879,12 @@
         ["certificado_emision", v => (tipoActual === "Moto" || v.trim() !== ""), "Campo requerido"],
         ["poliza_seguro", v => v.trim() !== "", "Campo requerido"]
       ];
-
+ 
       const errorMap = {
         "licencia_num":"error_licencianum", "porte_propiedad":"error_porte",
         "certificado_emision":"error_emision", "poliza_seguro":"error_poliza"
       };
-
+ 
       for (const [name, validator, msg] of checks) {
         const val = formData.get(name) || "";
         if (!validator(val)) {
@@ -893,48 +892,48 @@
           hasError = true;
         }
       }
-
+ 
       if (firmaVacia()) {
         showErr("error_firma", "Debes firmar antes de enviar");
         hasError = true;
       }
-
+ 
       const anyM = Object.values(aspectos).some(a => a.valor === "M");
       if (anyM && (formData.get("observaciones") || "").trim().length < 6) {
         showErr("error_observaciones", "Obligatorio si hay aspectos en M");
         hasError = true;
       }
-
+ 
       if (hasError) {
         document.getElementById("globalMessage").innerHTML = '<div class="msg-error">Revisa los campos marcados en rojo.</div>';
         window.scrollTo({ top: 0, behavior: "smooth" });
         return;
       }
-
+ 
       const btn = document.getElementById("submitBtn");
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner"></span>&nbsp;Generando PDF...';
-
+ 
       try {
         const resp = await fetch(form.action, {
           method: "POST",
           body: formData,
           headers: { "Authorization": `Bearer ${token}` }
         });
-
+ 
         if (resp.status === 401) {
           alert("Sesión expirada. Vuelve a iniciar sesión.");
           localStorage.clear();
           window.location.href = "/login";
           return;
         }
-
+ 
         if (!resp.ok) {
           const errData = await resp.json().catch(() => ({}));
           document.getElementById("globalMessage").innerHTML = `<div class="msg-error">Error: ${errData.error || errData.detail || "Error del servidor"}</div>`;
           return;
         }
-
+ 
         const contentType = resp.headers.get("content-type") || "";
         if (contentType.includes("application/pdf")) {
           const blob = await resp.blob();
@@ -948,10 +947,10 @@
           a.href = url; a.download = filename;
           document.body.appendChild(a); a.click(); a.remove();
           URL.revokeObjectURL(url);
-
+ 
           form.reset();
           onReset();
-
+ 
           const advertencia = resp.headers.get("X-Advertencias");
           if (advertencia) {
             try {
@@ -972,7 +971,7 @@
         btn.innerHTML = "📄 Enviar y generar PDF";
       }
     });
-
+ 
     // ===========================
     // 8. EVENT LISTENERS Y ARRANQUE
     // ===========================

@@ -15,7 +15,7 @@
   <style>
     /* ── LAYOUT ── */
     body { display: flex; min-height: 100vh; }
-
+ 
     /* ── SIDEBAR ── */
     .sidebar {
       width: 220px; flex-shrink: 0;
@@ -78,7 +78,7 @@
       transition: all 0.2s; cursor: pointer; text-decoration: none;
     }
     .btn-logout:hover { background: rgba(220,60,60,0.18); border-color: #f07070; }
-
+ 
     /* ── HAMBURGER ── */
     .hamburger {
       display: none;
@@ -99,10 +99,10 @@
       display: none; position: fixed; inset: 0;
       background: rgba(0,0,0,0.6); z-index: 19; backdrop-filter: blur(3px);
     }
-
+ 
     /* ── MAIN ── */
     .main { margin-left: 220px; flex: 1; padding: 2rem 2.25rem; min-height: 100vh; background: var(--bg-base); }
-
+ 
     /* ── TOPBAR ── */
     .topbar {
       display: flex; justify-content: space-between; align-items: flex-start;
@@ -115,7 +115,7 @@
       background-clip: text; line-height: 1;
     }
     .page-sub { font-size: 0.78rem; color: var(--text3); margin-top: 0.3rem; }
-
+ 
     /* ── KPI STRIP ── */
     .kpi-strip {
       display: grid; grid-template-columns: repeat(3, 1fr);
@@ -140,7 +140,7 @@
     .kpi-mini.green .kpi-mini-val { color: #28c878; }
     .kpi-mini.ember .kpi-mini-val { color: var(--ember); }
     .kpi-mini-icon { position: absolute; bottom: 0.6rem; right: 0.85rem; font-size: 1.75rem; opacity: 0.06; }
-
+ 
     /* ── FILTROS ── */
     .filters-card {
       background: var(--dark2); border: 1px solid var(--border);
@@ -174,7 +174,7 @@
     }
     .filter-select:focus { border-color: var(--amber); }
     .filter-select option { background: var(--dark2); }
-
+ 
     /* ── TABLE CARD ── */
     .table-card {
       background: var(--dark2); border: 1px solid var(--border);
@@ -188,10 +188,10 @@
     }
     .table-title { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
     .table-count { font-size: 0.72rem; color: var(--text3); margin-top: 0.1rem; }
-
+ 
     /* ── TABLA DESKTOP ── */
     .table-scroll { overflow-x: auto; }
-    table.logs { width: 100%; border-collapse: collapse; min-width: 580px; }
+    table.logs { width: 100%; border-collapse: collapse; min-width: 680px; }
     table.logs thead th {
       font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em;
       text-transform: uppercase; color: var(--text3);
@@ -204,7 +204,14 @@
     table.logs tbody td { padding: 0.85rem 1.5rem; font-size: 0.83rem; vertical-align: middle; }
     .log-fecha { font-size: 0.73rem; color: var(--text3); line-height: 1.5; }
     .log-detalle { color: var(--text2); line-height: 1.5; font-size: 0.82rem; }
-
+    .cedula-chip {
+      display: inline-flex; align-items: center;
+      background: rgba(245,156,0,0.08); border: 1px solid rgba(245,156,0,0.18);
+      border-radius: var(--r-sm); padding: 0.15rem 0.55rem;
+      font-size: 0.78rem; font-weight: 700; color: var(--amber);
+      letter-spacing: 0.06em;
+    }
+ 
     /* ── ACCIÓN PILLS ── */
     .accion-pill {
       display: inline-flex; align-items: center; gap: 0.3rem;
@@ -215,7 +222,7 @@
     .accion-editar   { background: rgba(245,156,0,0.12);   color: var(--amber); border: 1px solid rgba(245,156,0,0.2); }
     .accion-eliminar { background: rgba(220,60,60,0.12);   color: #f07070; border: 1px solid rgba(220,60,60,0.2); }
     .accion-otro     { background: var(--dark3); color: var(--text3); border: 1px solid var(--border); }
-
+ 
     /* ── CARDS MÓVIL ── */
     .cards-mobile { display: none; }
     .log-card {
@@ -225,36 +232,37 @@
     }
     .log-card:last-child { border-bottom: none; }
     .log-card:active { background: var(--dark3); }
-
+ 
     .log-card-top {
       display: flex; justify-content: space-between;
       align-items: flex-start; margin-bottom: 0.5rem; gap: 0.5rem;
     }
     .log-card-admin { font-size: 0.9rem; font-weight: 700; color: var(--text); }
+    .log-card-cedula { font-size: 0.68rem; color: var(--text3); margin-top: 0.15rem; }
     .log-card-time {
       font-size: 0.68rem; color: var(--text3);
       text-align: right; line-height: 1.5; flex-shrink: 0;
     }
     .log-card-detail {
       font-size: 0.8rem; color: var(--text2); line-height: 1.6;
-      margin-top: 0.35rem;
+      margin-top: 0.5rem;
     }
     .log-card-footer {
       display: flex; align-items: center; justify-content: space-between;
       margin-top: 0.5rem;
     }
-
+ 
     /* ── EMPTY ── */
     .empty-state { padding: 3rem; text-align: center; color: var(--text3); }
     .empty-icon  { font-size: 2.5rem; margin-bottom: 0.5rem; }
-
+ 
     /* ── FOOTER NOTE ── */
     .footer-note {
       padding: 0.85rem 1.5rem; border-top: 1px solid var(--border);
       font-size: 0.7rem; color: var(--text3);
       display: flex; align-items: center; gap: 0.4rem;
     }
-
+ 
     /* ── BADGE COUNT ── */
     .count-badge {
       display: inline-flex; align-items: center;
@@ -262,45 +270,52 @@
       color: var(--amber); border-radius: 20px;
       padding: 0.15rem 0.6rem; font-size: 0.72rem; font-weight: 700;
     }
-
+ 
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+ 
     /* ── RESPONSIVE ── */
     @media (max-width: 768px) {
       .hamburger { display: flex; }
       .sidebar { transform: translateX(-100%); box-shadow: none; }
       .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.5); }
       .sidebar-backdrop.open { display: block; }
-
+ 
       .main { margin-left: 0; padding: 0.75rem 0.75rem 3rem; padding-top: 3.75rem; }
-
+ 
       .topbar { flex-direction: column; gap: 0.25rem; margin-bottom: 1rem; }
       .page-title { font-size: 1.2rem; }
       .page-sub { font-size: 0.72rem; }
-
+ 
       /* KPIs — 3 en fila siempre */
       .kpi-strip { grid-template-columns: repeat(3, 1fr); gap: 0.45rem; margin-bottom: 1rem; }
       .kpi-mini { padding: 0.65rem 0.6rem; }
       .kpi-mini-val { font-size: 1.4rem; }
       .kpi-mini-label { font-size: 0.54rem; letter-spacing: 0.06em; margin-bottom: 0.25rem; }
       .kpi-mini-icon { display: none; }
-
+ 
       /* Filtros apilados */
       .filters-card { padding: 0.8rem 0.875rem; margin-bottom: 1rem; }
       .filters-row { flex-direction: column; gap: 0.5rem; }
       .filter-input, .filter-select { min-width: 0; width: 100%; font-size: 0.8rem; padding: 0.55rem 0.875rem; }
-
+ 
       /* Tabla -> cards */
       .table-scroll { display: none; }
       .cards-mobile { display: block; }
-
+ 
       /* Table header compacto */
       .table-header { padding: 0.75rem 0.875rem; }
       .table-title { font-size: 0.78rem; }
       .table-count { font-size: 0.66rem; }
-
+ 
       /* Cards compactas sin overflow */
       .log-card { padding: 0.75rem 0.875rem; }
       .log-card-top { gap: 0.4rem; margin-bottom: 0.4rem; }
       .log-card-admin { font-size: 0.84rem; }
+      .log-card-cedula { font-size: 0.64rem; margin-top: 0.1rem; }
       .log-card-time {
         font-size: 0.64rem; color: var(--text3);
         white-space: nowrap; flex-shrink: 0;
@@ -309,13 +324,13 @@
         line-height: 1.4;
       }
       .log-card-detail { font-size: 0.76rem; line-height: 1.5; margin-top: 0.3rem; }
-
+ 
       /* Pill mas pequena */
       .accion-pill { font-size: 0.6rem; padding: 0.18rem 0.5rem; }
-
+ 
       .footer-note { padding: 0.65rem 0.875rem; font-size: 0.65rem; }
     }
-
+ 
     @media (max-width: 420px) {
       .main { padding-left: 0.65rem; padding-right: 0.65rem; }
       .kpi-mini-val { font-size: 1.25rem; }
@@ -324,13 +339,13 @@
   </style>
 </head>
 <body>
-
+ 
 <!-- Hamburger -->
 <button class="hamburger" onclick="toggleSidebar()" id="hamburgerBtn">
   <span></span><span></span><span></span>
 </button>
 <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
-
+ 
 <!-- Sidebar -->
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-brand">
@@ -340,16 +355,16 @@
       <div class="brand-sub">Incubant SST</div>
     </div>
   </div>
-
+ 
   <div class="nav-section">Panel</div>
   <a href="/admin"               class="nav-link"><span class="nav-icon">📊</span> Dashboard</a>
   <a href="/admin/usuarios"      class="nav-link"><span class="nav-icon">👥</span> Usuarios</a>
   <a href="/admin/inspecciones"  class="nav-link"><span class="nav-icon">🔍</span> Inspecciones</a>
   <a href="/admin/logs"          class="nav-link active"><span class="nav-icon">📋</span> Auditoría</a>
-
+ 
   <div class="nav-section" style="margin-top:1.25rem;">Sistema</div>
   <a href="/" class="nav-link"><span class="nav-icon">🚗</span> Formulario</a>
-
+ 
   <div class="sidebar-footer">
     <div class="user-pill">
       <div class="user-avatar">{{ admin.nombre_visible[0]|upper if admin.nombre_visible else 'A' }}</div>
@@ -361,10 +376,10 @@
     <button onclick="cerrarSesion()" class="btn-logout">⏻ Cerrar sesión</button>
   </div>
 </aside>
-
+ 
 <!-- Main -->
 <main class="main">
-
+ 
   <!-- Topbar -->
   <div class="topbar">
     <div>
@@ -372,7 +387,7 @@
       <div class="page-sub">Registro de acciones administrativas</div>
     </div>
   </div>
-
+ 
   <!-- KPI strip -->
   <div class="kpi-strip">
     <div class="kpi-mini amber" style="animation-delay:0.05s">
@@ -391,13 +406,13 @@
       <div class="kpi-mini-icon">✕</div>
     </div>
   </div>
-
+ 
   <!-- Filtros -->
   <div class="filters-card" style="animation-delay:0.18s">
     <div class="filters-title">🔍 Filtrar registros</div>
     <div class="filters-row">
       <input type="text" id="searchInput" class="filter-input"
-        placeholder="Buscar por admin o detalle..." oninput="filtrar()">
+        placeholder="Buscar por admin, cédula o detalle..." oninput="filtrar()">
       <select id="accionFilter" class="filter-select" onchange="filtrar()">
         <option value="">Todas las acciones</option>
         <option value="CREAR_USUARIO">+ Crear usuario</option>
@@ -406,7 +421,7 @@
       </select>
     </div>
   </div>
-
+ 
   <!-- Tabla -->
   <div class="table-card">
     <div class="table-header">
@@ -418,9 +433,9 @@
         </div>
       </div>
     </div>
-
+ 
     {% if logs %}
-
+ 
     {# ——— TABLA DESKTOP ——— #}
     <div class="table-scroll">
       <table class="logs">
@@ -428,6 +443,7 @@
           <tr>
             <th>Fecha / Hora</th>
             <th>Administrador</th>
+            <th>Cédula</th>
             <th>Acción</th>
             <th>Detalle</th>
           </tr>
@@ -437,6 +453,7 @@
           <tr class="log-row"
               data-accion="{{ log.accion }}"
               data-admin="{{ log.admin_nombre }}"
+              data-cedula="{{ log.admin_cedula }}"
               data-detalle="{{ log.detalles }}">
             <td>
               <div class="log-fecha">
@@ -445,6 +462,7 @@
               </div>
             </td>
             <td><strong>{{ log.admin_nombre }}</strong></td>
+            <td><span class="cedula-chip">{{ log.admin_cedula }}</span></td>
             <td>
               {% if   log.accion == 'CREAR_USUARIO'    %}<span class="accion-pill accion-crear">+ Crear</span>
               {% elif log.accion == 'EDITAR_USUARIO'   %}<span class="accion-pill accion-editar">✏ Editar</span>
@@ -457,18 +475,20 @@
         </tbody>
       </table>
     </div>
-
+ 
     {# ——— CARDS MÓVIL ——— #}
     <div class="cards-mobile" id="cardsMobile">
       {% for log in logs %}
       <div class="log-card card-row"
            data-accion="{{ log.accion }}"
            data-admin="{{ log.admin_nombre }}"
+           data-cedula="{{ log.admin_cedula }}"
            data-detalle="{{ log.detalles }}">
         <div class="log-card-top">
           <div>
             <div class="log-card-admin">{{ log.admin_nombre }}</div>
-            <div style="margin-top:0.3rem;">
+            <div class="log-card-cedula"><span class="cedula-chip">{{ log.admin_cedula }}</span></div>
+            <div style="margin-top:0.35rem;">
               {% if   log.accion == 'CREAR_USUARIO'    %}<span class="accion-pill accion-crear">+ Crear</span>
               {% elif log.accion == 'EDITAR_USUARIO'   %}<span class="accion-pill accion-editar">✏ Editar</span>
               {% elif log.accion == 'ELIMINAR_USUARIO' %}<span class="accion-pill accion-eliminar">✕ Eliminar</span>
@@ -484,11 +504,11 @@
       </div>
       {% endfor %}
     </div>
-
+ 
     <div class="footer-note">
       ℹ️ Los logs son permanentes. Se muestran los últimos 100 registros.
     </div>
-
+ 
     {% else %}
     <div class="empty-state">
       <div class="empty-icon">🐣</div>
@@ -496,41 +516,43 @@
     </div>
     {% endif %}
   </div>
-
+ 
 </main>
-
+ 
 <script>
 function filtrar() {
   const txt    = document.getElementById('searchInput').value.toLowerCase();
   const accion = document.getElementById('accionFilter').value;
-
+ 
   // Desktop rows
   const rows = document.querySelectorAll('.log-row');
   let visible = 0;
   rows.forEach(row => {
     const ok = (row.dataset.admin.toLowerCase().includes(txt) ||
+                row.dataset.cedula.toLowerCase().includes(txt) ||
                 row.dataset.detalle.toLowerCase().includes(txt)) &&
                (!accion || row.dataset.accion === accion);
     row.style.display = ok ? '' : 'none';
     if (ok) visible++;
   });
-
+ 
   // Móvil cards
   document.querySelectorAll('.card-row').forEach(card => {
     const ok = (card.dataset.admin.toLowerCase().includes(txt) ||
+                card.dataset.cedula.toLowerCase().includes(txt) ||
                 card.dataset.detalle.toLowerCase().includes(txt)) &&
                (!accion || card.dataset.accion === accion);
     card.style.display = ok ? '' : 'none';
   });
-
+ 
   document.getElementById('visibleCount').textContent = visible;
 }
-
+ 
 async function cerrarSesion() {
   try { await fetch("/auth/logout", { method: "POST" }); } catch(e) {}
   window.location.href = "/auth/logout";
 }
-
+ 
 function toggleSidebar() {
   const sidebar  = document.getElementById('sidebar');
   const backdrop = document.getElementById('sidebarBackdrop');
@@ -540,7 +562,7 @@ function toggleSidebar() {
   btn.classList.toggle('open');
   document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
 }
-
+ 
 document.querySelectorAll('.nav-link').forEach(link => {
   link.addEventListener('click', () => {
     if (window.innerWidth <= 768) {
