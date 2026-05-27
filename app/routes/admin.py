@@ -23,7 +23,8 @@ from app.security import get_current_user, hash_pin
 router = APIRouter()
  
 from fastapi.templating import Jinja2Templates as _J2T
-_templates_admin = _J2T(directory=str(Path(__file__).resolve().parent / "templates"))
+# ✅ CORREGIDO: apuntar a app/templates, no a routes/templates
+_templates_admin = _J2T(directory=str(Path(__file__).resolve().parent.parent / "templates"))
  
  
 # ===============================
@@ -139,7 +140,7 @@ async def admin_dashboard(
         for anio in sorted(anual_dict.keys())
     ]
  
-    return templates.TemplateResponse("dashboard.html", {
+    return templates.TemplateResponse("admin/dashboard.html", {
         "request":             request,
         "admin":               usuario_admin,
         "total_usuarios":      total_usuarios,
@@ -173,7 +174,7 @@ async def admin_usuarios_list(
         .all()
     )
  
-    return templates.TemplateResponse("dashboard.html", {
+    return templates.TemplateResponse("admin/usuarios.html", {
         "request":  request,
         "admin":    usuario_admin,
         "usuarios": usuarios,
