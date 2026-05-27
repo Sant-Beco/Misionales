@@ -291,7 +291,7 @@
             <label class="firma-upload-area" id="firmaUploadArea">
               <div class="firma-upload-icon">🖼</div>
               <div class="firma-upload-text">Toca para seleccionar imagen de firma</div>
-              <div class="firma-upload-hint">JPG, PNG o WebP · Fondo blanco recomendado</div>
+              <div class="firma-upload-hint">JPG, PNG o WebP · Máximo 2MB</div>
               <input type="file" id="firmaImagenInput" accept="image/jpeg,image/png,image/webp" style="display:none;">
             </label>
             <div id="imagenPreviewWrap" style="display:none;">
@@ -311,7 +311,7 @@
           <span class="section-label">Observaciones</span>
         </div>
         <div class="section-body">
-          <textarea id="observaciones" name="observaciones" class="f-textarea" rows="3" placeholder="Ingresa observaciones si algún aspecto está en M..."></textarea>
+          <textarea id="observaciones" name="observaciones" class="f-textarea" rows="3" placeholder="Ingresa observaciones si algún aspecto está en M (mínimo 10 caracteres)..."></textarea>
           <span id="error_observaciones" class="f-error"></span>
         </div>
       </div>
@@ -325,11 +325,27 @@
     </form>
   </div>
  
-  <!-- ================== JAVASCRIPT COMPLETO ================== -->
+  <!-- ================== JAVASCRIPT COMPLETO CON VALIDACIONES ================== -->
   <script>
  
     // ===========================
-    // 2. INICIALIZACIÓN GENERAL
+    // 0. VALIDACIÓN: CONFIRMACIÓN ANTES DE ABANDONAR
+    // ===========================
+    let formularioModificado = false;
+    document.getElementById("inspeccionForm").addEventListener("change", () => {
+      formularioModificado = true;
+    });
+    
+    window.addEventListener("beforeunload", (e) => {
+      if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = "Tienes cambios sin guardar. ¿Abandonar?";
+        return e.returnValue;
+      }
+    });
+ 
+    // ===========================
+    // 1. INICIALIZACIÓN GENERAL
     // ===========================
     const token = localStorage.getItem("token");
     if (!token) window.location.href = "/login";
@@ -350,8 +366,12 @@
     const hoy = new Date().toLocaleDateString('es-CO');
     document.getElementById("fechaActual").textContent = hoy;
  
+    // ✅ VALIDACIÓN: Establecer min date para licencia_venc (hoy)
+    const hoyISO = new Date().toISOString().split('T')[0];
+    document.getElementById("licencia_venc").setAttribute("min", hoyISO);
+ 
     // ===========================
-    // 3. ASPECTOS POR TIPO DE VEHÍCULO
+    // 2. ASPECTOS POR TIPO DE VEHÍCULO
     // ===========================
     const ASPECTOS = {
       Moto: [
@@ -461,7 +481,7 @@
     let tipoActual = "Moto";
  
     // ===========================
-    // 4. FUNCIONES DE RENDERIZADO (ASPECTOS)
+    // 3. FUNCIONES DE RENDERIZADO (ASPECTOS)
     // ===========================
     function actualizarPlaceholders(tipo) {
       const p = PLACEHOLDERS[tipo.toLowerCase()] || PLACEHOLDERS.moto;
@@ -573,13 +593,15 @@
     }
  
     // ===========================
-    // 5. FIRMA (CANVAS + IMAGEN)
+    // 4. FIRMA (CANVAS + IMAGEN)
     // ===========================
     let firmaMode = "dibujar";
     let imagenFirmaCargada = false;
     let canvasFirmaHasMark = false;
     let canvasContext = null;
     let canvasDrawing = false;
+    let lastDrawTime = 0;
+    const DRAW_THROTTLE = 16; // ~60fps
  
     function initCanvas() {
       const canvas = document.getElementById("firmaCanvas");
@@ -628,9 +650,16 @@
         ctx.moveTo(p.x, p.y);
         if (placeholder) placeholder.style.opacity = "0";
       }
+ 
+      // ✅ VALIDACIÓN 13: THROTTLE CANVAS (60fps)
       function draw(e) {
         if (!canvasDrawing) return;
         e.preventDefault();
+        
+        const now = Date.now();
+        if (now - lastDrawTime < DRAW_THROTTLE) return;
+        lastDrawTime = now;
+        
         const p = getPos(e);
         ctx.lineTo(p.x, p.y);
         ctx.stroke();
@@ -709,8 +738,17 @@
       document.querySelector(".firma-canvas-wrap")?.classList.add("has-firma");
     }
  
+    // ✅ VALIDACIÓN 11: TAMAÑO FIRMA < 2MB
     function procesarImagenFirma(file) {
       if (!file || !file.type.startsWith("image/")) return;
+      
+      const MAX_FIRMA_SIZE = 2 * 1024 * 1024; // 2MB
+      if (file.size > MAX_FIRMA_SIZE) {
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        showErr("error_firma", `Imagen muy grande (${sizeMB}MB). Máximo 2MB.`);
+        return;
+      }
+      
       const reader = new FileReader();
       reader.onload = (e) => {
         const img = new Image();
@@ -775,7 +813,7 @@
     }
  
     // ===========================
-    // 6. VALIDACIONES Y UTILIDADES
+    // 5. VALIDACIONES Y UTILIDADES
     // ===========================
     function showErr(id, msg) {
       const el = document.getElementById(id);
@@ -819,6 +857,7 @@
         document.querySelectorAll(".aspecto-row").forEach(r => r.classList.remove("has-m"));
         actualizarBadge();
         setTipoVehiculo("Moto");
+        formularioModificado = false;
       }, 10);
     }
  
@@ -836,7 +875,7 @@
     }
  
     // ===========================
-    // 7. SUBMIT DEL FORMULARIO
+    // 6. SUBMIT DEL FORMULARIO
     // ===========================
     document.getElementById("inspeccionForm").addEventListener("submit", async (ev) => {
       ev.preventDefault();
@@ -898,15 +937,24 @@
         hasError = true;
       }
  
+      // ✅ VALIDACIÓN 10: OBSERVACIONES MÍNIMO 10 CARACTERES SI HAY M
       const anyM = Object.values(aspectos).some(a => a.valor === "M");
-      if (anyM && (formData.get("observaciones") || "").trim().length < 6) {
-        showErr("error_observaciones", "Obligatorio si hay aspectos en M");
+      const obsLen = (formData.get("observaciones") || "").trim().length;
+      if (anyM && obsLen < 10) {
+        showErr("error_observaciones", `Observaciones obligatorias si hay M (${obsLen}/10)`);
         hasError = true;
       }
  
       if (hasError) {
         document.getElementById("globalMessage").innerHTML = '<div class="msg-error">Revisa los campos marcados en rojo.</div>';
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        
+        // ✅ VALIDACIÓN 9: SCROLL AUTOMÁTICO A PRIMER ERROR
+        const firstErrorEl = document.querySelector('[id^="error_"]:not([style*="display: none"])');
+        if (firstErrorEl) {
+          firstErrorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
         return;
       }
  
@@ -914,12 +962,23 @@
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner"></span>&nbsp;Generando PDF...';
  
+      // ✅ VALIDACIÓN 8: TIMEOUT 30 SEGUNDOS
+      let submitTimeout;
       try {
+        submitTimeout = setTimeout(() => {
+          btn.disabled = false;
+          btn.innerHTML = "📄 Enviar y generar PDF";
+          document.getElementById("globalMessage").innerHTML = 
+            '<div class="msg-error">⏱️ Tiempo de respuesta agotado (30s). Intenta nuevamente.</div>';
+        }, 30000); // 30 segundos
+ 
         const resp = await fetch(form.action, {
           method: "POST",
           body: formData,
           headers: { "Authorization": `Bearer ${token}` }
         });
+ 
+        clearTimeout(submitTimeout);
  
         if (resp.status === 401) {
           alert("Sesión expirada. Vuelve a iniciar sesión.");
@@ -964,6 +1023,7 @@
           }
         }
       } catch(e) {
+        clearTimeout(submitTimeout);
         console.error(e);
         document.getElementById("globalMessage").innerHTML = '<div class="msg-error">Error de conexión. Intenta nuevamente.</div>';
       } finally {
@@ -973,7 +1033,7 @@
     });
  
     // ===========================
-    // 8. EVENT LISTENERS Y ARRANQUE
+    // 7. EVENT LISTENERS Y ARRANQUE
     // ===========================
     document.addEventListener("DOMContentLoaded", () => {
       // Selector tipo vehículo
