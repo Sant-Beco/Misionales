@@ -18,7 +18,7 @@ import secrets
 router = APIRouter()
  
 # Templates — mismo directorio que usa main.py
-_TEMPLATES = Jinja2Templates(directory=str(Path(__file__).resolve().parent / "templates"))
+_TEMPLATES = Jinja2Templates(directory=str(Path(__file__).resolve().parent.parent / "templates"))
  
 # ===============================
 #   DIRECTORIOS PRINCIPALES
