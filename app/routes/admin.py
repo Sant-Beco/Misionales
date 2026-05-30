@@ -1,4 +1,4 @@
-# app/routes_admin.py
+# app/routes/admin.py
 """
 Panel de administración web para gestionar usuarios
  
@@ -212,8 +212,9 @@ async def admin_usuario_crear(
  
     if not cedula_clean.isdigit() or not (5 <= len(cedula_clean) <= 12):
         raise HTTPException(400, "Cédula inválida (5-12 dígitos numéricos)")
-    if len(pin) < 4:
-        raise HTTPException(400, "PIN debe tener al menos 4 dígitos")
+    # ✅ ACTUALIZADO: PIN mínimo 6 dígitos (antes era 4)
+    if len(pin) < 6:
+        raise HTTPException(400, "PIN debe tener al menos 6 dígitos")
     if rol not in ["user", "admin"]:
         raise HTTPException(400, "Rol inválido")
  
@@ -286,7 +287,8 @@ async def admin_usuario_actualizar(
     if rol != usuario.rol:
         usuario.rol = rol
         cambios.append(f"rol → {rol}")
-    if pin and len(pin) >= 4:
+    # ✅ ACTUALIZADO: PIN mínimo 6 dígitos (antes era 4)
+    if pin and len(pin) >= 6:
         usuario.pin_hash = hash_pin(pin)
         cambios.append("PIN")
  
@@ -547,8 +549,42 @@ async def admin_usuario_inspecciones(
     })
  
  
+# ==========================================================
+#   API REST: VALIDAR CÉDULA EN TIEMPO REAL
+# ==========================================================
+ 
+@router.get("/api/admin/validar-cedula")
+async def validar_cedula(
+    cedula: str,
+    usuario_admin: models.Usuario = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """
+    Verifica si una cédula ya existe en la BD.
+    Usado por el formulario de crear usuario para validación en tiempo real.
+    
+    Retorna: {"existe": true/false}
+    """
+    cedula_clean = cedula.strip()
+    
+    if not cedula_clean.isdigit() or not (5 <= len(cedula_clean) <= 12):
+        return JSONResponse(
+            {"error": "Cédula inválida"},
+            status_code=400
+        )
+    
+    existe = db.query(models.Usuario).filter(
+        models.Usuario.cedula == cedula_clean
+    ).first()
+    
+    return JSONResponse({
+        "existe": existe is not None,
+        "cedula": cedula_clean,
+    })
+ 
+ 
 # ===============================
-# API REST
+# API REST: USUARIOS
 # ===============================
  
 @router.get("/api/admin/usuarios")

@@ -248,7 +248,7 @@
       <!-- SECCIÓN: Identidad -->
       <div class="form-section-title">🪪 Identidad</div>
  
-      <!-- ✅ CÉDULA — ahora es el campo principal en crear -->
+      <!-- ✅ CÉDULA — ahora es el campo principal en crear con validación BD -->
       {% if modo == 'crear' %}
       <div class="form-group">
         <label class="form-label" for="cedula">Cédula <span class="required">*</span></label>
@@ -257,6 +257,7 @@
           minlength="5" maxlength="12" autocomplete="off" oninput="validarCedula()">
         <div class="form-hint">5-12 dígitos numéricos. Identificador único de login.</div>
         <div id="cedulaFeedback"></div>
+        <div id="cedulaExisteError" style="color:#f07070; font-size:0.72rem; margin-top:0.3rem;"></div>
       </div>
       {% else %}
       <div class="form-group">
@@ -284,11 +285,11 @@
             PIN {% if modo == 'crear' %}<span class="required">*</span>{% endif %}
           </label>
           <input type="password" id="pin" name="pin" class="form-input"
-            placeholder="Mínimo 4 dígitos" inputmode="numeric"
-            {% if modo == 'crear' %}required{% endif %} minlength="4" maxlength="12"
+            placeholder="Mínimo 6 dígitos" inputmode="numeric"
+            {% if modo == 'crear' %}required{% endif %} minlength="6" maxlength="12"
             oninput="checkPin()">
           <div id="pinFeedback" class="form-hint">
-            {% if modo == 'editar' %}Deja vacío para no cambiar el PIN.{% else %}4-12 dígitos numéricos.{% endif %}
+            {% if modo == 'editar' %}Deja vacío para no cambiar el PIN.{% else %}6-12 dígitos numéricos.{% endif %}
           </div>
         </div>
         <div class="form-group">
@@ -337,21 +338,60 @@
 </main>
  
 <script>
-function validarCedula() {
+let cedulaTimer;
+ 
+async function validarCedula() {
   const cedula = document.getElementById('cedula').value;
   const fb = document.getElementById('cedulaFeedback');
+  const existeError = document.getElementById('cedulaExisteError');
+  
+  existeError.textContent = '';
   
   if (cedula.length === 0) {
     fb.textContent = '';
-  } else if (!/^\d+$/.test(cedula)) {
-    fb.innerHTML = '<span style="color:#f07070;">✕ Solo dígitos</span>';
-  } else if (cedula.length < 5) {
-    fb.innerHTML = '<span style="color:#f07070;">✕ Mínimo 5 dígitos</span>';
-  } else if (cedula.length > 12) {
-    fb.innerHTML = '<span style="color:#f07070;">✕ Máximo 12 dígitos</span>';
-  } else {
-    fb.innerHTML = '<span style="color:#28c878;">✓ Cédula válida</span>';
+    return;
   }
+  
+  if (!/^\d+$/.test(cedula)) {
+    fb.innerHTML = '<span style="color:#f07070;">✕ Solo dígitos</span>';
+    return;
+  }
+  
+  if (cedula.length < 5) {
+    fb.innerHTML = '<span style="color:#f07070;">✕ Mínimo 5 dígitos</span>';
+    return;
+  }
+  
+  if (cedula.length > 12) {
+    fb.innerHTML = '<span style="color:#f07070;">✕ Máximo 12 dígitos</span>';
+    return;
+  }
+  
+  // Validación formato OK → verificar en BD
+  fb.innerHTML = '<span style="color:#999;">⏳ Verificando...</span>';
+  
+  // Debounce: esperar 800ms para que termine de escribir
+  clearTimeout(cedulaTimer);
+  cedulaTimer = setTimeout(async () => {
+    try {
+      const res = await fetch(`/api/admin/validar-cedula?cedula=${encodeURIComponent(cedula)}`);
+      const data = await res.json();
+      
+      if (res.ok) {
+        if (data.existe) {
+          existeError.textContent = `⚠️ Esta cédula ya está registrada`;
+          fb.innerHTML = '<span style="color:#f07070;">✕ Cédula en uso</span>';
+        } else {
+          fb.innerHTML = '<span style="color:#28c878;">✓ Cédula disponible</span>';
+        }
+      } else {
+        fb.innerHTML = '<span style="color:#f07070;">✕ Error verificando cédula</span>';
+      }
+    } catch (err) {
+      console.error('Error:', err);
+      fb.innerHTML = '<span style="color:#f07070;">✕ Error de conexión</span>';
+    }
+  }, 800);
 }
  
 function checkPin() {
@@ -360,12 +400,12 @@ function checkPin() {
   const fb   = document.getElementById('pinFeedback');
   const fm   = document.getElementById('pinMatch');
  
-  if (pin.length > 0 && pin.length < 4) {
-    fb.innerHTML = '<span style="color:#f07070;">✕ Mínimo 4 dígitos</span>';
-  } else if (pin.length >= 4) {
+  if (pin.length > 0 && pin.length < 6) {
+    fb.innerHTML = '<span style="color:#f07070;">✕ Mínimo 6 dígitos</span>';
+  } else if (pin.length >= 6) {
     fb.innerHTML = '<span style="color:#28c878;">✓ PIN válido</span>';
   } else {
-    fb.textContent = '{{ "Deja vacío para no cambiar el PIN." if modo == "editar" else "4-12 dígitos numéricos." }}';
+    fb.textContent = '{{ "Deja vacío para no cambiar el PIN." if modo == "editar" else "6-12 dígitos numéricos." }}';
   }
  
   if (conf.length > 0) {
@@ -383,8 +423,11 @@ function validar() {
   {% if modo == 'crear' %}
   // Validar cédula (solo en crear)
   const cedula = document.getElementById('cedula').value;
+  const existeError = document.getElementById('cedulaExisteError').textContent;
+  
   if (!cedula) { alert('⚠ La cédula es obligatoria'); return false; }
   if (!/^\d{5,12}$/.test(cedula)) { alert('⚠ La cédula debe tener 5-12 dígitos'); return false; }
+  if (existeError.includes('⚠️')) { alert('⚠ Esta cédula ya está registrada'); return false; }
   {% endif %}
  
   // Validar PIN
@@ -395,7 +438,7 @@ function validar() {
   if (!pin) { alert('⚠ El PIN es obligatorio'); return false; }
   {% endif %}
   
-  if (pin && pin.length < 4) { alert('⚠ El PIN debe tener al menos 4 dígitos'); return false; }
+  if (pin && pin.length < 6) { alert('⚠ El PIN debe tener al menos 6 dígitos'); return false; }
   if (pin && pin !== conf) { alert('⚠ Los PINs no coinciden'); return false; }
  
   return true;
