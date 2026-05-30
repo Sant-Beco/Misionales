@@ -1,4 +1,4 @@
-# app/routes_inspecciones.py - VERSIÓN CORREGIDA CON VALIDACIONES CRÍTICAS
+# app/routes/inspecciones.py - VERSIÓN CORREGIDA CON VALIDACIONES CRÍTICAS
  
 from fastapi import APIRouter, Form, Depends, Request
 from fastapi.responses import FileResponse, JSONResponse, Response, HTMLResponse
@@ -17,7 +17,10 @@ import secrets
  
 router = APIRouter()
  
-# Templates — mismo directorio que usa main.py
+# ✅ CORREGIDO: templates está en app/templates, no en app/routes/templates
+# Path(__file__).resolve().parent = app/routes/
+# Path(__file__).resolve().parent.parent = app/
+# Entonces: app/ + "templates" = app/templates ✅
 _TEMPLATES = Jinja2Templates(directory=str(Path(__file__).resolve().parent.parent / "templates"))
  
 # ===============================
@@ -26,7 +29,7 @@ _TEMPLATES = Jinja2Templates(directory=str(Path(__file__).resolve().parent.paren
  
 # ✅ FIX: Rutas absolutas basadas en la ubicación de este archivo
 #    Evita roturas cuando uvicorn no corre desde la raíz del proyecto
-_HERE = Path(__file__).resolve().parent
+_HERE = Path(__file__).resolve().parent.parent  # app/
  
 BASE_PDF_DIR = _HERE / "data" / "generated_pdfs"
 BASE_PDF_DIR.mkdir(parents=True, exist_ok=True)
