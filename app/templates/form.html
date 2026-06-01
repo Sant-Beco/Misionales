@@ -269,8 +269,8 @@
           <div class="section-icon">✍</div>
           <span class="section-label">Firma del conductor</span>
           <div class="firma-tabs">
-            <button type="button" class="firma-tab active" data-firma-mode="dibujar">✍ Dibujar</button>
-            <button type="button" class="firma-tab" data-firma-mode="imagen">🖼 Subir imagen</button>
+            <button type="button" id="tabDibujar" class="firma-tab active" data-firma-mode="dibujar">✍ Dibujar</button>
+            <button type="button" id="tabImagen" class="firma-tab" data-firma-mode="imagen">🖼 Subir imagen</button>
           </div>
         </div>
         <div class="section-body">
@@ -620,7 +620,7 @@
         canvas.style.height = rect.height + "px";
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.scale(dpr, dpr);
-        ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--text').trim() || "#F0EDE8";
+        ctx.strokeStyle = "#000000";
         ctx.lineWidth = 2.2;
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
