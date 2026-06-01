@@ -175,9 +175,9 @@ templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 # ==========================================================
 #   ROUTERS
 # ==========================================================
-from app.routes.auth import router as auth_router
-from app.routes.inspecciones import router as inspecciones_router
-from app.routes.admin import router as admin_router
+from app.routes_auth import router as auth_router
+from app.routes_inspecciones import router as inspecciones_router
+from app.routes_admin import router as admin_router
  
 app.include_router(auth_router,         prefix="/auth",          tags=["Auth"])
 app.include_router(inspecciones_router, prefix="/inspecciones",  tags=["Inspecciones"])
@@ -304,16 +304,29 @@ async def login_page(request: Request, next: str = None, status: int = None):
 # ==========================================================
 #   RUTA PRINCIPAL — Formulario de inspección
 #   ✅ Usa get_db via Depends (no SessionLocal directo)
+#   ✅ VALIDACIÓN CRÍTICA: Verifica sesión antes de mostrar formulario
 # ==========================================================
 @app.get("/", response_class=HTMLResponse)
 async def form_page(request: Request, db: Session = Depends(get_db)):
     """
     Página principal: formulario de inspección preoperacional.
     
+    ✅ VALIDACIÓN: Si sesión expirada → redirige a /login
+    
     Estadísticas:
     - Cuenta total de inspecciones realizadas
     - Determina si mostrar botón de generar reporte consolidado
     """
+    # ✅ VALIDACIÓN CRÍTICA: Verificar sesión PRIMERO
+    try:
+        from app.security import get_current_user
+        usuario_actual = await get_current_user(request)
+        if not usuario_actual:
+            return RedirectResponse(url="/login?status=401", status_code=302)
+    except Exception as e:
+        print(f"⚠️ Error validando sesión en /: {e}")
+        return RedirectResponse(url="/login?status=401", status_code=302)
+    
     fecha_hoy = datetime.now().strftime("%d - %m - %Y")
     total_inspecciones = db.query(models.Inspeccion).count()
  
