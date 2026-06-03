@@ -175,9 +175,9 @@ templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 # ==========================================================
 #   ROUTERS
 # ==========================================================
-from app.routes_auth import router as auth_router
-from app.routes_inspecciones import router as inspecciones_router
-from app.routes_admin import router as admin_router
+from app.routes.auth import router as auth_router
+from app.routes.inspecciones import router as inspecciones_router
+from app.routes.admin import router as admin_router
  
 app.include_router(auth_router,         prefix="/auth",          tags=["Auth"])
 app.include_router(inspecciones_router, prefix="/inspecciones",  tags=["Inspecciones"])
