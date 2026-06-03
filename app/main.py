@@ -11,6 +11,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from sqlalchemy.orm import Session
+from app.security import get_current_user
  
 from app.database import Base, engine, get_db
 from app import models
@@ -307,29 +308,20 @@ async def login_page(request: Request, next: str = None, status: int = None):
 #   ✅ VALIDACIÓN CRÍTICA: Verifica sesión antes de mostrar formulario
 # ==========================================================
 @app.get("/", response_class=HTMLResponse)
-async def form_page(request: Request, db: Session = Depends(get_db)):
+async def form_page(
+    request: Request,
+    usuario_actual: models.Usuario = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """
     Página principal: formulario de inspección preoperacional.
     
-    ✅ VALIDACIÓN: Si sesión expirada → redirige a /login
-    
-    Estadísticas:
-    - Cuenta total de inspecciones realizadas
-    - Determina si mostrar botón de generar reporte consolidado
+    ✅ get_current_user valida sesión automáticamente
+    Si sesión expirada → levanta 401 → exception handler redirige a /login
     """
-    # ✅ VALIDACIÓN CRÍTICA: Verificar sesión PRIMERO
-    try:
-        from app.security import get_current_user
-        usuario_actual = await get_current_user(request)
-        if not usuario_actual:
-            return RedirectResponse(url="/login?status=401", status_code=302)
-    except Exception as e:
-        print(f"⚠️ Error validando sesión en /: {e}")
-        return RedirectResponse(url="/login?status=401", status_code=302)
-    
     fecha_hoy = datetime.now().strftime("%d - %m - %Y")
     total_inspecciones = db.query(models.Inspeccion).count()
- 
+
     return templates.TemplateResponse(
         "form.html",
         {
@@ -339,7 +331,6 @@ async def form_page(request: Request, db: Session = Depends(get_db)):
             "mostrar_reporte": total_inspecciones >= 15,
         },
     )
- 
  
 # ==========================================================
 #   HEALTHCHECK (para monitoreo/load balancers)

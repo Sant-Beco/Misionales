@@ -16,6 +16,22 @@
       var t = localStorage.getItem('incubant-theme') || 'light';
       document.documentElement.setAttribute('data-theme', t);
     })();
+ 
+    // ✅ Cargar datos usuario desde /auth/me
+    let usuario_actual = null;
+    async function loadUserData() {
+        try {
+            const resp = await fetch("/auth/me");
+            if (!resp.ok) {
+                window.location.href = "/login";
+                return;
+            }
+            usuario_actual = await resp.json();
+        } catch (e) {
+            console.error("Error cargando usuario:", e);
+            window.location.href = "/login";
+        }
+    }
   </script>
 </head>
 <body>
@@ -347,21 +363,6 @@
     // ===========================
     // 1. INICIALIZACIÓN GENERAL
     // ===========================
-    const token = localStorage.getItem("token");
-    if (!token) window.location.href = "/login";
- 
-    const nombre = localStorage.getItem("nombre") || "Conductor";
-    const rol    = localStorage.getItem("rol")    || "user";
- 
-    document.getElementById("headerNombre").textContent = nombre;
-    document.getElementById("usuarioIdInput").value = localStorage.getItem("usuario_id");
-    document.getElementById("nombreConductorInput").value = nombre;
- 
-    if (rol === "admin") {
-      document.getElementById("btnAdmin").style.display = "inline-flex";
-      document.getElementById("btnAdminMobile").style.display = "inline-flex";
-    }
- 
     // Fecha actual para el hero
     const hoy = new Date().toLocaleDateString('es-CO');
     document.getElementById("fechaActual").textContent = hoy;
@@ -868,9 +869,8 @@
  
     async function cerrarSesion() {
       try {
-        await fetch("/auth/logout", { method: "POST", headers: { "Authorization": `Bearer ${token}` } });
+        await fetch("/auth/logout", { method: "POST" });
       } catch(e) {}
-      localStorage.clear();
       window.location.href = "/login";
     }
  
@@ -974,15 +974,13 @@
  
         const resp = await fetch(form.action, {
           method: "POST",
-          body: formData,
-          headers: { "Authorization": `Bearer ${token}` }
+          body: formData
         });
  
         clearTimeout(submitTimeout);
  
         if (resp.status === 401) {
           alert("Sesión expirada. Vuelve a iniciar sesión.");
-          localStorage.clear();
           window.location.href = "/login";
           return;
         }
@@ -1035,7 +1033,26 @@
     // ===========================
     // 7. EVENT LISTENERS Y ARRANQUE
     // ===========================
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", async () => {
+      // ✅ Cargar usuario y validar sesión PRIMERO
+      await loadUserData();
+ 
+      if (!usuario_actual || !usuario_actual.usuario_id) {
+        window.location.href = "/login";
+        return;
+      }
+ 
+      // Establecer nombre en header
+      document.getElementById("headerNombre").textContent = usuario_actual.nombre || "Conductor";
+      document.getElementById("usuarioIdInput").value = usuario_actual.usuario_id;
+      document.getElementById("nombreConductorInput").value = usuario_actual.nombre || "Conductor";
+ 
+      // Admin access
+      if (usuario_actual.rol === "admin") {
+        document.getElementById("btnAdmin").style.display = "inline-flex";
+        document.getElementById("btnAdminMobile").style.display = "inline-flex";
+      }
+ 
       // Selector tipo vehículo
       document.querySelectorAll('.tipo-btn').forEach(btn => {
         btn.addEventListener('click', () => setTipoVehiculo(btn.getAttribute('data-tipo')));
