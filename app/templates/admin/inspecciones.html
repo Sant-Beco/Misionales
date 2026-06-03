@@ -391,8 +391,9 @@
           <label class="f-label">Tipo vehículo</label>
           <select name="tipo" class="f-select">
             <option value="">Todos</option>
-            <option value="Moto"  {% if filtros and filtros.tipo == 'Moto'  %}selected{% endif %}>🏍 Moto</option>
-            <option value="Carro" {% if filtros and filtros.tipo == 'Carro' %}selected{% endif %}>🚗 Carro</option>
+            <option value="Moto"   {% if filtros and filtros.tipo == 'Moto'   %}selected{% endif %}>🏍 Moto</option>
+            <option value="Carro"  {% if filtros and filtros.tipo == 'Carro'  %}selected{% endif %}>🚗 Carro</option>
+            <option value="Camion" {% if filtros and filtros.tipo == 'Camion' %}selected{% endif %}>🚛 Camión</option>
           </select>
         </div>
         <div class="f-group">
@@ -455,7 +456,7 @@
             <td><span class="placa-chip">{{ inspeccion.placa }}</span></td>
             <td>
               <span class="tipo-chip">
-                {% if inspeccion.tipo_vehiculo == 'Carro' %}🚗{% else %}🏍{% endif %}
+                {% if inspeccion.tipo_vehiculo == 'Carro' %}🚗{% elif inspeccion.tipo_vehiculo == 'Camion' %}🚛{% else %}🏍{% endif %}
                 {{ inspeccion.tipo_vehiculo or "Moto" }}
               </span>
             </td>
@@ -505,7 +506,7 @@
         </div>
         <div class="insp-card-meta">
           <span class="insp-card-meta-item">
-            <span>{% if inspeccion.tipo_vehiculo == 'Carro' %}🚗{% else %}🏍{% endif %}</span>
+            <span>{% if inspeccion.tipo_vehiculo == 'Carro' %}🚗{% elif inspeccion.tipo_vehiculo == 'Camion' %}🚛{% else %}🏍{% endif %}</span>
             <span class="insp-card-meta-val">{{ inspeccion.tipo_vehiculo or "Moto" }}</span>
           </span>
           <span class="insp-card-meta-item">
@@ -692,7 +693,7 @@ function verDetalle(idx) {
       </div>
       <div class="modal-field">
         <div class="modal-field-label">Tipo</div>
-        <div class="modal-field-val">${d.tipo === 'Carro' ? '🚗' : '🏍'} ${d.tipo}</div>
+        <div class="modal-field-val">${d.tipo === 'Carro' ? '🚗' : d.tipo === 'Camion' ? '🚛' : '🏍'} ${d.tipo}</div>
       </div>
       <div class="modal-field">
         <div class="modal-field-label">Proceso</div>
