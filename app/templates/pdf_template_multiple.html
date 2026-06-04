@@ -2,12 +2,24 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <!-- ✅ MEJORA 2: Meta viewport mejorado para landscape -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, orientation=landscape">
   <style>
-    @page { size: A4 landscape; margin: 8mm; }
+    /* ✅ MEJORA 2: Landscape mejorado */
+    @page { 
+      size: A4 landscape; 
+      margin: 6mm;
+    }
+    
+    @media print {
+      body { margin: 0; padding: 0; }
+      html, body { width: 100%; height: 100%; }
+      .encabezado { page-break-after: avoid; }
+    }
  
     body {
       font-family: DejaVu Sans, Arial, sans-serif;
-      font-size: 10px;
+      font-size: 9px;
       margin: 0;
       color: #000;
     }
@@ -16,35 +28,35 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 6px 0;
+      padding: 4px 0;
       border-bottom: 2px solid #000;
     }
  
-    .logo { width: 90px; }
+    .logo { width: 80px; }
  
     .titulo {
       flex: 1;
       text-align: center;
       font-weight: 700;
-      font-size: 18px;
+      font-size: 16px;
       text-transform: uppercase;
     }
  
     .subinfo {
       text-align: center;
-      font-size: 11px;
-      margin: 6px 0;
+      font-size: 9px;
+      margin: 4px 0;
     }
  
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 6px;
+      margin-top: 4px;
     }
  
     th, td {
       border: 1px solid #222;
-      padding: 4px;
+      padding: 3px;
       vertical-align: middle;
       text-align: center;
     }
@@ -52,63 +64,71 @@
     th {
       background: #eee;
       font-weight: 700;
-      font-size: 10px;
+      font-size: 8px;
       text-transform: uppercase;
     }
  
     .aspectos td { text-align: center; }
-    .aspectos .left { text-align: left; padding-left: 8px; }
+    .aspectos .left { text-align: left; padding-left: 6px; font-size: 8px; }
  
     .box {
       display: inline-block;
-      width: 18px;
-      height: 18px;
+      width: 16px;
+      height: 16px;
       border: 1px solid #222;
       text-align: center;
-      line-height: 18px;
+      line-height: 16px;
       font-weight: 700;
-      font-size: 12px;
+      font-size: 11px;
     }
  
     td[colspan="2"] {
       text-align: center;
-      width: 36px;
+      width: 32px;
     }
  
-    /* ══ FIRMA en consolidado ══
-       En el consolidado la firma va pequeña (col lateral).
-       Soporta tanto canvas dibujado como imagen subida.
-    */
-    .firma { margin-top: 10px; }
+    /* ✅ MEJORA 3: Columna de totales M */
+    .total-m {
+      background: #fff3cd;
+      font-weight: 700;
+      font-size: 9px;
+    }
+ 
+    .total-m-header {
+      background: #ffc107;
+      color: #000;
+      font-weight: 700;
+    }
+ 
+    .firma { margin-top: 8px; }
  
     .firma img {
       display: block;
-      max-width: 120px;
-      max-height: 60px;
+      max-width: 100px;
+      max-height: 50px;
       width: auto;
       height: auto;
       border: 1px solid #222;
-      margin-top: 6px;
-      /* Fondo blanco por si imagen tiene transparencia */
+      margin-top: 4px;
       background: #fff;
     }
  
     .firma-vacia {
       border: 1px dashed #aaa;
-      padding: 6px;
+      padding: 4px;
       display: inline-block;
-      width: 80px;
+      width: 70px;
       text-align: center;
       color: #777;
-      font-size: 9px;
-      margin-top: 6px;
+      font-size: 8px;
+      margin-top: 4px;
     }
  
     .nota {
-      font-size: 9px;
-      margin-top: 8px;
+      font-size: 8px;
+      margin-top: 6px;
       border-top: 1px solid #ddd;
-      padding-top: 6px;
+      padding-top: 4px;
     }
   </style>
 </head>
@@ -126,35 +146,28 @@
   <!-- INFO SUPERIOR -->
   <div class="subinfo">
     Código: {{ codigo }} — Versión: {{ version }} — Fecha consolidado: {{ fecha }}
-    — Tipo: <strong>{{ registros[0].tipo_vehiculo or "Moto" }}</strong><br>
-    Registros desde: <strong>{{ desde }}</strong> hasta <strong>{{ hasta }}</strong>
+    — Tipo: <strong>{{ registros[0].tipo_vehiculo or "Moto" }}</strong> —
+    Registros: <strong>{{ registros|length }}/15</strong><br>
+    Período: <strong>{{ desde }}</strong> hasta <strong>{{ hasta }}</strong>
   </div>
  
   <!-- INFO DEL CONDUCTOR (primer registro) -->
   <table>
     <tr>
-      <th>Nombre conductor</th>
-      <td colspan="3">{{ registros[0].nombre_conductor }}</td>
+      <th>Conductor</th>
+      <td colspan="2">{{ registros[0].nombre_conductor }}</td>
       <th>Placa</th>
-      <td colspan="3">{{ registros[0].placa }}</td>
-    </tr>
-    <tr>
+      <td colspan="2">{{ registros[0].placa }}</td>
       <th>Proceso</th>
-      <td colspan="3">{{ registros[0].proceso }}</td>
+      <td colspan="2">{{ registros[0].proceso }}</td>
+    </tr>
+    <tr>
       <th>Marca</th>
-      <td colspan="3">{{ registros[0].marca }}</td>
-    </tr>
-    <tr>
-      <th>Gasolina</th>
-      <td colspan="3">{{ registros[0].gasolina }}</td>
+      <td colspan="2">{{ registros[0].marca }}</td>
       <th>Modelo</th>
-      <td colspan="3">{{ registros[0].modelo }}</td>
-    </tr>
-    <tr>
+      <td colspan="2">{{ registros[0].modelo }}</td>
       <th>Motor</th>
-      <td colspan="3">{{ registros[0].motor }}</td>
-      <th>Línea</th>
-      <td colspan="3">{{ registros[0].linea }}</td>
+      <td colspan="2">{{ registros[0].motor }}</td>
     </tr>
   </table>
  
@@ -163,7 +176,7 @@
  
     <!-- ENCABEZADO: número de registro (1..15) -->
     <tr>
-      <th rowspan="2" style="width:22%;">Aspectos a revisar</th>
+      <th rowspan="2" style="width:16%;">Aspecto</th>
       {% for i in range(1, registros|length + 1) %}
         <th colspan="2">{{ i }}</th>
       {% endfor %}
@@ -172,6 +185,8 @@
           <th colspan="2" style="color:#bbb;">{{ i }}</th>
         {% endfor %}
       {% endif %}
+      <!-- ✅ MEJORA 3: Columna Total M -->
+      <th class="total-m-header" colspan="1">Total<br>M</th>
     </tr>
  
     <!-- Subencabezado B / M -->
@@ -180,13 +195,16 @@
         <th>B</th>
         <th>M</th>
       {% endfor %}
+      <th></th>
     </tr>
  
     <!-- Una fila por aspecto -->
-    {% for aspecto in aspectos_lista %}
-    {% set idx = loop.index|string %}
+    {% for item in aspectos_lista %}
+    {% set idx = item.indice if item is mapping else loop.index|string %}
+    {% set aspecto_nombre = item.nombre if item is mapping else item %}
+    {% set total_m_count = item.total_m if item is mapping else 0 %}
     <tr>
-      <td class="left">{{ aspecto }}</td>
+      <td class="left">{{ aspecto_nombre }}</td>
  
       {% for i in range(15) %}
         {% set reg = registros[i] if i < registros|length else None %}
@@ -213,15 +231,23 @@
         </td>
  
       {% endfor %}
+      <!-- ✅ MEJORA 3: Mostrar total de defectos (M) por aspecto -->
+      <td class="total-m">
+        {% if total_m_count > 0 %}
+          {{ total_m_count }}
+        {% else %}
+          —
+        {% endif %}
+      </td>
     </tr>
     {% endfor %}
  
   </table>
  
   <!-- CONDICIONES ÓPTIMAS -->
-  <table class="aspectos" style="margin-top:6px;">
+  <table class="aspectos" style="margin-top:4px;">
     <tr>
-      <th style="width:22%;">¿Óptimas condiciones?</th>
+      <th style="width:16%;">¿Óptimas?</th>
       {% for i in range(15) %}
         {% set reg = registros[i] if i < registros|length else None %}
         <td colspan="2">
@@ -236,21 +262,25 @@
           {% endif %}
         </td>
       {% endfor %}
+      <td class="total-m">
+        {% set total_no = registros|selectattr('condiciones_optimas', 'equalto', 'NO')|list|length %}
+        {% if total_no > 0 %}
+          {{ total_no }}
+        {% else %}
+          —
+        {% endif %}
+      </td>
     </tr>
   </table>
  
   <!-- FIRMA
-       Prioridad: firma_base64 (data-URI inyectado por utils_pdf.py)
-                  > firma_path (ruta en disco)
-                  > sin firma
-       Funciona igual para firma dibujada e imagen subida.
+       ✅ MEJORA 1: Busca la primera firma disponible en todos los registros
+       Renderización: data-URI (base64) o ruta en disco
   -->
   <div class="firma">
     <strong>Firma del conductor</strong><br>
-    {% if registros[0].firma_base64 %}
-      <img src="{{ registros[0].firma_base64 }}" alt="Firma del conductor">
-    {% elif registros[0].firma_path %}
-      <img src="{{ registros[0].firma_path }}" alt="Firma del conductor">
+    {% if primera_firma %}
+      <img src="{{ primera_firma }}" alt="Firma del conductor">
     {% else %}
       <div class="firma-vacia">(sin firma)</div>
     {% endif %}
@@ -258,10 +288,9 @@
  
   <!-- NOTA -->
   <div class="nota">
-    <strong>Nota:</strong> Inspeccione todos los elementos que apliquen.
-    Detenga el vehículo cuando observe una condición insegura y notifique al responsable.
+    <strong>Nota:</strong> Inspeccione todos los elementos. Detenga el vehículo ante condición insegura.
+    <strong>Defectos totales (M):</strong> Analice las columnas destacadas para identificar patrones de fallos.
   </div>
  
 </body>
 </html>
- 
