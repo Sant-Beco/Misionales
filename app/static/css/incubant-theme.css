@@ -1072,7 +1072,8 @@ body {
 }
 .f-input::placeholder, .f-textarea::placeholder { color: var(--text3); }
 .f-input.input-invalid, .f-select.input-invalid { border-color: #f07070 !important; }
-.f-input.input-valid { border-color: rgba(40,200,120,0.4); }
+.f-input.input-valid   { border-color: rgba(40,200,120,0.4); background: var(--bg-3) !important; color: var(--text) !important; }
+.f-select.input-valid  { border-color: rgba(40,200,120,0.4); background: var(--bg-3) !important; color: var(--text) !important; }
 .f-select {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236E6860'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
