@@ -5,34 +5,66 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Inspección Preoperacional · Misionales Incubant</title>
   
-  <!-- Temas: base (incluye estilos del formulario) -->
   <link rel="stylesheet" href="/static/css/incubant-theme.css">
-  
   <link rel="icon" href="/static/img/logotipo_01.png" type="image/png">
   
-  <!-- Aplica el tema guardado ANTES de pintar (evita flash) -->
   <script>
     (function(){
       var t = localStorage.getItem('incubant-theme') || 'light';
       document.documentElement.setAttribute('data-theme', t);
     })();
- 
-    // ✅ Cargar datos usuario desde /auth/me
-    let usuario_actual = null;
-    async function loadUserData() {
-        try {
-            const resp = await fetch("/auth/me");
-            if (!resp.ok) {
-                window.location.href = "/login";
-                return;
-            }
-            usuario_actual = await resp.json();
-        } catch (e) {
-            console.error("Error cargando usuario:", e);
-            window.location.href = "/login";
-        }
-    }
   </script>
+ 
+  <style>
+    /* ✅ OFFLINE: Indicador de conexión y auto-guardado */
+    .connection-indicator {
+      position: fixed;
+      top: 75px;
+      left: 20px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      z-index: 998;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(34, 197, 94, 0.9);
+      color: white;
+      transition: all 0.3s;
+    }
+ 
+    .connection-indicator.offline {
+      background: rgba(239, 68, 68, 0.9);
+    }
+ 
+    .save-indicator {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      padding: 8px 12px;
+      background: rgba(59, 130, 246, 0.85);
+      color: white;
+      border-radius: 6px;
+      font-size: 11px;
+      z-index: 999;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+ 
+    @media (max-width: 768px) {
+      .connection-indicator {
+        top: 70px;
+        left: 10px;
+        font-size: 10px;
+      }
+      .save-indicator {
+        bottom: 20px;
+        right: 20px;
+        font-size: 10px;
+      }
+    }
+  </style>
 </head>
 <body>
  
@@ -65,6 +97,14 @@
       <a href="#" id="btnAdminMobile" class="action-pill action-pill-amber" style="display:none;">⚙ Admin</a>
     </div>
   </header>
+ 
+  <!-- ✅ OFFLINE: Indicador de conexión -->
+  <div class="connection-indicator" id="connectionIndicator">
+    <span id="connectionText">🟢 En línea</span>
+  </div>
+ 
+  <!-- ✅ AUTO-GUARDADO: Indicador -->
+  <div class="save-indicator" id="saveIndicator">💾 Guardando...</div>
  
   <!-- CONTENIDO PRINCIPAL -->
   <div class="page-wrap">
@@ -341,8 +381,36 @@
     </form>
   </div>
  
-  <!-- ================== JAVASCRIPT COMPLETO CON VALIDACIONES ================== -->
+  <!-- ================== JAVASCRIPT CON OFFLINE + AUTO-GUARDADO ================== -->
+  <script src="/static/js/form-autosave.js"></script>
   <script>
+ 
+    // ===========================
+    // ✅ OFFLINE: Detector de conexión
+    // ===========================
+    const connIndicator = document.getElementById('connectionIndicator');
+    const connText = document.getElementById('connectionText');
+ 
+    function updateConnectionStatus() {
+      if (navigator.onLine) {
+        connIndicator.classList.remove('offline');
+        connText.textContent = '🟢 En línea';
+      } else {
+        connIndicator.classList.add('offline');
+        connText.textContent = '🔴 Sin conexión - Datos se guardan localmente';
+      }
+    }
+ 
+    window.addEventListener('online', updateConnectionStatus);
+    window.addEventListener('offline', updateConnectionStatus);
+    updateConnectionStatus();
+ 
+    // Registrar Service Worker para caché
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/static/js/service-worker.js')
+        .then(() => console.log('✅ Service Worker registrado'))
+        .catch(err => console.log('⚠️ Error SW:', err));
+    }
  
     // ===========================
     // 0. VALIDACIÓN: CONFIRMACIÓN ANTES DE ABANDONAR
@@ -353,6 +421,11 @@
     });
     
     window.addEventListener("beforeunload", (e) => {
+      if (formularioModificado && !navigator.onLine) {
+        // Auto-guardar al abandonar si offline
+        formAutoSave.saveFormData();
+      }
+      
       if (formularioModificado) {
         e.preventDefault();
         e.returnValue = "Tienes cambios sin guardar. ¿Abandonar?";
@@ -363,11 +436,24 @@
     // ===========================
     // 1. INICIALIZACIÓN GENERAL
     // ===========================
-    // Fecha actual para el hero
+    async function loadUserData() {
+      try {
+        const resp = await fetch("/auth/me");
+        if (!resp.ok) {
+          window.location.href = "/login";
+          return null;
+        }
+        return await resp.json();
+      } catch (e) {
+        console.error("Error cargando usuario:", e);
+        window.location.href = "/login";
+        return null;
+      }
+    }
+ 
     const hoy = new Date().toLocaleDateString('es-CO');
     document.getElementById("fechaActual").textContent = hoy;
  
-    // ✅ VALIDACIÓN: Establecer min date para licencia_venc (hoy)
     const hoyISO = new Date().toISOString().split('T')[0];
     document.getElementById("licencia_venc").setAttribute("min", hoyISO);
  
@@ -482,7 +568,7 @@
     let tipoActual = "Moto";
  
     // ===========================
-    // 3. FUNCIONES DE RENDERIZADO (ASPECTOS)
+    // 3. FUNCIONES DE RENDERIZADO
     // ===========================
     function actualizarPlaceholders(tipo) {
       const p = PLACEHOLDERS[tipo.toLowerCase()] || PLACEHOLDERS.moto;
@@ -519,7 +605,6 @@
         container.appendChild(row);
       });
       actualizarBadge();
-      // Agregar event listeners a los nuevos radios
       for (let i = 0; i < lista.length; i++) {
         const mRad = document.getElementById(`m_${i}`);
         if (mRad) mRad.addEventListener('change', () => onAspectoChange(i));
@@ -573,20 +658,16 @@
       renderAspectos(tipo);
       actualizarPlaceholders(tipo);
  
-      // Limpiar campos del vehículo
       ["placa","proceso","desde","hasta","marca","gasolina","modelo","motor","linea"].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = "";
       });
  
-      // Resetear condiciones óptimas a "SI"
       const optSi = document.getElementById("opt_si");
       if (optSi) optSi.checked = true;
  
-      // Limpiar firma completamente
       limpiarFirmaCompleta();
  
-      // Ocultar campo de emisión si no es carro/camión
       const campoEmision = document.getElementById("campoEmision");
       if (campoEmision) campoEmision.style.display = (tipo === "Carro" || tipo === "Camion") ? "block" : "none";
  
@@ -602,7 +683,7 @@
     let canvasContext = null;
     let canvasDrawing = false;
     let lastDrawTime = 0;
-    const DRAW_THROTTLE = 16; // ~60fps
+    const DRAW_THROTTLE = 16;
  
     function initCanvas() {
       const canvas = document.getElementById("firmaCanvas");
@@ -652,7 +733,6 @@
         if (placeholder) placeholder.style.opacity = "0";
       }
  
-      // ✅ VALIDACIÓN 13: THROTTLE CANVAS (60fps)
       function draw(e) {
         if (!canvasDrawing) return;
         e.preventDefault();
@@ -739,11 +819,10 @@
       document.querySelector(".firma-canvas-wrap")?.classList.add("has-firma");
     }
  
-    // ✅ VALIDACIÓN 11: TAMAÑO FIRMA < 2MB
     function procesarImagenFirma(file) {
       if (!file || !file.type.startsWith("image/")) return;
       
-      const MAX_FIRMA_SIZE = 2 * 1024 * 1024; // 2MB
+      const MAX_FIRMA_SIZE = 2 * 1024 * 1024;
       if (file.size > MAX_FIRMA_SIZE) {
         const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
         showErr("error_firma", `Imagen muy grande (${sizeMB}MB). Máximo 2MB.`);
@@ -770,7 +849,7 @@
           document.getElementById("error_firma").style.display = "none";
           const prev = document.getElementById("firmaPreview");
           prev.style.display = "flex";
-          prev.innerHTML = `<img src="${dataURL}" alt="Firma cargada"><span class="firma-ok">✓ Imagen de firma lista</span>`;
+          prev.innerHTML = `<img src="${dataURL}" alt="Firma cargada"><span class="firma-ok">✓ Imagen lista</span>`;
           const area = document.getElementById("firmaUploadArea");
           if (area) {
             area.style.borderColor = "rgba(40,200,120,0.45)";
@@ -858,6 +937,8 @@
         actualizarBadge();
         setTipoVehiculo("Moto");
         formularioModificado = false;
+        // Auto-guardado: limpiar después de reset
+        formAutoSave.clearSavedData();
       }, 10);
     }
  
@@ -936,7 +1017,6 @@
         hasError = true;
       }
  
-      // ✅ VALIDACIÓN 10: OBSERVACIONES MÍNIMO 10 CARACTERES SI HAY M
       const anyM = Object.values(aspectos).some(a => a.valor === "M");
       const obsLen = (formData.get("observaciones") || "").trim().length;
       if (anyM && obsLen < 10) {
@@ -946,8 +1026,6 @@
  
       if (hasError) {
         document.getElementById("globalMessage").innerHTML = '<div class="msg-error">Revisa los campos marcados en rojo.</div>';
-        
-        // ✅ VALIDACIÓN 9: SCROLL AUTOMÁTICO A PRIMER ERROR
         const firstErrorEl = document.querySelector('[id^="error_"]:not([style*="display: none"])');
         if (firstErrorEl) {
           firstErrorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -961,7 +1039,6 @@
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner"></span>&nbsp;Generando PDF...';
  
-      // ✅ VALIDACIÓN 8: TIMEOUT 30 SEGUNDOS
       let submitTimeout;
       try {
         submitTimeout = setTimeout(() => {
@@ -969,7 +1046,7 @@
           btn.innerHTML = "📄 Enviar y generar PDF";
           document.getElementById("globalMessage").innerHTML = 
             '<div class="msg-error">⏱️ Tiempo de respuesta agotado (30s). Intenta nuevamente.</div>';
-        }, 30000); // 30 segundos
+        }, 30000);
  
         const resp = await fetch(form.action, {
           method: "POST",
@@ -1033,47 +1110,38 @@
     // 7. EVENT LISTENERS Y ARRANQUE
     // ===========================
     document.addEventListener("DOMContentLoaded", async () => {
-      // ✅ Cargar usuario y validar sesión PRIMERO
-      await loadUserData();
- 
-      if (!usuario_actual || !usuario_actual.usuario_id) {
+      // Cargar usuario
+      const usuario = await loadUserData();
+      if (!usuario || !usuario.usuario_id) {
         window.location.href = "/login";
         return;
       }
  
-      // Establecer nombre en header
-      document.getElementById("headerNombre").textContent = usuario_actual.nombre || "Conductor";
-      document.getElementById("usuarioIdInput").value = usuario_actual.usuario_id;
-      document.getElementById("nombreConductorInput").value = usuario_actual.nombre || "Conductor";
+      document.getElementById("headerNombre").textContent = usuario.nombre || "Conductor";
+      document.getElementById("usuarioIdInput").value = usuario.usuario_id;
+      document.getElementById("nombreConductorInput").value = usuario.nombre || "Conductor";
  
-      // Admin access
-      if (usuario_actual.rol === "admin") {
+      if (usuario.rol === "admin") {
         document.getElementById("btnAdmin").style.display = "inline-flex";
         document.getElementById("btnAdminMobile").style.display = "inline-flex";
       }
  
-      // Selector tipo vehículo
       document.querySelectorAll('.tipo-btn').forEach(btn => {
         btn.addEventListener('click', () => setTipoVehiculo(btn.getAttribute('data-tipo')));
       });
-      // Firma canvas
       initCanvas();
-      // Tabs de firma
       document.querySelectorAll('.firma-tab').forEach(tab => {
         tab.addEventListener('click', () => setFirmaMode(tab.getAttribute('data-firma-mode')));
       });
-      // Botones de firma
       const clearCanvasBtn = document.querySelector('[data-clear-canvas]');
       if (clearCanvasBtn) clearCanvasBtn.addEventListener('click', limpiarFirma);
       const saveCanvasBtn = document.querySelector('[data-save-canvas]');
       if (saveCanvasBtn) saveCanvasBtn.addEventListener('click', guardarFirma);
-      // Subir imagen
       const uploadArea = document.getElementById("firmaUploadArea");
       const fileInput = document.getElementById("firmaImagenInput");
       if (uploadArea && fileInput) {
         uploadArea.addEventListener("click", () => fileInput.click());
         fileInput.addEventListener("change", (e) => cargarImagenFirma(e.target));
-        // Drag & drop
         uploadArea.addEventListener("dragover", (e) => { e.preventDefault(); uploadArea.classList.add("drag-over"); });
         uploadArea.addEventListener("dragleave", () => uploadArea.classList.remove("drag-over"));
         uploadArea.addEventListener("drop", (e) => {
@@ -1085,20 +1153,15 @@
       }
       const clearImageBtn = document.querySelector('[data-clear-image]');
       if (clearImageBtn) clearImageBtn.addEventListener('click', limpiarImagenFirma);
-      // Reset
       document.getElementById("resetBtn").addEventListener("click", onReset);
-      // Logout
       document.getElementById("logoutBtn").addEventListener("click", cerrarSesion);
-      // Admin links
       document.getElementById("btnAdmin")?.addEventListener("click", irAAdmin);
       document.getElementById("btnAdminMobile")?.addEventListener("click", irAAdmin);
-      // Placeholder dinámico para placa
       document.getElementById("placa")?.addEventListener("input", (e) => {
         const v = e.target.value.trim().toUpperCase().replace(/[^A-Z0-9]/g,"");
         if (v.length < 5) showErr("error_placa","Placa inválida");
         else clearErr("error_placa");
       });
-      // Inicializar con Moto
       setTipoVehiculo("Moto");
     });
   </script>
