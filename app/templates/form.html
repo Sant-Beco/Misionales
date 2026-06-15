@@ -16,31 +16,46 @@
   </script>
  
   <style>
-    /* ✅ OFFLINE: Indicador de conexión y auto-guardado */
+    /* ✅ OFFLINE: Indicador de conexión (abajo-derecha) y auto-guardado */
     .connection-indicator {
       position: fixed;
-      top: 75px;
-      left: 20px;
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 11px;
+      bottom: 30px;
+      right: 30px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 12px;
       font-weight: 600;
       z-index: 998;
       display: flex;
       align-items: center;
-      gap: 6px;
-      background: rgba(34, 197, 94, 0.9);
+      gap: 8px;
+      background: rgba(34, 197, 94, 0.95);
       color: white;
-      transition: all 0.3s;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      backdrop-filter: blur(10px);
     }
  
     .connection-indicator.offline {
-      background: rgba(239, 68, 68, 0.9);
+      background: rgba(239, 68, 68, 0.95);
+    }
+ 
+    .connection-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: white;
+      animation: pulse 1.5s infinite;
+    }
+ 
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
     }
  
     .save-indicator {
       position: fixed;
-      bottom: 30px;
+      bottom: 90px;
       right: 30px;
       padding: 8px 12px;
       background: rgba(59, 130, 246, 0.85);
@@ -50,18 +65,34 @@
       z-index: 999;
       opacity: 0;
       transition: opacity 0.3s;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
  
     @media (max-width: 768px) {
       .connection-indicator {
-        top: 70px;
-        left: 10px;
+        bottom: 20px;
+        right: 20px;
+        padding: 8px 12px;
+        font-size: 11px;
+      }
+      .save-indicator {
+        bottom: 80px;
+        right: 20px;
+        font-size: 10px;
+      }
+    }
+ 
+    @media (max-width: 480px) {
+      .connection-indicator {
+        bottom: 15px;
+        right: 15px;
+        padding: 8px 12px;
         font-size: 10px;
       }
       .save-indicator {
-        bottom: 20px;
-        right: 20px;
-        font-size: 10px;
+        bottom: 75px;
+        right: 15px;
+        font-size: 9px;
       }
     }
   </style>

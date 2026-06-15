@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -31,8 +30,8 @@
     /* ✅ OFFLINE: Indicador de conexión */
     .connection-status {
       position: fixed;
-      top: 20px;
-      left: 20px;
+      bottom: 30px;
+      right: 30px;
       padding: 10px 16px;
       border-radius: 8px;
       font-size: 12px;
@@ -41,13 +40,15 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      background: rgba(34, 197, 94, 0.9);
+      background: rgba(34, 197, 94, 0.95);
       color: white;
       transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      backdrop-filter: blur(10px);
     }
  
     .connection-status.offline {
-      background: rgba(239, 68, 68, 0.9);
+      background: rgba(239, 68, 68, 0.95);
     }
  
     .connection-dot {
