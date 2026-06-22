@@ -7,108 +7,248 @@
   <link rel="stylesheet" href="/static/css/incubant-theme.css">
   <link rel="icon" href="/static/img/logotipo_01.png" type="image/png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
- <script>
+  <script>
     (function(){
       var t = localStorage.getItem('incubant-theme') || 'light';
       document.documentElement.setAttribute('data-theme', t);
     })();
-  </script> 
+  </script>
   <style>
+    /* ══════════════════════════════════════════
+       BASE
+    ══════════════════════════════════════════ */
     body { display: flex; min-height: 100vh; margin: 0; }
-
-    /* ══ SIDEBAR ══ */
+ 
+    /* ══════════════════════════════════════════
+       SIDEBAR
+    ══════════════════════════════════════════ */
     .sidebar {
       width: 220px; flex-shrink: 0;
-      background: var(--dark1); border-right: 1px solid var(--border);
+      background: var(--bg-1); border-right: 1px solid var(--border);
       display: flex; flex-direction: column;
       padding: 1.5rem 0.875rem;
       position: fixed; top: 0; left: 0; bottom: 0;
       z-index: 20; transition: transform 0.28s ease;
+      overflow-y: auto;
     }
-    .sidebar-brand { display: flex; align-items: center; gap: 0.6rem; padding: 0 0.5rem 1.5rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+    .sidebar-brand {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0 0.5rem 1.5rem; border-bottom: 1px solid var(--border);
+      margin-bottom: 1.5rem; flex-shrink: 0;
+    }
     .brand-logo { height: 32px; filter: drop-shadow(0 2px 8px rgba(245,156,0,0.35)); }
-    .brand-texts { line-height: 1.2; }
-    .brand-name { font-size: 0.95rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; background: var(--grad-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .brand-name {
+      font-size: 0.95rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; background: var(--grad-brand);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
     .brand-sub { font-size: 0.62rem; color: var(--text3); letter-spacing: 0.06em; text-transform: uppercase; }
-    .nav-section { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); padding: 0 0.75rem; margin-bottom: 0.4rem; }
-    .nav-link { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.75rem; border-radius: var(--r-md); color: var(--text2); text-decoration: none; font-size: 0.85rem; font-weight: 400; margin-bottom: 2px; transition: all 0.2s; letter-spacing: 0.02em; }
-    .nav-link:hover { background: var(--dark3); color: var(--text); }
+    .nav-section {
+      font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--text3); padding: 0 0.75rem; margin-bottom: 0.4rem;
+    }
+    .nav-link {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.6rem 0.75rem; border-radius: var(--r-md);
+      color: var(--text2); text-decoration: none; font-size: 0.85rem;
+      font-weight: 400; margin-bottom: 2px; transition: all 0.2s;
+    }
+    .nav-link:hover { background: var(--bg-3); color: var(--text); }
     .nav-link.active { background: rgba(245,156,0,0.1); color: var(--amber); border-left: 2px solid var(--amber); }
     .nav-icon { font-size: 0.95rem; width: 18px; text-align: center; }
-    .sidebar-footer { margin-top: auto; padding-top: 1.25rem; border-top: 1px solid var(--border); }
-    .user-pill { display: flex; align-items: center; gap: 0.6rem; padding: 0.65rem 0.75rem; border-radius: var(--r-md); background: var(--dark3); margin-bottom: 0.75rem; }
-    .user-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--grad-brand); display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; color: #1a0f00; flex-shrink: 0; }
+    .sidebar-footer { margin-top: auto; padding-top: 1.25rem; border-top: 1px solid var(--border); flex-shrink: 0; }
+    .user-pill {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.65rem 0.75rem; border-radius: var(--r-md);
+      background: var(--bg-3); margin-bottom: 0.75rem;
+    }
+    .user-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--grad-brand); display: flex; align-items: center;
+      justify-content: center; font-size: 0.72rem; font-weight: 700;
+      color: #1a0f00; flex-shrink: 0;
+    }
     .user-name { font-size: 0.8rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .user-role { font-size: 0.65rem; color: var(--amber); letter-spacing: 0.06em; text-transform: uppercase; }
-    .btn-logout { display: flex; align-items: center; justify-content: center; gap: 0.4rem; width: 100%; padding: 0.6rem; background: rgba(220,60,60,0.08); border: 1px solid rgba(220,60,60,0.2); border-radius: var(--r-md); color: #f07070; text-decoration: none; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.2s; cursor: pointer; }
+    .btn-logout {
+      display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+      width: 100%; padding: 0.6rem;
+      background: rgba(220,60,60,0.08); border: 1px solid rgba(220,60,60,0.2);
+      border-radius: var(--r-md); color: #f07070; font-size: 0.8rem;
+      font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.2s;
+    }
     .btn-logout:hover { background: rgba(220,60,60,0.18); border-color: #f07070; }
-
-    /* ══ MAIN ══ */
-    .main { margin-left: 220px; flex: 1; padding: 2rem 2.25rem; min-height: 100vh; background: var(--bg-base); box-sizing: border-box; }
-
-    /* ══ TOPBAR ══ */
-    .topbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; gap: 0.75rem; flex-wrap: wrap; background: transparent; z-index: 10; position: relative; }
-    .page-title { font-size: 1.6rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; background: var(--grad-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; }
-    .page-sub { font-size: 0.78rem; color: var(--text3); margin-top: 0.3rem; letter-spacing: 0.04em; }
-    .date-chip { background: var(--dark2); border: 1px solid var(--border); border-radius: var(--r-md); padding: 0.45rem 0.9rem; font-size: 0.75rem; color: var(--text3); letter-spacing: 0.04em; white-space: nowrap; }
-
-    /* ══ KPIs ══ */
-    .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
-    .kpi { background: var(--dark2); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 1.25rem 1.4rem; position: relative; overflow: hidden; transition: transform 0.2s; animation: fadeUp 0.5s ease both; }
-    .kpi:hover { transform: translateY(-2px); }
-    .kpi::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+ 
+    /* ══════════════════════════════════════════
+       MAIN CONTENT
+    ══════════════════════════════════════════ */
+    .main {
+      margin-left: 220px; flex: 1;
+      padding: 2rem 2.25rem;
+      min-height: 100vh; background: var(--bg-base); box-sizing: border-box;
+    }
+ 
+    /* ══════════════════════════════════════════
+       TOPBAR
+    ══════════════════════════════════════════ */
+    .topbar {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 2rem; gap: 0.75rem; flex-wrap: wrap;
+    }
+    .page-title {
+      font-size: 1.6rem; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; background: var(--grad-brand);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; line-height: 1;
+    }
+    .page-sub { font-size: 0.78rem; color: var(--text3); margin-top: 0.3rem; }
+    .date-chip {
+      background: var(--bg-2); border: 1px solid var(--border);
+      border-radius: var(--r-md); padding: 0.45rem 0.9rem;
+      font-size: 0.75rem; color: var(--text3); white-space: nowrap;
+    }
+ 
+    /* ══════════════════════════════════════════
+       KPIs
+    ══════════════════════════════════════════ */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem; margin-bottom: 1.5rem;
+    }
+    .kpi {
+      background: var(--bg-2); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: 1.25rem 1.4rem;
+      position: relative; overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+      animation: fadeUp 0.5s ease both;
+    }
+    .kpi:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .kpi::after {
+      content: ''; position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+    }
     .kpi.amber::after  { background: var(--amber); }
     .kpi.golden::after { background: var(--golden); }
     .kpi.ember::after  { background: var(--ember); }
     .kpi.orange::after { background: var(--orange); }
-    .kpi-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.6rem; }
+    .kpi-label {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text3); margin-bottom: 0.6rem;
+    }
     .kpi-val { font-size: 2.2rem; font-weight: 700; line-height: 1; margin-bottom: 0.3rem; }
     .kpi.amber  .kpi-val { color: var(--amber); }
     .kpi.golden .kpi-val { color: var(--golden); }
     .kpi.ember  .kpi-val { color: var(--ember); }
     .kpi.orange .kpi-val { color: var(--orange); }
     .kpi-sub { font-size: 0.75rem; color: var(--text3); }
-    .kpi-bg-icon { position: absolute; bottom: 0.75rem; right: 1rem; font-size: 2.2rem; opacity: 0.06; }
-
-    /* ══ GRÁFICAS ══ */
-    .charts-row { display: grid; grid-template-columns: 1.5fr 1fr; gap: 1rem; margin-bottom: 1rem; }
-    .bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    .chart-card { background: var(--dark2); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 1.4rem; animation: fadeUp 0.55s ease both; min-width: 0; }
-    .chart-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.5rem; }
-    .chart-title { font-size: 0.88rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text); }
+    .kpi-bg-icon {
+      position: absolute; bottom: 0.75rem; right: 1rem;
+      font-size: 2.2rem; opacity: 0.06; pointer-events: none;
+    }
+ 
+    /* ══════════════════════════════════════════
+       GRÁFICAS — LAYOUT
+    ══════════════════════════════════════════ */
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 1rem; margin-bottom: 1rem;
+    }
+    .bottom-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .chart-card {
+      background: var(--bg-2); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: 1.4rem;
+      animation: fadeUp 0.55s ease both;
+      min-width: 0; /* clave para que no se desborde en flex/grid */
+      overflow: hidden;
+    }
+    .chart-header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.5rem;
+    }
+    .chart-title {
+      font-size: 0.88rem; font-weight: 700; letter-spacing: 0.05em;
+      text-transform: uppercase; color: var(--text);
+    }
     .chart-desc { font-size: 0.72rem; color: var(--text3); margin-top: 0.2rem; }
-    .chip { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.2rem 0.6rem; border-radius: 20px; flex-shrink: 0; }
+    .chip {
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; padding: 0.2rem 0.6rem;
+      border-radius: 20px; flex-shrink: 0;
+    }
     .chip-amber  { background: rgba(245,156,0,0.12);  color: var(--amber); }
     .chip-golden { background: rgba(255,204,0,0.12);  color: var(--golden); }
     .chip-ember  { background: rgba(235,102,8,0.12);  color: var(--ember); }
-
-
-
-    /* ══ RANKING ══ */
+ 
+    /* Wrapper que fuerza el canvas a respetar el ancho del contenedor */
+    .chart-canvas-wrap {
+      position: relative;
+      width: 100%;
+      /* height se define inline según el gráfico */
+    }
+    .chart-canvas-wrap canvas {
+      display: block;
+      width: 100% !important;  /* siempre 100% del padre */
+      height: auto !important; /* Chart.js maneja el aspect ratio */
+    }
+ 
+    /* ══════════════════════════════════════════
+       DONA — centrada, tamaño fijo que cede en mobile
+    ══════════════════════════════════════════ */
+    .donut-wrap {
+      display: flex; align-items: center; justify-content: center;
+      /* en desktop el canvas mide 200x200 fijo (responsive:false) */
+    }
+ 
+    /* ══════════════════════════════════════════
+       RANKING
+    ══════════════════════════════════════════ */
     table.rk { width: 100%; border-collapse: collapse; }
-    table.rk thead th { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); padding: 0 0 0.65rem; border-bottom: 1px solid var(--border); text-align: left; }
+    table.rk thead th {
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text3);
+      padding: 0 0 0.65rem; border-bottom: 1px solid var(--border); text-align: left;
+    }
     table.rk thead th:last-child { text-align: right; }
     table.rk tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
     table.rk tbody tr:last-child { border-bottom: none; }
-    table.rk tbody tr:hover { background: var(--dark3); }
+    table.rk tbody tr:hover { background: var(--bg-3); }
     table.rk tbody td { padding: 0.75rem 0; font-size: 0.85rem; }
     table.rk tbody td:last-child { text-align: right; }
-    .medal { width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; margin-right: 0.4rem; }
+    .medal {
+      width: 20px; height: 20px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 0.65rem; font-weight: 700; margin-right: 0.4rem;
+    }
     .medal-1 { background: rgba(255,204,0,0.2);  color: var(--golden); }
     .medal-2 { background: rgba(245,156,0,0.15); color: var(--amber); }
     .medal-3 { background: rgba(235,102,8,0.12); color: var(--ember); }
-    .medal-n { background: var(--dark3); color: var(--text3); }
-    .mini-bar { display: inline-block; height: 4px; border-radius: 2px; margin-left: 0.4rem; vertical-align: middle; background: var(--amber); opacity: 0.45; }
-    .count-pill { background: rgba(245,156,0,0.1); color: var(--amber); padding: 0.15rem 0.55rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700; }
+    .medal-n { background: var(--bg-3); color: var(--text3); }
+    .mini-bar {
+      display: inline-block; height: 4px; border-radius: 2px;
+      margin-left: 0.4rem; vertical-align: middle;
+      background: var(--amber); opacity: 0.45;
+    }
+    .count-pill {
+      background: rgba(245,156,0,0.1); color: var(--amber);
+      padding: 0.15rem 0.55rem; border-radius: 12px;
+      font-size: 0.75rem; font-weight: 700;
+    }
     .annual-card { margin-top: 1rem; }
-    .donut-wrap { display: flex; align-items: center; justify-content: center; min-height: 190px; }
-
-    /* ══ CHIPS DE PERÍODO ══ */
+ 
+    /* ══════════════════════════════════════════
+       PERÍODO CHIPS
+    ══════════════════════════════════════════ */
     .period-chips { display: flex; gap: 0.3rem; flex-wrap: wrap; }
     .period-btn {
-      padding: 0.22rem 0.65rem;
-      border-radius: 20px; border: 1px solid var(--border);
-      background: var(--dark3); color: var(--text3);
+      padding: 0.22rem 0.65rem; border-radius: 20px;
+      border: 1px solid var(--border); background: var(--bg-3); color: var(--text3);
       font-family: 'Futura', sans-serif; font-size: 0.65rem;
       font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
       cursor: pointer; transition: all 0.18s;
@@ -116,76 +256,157 @@
     .period-btn:hover { border-color: rgba(245,156,0,0.4); color: var(--amber); }
     .period-btn.active {
       background: rgba(245,156,0,0.12);
-      border-color: rgba(245,156,0,0.4);
-      color: var(--amber);
+      border-color: rgba(245,156,0,0.4); color: var(--amber);
     }
-
-    /* ══ HAMBURGER ══ */
-    .hamburger { display: none; position: fixed; top: 1rem; left: 1rem; z-index: 30; flex-direction: column; justify-content: center; align-items: center; gap: 5px; width: 40px; height: 40px; background: var(--dark2); border: 1px solid var(--border); border-radius: var(--r-md); cursor: pointer; padding: 0; }
+ 
+    /* ══════════════════════════════════════════
+       HAMBURGER + BACKDROP
+    ══════════════════════════════════════════ */
+    .hamburger {
+      display: none; position: fixed;
+      top: 1rem; left: 1rem; z-index: 30;
+      flex-direction: column; justify-content: center;
+      align-items: center; gap: 5px;
+      width: 40px; height: 40px;
+      background: var(--bg-2); border: 1px solid var(--border);
+      border-radius: var(--r-md); cursor: pointer; padding: 0;
+    }
     .hamburger span { display: block; width: 18px; height: 2px; background: var(--amber); border-radius: 2px; transition: all 0.25s; }
     .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
     .hamburger.open span:nth-child(2) { opacity: 0; }
     .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-    .sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 19; backdrop-filter: blur(2px); }
-
-    @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
-
-    /* ══ RESPONSIVE ══ */
-    @media (max-width: 900px) {
-      .kpi-row    { grid-template-columns: 1fr 1fr !important; gap: 0.75rem; }
-      .charts-row { grid-template-columns: 1fr !important; }
-      .bottom-row { grid-template-columns: 1fr !important; }
+    .sidebar-backdrop {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6); z-index: 19; backdrop-filter: blur(2px);
     }
-
+    .sidebar-backdrop.open { display: block; }
+ 
+    /* ══════════════════════════════════════════
+       ANIMACIONES
+    ══════════════════════════════════════════ */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+ 
+    /* ══════════════════════════════════════════
+       RESPONSIVE — TABLET (≤900px)
+       2 columnas en KPIs, gráficas apiladas
+    ══════════════════════════════════════════ */
+    @media (max-width: 900px) {
+      .kpi-row { grid-template-columns: repeat(2, 1fr); gap: 0.85rem; }
+      .charts-row { grid-template-columns: 1fr; }
+      .bottom-row  { grid-template-columns: 1fr; }
+      .annual-card { margin-top: 1rem; }
+    }
+ 
+    /* ══════════════════════════════════════════
+       RESPONSIVE — MÓVIL GRANDE (≤768px)
+       Sidebar offcanvas, layout una columna
+    ══════════════════════════════════════════ */
     @media (max-width: 768px) {
       .hamburger { display: flex; }
-      .sidebar { transform: translateX(-100%); z-index: 25; }
+      .sidebar { transform: translateX(-100%); }
       .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.5); }
-      .sidebar-backdrop.open { display: block; }
-      .main { margin-left: 0 !important; padding: 1rem; padding-top: 4.5rem; }
-      .topbar { flex-direction: column; align-items: flex-start; margin-bottom: 1.25rem; }
-      .page-title { font-size: 1.2rem; }
-      .date-chip { font-size: 0.7rem; padding: 0.35rem 0.7rem; }
-      .kpi-row { grid-template-columns: 1fr 1fr !important; gap: 0.65rem; }
-      .kpi { padding: 1rem; }
-      .kpi-val { font-size: 1.65rem; }
-      .kpi-label { font-size: 0.62rem; }
-      .kpi-bg-icon { font-size: 1.6rem; }
-      .charts-row { grid-template-columns: 1fr !important; }
-      .bottom-row { grid-template-columns: 1fr !important; }
-      .chart-card { padding: 1rem; }
-      .chart-title { font-size: 0.8rem; }
-      .annual-card .chart-header { flex-direction: column; gap: 0.5rem; }
-      .donut-wrap { min-height: 160px; }
-      .donut-wrap canvas { width: 160px !important; height: 160px !important; }
-    }
-
-    @media (max-width: 420px) {
-      .kpi-row { grid-template-columns: 1fr 1fr !important; gap: 0.5rem; }
-      .kpi-val { font-size: 1.4rem; }
-      .kpi-bg-icon { display: none; }
+      .main { margin-left: 0; padding: 1.25rem 1rem; padding-top: 4.75rem; }
+ 
+      .topbar { margin-bottom: 1.25rem; }
+      .page-title { font-size: 1.3rem; }
+      .page-sub   { font-size: 0.73rem; }
+      .date-chip  { font-size: 0.7rem; padding: 0.35rem 0.7rem; }
+ 
+      .kpi-row { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-bottom: 1.25rem; }
+      .kpi { padding: 1rem 1.1rem; }
+      .kpi-val { font-size: 1.8rem; }
+      .kpi-label { font-size: 0.63rem; }
+      .kpi-sub { font-size: 0.7rem; }
+ 
+      .charts-row { grid-template-columns: 1fr; gap: 0.85rem; margin-bottom: 0.85rem; }
+      .bottom-row  { grid-template-columns: 1fr; gap: 0.85rem; }
+      .chart-card { padding: 1.1rem; }
+      .chart-title { font-size: 0.82rem; }
+      .chart-desc  { font-size: 0.68rem; }
+      .chart-header { margin-bottom: 1rem; }
+ 
+      /* Dona: centrada y más pequeña */
+      .donut-wrap { min-height: 0; padding: 0.5rem 0; }
+ 
+      /* Gráfica anual: leyenda apilada */
+      .annual-card .chart-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+      #anualLegend { flex-wrap: wrap; gap: 0.5rem; }
+ 
+      /* Tabla ranking: columna mini-bar oculta */
       .mini-bar { display: none; }
+    }
+ 
+    /* ══════════════════════════════════════════
+       RESPONSIVE — MÓVIL (≤480px)
+       Máxima compresión, texto más pequeño
+    ══════════════════════════════════════════ */
+    @media (max-width: 480px) {
+      .main { padding: 1rem 0.75rem; padding-top: 4.5rem; }
+ 
+      .page-title { font-size: 1.1rem; }
+      .page-sub   { font-size: 0.68rem; }
+      .date-chip  { font-size: 0.65rem; padding: 0.3rem 0.65rem; }
+ 
+      .kpi-row { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; margin-bottom: 1rem; }
+      .kpi { padding: 0.85rem 0.9rem; }
+      .kpi-val { font-size: 1.5rem; }
+      .kpi-label { font-size: 0.59rem; margin-bottom: 0.4rem; }
       .kpi-sub { font-size: 0.65rem; }
+      .kpi-bg-icon { display: none; } /* quita iconos decorativos para ganar espacio */
+ 
+      .charts-row { gap: 0.7rem; margin-bottom: 0.7rem; }
+      .bottom-row  { gap: 0.7rem; }
+      .chart-card { padding: 0.9rem; border-radius: var(--r-md); }
+      .chart-title { font-size: 0.76rem; }
+      .chart-desc  { font-size: 0.63rem; }
+      .chip { font-size: 0.58rem; padding: 0.15rem 0.45rem; }
+      .period-btn { padding: 0.18rem 0.5rem; font-size: 0.6rem; }
+ 
+      /* Tabla */
+      table.rk { font-size: 0.78rem; }
+      table.rk thead th { font-size: 0.6rem; padding-bottom: 0.5rem; }
+      table.rk tbody td { padding: 0.55rem 0; font-size: 0.77rem; }
+      .medal { width: 18px; height: 18px; font-size: 0.6rem; margin-right: 0.25rem; }
+      .count-pill { padding: 0.12rem 0.45rem; font-size: 0.7rem; }
+    }
+ 
+    /* ══════════════════════════════════════════
+       RESPONSIVE — MÓVIL PEQUEÑO (≤360px)
+    ══════════════════════════════════════════ */
+    @media (max-width: 360px) {
+      .main { padding: 0.9rem 0.65rem; padding-top: 4.25rem; }
+      .page-title { font-size: 1rem; }
+      .kpi-row { gap: 0.5rem; }
+      .kpi { padding: 0.75rem 0.75rem; }
+      .kpi-val { font-size: 1.3rem; }
+      .kpi-label { font-size: 0.55rem; }
+      .chart-card { padding: 0.8rem; }
+      .chart-title { font-size: 0.72rem; }
+      table.rk { font-size: 0.73rem; }
+      .medal { width: 16px; height: 16px; font-size: 0.55rem; margin-right: 0.2rem; }
     }
   </style>
 </head>
 <body>
-
+ 
 <button class="hamburger" onclick="toggleSidebar()" id="hamburgerBtn">
   <span></span><span></span><span></span>
 </button>
 <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
-
+ 
 <!-- SIDEBAR -->
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar">
   <div class="sidebar-brand">
     <img src="/static/img/logotipo_01.png" alt="Incubant" class="brand-logo">
-    <div class="brand-texts">
+    <div>
       <div class="brand-name">Misionales</div>
       <div class="brand-sub">Incubant SST</div>
     </div>
   </div>
-  <div class="nav-section" style="margin-top:0.25rem;">Panel</div>
+  <div class="nav-section">Panel</div>
   <a href="/admin"              class="nav-link active"><span class="nav-icon">📊</span> Dashboard</a>
   <a href="/admin/usuarios"     class="nav-link"><span class="nav-icon">👥</span> Usuarios</a>
   <a href="/admin/inspecciones" class="nav-link"><span class="nav-icon">🔍</span> Inspecciones</a>
@@ -208,10 +429,10 @@
     </button>
   </div>
 </aside>
-
+ 
 <!-- MAIN -->
 <main class="main">
-
+ 
   <div class="topbar">
     <div>
       <div class="page-title">Dashboard</div>
@@ -219,7 +440,7 @@
     </div>
     <div class="date-chip" id="fechaHoy"></div>
   </div>
-
+ 
   <!-- KPIs -->
   <div class="kpi-row">
     <div class="kpi amber" style="animation-delay:0.05s">
@@ -247,12 +468,12 @@
       <div class="kpi-bg-icon">🐣</div>
     </div>
   </div>
-
-  <!-- Gráficas principales -->
+ 
+  <!-- Fila principal de gráficas -->
   <div class="charts-row">
-
-    <!-- Gráfica de línea con chips de período -->
-    <div class="chart-card" style="animation-delay:0.1s">
+ 
+    <!-- Gráfica de línea -->
+    <div class="chart-card" style="animation-delay:0.10s">
       <div class="chart-header">
         <div>
           <div class="chart-title">Actividad reciente</div>
@@ -263,9 +484,13 @@
           <button class="period-btn" onclick="setPeriod(0, this)">Todo</button>
         </div>
       </div>
-      <canvas id="lineChart" height="170"></canvas>
+      <!-- Wrapper responsivo: la altura se ajusta en mobile vía JS -->
+      <div class="chart-canvas-wrap" id="lineWrap">
+        <canvas id="lineChart"></canvas>
+      </div>
     </div>
-
+ 
+    <!-- Barras top conductores -->
     <div class="chart-card" style="animation-delay:0.15s">
       <div class="chart-header">
         <div>
@@ -274,13 +499,17 @@
         </div>
         <span class="chip chip-golden">Barras</span>
       </div>
-      <canvas id="barChart" width="400" height="170"></canvas>
+      <div class="chart-canvas-wrap" id="barWrap">
+        <canvas id="barChart"></canvas>
+      </div>
     </div>
   </div>
-
-  <!-- Bottom -->
+ 
+  <!-- Fila inferior -->
   <div class="bottom-row">
-    <div class="chart-card" style="animation-delay:0.2s">
+ 
+    <!-- Ranking -->
+    <div class="chart-card" style="animation-delay:0.20s">
       <div class="chart-header">
         <div>
           <div class="chart-title">Ranking conductores</div>
@@ -314,7 +543,8 @@
         </table>
       </div>
     </div>
-
+ 
+    <!-- Dona -->
     <div class="chart-card" style="animation-delay:0.25s">
       <div class="chart-header">
         <div>
@@ -323,12 +553,12 @@
         </div>
         <span class="chip chip-amber">Dona</span>
       </div>
-      <div class="donut-wrap">
-        <canvas id="donutChart" width="200" height="200"></canvas>
+      <div class="donut-wrap" id="donutWrap">
+        <canvas id="donutChart"></canvas>
       </div>
     </div>
   </div>
-
+ 
   <!-- Gráfica anual -->
   <div class="chart-card annual-card" style="animation-delay:0.30s;">
     <div class="chart-header">
@@ -341,58 +571,103 @@
         <span class="chip chip-amber">Barras agrupadas</span>
       </div>
     </div>
-    <div style="position:relative;">
-      <canvas id="annualChart" height="130"></canvas>
+    <div class="chart-canvas-wrap" id="annualWrap">
+      <canvas id="annualChart"></canvas>
       <div id="annualEmpty" style="display:none;text-align:center;padding:2rem;color:var(--text3);font-size:0.82rem;">
         Sin datos anuales registrados aún.
       </div>
     </div>
   </div>
-
+ 
 </main>
-
+ 
 <script>
+// ══════════════════════════════════════════
+// UTILIDADES
+// ══════════════════════════════════════════
 document.getElementById('fechaHoy').textContent = new Date().toLocaleDateString('es-CO', {
   weekday:'long', year:'numeric', month:'long', day:'numeric'
 });
-
+ 
+// Detectar si estamos en mobile
+function isMobile() { return window.innerWidth <= 768; }
+function isSmallMobile() { return window.innerWidth <= 480; }
+ 
+// Colores de la marca
 const AMBER  = '#F59C00';
 const GOLDEN = '#FFCC00';
 const EMBER  = '#EB6608';
 const ORANGE = '#EF7D00';
-const MUTED  = '#6E6860';
-const BORDER  = getComputedStyle(document.documentElement).getPropertyValue('--border').trim();
-const SURFACE = getComputedStyle(document.documentElement).getPropertyValue('--bg-2').trim();
 const PALETTE = [AMBER, GOLDEN, EMBER, ORANGE, '#f0c040', '#e8882a', '#ffdd55'];
-
-Chart.defaults.color       = getComputedStyle(document.documentElement).getPropertyValue('--text3').trim();
-Chart.defaults.borderColor = getComputedStyle(document.documentElement).getPropertyValue('--border').trim();
+ 
+// Leer CSS variables para que los colores del chart respeten el tema
+const cssVar = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+ 
+Chart.defaults.color       = cssVar('--text3');
+Chart.defaults.borderColor = cssVar('--border');
 Chart.defaults.font.family = "'Futura', 'Trebuchet MS', sans-serif";
-
+ 
+// Opciones de tooltip compartidas
+const tooltipBase = {
+  backgroundColor: cssVar('--bg-2'),
+  borderColor:     cssVar('--border'),
+  borderWidth: 1,
+  padding: 10,
+  titleColor: AMBER,
+  bodyColor: cssVar('--text'),
+};
+ 
+// Datos del backend (Jinja2)
 const usuariosActivos = [
   {% for u in usuarios_activos %}
   { nombre: {{ u[0] | tojson }}, total: {{ u[1] }} },
   {% endfor %}
 ];
-
-// Array completo de 90 días desde el backend
+ 
 const TODOS_LOS_DIAS = [
   {% for d in inspecciones_por_dia %}
   { fecha: {{ d.fecha | tojson }}, total: {{ d.total }} },
   {% endfor %}
 ];
-
-const tooltipDefaults = {
-  backgroundColor: SURFACE, borderColor: BORDER, borderWidth: 1,
-  padding: 10, titleColor: AMBER, bodyColor: '#F0EDE8',
-};
-
-// ── GRÁFICA DE LÍNEA con período variable ──
+ 
+// ══════════════════════════════════════════
+// HELPERS RESPONSIVOS PARA CHART.JS
+// Los canvas de Chart.js necesitan que
+// maintainAspectRatio=true Y que el
+// contenedor padre tenga ancho definido.
+// ══════════════════════════════════════════
+ 
+function getLineHeight()   { return isMobile() ? 180 : 200; }
+function getBarHeight()    { return isMobile() ? 200 : 210; }
+function getAnnualHeight() { return isSmallMobile() ? 200 : isMobile() ? 220 : 160; }
+ 
+// Opciones base para gráficas de barras/línea (responsive, se estira al ancho)
+function baseScaleOpts(labelSize) {
+  return {
+    x: {
+      grid: { color: cssVar('--border') },
+      ticks: {
+        font: { size: labelSize || (isMobile() ? 9 : 10) },
+        maxRotation: 45,
+        maxTicksLimit: isMobile() ? 7 : 14,
+      }
+    },
+    y: {
+      grid: { color: cssVar('--border') },
+      beginAtZero: true,
+      ticks: { precision: 0, font: { size: labelSize || (isMobile() ? 9 : 10) } }
+    }
+  };
+}
+ 
+// ══════════════════════════════════════════
+// 1. GRÁFICA DE LÍNEA
+// ══════════════════════════════════════════
 const lineCtx = document.getElementById('lineChart').getContext('2d');
-const lineGrad = lineCtx.createLinearGradient(0, 0, 0, 200);
-lineGrad.addColorStop(0, 'rgba(245,156,0,0.30)');
+const lineGrad = lineCtx.createLinearGradient(0, 0, 0, getLineHeight());
+lineGrad.addColorStop(0, 'rgba(245,156,0,0.28)');
 lineGrad.addColorStop(1, 'rgba(245,156,0,0.01)');
-
+ 
 const lineChart = new Chart(lineCtx, {
   type: 'line',
   data: {
@@ -404,7 +679,7 @@ const lineChart = new Chart(lineCtx, {
       backgroundColor: lineGrad,
       borderWidth: 2.5,
       pointBackgroundColor: AMBER,
-      pointBorderColor: SURFACE,
+      pointBorderColor: cssVar('--bg-2'),
       pointBorderWidth: 2,
       pointRadius: 4, pointHoverRadius: 7,
       tension: 0.4, fill: true,
@@ -412,41 +687,47 @@ const lineChart = new Chart(lineCtx, {
   },
   options: {
     responsive: true,
-    plugins: { legend: { display: false }, tooltip: tooltipDefaults },
-    scales: {
-      x: { grid: { color: BORDER }, ticks: { font: { size: 10 }, maxRotation: 45, maxTicksLimit: 14 } },
-      y: { grid: { color: BORDER }, beginAtZero: true, ticks: { precision: 0, font: { size: 10 } } }
-    }
+    maintainAspectRatio: false, // <-- dejamos que el wrapper controle la altura
+    plugins: { legend: { display: false }, tooltip: tooltipBase },
+    scales: baseScaleOpts()
   }
 });
-
+ 
+// Fijar la altura del wrapper antes de que Chart.js la lea
+document.getElementById('lineWrap').style.height = getLineHeight() + 'px';
+ 
 function setPeriod(days, btn) {
   document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-
-  // slice(-days) para los últimos N, sin filtros de fecha — igual que antes
+ 
   const datos = days === 0 ? TODOS_LOS_DIAS : TODOS_LOS_DIAS.slice(-days);
   const n = datos.length;
-
+ 
   lineChart.data.datasets[0].pointRadius      = n > 60 ? 2 : n > 30 ? 3 : 4;
   lineChart.data.datasets[0].pointHoverRadius = n > 60 ? 4 : n > 30 ? 5 : 7;
-  lineChart.options.scales.x.ticks.maxTicksLimit = n > 60 ? 8 : 14;
-
+  lineChart.options.scales.x.ticks.maxTicksLimit = isMobile() ? (n > 30 ? 5 : 7) : 14;
   lineChart.data.labels = datos.map(d => d.fecha);
   lineChart.data.datasets[0].data = datos.map(d => d.total);
   lineChart.update('active');
-
+ 
   document.getElementById('lineDesc').textContent =
-    days === 0 ? 'Inspecciones — historial completo' : 'Inspecciones — últimos ' + days + ' días';
+    days === 0 ? 'Inspecciones — historial completo' : `Inspecciones — últimos ${days} días`;
 }
-
-// Inicializar con 14 días (igual que antes)
 setPeriod(14, document.querySelector('.period-btn.active'));
-
-// ── BARRAS ──
+ 
+// ══════════════════════════════════════════
+// 2. BARRAS — TOP CONDUCTORES
+// ══════════════════════════════════════════
 (function() {
-  const labels = usuariosActivos.map(u => (u.nombre || 'Sin nombre').split(' ')[0]);
-  const data   = usuariosActivos.map(u => u.total);
+  const wrap = document.getElementById('barWrap');
+  wrap.style.height = getBarHeight() + 'px';
+ 
+  // En mobile mostramos solo primer nombre para ahorrar espacio
+  const labels = usuariosActivos.map(u =>
+    isMobile() ? (u.nombre || '?').split(' ')[0] : (u.nombre || 'Sin nombre')
+  );
+  const data = usuariosActivos.map(u => u.total);
+ 
   new Chart(document.getElementById('barChart'), {
     type: 'bar',
     data: {
@@ -460,16 +741,67 @@ setPeriod(14, document.querySelector('.period-btn.active'));
     },
     options: {
       responsive: true,
-      plugins: { legend: { display: false }, tooltip: { ...tooltipDefaults, titleColor: GOLDEN } },
-      scales: {
-        x: { grid: { display: false }, ticks: { font: { size: 10 }, maxRotation: 45 } },
-        y: { grid: { color: BORDER }, beginAtZero: true, ticks: { precision: 0, font: { size: 10 } } }
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { ...tooltipBase, titleColor: GOLDEN } },
+      scales: baseScaleOpts(isMobile() ? 9 : 10)
+    }
+  });
+})();
+ 
+// ══════════════════════════════════════════
+// 3. DONA — top 5 conductores
+// Se mantiene responsive:true y
+// maintainAspectRatio:true para que el
+// canvas cuadre solo con un maxWidth en CSS
+// ══════════════════════════════════════════
+(function() {
+  const top5 = usuariosActivos.slice(0, 5);
+ 
+  if (!top5.length) {
+    document.getElementById('donutWrap').innerHTML =
+      '<p style="color:var(--text3);font-size:.8rem;text-align:center;">Sin datos aún</p>';
+    return;
+  }
+ 
+  // Tamaño máximo del canvas de la dona según pantalla
+  const donutSize = isSmallMobile() ? 180 : isMobile() ? 200 : 220;
+  const canvas = document.getElementById('donutChart');
+  canvas.style.maxWidth  = donutSize + 'px';
+  canvas.style.maxHeight = donutSize + 'px';
+ 
+  new Chart(canvas, {
+    type: 'doughnut',
+    data: {
+      labels: top5.map(u => (u.nombre || '?').split(' ')[0]),
+      datasets: [{
+        data: top5.map(u => u.total),
+        backgroundColor: PALETTE.slice(0, top5.length).map(c => c + 'cc'),
+        borderColor: cssVar('--bg-1'),
+        borderWidth: 3, hoverOffset: 8,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true, // la dona mantiene su ratio 1:1
+      cutout: '68%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            boxWidth: isSmallMobile() ? 8 : 10,
+            padding:  isSmallMobile() ? 8 : 12,
+            font: { size: isSmallMobile() ? 9 : 10 },
+          }
+        },
+        tooltip: { ...tooltipBase, titleColor: GOLDEN }
       }
     }
   });
 })();
-
-// ── ANUAL ──
+ 
+// ══════════════════════════════════════════
+// 4. GRÁFICA ANUAL — barras agrupadas
+// ══════════════════════════════════════════
 (function() {
   const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
   const datosAnuales = [
@@ -477,13 +809,16 @@ setPeriod(14, document.querySelector('.period-btn.active'));
     { anio: {{ serie.anio }}, meses: {{ serie.meses | tojson }} },
     {% endfor %}
   ];
-
+ 
   if (!datosAnuales.length) {
     document.getElementById('annualChart').style.display = 'none';
     document.getElementById('annualEmpty').style.display = 'block';
     return;
   }
-
+ 
+  const wrap = document.getElementById('annualWrap');
+  wrap.style.height = getAnnualHeight() + 'px';
+ 
   const YEAR_PALETTE = [
     { bg: 'rgba(245,156,0,0.75)',  border: '#F59C00' },
     { bg: 'rgba(255,204,0,0.75)',  border: '#FFCC00' },
@@ -491,7 +826,7 @@ setPeriod(14, document.querySelector('.period-btn.active'));
     { bg: 'rgba(239,125,0,0.75)',  border: '#EF7D00' },
     { bg: 'rgba(180,220,80,0.75)', border: '#a8d440' },
   ];
-
+ 
   const datasets = datosAnuales.map((serie, i) => {
     const pal = YEAR_PALETTE[i % YEAR_PALETTE.length];
     return {
@@ -500,70 +835,100 @@ setPeriod(14, document.querySelector('.period-btn.active'));
       borderWidth: 1.5, borderRadius: 4, borderSkipped: false,
     };
   });
-
+ 
+  const tickSize = isSmallMobile() ? 9 : isMobile() ? 10 : 11;
+ 
   new Chart(document.getElementById('annualChart'), {
     type: 'bar',
     data: { labels: meses, datasets },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
       plugins: {
-        legend: { display: true, position: 'top', align: 'end', labels: { boxWidth: 12, boxHeight: 12, padding: 14, font: { size: 11 }, color: '#F0EDE8' } },
-        tooltip: { ...tooltipDefaults, callbacks: { title: (i) => meses[i[0].dataIndex], label: (i) => ` ${i.dataset.label}: ${i.parsed.y} inspecciones` } }
+        legend: {
+          display: true, position: 'top', align: 'end',
+          labels: {
+            boxWidth: isMobile() ? 10 : 12,
+            boxHeight: isMobile() ? 10 : 12,
+            padding: isMobile() ? 10 : 14,
+            font: { size: isMobile() ? 10 : 11 },
+            color: cssVar('--text'),
+          }
+        },
+        tooltip: {
+          ...tooltipBase,
+          callbacks: {
+            title: (i) => meses[i[0].dataIndex],
+            label: (i) => ` ${i.dataset.label}: ${i.parsed.y} inspecciones`
+          }
+        }
       },
       scales: {
-        x: { grid: { display: false }, ticks: { font: { size: 11 } } },
-        y: { grid: { color: BORDER }, beginAtZero: true, ticks: { precision: 0, font: { size: 11 } } }
+        x: {
+          grid: { display: false },
+          ticks: {
+            font: { size: tickSize },
+            // En mobile muy pequeño abreviar a 1 letra
+            callback: function(val, idx) {
+              return isSmallMobile() ? meses[idx][0] : meses[idx];
+            }
+          }
+        },
+        y: {
+          grid: { color: cssVar('--border') },
+          beginAtZero: true,
+          ticks: { precision: 0, font: { size: tickSize } }
+        }
       }
     }
   });
 })();
-
-// ── DONA ──
-(function() {
-  const top5 = usuariosActivos.slice(0, 5);
-  if (!top5.length) {
-    document.getElementById('donutChart').parentElement.innerHTML = '<p style="color:var(--text3);font-size:.8rem;">Sin datos aún</p>';
-    return;
-  }
-  new Chart(document.getElementById('donutChart'), {
-    type: 'doughnut',
-    data: {
-      labels: top5.map(u => (u.nombre || 'Sin nombre').split(' ')[0]),
-      datasets: [{ data: top5.map(u => u.total), backgroundColor: PALETTE.slice(0, top5.length).map(c => c + 'cc'), borderColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-1').trim(), borderWidth: 3, hoverOffset: 8 }]
-    },
-    options: {
-      responsive: false, cutout: '68%',
-      plugins: {
-        legend: { position: 'bottom', labels: { boxWidth: 10, padding: 12, font: { size: 10 } } },
-        tooltip: { ...tooltipDefaults, titleColor: GOLDEN }
-      }
+ 
+// ══════════════════════════════════════════
+// REDIMENSIONAR las gráficas al rotar pantalla
+// Chart.js responsive:true lo hace solo, pero
+// los wrappers con altura fija necesitan
+// actualizarse manualmente.
+// ══════════════════════════════════════════
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    document.getElementById('lineWrap').style.height   = getLineHeight()   + 'px';
+    document.getElementById('barWrap').style.height    = getBarHeight()    + 'px';
+    document.getElementById('annualWrap').style.height = getAnnualHeight() + 'px';
+    // Chart.js detecta el cambio de tamaño del wrapper y redibuja solo
+  }, 150);
+});
+ 
+// ══════════════════════════════════════════
+// SIDEBAR + SESIÓN
+// ══════════════════════════════════════════
+function toggleSidebar() {
+  const sidebar   = document.getElementById('sidebar');
+  const backdrop  = document.getElementById('sidebarBackdrop');
+  const btn       = document.getElementById('hamburgerBtn');
+  const isOpen    = sidebar.classList.toggle('open');
+  backdrop.classList.toggle('open');
+  btn.classList.toggle('open');
+  document.body.style.overflow = isOpen ? 'hidden' : '';
+}
+ 
+// Cerrar sidebar al hacer clic en un link (mobile)
+document.querySelectorAll('.nav-link').forEach(link => {
+  link.addEventListener('click', () => {
+    if (window.innerWidth <= 768) {
+      const s = document.getElementById('sidebar');
+      if (s.classList.contains('open')) toggleSidebar();
     }
   });
-})();
-</script>
-
-<script>
+});
+ 
 async function cerrarSesion() {
   try { await fetch("/auth/logout", { method: "POST" }); } catch(e) {}
   window.location.href = "/auth/logout";
 }
-
-function toggleSidebar() {
-  const sidebar  = document.querySelector('.sidebar');
-  const backdrop = document.getElementById('sidebarBackdrop');
-  const btn      = document.getElementById('hamburgerBtn');
-  sidebar.classList.toggle('open');
-  backdrop.classList.toggle('open');
-  btn.classList.toggle('open');
-}
-document.querySelectorAll('.nav-link').forEach(link => {
-  link.addEventListener('click', () => {
-    if (window.innerWidth <= 768) {
-      setTimeout(() => { const s = document.querySelector('.sidebar'); if (s.classList.contains('open')) toggleSidebar(); }, 150);
-    }
-  });
-});
 </script>
 </body>
 </html>
