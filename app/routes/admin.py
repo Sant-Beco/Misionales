@@ -8,13 +8,15 @@ Funcionalidades:
 - Editar usuarios (cambiar PIN, rol)
 - Eliminar usuarios
 - Ver logs de auditoría
+- Dashboard con gráficas de inspecciones
 """
  
 from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from sqlalchemy.orm import Session
-from datetime import datetime
+from sqlalchemy import func, desc, extract, and_, cast, Date as SADate
+from datetime import datetime, date, timedelta
  
 from app.database import SessionLocal
 from app import models
@@ -60,9 +62,9 @@ def registrar_accion(db: Session, admin_id: int, accion: str, detalles: str):
     db.commit()
  
  
-# ===============================
-# DASHBOARD
-# ===============================
+# ═══════════════════════════════════════════════════════════════════
+# DASHBOARD CON GRÁFICAS
+# ═══════════════════════════════════════════════════════════════════
  
 @router.get("/admin", response_class=HTMLResponse)
 async def admin_dashboard(
@@ -70,84 +72,108 @@ async def admin_dashboard(
     usuario_admin: models.Usuario = Depends(require_admin),
     db: Session = Depends(get_db)
 ):
+    """
+    Dashboard admin con gráficas:
+    - KPIs: usuarios, inspecciones, promedio, activos
+    - Gráfica de línea: inspecciones por día (últimos 90 días)
+    - Gráfica de barras: top conductores
+    - Tabla ranking: conductores con más inspecciones
+    - Gráfica dona: distribución top 5 conductores
+    - Gráfica anual: inspecciones por mes comparando años
+    
+    ✅ CORREGIDO:
+    - Usa fecha)
+    - Usa outerjoin en vez de join
+    - Llena días vacíos con 0
+    - Filtra solo usuarios activos
+    """
     templates = _templates_admin
-    total_usuarios     = db.query(models.Usuario).count()
+    
+    # ✅ 1. KPIs GENERALES
+    total_usuarios = db.query(models.Usuario).count()
     total_inspecciones = db.query(models.Inspeccion).count()
- 
-    from sqlalchemy import func, desc
+    
+    # ✅ 2. TOP CONDUCTORES (para ranking, barras y dona)
+    from sqlalchemy import func, desc, extract, and_, cast, Date as SADate
+
     usuarios_activos = (
-        db.query(
-            models.Usuario.nombre_visible,
+    db.query(
+        func.coalesce(models.Usuario.nombre_visible, models.Usuario.cedula).label("nombre"),
             func.count(models.Inspeccion.id).label("total")
-        )
-        .join(models.Inspeccion)
+    )
+        .outerjoin(models.Inspeccion)  # ✅ CORREGIDO: outerjoin
+        .filter(models.Usuario.activo == 1)  # ✅ Solo usuarios activos
         .group_by(models.Usuario.id)
+        .having(func.count(models.Inspeccion.id) > 0)  # ✅ Solo con inspecciones
         .order_by(desc("total"))
         .limit(5)
         .all()
     )
- 
-    from datetime import date, timedelta
-    from sqlalchemy import cast, Date as SADate
-    hoy     = date.today()
-    primera = db.query(func.min(cast(models.Inspeccion.fecha, SADate))).scalar()
- 
-    if primera:
-        delta = (hoy - primera).days + 1
-        rows  = (
-            db.query(
-                cast(models.Inspeccion.fecha, SADate).label("dia"),
-                func.count(models.Inspeccion.id).label("total")
-            )
-            .group_by("dia")
-            .order_by("dia")
-            .all()
+    
+    # ✅ 3. INSPECCIONES POR DÍA (últimos 90 días)
+    hoy = date.today()
+    hace_90_dias = hoy - timedelta(days=90)
+    
+    # Query: agrupar por fecha
+    rows = (
+        db.query(
+            cast(models.Inspeccion.fecha, SADate).label("dia"),  
+            func.count(models.Inspeccion.id).label("total")
         )
-        totales_dia = {r.dia: r.total for r in rows}
-        inspecciones_por_dia = [
-            {
-                "fecha":     (primera + timedelta(days=i)).strftime("%d/%m/%y"),
-                "fecha_iso": (primera + timedelta(days=i)).isoformat(),
-                "total":     totales_dia.get(primera + timedelta(days=i), 0)
-            }
-            for i in range(delta)
-        ]
-    else:
-        inspecciones_por_dia = []
- 
-    from sqlalchemy import extract
+        .filter(models.Inspeccion.fecha >= hace_90_dias)  
+        .group_by("dia")
+        .order_by("dia")
+        .all()
+    )
+    
+    # Convertir a dict para búsqueda rápida
+    totales_dia = {r.dia: r.total for r in rows}
+    
+    # Llenar los 90 días (incluir días sin inspecciones como 0)
+    inspecciones_por_dia = []
+    for i in range(90):
+        fecha = hace_90_dias + timedelta(days=i)
+        inspecciones_por_dia.append({
+            "fecha": fecha.strftime("%d/%m/%y"),
+            "total": totales_dia.get(fecha, 0)  # ← 0 si no hay datos
+        })
+    
+    # ✅ 4. INSPECCIONES POR MES/AÑO (comparativa anual)
     rows_anual = (
         db.query(
-            extract("year",  models.Inspeccion.fecha).label("anio"),
-            extract("month", models.Inspeccion.fecha).label("mes"),
+            extract("year", models.Inspeccion.fecha).label("anio"),  
+            extract("month", models.Inspeccion.fecha).label("mes"),  
             func.count(models.Inspeccion.id).label("total")
         )
         .group_by("anio", "mes")
         .order_by("anio", "mes")
         .all()
     )
- 
-    anual_dict: dict = {}
+    
+    # Estructurar como espera el template: {anio: [mes1, mes2, ...]}
+    anual_dict = {}
     for row in rows_anual:
         anio = int(row.anio)
-        mes  = int(row.mes)
+        mes = int(row.mes)
         if anio not in anual_dict:
             anual_dict[anio] = [0] * 12
         anual_dict[anio][mes - 1] = int(row.total)
- 
+    
+    # Convertir a lista de dicts ordenados (años más recientes primero)
     inspecciones_anual = [
         {"anio": anio, "meses": anual_dict[anio]}
-        for anio in sorted(anual_dict.keys())
+        for anio in sorted(anual_dict.keys(), reverse=True)
     ]
- 
+    
+    # ✅ 5. RETORNAR TEMPLATE CON TODOS LOS DATOS
     return templates.TemplateResponse("admin/dashboard.html", {
-        "request":             request,
-        "admin":               usuario_admin,
-        "total_usuarios":      total_usuarios,
-        "total_inspecciones":  total_inspecciones,
-        "usuarios_activos":    usuarios_activos,
-        "inspecciones_por_dia": inspecciones_por_dia,
-        "inspecciones_anual":  inspecciones_anual,
+        "request": request,
+        "admin": usuario_admin,
+        "total_usuarios": total_usuarios,
+        "total_inspecciones": total_inspecciones,
+        "usuarios_activos": usuarios_activos,  # ← Para ranking, barras, dona
+        "inspecciones_por_dia": inspecciones_por_dia,  # ← Para gráfica de línea
+        "inspecciones_anual": inspecciones_anual,  # ← Para gráfica anual
     })
  
  
@@ -164,7 +190,6 @@ async def admin_usuarios_list(
     templates = _templates_admin
     usuarios  = db.query(models.Usuario).all()
  
-    from sqlalchemy import func
     stats = dict(
         db.query(
             models.Inspeccion.usuario_id,
@@ -212,7 +237,7 @@ async def admin_usuario_crear(
  
     if not cedula_clean.isdigit() or not (5 <= len(cedula_clean) <= 12):
         raise HTTPException(400, "Cédula inválida (5-12 dígitos numéricos)")
-    # ✅ ACTUALIZADO: PIN mínimo 6 dígitos (antes era 4)
+    # ✅ PIN mínimo 6 dígitos
     if len(pin) < 6:
         raise HTTPException(400, "PIN debe tener al menos 6 dígitos")
     if rol not in ["user", "admin"]:
@@ -287,7 +312,7 @@ async def admin_usuario_actualizar(
     if rol != usuario.rol:
         usuario.rol = rol
         cambios.append(f"rol → {rol}")
-    # ✅ ACTUALIZADO: PIN mínimo 6 dígitos (antes era 4)
+    # ✅ PIN mínimo 6 dígitos
     if pin and len(pin) >= 6:
         usuario.pin_hash = hash_pin(pin)
         cambios.append("PIN")
@@ -347,8 +372,6 @@ async def admin_logs(
     usuario_admin: models.Usuario = Depends(require_admin),
     db: Session = Depends(get_db)
 ):
-    from sqlalchemy import desc
- 
     logs = (
         db.query(models.LogAuditoria)
         .order_by(desc(models.LogAuditoria.fecha))
@@ -433,8 +456,6 @@ async def admin_inspecciones(
     fecha_desde: str = "",
     fecha_hasta: str = "",
 ):
-    from datetime import datetime as _dt, timedelta
- 
     q = (
         db.query(models.Inspeccion, models.Usuario)
         .join(models.Usuario, models.Inspeccion.usuario_id == models.Usuario.id)
@@ -448,12 +469,12 @@ async def admin_inspecciones(
         q = q.filter(models.Inspeccion.tipo_vehiculo == tipo.strip())
     if fecha_desde.strip():
         try:
-            q = q.filter(models.Inspeccion.fecha >= _dt.strptime(fecha_desde.strip(), "%Y-%m-%d"))
+            q = q.filter(models.Inspeccion.fecha >= datetime.strptime(fecha_desde.strip(), "%Y-%m-%d"))
         except ValueError:
             pass
     if fecha_hasta.strip():
         try:
-            limite = _dt.strptime(fecha_hasta.strip(), "%Y-%m-%d") + timedelta(days=1)
+            limite = datetime.strptime(fecha_hasta.strip(), "%Y-%m-%d") + timedelta(days=1)
             q = q.filter(models.Inspeccion.fecha < limite)
         except ValueError:
             pass

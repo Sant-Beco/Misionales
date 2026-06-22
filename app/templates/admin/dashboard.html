@@ -274,7 +274,7 @@
         </div>
         <span class="chip chip-golden">Barras</span>
       </div>
-      <canvas id="barChart" height="170"></canvas>
+      <canvas id="barChart" width="400" height="170"></canvas>
     </div>
   </div>
 
@@ -445,7 +445,7 @@ setPeriod(14, document.querySelector('.period-btn.active'));
 
 // ── BARRAS ──
 (function() {
-  const labels = usuariosActivos.map(u => u.nombre.split(' ')[0]);
+  const labels = usuariosActivos.map(u => (u.nombre || 'Sin nombre').split(' ')[0]);
   const data   = usuariosActivos.map(u => u.total);
   new Chart(document.getElementById('barChart'), {
     type: 'bar',
@@ -529,7 +529,7 @@ setPeriod(14, document.querySelector('.period-btn.active'));
   new Chart(document.getElementById('donutChart'), {
     type: 'doughnut',
     data: {
-      labels: top5.map(u => u.nombre.split(' ')[0]),
+      labels: top5.map(u => (u.nombre || 'Sin nombre').split(' ')[0]),
       datasets: [{ data: top5.map(u => u.total), backgroundColor: PALETTE.slice(0, top5.length).map(c => c + 'cc'), borderColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-1').trim(), borderWidth: 3, hoverOffset: 8 }]
     },
     options: {
