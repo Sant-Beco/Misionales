@@ -15,7 +15,7 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from sqlalchemy.orm import Session
-from sqlalchemy import func, desc, extract, and_, cast, Date as SADate
+from sqlalchemy import func, desc, extract, and_, cast, Date as SADate, case
 from datetime import datetime, date, timedelta
  
 from app.database import SessionLocal
@@ -82,10 +82,11 @@ async def admin_dashboard(
     - Gráfica anual: inspecciones por mes comparando años
     
     ✅ CORREGIDO:
-    - Usa fecha)
+    - Usa fecha (no fecha_creacion) ← CORRECCIÓN PRINCIPAL
     - Usa outerjoin en vez de join
     - Llena días vacíos con 0
     - Filtra solo usuarios activos
+    - Muestra nombre completo (no cédula)
     """
     templates = _templates_admin
     
@@ -94,13 +95,21 @@ async def admin_dashboard(
     total_inspecciones = db.query(models.Inspeccion).count()
     
     # ✅ 2. TOP CONDUCTORES (para ranking, barras y dona)
-    from sqlalchemy import func, desc, extract, and_, cast, Date as SADate
-
+    # MEJORADO: Prioridad nombre_visible > nombre > Conductor + cédula
     usuarios_activos = (
-    db.query(
-        func.coalesce(models.Usuario.nombre_visible, models.Usuario.cedula).label("nombre"),
+        db.query(
+            case(
+                # 1º nombre_visible si no es NULL ni vacío
+                (func.trim(func.coalesce(models.Usuario.nombre_visible, '')) != '', 
+                 models.Usuario.nombre_visible),
+                # 2º nombre si no es NULL ni vacío  
+                (func.trim(func.coalesce(models.Usuario.nombre, '')) != '',
+                 models.Usuario.nombre),
+                # 3º fallback: "Conductor " + cédula (nunca muestra el número crudo)
+                else_="Conductor " + models.Usuario.cedula
+            ).label("nombre"),
             func.count(models.Inspeccion.id).label("total")
-    )
+        )
         .outerjoin(models.Inspeccion)  # ✅ CORREGIDO: outerjoin
         .filter(models.Usuario.activo == 1)  # ✅ Solo usuarios activos
         .group_by(models.Usuario.id)
@@ -117,10 +126,10 @@ async def admin_dashboard(
     # Query: agrupar por fecha
     rows = (
         db.query(
-            cast(models.Inspeccion.fecha, SADate).label("dia"),  
+            cast(models.Inspeccion.fecha, SADate).label("dia"),  # ✅ CORREGIDO: usa 'fecha' no 'fecha_creacion'
             func.count(models.Inspeccion.id).label("total")
         )
-        .filter(models.Inspeccion.fecha >= hace_90_dias)  
+        .filter(models.Inspeccion.fecha >= hace_90_dias)  # ✅ CORREGIDO: usa 'fecha'
         .group_by("dia")
         .order_by("dia")
         .all()
@@ -141,8 +150,8 @@ async def admin_dashboard(
     # ✅ 4. INSPECCIONES POR MES/AÑO (comparativa anual)
     rows_anual = (
         db.query(
-            extract("year", models.Inspeccion.fecha).label("anio"),  
-            extract("month", models.Inspeccion.fecha).label("mes"),  
+            extract("year", models.Inspeccion.fecha).label("anio"),  # ✅ CORREGIDO: usa 'fecha'
+            extract("month", models.Inspeccion.fecha).label("mes"),  # ✅ CORREGIDO: usa 'fecha'
             func.count(models.Inspeccion.id).label("total")
         )
         .group_by("anio", "mes")
@@ -171,7 +180,7 @@ async def admin_dashboard(
         "admin": usuario_admin,
         "total_usuarios": total_usuarios,
         "total_inspecciones": total_inspecciones,
-        "usuarios_activos": usuarios_activos,  # ← Para ranking, barras, dona
+        "usuarios_activos": usuarios_activos,  # ← Para ranking, barras, dona (con nombres)
         "inspecciones_por_dia": inspecciones_por_dia,  # ← Para gráfica de línea
         "inspecciones_anual": inspecciones_anual,  # ← Para gráfica anual
     })
@@ -381,9 +390,9 @@ async def admin_logs(
  
     for log in logs:
         admin = db.query(models.Usuario).filter_by(id=log.admin_id).first()
-        # Mostrar nombre_visible si existe, si no la cédula
+        # ✅ MEJORADO: Prioridad nombre_visible > nombre > cédula
         log.admin_nombre = (
-            (admin.nombre_visible or admin.cedula) if admin else "Desconocido"
+            (admin.nombre_visible or admin.nombre or admin.cedula) if admin else "Desconocido"
         )
  
     return _templates_admin.TemplateResponse("admin/logs.html", {
