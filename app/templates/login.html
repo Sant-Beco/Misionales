@@ -10,7 +10,6 @@
   <link rel="stylesheet" href="/static/css/incubant-theme.css">
   <link rel="icon" href="/static/img/logotipo_01.png" type="image/png">
  
-  <!-- Aplicar tema ANTES de pintar — evita flash -->
   <script>
     (function(){
       var t = localStorage.getItem('incubant-theme') || 'light';
@@ -18,7 +17,6 @@
     })();
   </script>
    <style>
-    /* PIN — estilo exclusivo de este login */
     .pin-input {
       font-size: 1.4rem;
       letter-spacing: 0.35em;
@@ -27,7 +25,6 @@
       font-family: monospace;
     }
  
-    /* ✅ OFFLINE: Indicador de conexión */
     .connection-status {
       position: fixed;
       bottom: 30px;
@@ -51,6 +48,10 @@
       background: rgba(239, 68, 68, 0.95);
     }
  
+    .connection-status.slow {
+      background: rgba(255, 153, 0, 0.95);
+    }
+ 
     .connection-dot {
       width: 8px;
       height: 8px;
@@ -63,6 +64,17 @@
       0%, 100% { opacity: 1; }
       50% { opacity: 0.5; }
     }
+ 
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
  
     @media (max-width: 480px) {
       .pin-input { font-size: 1.6rem; letter-spacing: 0.4em; }
@@ -84,7 +96,6 @@
 </head>
 <body class="page-login">
  
-  <!-- Fondo -->
   <div class="bg-layer">
     <div class="bg-dots"></div>
     <div class="bg-glow"></div>
@@ -92,13 +103,12 @@
     <div class="bg-egg-2"></div>
   </div>
  
-  <!-- ✅ OFFLINE: Indicador de conexión -->
+  <!-- ✅ MEJORADO: Indicador de conexión con detección de 3G/lenta -->
   <div class="connection-status" id="connectionStatus">
     <div class="connection-dot"></div>
     <span id="connectionText">En línea</span>
   </div>
  
-  <!-- Toggle tema -->
   <div class="theme-btn-wrap">
     <button class="theme-toggle" data-theme-toggle aria-label="Cambiar tema">
       <div class="theme-toggle-track"><div class="theme-toggle-thumb"></div></div>
@@ -106,7 +116,6 @@
     </button>
   </div>
  
-  <!-- Card -->
   <div class="login-wrap">
     <div class="login-card">
  
@@ -131,10 +140,9 @@
       <div id="sessionBanner" class="session-banner"></div>
       <div id="errorBox" class="error-box"></div>
  
-      <!-- ✅ CORREGIDO: method="POST" explícito -->
+      <!-- ✅ Fetch con manejo de timeout y conexión mala -->
       <form id="loginForm" method="POST">
  
-        <!-- ✅ CORREGIDO: id="cedula" y name="cedula" (no "nombre") -->
         <div class="form-group">
           <label class="form-label" for="cedula">Cédula</label>
           <div class="input-wrapper">
@@ -157,7 +165,6 @@
           </div>
         </div>
  
-        <!-- PIN — teclado numérico nativo -->
         <div class="form-group">
           <label class="form-label" for="pin">PIN de acceso</label>
           <div class="input-wrapper">
@@ -191,34 +198,60 @@
   </div>
  
   <script>
-  /* ══ SERVICE WORKER REGISTRATION ══ */
+  /* ══ SERVICE WORKER ══ */
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/static/js/service-worker.js')
       .then(() => console.log('✅ Service Worker registrado'))
       .catch(err => console.log('⚠️ Error SW:', err));
   }
  
-  /* ══ OFFLINE STATUS ══ */
+  /* ══ CONEXIÓN MEJORADA: Detectar 3G/lenta ══ */
   const statusEl = document.getElementById('connectionStatus');
   const textEl = document.getElementById('connectionText');
   const btnLogin = document.getElementById('btnLogin');
+  let conexionLenta = false;
  
   function updateConnectionStatus() {
-    if (navigator.onLine) {
-      statusEl.classList.remove('offline');
-      textEl.textContent = '🟢 En línea';
-      btnLogin.disabled = false;
-    } else {
+    if (!navigator.onLine) {
+      // OFFLINE
+      statusEl.classList.remove('slow');
       statusEl.classList.add('offline');
       textEl.textContent = '🔴 Sin conexión';
       btnLogin.disabled = true;
       document.getElementById('errorBox').textContent = '⚠ Sin conexión a internet';
       document.getElementById('errorBox').style.display = 'block';
+      conexionLenta = false;
+    } else {
+      // ONLINE
+      statusEl.classList.remove('offline');
+      
+      // Detectar si es 3G/lenta (vía Connection API si existe)
+      const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      if (conn && (conn.effectiveType === '3g' || conn.effectiveType === '2g' || conn.saveData)) {
+        // Conexión lenta
+        conexionLenta = true;
+        statusEl.classList.add('slow');
+        textEl.textContent = '🟡 Conexión lenta';
+        btnLogin.disabled = false;
+      } else {
+        // Conexión rápida
+        conexionLenta = false;
+        statusEl.classList.remove('slow');
+        textEl.textContent = '🟢 En línea';
+        btnLogin.disabled = false;
+      }
     }
   }
  
   window.addEventListener('online', updateConnectionStatus);
   window.addEventListener('offline', updateConnectionStatus);
+  
+  // Detectar cambios en la conexión (3G ↔ 4G)
+  const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  if (conn) {
+    conn.addEventListener('change', updateConnectionStatus);
+  }
+  
   updateConnectionStatus();
  
   /* ══ THEME MANAGER ══ */
@@ -242,14 +275,16 @@
     });
   })();
  
-  /* ══ LOGIN LOGIC ══ */
-  ['token','usuario_id','nombre','rol'].forEach(k => localStorage.removeItem(k));
- 
+  /* ══ LOGIN CON TIMEOUT Y MANEJO DE CONEXIÓN MALA ══ */
   const form = document.getElementById('loginForm');
   const btn  = document.getElementById('btnLogin');
   const err  = document.getElementById('errorBox');
+  const textBtn = 'Ingresar al sistema';
+  
+  // No guardar token en localStorage — está en httpOnly cookie
+  ['usuario_id','nombre','rol'].forEach(k => localStorage.removeItem(k));
  
-  // ✅ CORREGIDO: getElementById('cedula') en lugar de getElementById('nombre')
+  // Focus: pasar de cédula a PIN
   document.getElementById('cedula').addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -257,17 +292,17 @@
     }
   });
  
-  function showError(msg) {
-    err.textContent = '⚠ ' + msg;
+  function showError(msg, reintentable = false) {
+    err.innerHTML = '⚠ ' + msg;
+    if (reintentable) {
+      err.innerHTML += ' <a href="#" style="color:#f07070;text-decoration:underline;margin-left:0.5rem;" onclick="location.reload();return false;">Reintentar</a>';
+    }
     err.style.display = 'block';
-    // Vibrar en móvil como feedback de error
     if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-    setTimeout(() => { err.style.display = 'none'; }, 5000);
   }
  
   const _params = new URLSearchParams(window.location.search);
   const _razon  = _params.get('razon');
-  const _next   = _params.get('next') || '/';
  
   if (_razon) {
     const banner = document.getElementById('sessionBanner');
@@ -277,12 +312,21 @@
       : '⚠ Tu sesión expiró. Inicia sesión para continuar.';
   }
  
+  /* ✅ MEJORADO: Fetch con timeout automático ══ */
+  function fetchConTimeout(url, opciones = {}, timeoutMs = 10000) {
+    return Promise.race([
+      fetch(url, opciones),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('timeout')), timeoutMs)
+      )
+    ]);
+  }
+ 
   form.addEventListener('submit', async function (e) {
     e.preventDefault();
  
-    // Validar conexión
     if (!navigator.onLine) {
-      showError('Sin conexión a internet. Intenta cuando tengas señal.');
+      showError('Sin conexión a internet. Verifica tu red.');
       return;
     }
  
@@ -291,36 +335,67 @@
     err.style.display = 'none';
  
     try {
-      const res  = await fetch('/auth/login', { method: 'POST', body: new FormData(form) });
+      // Ajustar timeout según velocidad de conexión
+      // 3G/lenta: 20s, rápida: 10s
+      const timeout = conexionLenta ? 20000 : 10000;
+      
+      const res = await fetchConTimeout('/auth/login', {
+        method: 'POST',
+        credentials: 'include',  // ✅ IMPORTANTE: para que se envíe/reciba la cookie
+        body: new FormData(form)
+      }, timeout);
+      
       const data = await res.json();
  
       if (res.ok) {
-        localStorage.setItem('token',      data.access_token);
-        localStorage.setItem('usuario_id', data.usuario_id);
-        localStorage.setItem('nombre',     data.nombre);
-        localStorage.setItem('rol',        data.rol || 'user');
+        // ✅ NO guardar el token aquí — está en httpOnly cookie
+        // Solo guardar metadata para UX rápida (opcional)
+        // localStorage.setItem('usuario_id', data.usuario_id);
+        // localStorage.setItem('nombre', data.nombre);
+        // localStorage.setItem('rol', data.rol || 'user');
  
         btn.innerHTML = '✓ Acceso concedido';
         btn.style.background = 'linear-gradient(135deg,#28c878,#1a9c57)';
  
-        // Vibración de éxito
         if (navigator.vibrate) navigator.vibrate(80);
  
         setTimeout(() => {
-          window.location.href = _next !== '/' ? _next : (data.rol === 'admin' ? '/admin' : '/');
+          // Redirigir según rol
+          const destino = data.rol === 'admin' ? '/admin' : '/';
+          window.location.href = destino;
         }, 500);
       } else {
+        // Error del servidor (401, 403, etc.)
         showError(data.detail || 'Cédula o PIN incorrecto');
         btn.disabled = false;
-        btn.innerHTML = 'Ingresar al sistema';
-        // Limpiar PIN en error — UX estándar
+        btn.innerHTML = textBtn;
         document.getElementById('pin').value = '';
         document.getElementById('pin').focus();
       }
     } catch (ex) {
-      showError('Sin conexión. Verifica tu red e intenta de nuevo.');
+      console.error('❌ Error login:', ex.message);
+      
+      if (ex.message === 'timeout') {
+        // Timeout
+        showError(
+          conexionLenta 
+            ? 'Conexión muy lenta. El servidor tardó demasiado. Intenta de nuevo.'
+            : 'La solicitud tardó demasiado. Verifica tu conexión de red.',
+          true // reintentable
+        );
+      } else if (ex instanceof TypeError) {
+        // TypeError = problemas de red (CORS, DNS, etc.)
+        showError(
+          'No se pudo conectar al servidor. Verifica tu conexión de internet.',
+          true
+        );
+      } else {
+        // Otro error
+        showError('Error inesperado. Intenta de nuevo más tarde.', true);
+      }
+      
       btn.disabled = false;
-      btn.innerHTML = 'Ingresar al sistema';
+      btn.innerHTML = textBtn;
     }
   });
   </script>
