@@ -553,9 +553,14 @@ async def admin_logs(
     
     for log in logs:
         admin = db.query(models.Usuario).filter_by(id=log.admin_id).first()
-        log.admin_nombre = (
-            (admin.nombre_visible or admin.nombre or admin.cedula) if admin else "Desconocido"
-        )
+        if admin:
+            # ✅ Asignar nombre (con prioridad)
+            log.admin_nombre = admin.nombre_visible or admin.nombre or admin.cedula
+            # ✅ Asignar cédula del admin
+            log.admin_cedula = admin.cedula
+        else:
+            log.admin_nombre = "Desconocido"
+            log.admin_cedula = "---"
     
     return _templates_admin.TemplateResponse("admin/logs.html", {
         "request": request,
