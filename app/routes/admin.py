@@ -250,6 +250,53 @@ async def api_inspecciones(
  
  
 # ═══════════════════════════════════════════════════════════════════
+# MIS INSPECCIONES (para admin ver las suyas)
+# ═══════════════════════════════════════════════════════════════════
+ 
+@router.get("/admin/mis-inspecciones", response_class=HTMLResponse)
+async def admin_mis_inspecciones(
+    request: Request,
+    usuario_admin: models.Usuario = Depends(require_admin)
+):
+    """Admin ve sus propias inspecciones en lista_inspecciones.html"""
+    return _templates_admin.TemplateResponse("admin/lista_inspecciones.html", {
+        "request": request,
+        "admin": usuario_admin,
+    })
+ 
+ 
+@router.get("/api/admin/mis-inspecciones")
+async def api_admin_mis_inspecciones(
+    usuario_admin: models.Usuario = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """API JSON para obtener las inspecciones del admin"""
+    inspecciones = (
+        db.query(models.Inspeccion)
+        .filter(models.Inspeccion.usuario_id == usuario_admin.id)
+        .order_by(desc(models.Inspeccion.fecha))
+        .all()
+    )
+    
+    return {
+        "success": True,
+        "total": len(inspecciones),
+        "inspecciones": [
+            {
+                "id": insp.id,
+                "fecha": insp.fecha.isoformat() if insp.fecha else None,
+                "conductor": insp.nombre_conductor,
+                "placa": insp.placa,
+                "tipo_vehiculo": insp.tipo_vehiculo,
+                "proceso": insp.proceso,
+                "usuario_id": insp.usuario_id
+            }
+            for insp in inspecciones
+        ]
+    }
+ 
+ 
+# ═══════════════════════════════════════════════════════════════════
 # USUARIOS — LISTAR
 # ═══════════════════════════════════════════════════════════════════
  
