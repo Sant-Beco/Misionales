@@ -32,7 +32,7 @@ from app.models import Usuario
 MIN_PIN_LENGTH  = 4   # 4 para compatibilidad con PINs existentes en BD
 MAX_PIN_LENGTH  = 20
 BCRYPT_ROUNDS   = 12
-DEFAULT_TOKEN_EXPIRATION_HOURS = 8
+DEFAULT_TOKEN_EXPIRATION_HOURS = 24
 
 _PINES_PROHIBIDOS = {
     "0000","1234","4321","1111","2222","3333","4444","5555",
