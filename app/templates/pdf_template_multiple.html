@@ -4,14 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
- 
-    /* ══════════════════════════════════════════
-       PÁGINA — A4 landscape, márgenes mínimos
-       Target WeasyPrint: todo en 1 página
-       ══════════════════════════════════════════ */
     @page {
       size: A4 landscape;
-      margin: 4mm 5mm 4mm 5mm;   /* top right bottom left */
+      margin: 5mm 7mm 5mm 7mm;
     }
  
     @media print {
@@ -19,353 +14,446 @@
       * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     }
  
-    /* ══════════════════════════════════════════
-       RESET Y BASE
-       Fuente más pequeña = más contenido en menos espacio
-       ══════════════════════════════════════════ */
     * { box-sizing: border-box; margin: 0; padding: 0; }
  
     body {
-      font-family: DejaVu Sans, Arial, sans-serif;
-      font-size: 7.5px;
-      line-height: 1.15;
+      font-family: Arial, sans-serif;
+      font-size: 8px;
+      line-height: 1.25;
       color: #000;
-    }
- 
-    /* ══════════════════════════════════════════
-       ENCABEZADO — más compacto
-       ══════════════════════════════════════════ */
-    .encabezado {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 2px 0 3px;
-      border-bottom: 1.5px solid #000;
-      margin-bottom: 3px;
-    }
- 
-    .logo {
-      width: 56px;      /* reducido de 80px */
-      flex-shrink: 0;
-    }
- 
-    .titulo {
-      flex: 1;
-      text-align: center;
-      font-weight: 700;
-      font-size: 13px;  /* reducido de 16px */
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-    }
- 
-    /* ══════════════════════════════════════════
-       SUBINFO — 1 sola línea en vez de 2
-       ══════════════════════════════════════════ */
-    .subinfo {
-      text-align: center;
-      font-size: 7px;
-      margin-bottom: 3px;
-      white-space: nowrap;
-      overflow: hidden;
-    }
- 
-    /* ══════════════════════════════════════════
-       TABLAS — padding mínimo legible
-       ══════════════════════════════════════════ */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 2px;
-    }
- 
-    th, td {
-      border: 0.5px solid #444;
-      padding: 1.5px 2px;
-      vertical-align: middle;
-      text-align: center;
-    }
- 
-    th {
-      background: #e8e8e8;
-      font-weight: 700;
-      font-size: 7px;
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
- 
-    /* ══════════════════════════════════════════
-       TABLA DE DATOS DEL CONDUCTOR
-       Todo en 1 sola fila para ahorrar espacio
-       ══════════════════════════════════════════ */
-    .tabla-conductor th {
-      background: #d0d0d0;
-      font-size: 6.5px;
-      width: 48px;
-    }
-    .tabla-conductor td {
-      font-size: 7.5px;
-      font-weight: 600;
-      text-align: left;
-      padding-left: 3px;
-    }
- 
-    /* ══════════════════════════════════════════
-       TABLA DE ASPECTOS
-       ══════════════════════════════════════════ */
-    .aspectos th {
-      font-size: 6.5px;
-      padding: 1px 1px;
-      background: #e0e0e0;
-    }
- 
-    .aspectos td {
-      font-size: 7px;
-      padding: 1px 1px;
-    }
- 
-    /* Columna de nombre del aspecto — alineada izquierda */
-    .aspectos .left {
-      text-align: left;
-      padding-left: 4px;
-      font-size: 7px;
-      white-space: normal;
-      word-break: break-word;
-      min-width: 90px;
-      max-width: 120px;
-    }
- 
-    /* Checkboxes B / M compactos */
-    .box {
-      display: inline-block;
-      width: 11px;
-      height: 11px;
-      border: 0.5px solid #333;
-      text-align: center;
-      line-height: 11px;
-      font-weight: 700;
-      font-size: 9px;
-    }
- 
-    /* ══════════════════════════════════════════
-       COLUMNA TOTAL M
-       ══════════════════════════════════════════ */
-    .total-m {
-      background: #fff3cd;
-      font-weight: 700;
-      font-size: 7px;
-      min-width: 14px;
-    }
- 
-    .total-m-header {
-      background: #ffc107;
-      color: #000;
-      font-weight: 700;
-      font-size: 6.5px;
-      min-width: 14px;
-    }
- 
-    /* ══════════════════════════════════════════
-       FILA DE CONDICIONES ÓPTIMAS
-       ══════════════════════════════════════════ */
-    .optimas th {
-      background: #d0d0d0;
-      font-size: 6.5px;
-    }
- 
-    /* ══════════════════════════════════════════
-       SECCIÓN INFERIOR — firma y nota en fila
-       horizontal para ahorrar espacio vertical
-       ══════════════════════════════════════════ */
-    .footer-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      margin-top: 4px;
-      border-top: 0.5px solid #ccc;
-      padding-top: 3px;
-    }
- 
-    .firma-wrap {
-      flex-shrink: 0;
-    }
- 
-    .firma-label {
-      font-size: 6.5px;
-      font-weight: 700;
-      text-transform: uppercase;
-      margin-bottom: 2px;
-    }
- 
-    .firma img {
-      display: block;
-      max-width: 80px;
-      max-height: 35px;
-      width: auto;
-      height: auto;
-      border: 0.5px solid #555;
       background: #fff;
     }
  
-    .firma-vacia {
-      border: 0.5px dashed #aaa;
-      padding: 3px 5px;
-      display: inline-block;
-      width: 60px;
-      text-align: center;
-      color: #888;
-      font-size: 6.5px;
+    /* ══ ENCABEZADO COMPACTO ══ */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 3px 0 4px;
+      border-bottom: 1.5px solid #000;
+      margin-bottom: 3px;
+      gap: 6px;
     }
  
-    .nota {
+    .logo {
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+      object-fit: contain;
+    }
+ 
+    .title {
       flex: 1;
-      font-size: 6.5px;
-      color: #333;
-      line-height: 1.4;
+      text-align: center;
     }
  
-    .nota strong { font-weight: 700; }
+    .title-main {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+ 
+    .title-sub {
+      font-size: 6.5px;
+      color: #555;
+      margin-top: 1px;
+    }
+ 
+    .info {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      font-size: 7px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+ 
+    .info-item {
+      display: flex;
+      justify-content: flex-end;
+      gap: 3px;
+    }
+ 
+    .info-label { font-weight: 700; min-width: 30px; }
+    .info-value { text-align: left; }
+ 
+    /* ══ DATOS CONDUCTOR ══ */
+    .conductor {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 2px 8px;
+      font-size: 7.5px;
+      padding: 3px;
+      background: #f5f5f5;
+      border: 0.5px solid #ccc;
+      border-radius: 2px;
+      margin-bottom: 3px;
+    }
+ 
+    .conductor-field {
+      display: flex;
+      gap: 2px;
+    }
+ 
+    .conductor-label {
+      font-weight: 700;
+      min-width: 45px;
+    }
+ 
+    .conductor-value {
+      flex: 1;
+      border-bottom: 0.5px solid #999;
+      padding: 0 2px;
+    }
+ 
+    /* ══ TABLA DOCUMENTOS ══ */
+    .docs-title {
+      font-size: 7px;
+      font-weight: 700;
+      background: #333;
+      color: #fff;
+      padding: 2px 4px;
+      margin-bottom: 1px;
+    }
+ 
+    table.docs {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 7px;
+      margin-bottom: 3px;
+    }
+ 
+    table.docs th {
+      background: #e0e0e0;
+      padding: 1.5px 2px;
+      text-align: left;
+      font-weight: 700;
+      border: 0.5px solid #999;
+    }
+ 
+    table.docs td {
+      padding: 1.5px 2px;
+      border: 0.5px solid #ddd;
+    }
+ 
+    table.docs td:nth-child(1) {
+      font-weight: 700;
+      background: #fafafa;
+      min-width: 120px;
+    }
+ 
+    /* ══ TABLA ASPECTOS ══ */
+    .aspectos-title {
+      font-size: 7px;
+      font-weight: 700;
+      background: #f59c00;
+      color: #fff;
+      padding: 2px 4px;
+      margin-bottom: 1px;
+    }
+ 
+    table.aspectos {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 7px;
+    }
+ 
+    table.aspectos th {
+      background: #e8e8e8;
+      padding: 1px;
+      text-align: center;
+      font-weight: 700;
+      border: 0.5px solid #999;
+      font-size: 6.5px;
+    }
+ 
+    table.aspectos td {
+      padding: 1px;
+      border: 0.5px solid #ccc;
+      text-align: center;
+      height: 12px;
+    }
+ 
+    table.aspectos td:first-child {
+      text-align: left;
+      padding-left: 3px;
+      font-size: 7px;
+      font-weight: 600;
+      background: #f9f9f9;
+      border: 0.5px solid #999;
+      min-width: 100px;
+    }
+ 
+    .box {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 10px;
+      height: 10px;
+      border: 0.5px solid #333;
+      font-size: 7px;
+      font-weight: 700;
+      background: #fff;
+    }
+ 
+    .total-m {
+      background: #fff9e6;
+      font-weight: 700;
+      border: 0.5px solid #f59c00;
+      min-width: 12px;
+    }
+ 
+    /* ══ FOOTER ══ */
+    .footer {
+      display: flex;
+      gap: 8px;
+      padding: 2px;
+      border-top: 0.5px solid #ccc;
+      margin-top: 2px;
+      align-items: flex-start;
+    }
+ 
+    .firma-box {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      align-items: center;
+      font-size: 6px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+ 
+    .firma-space {
+      width: 55px;
+      height: 22px;
+      border: 0.5px solid #999;
+      border-top: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 5px;
+      color: #bbb;
+    }
+ 
+    .firma-img {
+      max-width: 55px;
+      max-height: 22px;
+      border: 0.5px solid #999;
+    }
+ 
+    .firma-label {
+      font-weight: 700;
+      border-bottom: 0.5px solid #000;
+      padding-bottom: 0px;
+      font-size: 6px;
+    }
+ 
+    .firma-name {
+      font-size: 5.5px;
+      margin-top: 14px;
+      border-top: 0.5px solid #000;
+      padding-top: 1px;
+      min-width: 55px;
+    }
+ 
+    .note {
+      font-size: 6.5px;
+      line-height: 1.3;
+      color: #333;
+      flex: 1;
+    }
+ 
+    .note strong { font-weight: 700; }
  
   </style>
 </head>
  
 <body>
  
-  <!-- ══ ENCABEZADO ══ -->
-  <div class="encabezado">
+  <!-- ENCABEZADO -->
+  <div class="header">
     <img class="logo" src="{{ logo_path }}" alt="Logo">
-    <div class="titulo">
-      {{ titulo_tipo or "Inspección Pre Operacional Motocicleta" | upper }}
+    <div class="title">
+      <div class="title-main">Inspección Pre Operacional</div>
+      <div class="title-sub">Sistema de Inspecciones Vehicular SST · Incubant</div>
+    </div>
+    <div class="info">
+      <div class="info-item"><span class="info-label">Código:</span> <span class="info-value">{{ codigo }}</span></div>
+      <div class="info-item"><span class="info-label">Versión:</span> <span class="info-value">{{ version }}</span></div>
+      <div class="info-item"><span class="info-label">Fecha:</span> <span class="info-value">{{ fecha }}</span></div>
+      <div class="info-item"><span class="info-label">Registros:</span> <span class="info-value">{{ registros|length }}/15</span></div>
     </div>
   </div>
  
-  <!-- ══ SUBINFO — 1 sola línea ══ -->
-  <div class="subinfo">
-    Código: <strong>{{ codigo }}</strong> &nbsp;·&nbsp;
-    Versión: <strong>{{ version }}</strong> &nbsp;·&nbsp;
-    Consolidado: <strong>{{ fecha }}</strong> &nbsp;·&nbsp;
-    Período: <strong>{{ desde }}</strong> → <strong>{{ hasta }}</strong> &nbsp;·&nbsp;
-    Tipo: <strong>{{ registros[0].tipo_vehiculo or "Moto" }}</strong> &nbsp;·&nbsp;
-    Registros: <strong>{{ registros|length }}/15</strong>
+  <!-- DATOS CONDUCTOR -->
+  <div class="conductor">
+    <div class="conductor-field">
+      <span class="conductor-label">Conductor:</span>
+      <span class="conductor-value">{{ registros[0].nombre_conductor }}</span>
+    </div>
+    <div class="conductor-field">
+      <span class="conductor-label">Placa:</span>
+      <span class="conductor-value">{{ registros[0].placa }}</span>
+    </div>
+    <div class="conductor-field">
+      <span class="conductor-label">Proceso:</span>
+      <span class="conductor-value">{{ registros[0].proceso }}</span>
+    </div>
+    <div class="conductor-field">
+      <span class="conductor-label">Marca:</span>
+      <span class="conductor-value">{{ registros[0].marca }}</span>
+    </div>
+    <div class="conductor-field">
+      <span class="conductor-label">Gasolina:</span>
+      <span class="conductor-value">{{ registros[0].gasolina }}</span>
+    </div>
+    <div class="conductor-field">
+      <span class="conductor-label">Modelo:</span>
+      <span class="conductor-value">{{ registros[0].modelo }}</span>
+    </div>
+    <div class="conductor-field">
+      <span class="conductor-label">Tipo:</span>
+      <span class="conductor-value">{{ registros[0].tipo_vehiculo or 'Moto' }}</span>
+    </div>
+    <div class="conductor-field">
+      <span class="conductor-label">Línea:</span>
+      <span class="conductor-value">{{ registros[0].linea }}</span>
+    </div>
   </div>
  
-  <!-- ══ TABLA CONDUCTOR — todo en 1 fila ══ -->
-  <table class="tabla-conductor">
-    <tr>
-      <th>Conductor</th>
-      <td style="min-width:90px;">{{ registros[0].nombre_conductor }}</td>
-      <th>Placa</th>
-      <td>{{ registros[0].placa }}</td>
-      <th>Proceso</th>
-      <td>{{ registros[0].proceso }}</td>
-      <th>Marca</th>
-      <td>{{ registros[0].marca }}</td>
-      <th>Modelo</th>
-      <td>{{ registros[0].modelo }}</td>
-      <th>Motor</th>
-      <td>{{ registros[0].motor }}</td>
-      <th>Línea</th>
-      <td>{{ registros[0].linea }}</td>
-      <th>Gasolina</th>
-      <td>{{ registros[0].gasolina }}</td>
-    </tr>
+  <!-- DOCUMENTOS -->
+  <div class="docs-title">📋 Revisión de Documentos</div>
+  <table class="docs">
+    <thead>
+      <tr>
+        <th>Documento</th>
+        <th>Número</th>
+        <th>Vencimiento</th>
+        <th>Obs.</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Licencia de Conducción</td>
+        <td>{{ registros[0].licencia_num or '—' }}</td>
+        <td>{{ registros[0].licencia_venc or '—' }}</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Porte Tarjeta Propiedad</td>
+        <td>{{ registros[0].porte_propiedad or '—' }}</td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Seguro Obligatorio SOAT</td>
+        <td>{{ registros[0].soat or '—' }}</td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Certificado Emisión Gases Tóxicos</td>
+        <td>{{ registros[0].certificado_emision or '—' }}</td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Póliza Seguro del Vehículo</td>
+        <td>{{ registros[0].poliza_seguro or '—' }}</td>
+        <td></td>
+        <td></td>
+      </tr>
+    </tbody>
   </table>
  
-  <!-- ══ TABLA DE ASPECTOS ══ -->
+  <!-- TABLA ASPECTOS -->
+  <div class="aspectos-title">✓ Aspectos a Revisar (B: Bueno | M: Malo)</div>
   <table class="aspectos">
- 
-    <!-- Fila 1: números de registro -->
+    
+    <!-- Números de registro -->
     <tr>
-      <th rowspan="2" class="left" style="width:14%;">Aspecto</th>
-      {% for i in range(1, registros|length + 1) %}
-        <th colspan="2">{{ i }}</th>
+      <th rowspan="2">Aspecto</th>
+      {% for i in range(1, 16) %}
+        {% if i <= registros|length %}
+          <th colspan="2" style="font-size:6px;min-width:18px;">{{ i }}</th>
+        {% else %}
+          <th colspan="2" style="font-size:6px;color:#bbb;background:#f5f5f5;">{{ i }}</th>
+        {% endif %}
       {% endfor %}
-      {% if registros|length < 15 %}
-        {% for i in range(registros|length + 1, 16) %}
-          <th colspan="2" style="color:#bbb;">{{ i }}</th>
-        {% endfor %}
-      {% endif %}
-      <th class="total-m-header" rowspan="2">M</th>
+      <th rowspan="2" style="background:#f59c00;color:#fff;min-width:12px;">M</th>
     </tr>
  
-    <!-- Fila 2: B / M -->
+    <!-- B / M -->
     <tr>
       {% for i in range(15) %}
-        <th>B</th><th>M</th>
+        <th style="width:7px;">B</th>
+        <th style="width:7px;">M</th>
       {% endfor %}
     </tr>
  
-    <!-- Filas de aspectos -->
+    <!-- Aspectos -->
     {% for item in aspectos_lista %}
-    {% set idx           = item.indice if item is mapping else loop.index|string %}
-    {% set aspecto_nombre = item.nombre  if item is mapping else item %}
-    {% set total_m_count  = item.total_m  if item is mapping else 0 %}
+    {% set idx = item.indice if item is mapping else loop.index|string %}
+    {% set nombre = item.nombre if item is mapping else item %}
+    {% set total = item.total_m if item is mapping else 0 %}
     <tr>
-      <td class="left">{{ aspecto_nombre }}</td>
+      <td>{{ nombre }}</td>
  
       {% for i in range(15) %}
         {% set reg = registros[i] if i < registros|length else None %}
         {% set val = (reg.aspectos_parsed or {}).get(idx, '') if reg else '' %}
  
-        <td>{% if val == 'B' %}<span class="box">✔</span>
-            {% elif reg %}<span class="box"></span>
-            {% else %}<span style="color:#ccc;">—</span>{% endif %}</td>
- 
-        <td>{% if val == 'M' %}<span class="box">✖</span>
-            {% elif reg %}<span class="box"></span>
-            {% else %}<span style="color:#ccc;">—</span>{% endif %}</td>
+        <td>{% if val == 'B' %}<span class="box">✓</span>{% elif reg %}<span class="box"></span>{% else %}—{% endif %}</td>
+        <td>{% if val == 'M' %}<span class="box">✖</span>{% elif reg %}<span class="box"></span>{% else %}—{% endif %}</td>
       {% endfor %}
  
-      <td class="total-m">{{ total_m_count if total_m_count > 0 else '—' }}</td>
+      <td class="total-m">{{ total if total > 0 else '—' }}</td>
     </tr>
     {% endfor %}
  
-    <!-- Fila condiciones óptimas -->
-    <tr class="optimas">
-      <th class="left" style="background:#d0d0d0;font-size:6.5px;">¿Óptimas?</th>
+    <!-- Óptimas -->
+    <tr>
+      <td><strong>Óptimas (SI/NO)</strong></td>
+ 
       {% for i in range(15) %}
         {% set reg = registros[i] if i < registros|length else None %}
         <td colspan="2">
-          {% if reg and reg.condiciones_optimas == "SI" %}
-            <span class="box">✔</span>
-          {% elif reg and reg.condiciones_optimas == "NO" %}
+          {% if reg and reg.condiciones_optimas == 'SI' %}
+            <span class="box">✓</span>
+          {% elif reg and reg.condiciones_optimas == 'NO' %}
             <span class="box">✖</span>
           {% elif reg %}
             <span class="box"></span>
           {% else %}
-            <span style="color:#ccc;">—</span>
+            —
           {% endif %}
         </td>
       {% endfor %}
+ 
       <td class="total-m">
-        {% set total_no = registros|selectattr('condiciones_optimas','equalto','NO')|list|length %}
-        {{ total_no if total_no > 0 else '—' }}
+        {% set no = registros|selectattr('condiciones_optimas','equalto','NO')|list|length %}
+        {{ no if no > 0 else '—' }}
       </td>
     </tr>
  
   </table>
  
-  <!-- ══ FOOTER: FIRMA + NOTA en fila horizontal ══ -->
-  <div class="footer-row">
- 
-    <div class="firma-wrap">
-      <div class="firma-label">Firma del conductor</div>
-      <div class="firma">
-        {% if primera_firma %}
-          <img src="{{ primera_firma }}" alt="Firma">
-        {% else %}
-          <div class="firma-vacia">(sin firma)</div>
-        {% endif %}
-      </div>
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="firma-box">
+      <div class="firma-label">Firma Conductor</div>
+      {% if primera_firma %}
+        <img class="firma-img" src="{{ primera_firma }}" alt="Firma">
+      {% else %}
+        <div class="firma-space">(sin firma)</div>
+      {% endif %}
+      <div class="firma-name">{{ registros[0].nombre_conductor }}</div>
     </div>
  
-    <div class="nota">
-      <strong>Nota:</strong>
-      Inspeccione todos los elementos. Detenga el vehículo ante condición insegura y notifique al responsable.
-      <br>
-      <strong>Defectos (M):</strong> Revise la columna <span style="background:#fff3cd;padding:0 2px;">M</span>
-      para identificar patrones de fallas recurrentes en los 15 registros del período.
+    <div class="note">
+      <strong>Instrucciones:</strong> Marque <strong>B</strong> si está en óptimas condiciones o <strong>M</strong> si hay defecto. Si hay M: notifique al responsable. No circule hasta corrección. <strong>Período:</strong> {{ desde }} → {{ hasta }}
     </div>
- 
   </div>
  
 </body>
