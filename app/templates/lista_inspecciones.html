@@ -539,9 +539,18 @@
   </div>
 
   <script>
-  /* ── Autenticación ── */
-  const token = localStorage.getItem("token");
-  if (!token) window.location.href = "/login";
+  // ✅ CORRECTO
+  async function verificarAutenticacion() {
+      const resp = await fetch("/auth/me", {
+          credentials: "include"  // ✅ Envía cookie
+      });
+      if (!resp.ok) {
+          window.location.href = "/login";
+          return;
+      }
+      // ✅ Autenticado → cargar inspecciones
+      cargarInspecciones();
+  }
 
   /* ── Cerrar sesión: invalida token en BD, borra cookie y redirige ── */
   async function cerrarSesion() {

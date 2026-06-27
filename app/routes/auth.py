@@ -1,7 +1,9 @@
 import os
 import logging
 from fastapi import APIRouter, HTTPException, Form, Depends, Response, Request
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse, HTMLResponse
+from fastapi.templating import Jinja2Templates
+from pathlib import Path
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from collections import defaultdict
@@ -19,6 +21,11 @@ from app.security import (
  
 router = APIRouter(tags=["Auth"])
 _log = logging.getLogger("routes_auth")
+ 
+# Templates para login
+_templates = Jinja2Templates(directory=str(
+    Path(__file__).resolve().parent.parent / "templates"
+))
  
 # ════════════════════════════════════════════════════════════════
 # RATE LIMITING EN MEMORIA
@@ -71,6 +78,32 @@ def _limpiar_fallo(ip: str):
     """Limpia historial de la IP tras login exitoso."""
     if ip in _intentos_fallidos:
         del _intentos_fallidos[ip]
+ 
+ 
+# ════════════════════════════════════════════════════════════════
+# LOGIN PAGE (GET) — SIN AUTENTICACIÓN REQUERIDA
+# ════════════════════════════════════════════════════════════════
+ 
+@router.get("/login", response_class=HTMLResponse)
+async def login_page(request: Request, razon: str = None):
+    """
+    Página de login — accesible sin autenticación.
+    
+    Esta ruta es necesaria para:
+    - Acceso inicial al login
+    - Redirecciones cuando sesión expira
+    - Recuperación de sesión expirada
+    
+    Parámetros:
+        razon: razón del redireccionamiento
+            - sesion_expirada: token expiró
+            - 403: acceso denegado
+            - otra_razon: mensaje personalizado
+    """
+    return _templates.TemplateResponse("auth/login.html", {
+        "request": request,
+        "razon": razon,
+    })
  
  
 # ════════════════════════════════════════════════════════════════
