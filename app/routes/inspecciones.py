@@ -820,23 +820,30 @@ async def generar_pdf15(
  
 # ==========================================================
 #   RUTA: MIS INSPECCIONES (historial del conductor)
+#   ✅ CORREGIDA: Soporte para ?formato=json
 # ==========================================================
  
-@router.get("/mis-inspecciones", response_class=HTMLResponse)
+@router.get("/mis-inspecciones")
 async def mis_inspecciones(
     request: Request,
+    formato: str = "html",
     usuario_actual: models.Usuario = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """
-    Muestra el historial de inspecciones del conductor autenticado.
-    Sirve el template lista_inspecciones.html con sus KPIs y tabla.
+    Historial de inspecciones del conductor autenticado.
+    
+    Soporta dos formatos:
+    - ?formato=html (defecto) → devuelve template lista_inspecciones.html
+    - ?formato=json → devuelve JSON con registros + reportes
+    
+    ✅ CORREGIDO: Ahora soporta JSON para que lista_inspecciones.html pueda cargar datos
     """
     nombre_conductor = normalize_name(
         usuario_actual.nombre_visible or usuario_actual.nombre
     )
  
-    # ✅ BLOQUEANTE #3: filtrar por usuario_id, no por nombre
+    # ✅ Filtrar por usuario_id, no por nombre
     registros = (
         db.query(models.Inspeccion)
         .filter(models.Inspeccion.usuario_id == usuario_actual.id)
@@ -844,19 +851,52 @@ async def mis_inspecciones(
         .all()
     )
  
+    # Reportes consolidados
+    reportes_consolidados = (
+        db.query(models.ReporteInspeccion)
+        .filter(models.ReporteInspeccion.nombre_conductor == nombre_conductor)
+        .order_by(models.ReporteInspeccion.fecha_reporte.desc())
+        .all()
+    )
+ 
+    # ✅ NUEVO: Soporte para JSON
+    if formato.lower() == "json":
+        return JSONResponse({
+            "nombre_conductor": nombre_conductor,
+            "registros": [
+                {
+                    "id": r.id,
+                    "fecha": r.fecha.strftime("%Y-%m-%d"),
+                    "placa": r.placa,
+                    "tipo_vehiculo": r.tipo_vehiculo or "Moto",
+                    "proceso": r.proceso,
+                    "desde": r.desde,
+                    "hasta": r.hasta,
+                    "condiciones_optimas": r.condiciones_optimas,
+                    "observaciones": r.observaciones or "",
+                }
+                for r in registros
+            ],
+            "puede_generar_pdf15": len(registros) >= 15,
+            "reportes_consolidados": [
+                {
+                    "id": rep.id,
+                    "fecha_reporte": rep.fecha_reporte.strftime("%Y-%m-%d %H:%M"),
+                    "total_incluidas": rep.total_incluidas,
+                }
+                for rep in reportes_consolidados
+            ],
+        })
+ 
+    # Formato HTML (original)
     return _TEMPLATES.TemplateResponse(
         "lista_inspecciones.html",
         {
-            "request":           request,
-            "nombre_conductor":  nombre_conductor,
-            "registros":         registros,
+            "request": request,
+            "nombre_conductor": nombre_conductor,
+            "registros": registros,
             "puede_generar_pdf15": len(registros) >= 15,
-            "reportes_consolidados": (
-                db.query(models.ReporteInspeccion)
-                .filter(models.ReporteInspeccion.nombre_conductor == nombre_conductor)
-                .order_by(models.ReporteInspeccion.fecha_reporte.desc())
-                .all()
-            ),
+            "reportes_consolidados": reportes_consolidados,
         },
     )
  
