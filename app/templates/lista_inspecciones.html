@@ -16,7 +16,7 @@
   <script src="/static/js/session-check.js"></script>
   <style>
     body { min-height: 100vh; background: var(--night); }
-
+ 
     /* ── TOPBAR ── */
     .topbar {
       position: sticky; top: 0; z-index: 50;
@@ -50,7 +50,7 @@
       text-decoration: none; transition: all 0.2s;
     }
     .btn-back:hover { border-color: var(--amber); color: var(--amber); }
-
+ 
     .btn-logout-top {
       display: inline-flex; align-items: center; gap: 0.35rem;
       padding: 0.45rem 0.9rem;
@@ -61,10 +61,10 @@
       cursor: pointer; transition: all 0.2s;
     }
     .btn-logout-top:hover { background: rgba(220,60,60,0.14); border-color: #f07070; }
-
+ 
     /* ── CONTENIDO ── */
     .page-wrap { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
-
+ 
     /* Hero */
     .page-hero {
       background: var(--dark2); border: 1px solid var(--border);
@@ -89,7 +89,7 @@
       -webkit-text-fill-color: transparent; background-clip: text;
     }
     .hero-sub { font-size: 0.78rem; color: var(--text3); margin-top: 0.25rem; }
-
+ 
     /* KPIs */
     .kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.25rem; }
     .kpi-card {
@@ -108,7 +108,7 @@
     .kpi-card.golden .kpi-val { color: var(--golden); }
     .kpi-card.ember  .kpi-val { color: var(--ember); }
     .kpi-sub { font-size: 0.72rem; color: var(--text3); margin-top: 0.25rem; }
-
+ 
     /* Progreso hacia el consolidado */
     .progress-card {
       background: var(--dark2); border: 1px solid var(--border);
@@ -128,7 +128,7 @@
       transition: width 0.6s ease;
     }
     .progress-hint { font-size: 0.72rem; color: var(--text3); margin-top: 0.5rem; }
-
+ 
     /* Tabla */
     .table-card {
       background: var(--dark2); border: 1px solid var(--border);
@@ -142,7 +142,7 @@
     }
     .table-title { font-size: 0.82rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
     .table-count { font-size: 0.72rem; color: var(--text3); margin-top: 0.15rem; }
-
+ 
     table.hist { width: 100%; border-collapse: collapse; }
     table.hist thead th {
       font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
@@ -153,7 +153,7 @@
     table.hist tbody tr:last-child { border-bottom: none; }
     table.hist tbody tr:hover { background: var(--dark3); }
     table.hist tbody td { padding: 0.8rem 1.5rem; font-size: 0.85rem; }
-
+ 
     .placa-chip {
       display: inline-flex; align-items: center;
       background: rgba(245,156,0,0.08); border: 1px solid rgba(245,156,0,0.18);
@@ -161,20 +161,20 @@
       font-size: 0.78rem; font-weight: 700; color: var(--amber);
       letter-spacing: 0.06em;
     }
-
+ 
     .proceso-chip {
       display: inline-flex; align-items: center;
       background: var(--dark3); border: 1px solid var(--border);
       border-radius: 20px; padding: 0.15rem 0.55rem;
       font-size: 0.72rem; color: var(--text2);
     }
-
+ 
     .ruta-text { font-size: 0.78rem; color: var(--text3); }
     .ruta-arrow { color: var(--amber); margin: 0 0.25rem; }
-
+ 
     .empty-state { padding: 3rem; text-align: center; color: var(--text3); }
     .empty-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
-
+ 
     /* Botón PDF 15 */
     .pdf15-wrap {
       padding: 1.25rem 1.5rem; border-top: 1px solid var(--border);
@@ -194,12 +194,12 @@
       box-shadow: var(--shadow-amber);
     }
     .btn-pdf15:hover { filter: brightness(1.1); transform: translateY(-1px); }
-
+ 
     @media (max-width: 600px) {
       .kpi-row { grid-template-columns: 1fr; }
       .pdf15-wrap { flex-direction: column; gap: 0.75rem; }
     }
-
+ 
     /* ── MODAL DETALLE ── */
     .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.72); backdrop-filter:blur(5px); z-index:200; align-items:flex-start; justify-content:center; padding:2rem 1rem; overflow-y:auto; }
     .modal-overlay.open { display:flex; }
@@ -233,61 +233,40 @@
     .btn-ver-insp:hover { border-color:var(--amber); color:var(--amber); }
     @keyframes spin { to { transform:rotate(360deg); } }
     .spinner-sm { display:inline-block; width:12px; height:12px; border:2px solid rgba(26,15,0,0.3); border-top-color:#1a0f00; border-radius:50%; animation:spin 0.7s linear infinite; vertical-align:middle; }
-
+ 
     /* ══ TABLE SCROLL WRAPPER ══ */
     .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     table.hist { min-width: 480px; }
-
+ 
     /* ══ RESPONSIVE MÓVIL — lista_inspecciones ══ */
     @media (max-width: 640px) {
-      /* Topbar compacto */
       .topbar { padding: 0.6rem 0.9rem; flex-wrap: wrap; gap: 0.4rem; }
       .topbar-right { gap: 0.35rem; flex-wrap: wrap; }
       .user-chip { display: none; }
       .btn-back, .btn-logout-top {
         font-size: 0.66rem; padding: 0.35rem 0.6rem; letter-spacing: 0.04em;
       }
-
-      /* Contenido */
       .page-wrap { padding: 0.85rem 0.75rem 3rem; }
-
-      /* Hero */
       .page-hero { padding: 1.1rem 1.25rem; margin-bottom: 1rem; }
       .hero-title { font-size: 1rem; }
       .hero-sub { font-size: 0.72rem; }
-
-      /* KPIs — 2 columnas */
       .kpi-row { grid-template-columns: 1fr 1fr !important; gap: 0.6rem; margin-bottom: 1rem; }
       .kpi-val { font-size: 1.5rem; }
       .kpi-label { font-size: 0.6rem; }
       .kpi-sub { font-size: 0.65rem; }
-
-      /* Progreso */
       .progress-card { padding: 0.9rem 1rem; margin-bottom: 1rem; }
       .progress-label { font-size: 0.72rem; }
       .progress-count { font-size: 0.75rem; }
       .progress-hint { font-size: 0.68rem; }
-
-      /* Tabla principal — scroll horizontal */
       table.hist { min-width: 440px; }
       table.hist thead th,
       table.hist tbody td { padding: 0.55rem 0.65rem; font-size: 0.78rem; }
-
-      /* Ocultar columna Ruta en móvil */
       table.hist thead th:nth-child(5),
       table.hist tbody td:nth-child(5) { display: none; }
-
-      /* Botón ver más compacto */
       .btn-ver-insp { font-size: 0.65rem; padding: 0.22rem 0.5rem; }
-
-      /* PDF 15 */
       .pdf15-wrap { flex-direction: column; gap: 0.75rem; text-align: center; padding: 1rem; }
       .btn-pdf15 { width: 100%; justify-content: center; font-size: 0.78rem; }
-
-      /* Historial consolidados */
       .table-card[style*="margin-top"] { margin-top: 1rem !important; }
-
-      /* Modal responsive */
       .modal { padding: 1rem; margin: 0.5rem; max-width: calc(100vw - 1rem); }
       .modal-grid { grid-template-columns: 1fr !important; gap: 0.4rem; }
       .modal-field.full { grid-column: auto !important; }
@@ -300,22 +279,18 @@
       .modal-section-title { font-size: 0.6rem; }
       .asp-label { font-size: 0.72rem; }
     }
-
+ 
     @media (max-width: 380px) {
-      /* En pantallas muy pequeñas */
       .kpi-row { grid-template-columns: 1fr !important; }
       .topbar-brand .topbar-title { font-size: 0.76rem; }
       table.hist { min-width: 360px; }
-
-      /* Ocultar también Proceso en pantallas muy pequeñas */
       table.hist thead th:nth-child(4),
       table.hist tbody td:nth-child(4) { display: none; }
     }
-
   </style>
 </head>
 <body>
-
+ 
   <!-- TOPBAR -->
   <header class="topbar">
     <div class="topbar-brand">
@@ -328,198 +303,70 @@
     <div class="topbar-right">
       <div class="user-chip">
         <div class="user-dot"></div>
-        <span class="user-text">{{ nombre_conductor }}</span>
+        <span class="user-text" id="userText">Cargando...</span>
       </div>
       <a href="/" class="btn-back">← Nueva inspección</a>
       <button class="btn-logout-top" onclick="cerrarSesion()">X Salir</button>
     </div>
   </header>
-
+ 
   <div class="page-wrap">
-
+ 
     <!-- Hero -->
     <div class="page-hero">
       <div class="hero-egg"></div>
       <div class="hero-title">Historial de inspecciones</div>
-      <div class="hero-sub">{{ nombre_conductor }} · Registro personal SST</div>
+      <div class="hero-sub" id="heroSub">Cargando datos...</div>
     </div>
-
+ 
     <!-- KPIs -->
     <div class="kpi-row">
       <div class="kpi-card amber" style="animation-delay:0.05s">
         <div class="kpi-label">Total registros</div>
-        <div class="kpi-val">{{ registros | length }}</div>
+        <div class="kpi-val" id="kpiTotal">0</div>
         <div class="kpi-sub">En curso</div>
       </div>
       <div class="kpi-card golden" style="animation-delay:0.10s">
         <div class="kpi-label">Para consolidado</div>
-        <div class="kpi-val">{{ [15 - (registros | length), 0] | max }}</div>
+        <div class="kpi-val" id="kpiRestantes">15</div>
         <div class="kpi-sub">Inspecciones restantes</div>
       </div>
       <div class="kpi-card ember" style="animation-delay:0.15s">
         <div class="kpi-label">Próximo PDF</div>
-        <div class="kpi-val">{{ "Listo" if registros | length >= 15 else (registros | length) ~ "/15" }}</div>
+        <div class="kpi-val" id="kpiPDF">0/15</div>
         <div class="kpi-sub">Consolidado mensual</div>
       </div>
     </div>
-
+ 
     <!-- Barra de progreso -->
-    {% set pct = [(registros | length) * 100 // 15, 100] | min %}
     <div class="progress-card" style="animation-delay:0.18s">
       <div class="progress-header">
         <span class="progress-label">Progreso hacia el consolidado de 15</span>
-        <span class="progress-count">{{ registros | length }} / 15</span>
+        <span class="progress-count"><span id="progCount">0</span> / 15</span>
       </div>
       <div class="progress-bar-wrap">
-        <div class="progress-bar" style="width: {{ pct }}%;"></div>
+        <div class="progress-bar" id="progBar" style="width: 0%;"></div>
       </div>
-      <div class="progress-hint">
-        {% if registros | length >= 15 %}
-          ✓ Completado — puedes generar el PDF consolidado de los últimos 15 registros
-        {% else %}
-          Faltan {{ 15 - (registros | length) }} inspecciones para el consolidado mensual
-        {% endif %}
-      </div>
+      <div class="progress-hint" id="progHint">Faltan 15 inspecciones para el consolidado mensual</div>
     </div>
-
+ 
     <!-- Tabla de historial -->
     <div class="table-card" style="animation-delay:0.22s">
       <div class="table-header">
         <div>
           <div class="table-title">Registros activos</div>
-          <div class="table-count">{{ registros | length }} inspecciones pendientes de consolidar</div>
+          <div class="table-count" id="tableCount">Cargando...</div>
         </div>
       </div>
-
-      {% if registros %}
-      <div class="table-scroll">
-      <table class="hist">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Fecha</th>
-            <th>Placa</th>
-            <th>Proceso</th>
-            <th>Ruta</th>
-            <th>Estado</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for r in registros | reverse %}
-          {% set asp = r.aspectos_dict if r.aspectos_dict is defined else {} %}
-          {% set tiene_malo = 'M' in asp.values() %}
-          <tr>
-            <td style="color:var(--text3); font-size:0.75rem;">{{ loop.index }}</td>
-            <td style="color:var(--text2);">{{ r.fecha.strftime("%d/%m/%Y") }}</td>
-            <td><span class="placa-chip">{{ r.placa }}</span></td>
-            <td><span class="proceso-chip">{{ r.proceso }}</span></td>
-            <td class="ruta-text">
-              {{ r.desde }}<span class="ruta-arrow">→</span>{{ r.hasta }}
-            </td>
-            <td>
-              {% if tiene_malo %}
-                <span style="display:inline-flex;align-items:center;gap:0.25rem;
-                  background:rgba(220,60,60,0.12);border:1px solid rgba(220,60,60,0.3);
-                  border-radius:20px;padding:0.15rem 0.55rem;
-                  font-size:0.7rem;font-weight:700;color:#f07070;">
-                  ⚠ M
-                </span>
-              {% else %}
-                <span style="display:inline-flex;align-items:center;gap:0.25rem;
-                  background:rgba(40,200,120,0.12);border:1px solid rgba(40,200,120,0.25);
-                  border-radius:20px;padding:0.15rem 0.55rem;
-                  font-size:0.7rem;font-weight:700;color:#28c878;">
-                  ✓ B
-                </span>
-              {% endif %}
-            </td>
-            <td>
-              <button class="btn-ver-insp" onclick="verInspeccion({{ r.id }})">🔍 Ver</button>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-
-      </div><!-- /table-scroll -->
-      {% if puede_generar_pdf15 %}
-      <div class="pdf15-wrap">
-        <div class="pdf15-info">
-          🎯 Tienes <strong>15 inspecciones</strong> — el consolidado SST está listo para generar.
-        </div>
-        <a href="/inspecciones/reporte15/{{ nombre_conductor }}" class="btn-pdf15">
-          📄 Generar PDF consolidado
-        </a>
-      </div>
-      {% endif %}
-
-      {% else %}
-      <div class="empty-state">
-        <div class="empty-icon">🐣</div>
-        <div>No tienes inspecciones registradas aún.</div>
-        <div style="margin-top:0.5rem; font-size:0.78rem;">
-          <a href="/" style="color:var(--amber);">← Ir al formulario</a>
+      <div id="tableContent">
+        <div class="empty-state" style="padding: 2rem;">
+          <div style="text-align: center; color: var(--text3);">⏳ Cargando inspecciones...</div>
         </div>
       </div>
-      {% endif %}
     </div>
-
+ 
   </div>
-
-
-    <!-- ── HISTORIAL DE PDFs CONSOLIDADOS ── -->
-    {% if reportes_consolidados %}
-    <div style="max-width:860px;margin:0 auto;padding:0 1.5rem 4rem;">
-    <div class="table-card" style="animation-delay:0.28s; margin-top:1.25rem;">
-      <div class="table-header">
-        <div>
-          <div class="table-title">📁 Historial de consolidados</div>
-          <div class="table-count">{{ reportes_consolidados | length }} PDF(s) generado(s)</div>
-        </div>
-      </div>
-      <div class="table-scroll">
-      <table class="hist">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Fecha generación</th>
-            <th>Inspecciones incluidas</th>
-            <th>Descargar</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for r in reportes_consolidados %}
-          <tr>
-            <td style="color:var(--text3);font-size:0.75rem;">{{ loop.index }}</td>
-            <td style="color:var(--text2);">
-              {{ r.fecha_reporte.strftime("%d/%m/%Y") }}
-              <span style="color:var(--text3);font-size:0.72rem;"> · {{ r.fecha_reporte.strftime("%H:%M") }}</span>
-            </td>
-            <td style="text-align:center;">
-              <span style="background:rgba(245,156,0,0.1);color:var(--amber);padding:0.15rem 0.65rem;border-radius:20px;font-size:0.75rem;font-weight:700;">
-                {{ r.total_incluidas }} inspecciones
-              </span>
-            </td>
-            <td>
-              <a href="/inspecciones/reporte-consolidado/{{ r.id }}"
-                 style="display:inline-flex;align-items:center;gap:0.3rem;padding:0.3rem 0.75rem;
-                        background:rgba(245,156,0,0.08);border:1px solid rgba(245,156,0,0.2);
-                        border-radius:var(--r-sm);color:var(--amber);font-size:0.72rem;font-weight:700;
-                        letter-spacing:0.05em;text-transform:uppercase;text-decoration:none;transition:all 0.2s;"
-                 target="_blank">📄 Descargar PDF</a>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      </div><!-- /table-scroll consolidados -->
-      <div style="padding:0.75rem 1.5rem;border-top:1px solid var(--border);font-size:0.72rem;color:var(--text3);">
-        ℹ Los PDFs se generan al completar 15 inspecciones. Una vez generados, el ciclo reinicia.
-      </div>
-    </div>
-    {% endif %}
-
+ 
   <!-- Modal detalle inspección -->
   <div id="modalOverlay" class="modal-overlay">
     <div class="modal">
@@ -537,146 +384,286 @@
       </div>
     </div>
   </div>
-
+ 
   <script>
-  // ✅ CORRECTO
+  // ✅ CORRECTO: Verificar autenticación vía /auth/me
   async function verificarAutenticacion() {
-      const resp = await fetch("/auth/me", {
-          credentials: "include"  // ✅ Envía cookie
-      });
-      if (!resp.ok) {
-          window.location.href = "/login";
-          return;
+      try {
+          const resp = await fetch("/auth/me", {
+              credentials: "include"  // ✅ Envía cookie automáticamente
+          });
+          if (!resp.ok) {
+              window.location.href = "/login?razon=sesion_expirada";
+              return false;
+          }
+          
+          // ✅ Autenticado → cargar datos
+          const user = await resp.json();
+          document.getElementById("userText").textContent = user.nombre_visible || user.nombre || "Usuario";
+          document.getElementById("heroSub").textContent = (user.nombre_visible || user.nombre) + " · Registro personal SST";
+          
+          // Cargar inspecciones
+          cargarInspecciones();
+          return true;
+      } catch (err) {
+          console.error("Error verificando autenticación:", err);
+          window.location.href = "/login?razon=error";
+          return false;
       }
-      // ✅ Autenticado → cargar inspecciones
-      cargarInspecciones();
   }
-
-  /* ── Cerrar sesión: invalida token en BD, borra cookie y redirige ── */
+ 
+  // ✅ Cargar inspecciones via JSON
+  async function cargarInspecciones() {
+      try {
+          const resp = await fetch("/inspecciones/mis-inspecciones?formato=json", {
+              credentials: "include"
+          });
+          if (!resp.ok) throw new Error("Error " + resp.status);
+          
+          const data = await resp.json();
+          const registros = data.registros || [];
+          
+          // Actualizar KPIs
+          const total = registros.length;
+          const restantes = Math.max(15 - total, 0);
+          const pct = Math.min(total * 100 / 15, 100);
+          
+          document.getElementById("kpiTotal").textContent = total;
+          document.getElementById("kpiRestantes").textContent = restantes;
+          document.getElementById("kpiPDF").textContent = total + "/15";
+          document.getElementById("progCount").textContent = total;
+          document.getElementById("progBar").style.width = pct + "%";
+          document.getElementById("progHint").textContent = total >= 15 
+              ? "✓ Completado — puedes generar el PDF consolidado de los últimos 15 registros"
+              : "Faltan " + restantes + " inspecciones para el consolidado mensual";
+          document.getElementById("tableCount").textContent = total + " inspecciones pendientes de consolidar";
+          
+          // Renderizar tabla
+          if (total === 0) {
+              document.getElementById("tableContent").innerHTML = `
+                  <div class="empty-state">
+                      <div class="empty-icon">🐣</div>
+                      <div>No tienes inspecciones registradas aún.</div>
+                      <div style="margin-top:0.5rem; font-size:0.78rem;">
+                          <a href="/" style="color:var(--amber);">← Ir al formulario</a>
+                      </div>
+                  </div>
+              `;
+          } else {
+              let html = '<div class="table-scroll"><table class="hist"><thead><tr>'
+                  + '<th>#</th><th>Fecha</th><th>Placa</th><th>Proceso</th><th>Ruta</th><th>Estado</th><th></th>'
+                  + '</tr></thead><tbody>';
+              
+              registros.reverse().forEach(function(r, idx) {
+                  const estado = '<span style="display:inline-flex;align-items:center;gap:0.25rem;background:rgba(40,200,120,0.12);border:1px solid rgba(40,200,120,0.25);border-radius:20px;padding:0.15rem 0.55rem;font-size:0.7rem;font-weight:700;color:#28c878;">✓ B</span>';
+                  
+                  html += '<tr>'
+                      + '<td style="color:var(--text3);font-size:0.75rem;">' + (idx + 1) + '</td>'
+                      + '<td style="color:var(--text2);">' + r.fecha + '</td>'
+                      + '<td><span class="placa-chip">' + r.placa + '</span></td>'
+                      + '<td><span class="proceso-chip">' + r.proceso + '</span></td>'
+                      + '<td class="ruta-text">' + r.desde + '<span class="ruta-arrow">→</span>' + r.hasta + '</td>'
+                      + '<td>' + estado + '</td>'
+                      + '<td><button class="btn-ver-insp" onclick="verInspeccion(' + r.id + ')">🔍 Ver</button></td>'
+                      + '</tr>';
+              });
+              
+              html += '</tbody></table></div>';
+              
+              if (total >= 15) {
+                  html += '<div class="pdf15-wrap">'
+                      + '<div class="pdf15-info">🎯 Tienes <strong>15 inspecciones</strong> — el consolidado SST está listo para generar.</div>'
+                      + '<a href="/inspecciones/reporte15" class="btn-pdf15">📄 Generar PDF consolidado</a>'
+                      + '</div>';
+              }
+              
+              document.getElementById("tableContent").innerHTML = html;
+              
+              // ✅ Agregar historial de consolidados si existen
+              if (data.reportes_consolidados && data.reportes_consolidados.length > 0) {
+                  let histHtml = '<div style="max-width:860px;margin:0 auto;padding:0 1.5rem 4rem;">'
+                      + '<div class="table-card" style="animation-delay:0.28s; margin-top:1.25rem;">'
+                      + '<div class="table-header">'
+                      + '<div>'
+                      + '<div class="table-title">📁 Historial de consolidados</div>'
+                      + '<div class="table-count">' + data.reportes_consolidados.length + ' PDF(s) generado(s)</div>'
+                      + '</div></div>'
+                      + '<div class="table-scroll">'
+                      + '<table class="hist"><thead><tr>'
+                      + '<th>#</th><th>Fecha generación</th><th>Inspecciones incluidas</th><th>Descargar</th>'
+                      + '</tr></thead><tbody>';
+                  
+                  data.reportes_consolidados.forEach(function(r, idx) {
+                      histHtml += '<tr>'
+                          + '<td style="color:var(--text3);font-size:0.75rem;">' + (idx + 1) + '</td>'
+                          + '<td style="color:var(--text2);">'
+                          + r.fecha_reporte
+                          + '</td>'
+                          + '<td style="text-align:center;">'
+                          + '<span style="background:rgba(245,156,0,0.1);color:var(--amber);padding:0.15rem 0.65rem;border-radius:20px;font-size:0.75rem;font-weight:700;">'
+                          + r.total_incluidas + ' inspecciones'
+                          + '</span>'
+                          + '</td>'
+                          + '<td>'
+                          + '<a href="/inspecciones/reporte-consolidado/' + r.id + '"'
+                          + ' style="display:inline-flex;align-items:center;gap:0.3rem;padding:0.3rem 0.75rem;'
+                          + 'background:rgba(245,156,0,0.08);border:1px solid rgba(245,156,0,0.2);'
+                          + 'border-radius:var(--r-sm);color:var(--amber);font-size:0.72rem;font-weight:700;'
+                          + 'letter-spacing:0.05em;text-transform:uppercase;text-decoration:none;transition:all 0.2s;"'
+                          + ' target="_blank">📄 Descargar PDF</a>'
+                          + '</td>'
+                          + '</tr>';
+                  });
+                  
+                  histHtml += '</tbody></table></div>'
+                      + '<div style="padding:0.75rem 1.5rem;border-top:1px solid var(--border);font-size:0.72rem;color:var(--text3);">'
+                      + 'ℹ Los PDFs se generan al completar 15 inspecciones. Una vez generados, el ciclo reinicia.'
+                      + '</div>'
+                      + '</div></div>';
+                  
+                  document.querySelector("body").insertAdjacentHTML("beforeend", histHtml);
+              }
+          }
+      } catch (err) {
+          console.error("Error cargando inspecciones:", err);
+          document.getElementById("tableContent").innerHTML = '<div class="empty-state"><div>❌ Error cargando inspecciones</div></div>';
+      }
+  }
+ 
+  // ✅ Cerrar sesión
   async function cerrarSesion() {
-    try {
-      await fetch("/auth/logout", {
-        method: "POST",
-        headers: { "Authorization": `Bearer ${token}` }
-      });
-    } catch(e) {}
-    finally {
-      localStorage.clear();
-      window.location.href = "/login";
-    }
-  }
-
-
-  let _inspeccionActual = null;
-
-  async function verInspeccion(id) {
-    const overlay = document.getElementById('modalOverlay');
-    const cuerpo  = document.getElementById('modalCuerpo');
-    const sub     = document.getElementById('modalSub');
-    const btnDl   = document.getElementById('btnDescarga');
-    cuerpo.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text3);">Cargando...</div>';
-    sub.textContent = '';
-    btnDl.disabled  = true;
-    overlay.classList.add('open');
-    try {
-      const resp = await fetch('/inspecciones/detalle/' + id + '?formato=json', {
-        headers: { "Authorization": 'Bearer ' + token }
-      });
-      if (!resp.ok) throw new Error('Error ' + resp.status);
-      const d = await resp.json();
-      _inspeccionActual = id;
-      sub.textContent = d.fecha + '  ·  ' + d.tipo_vehiculo + '  ·  Placa: ' + d.placa;
-      const malos = d.aspectos.filter(function(a){ return a.valor === 'M'; }).length;
-
-      const aspHtml = d.aspectos.map(function(a) {
-        return '<div class="asp-row ' + (a.valor === 'M' ? 'malo' : 'bueno') + '">'
-          + '<span class="asp-num">' + a.num + '</span>'
-          + '<span class="asp-label">' + a.label + '</span>'
-          + (a.valor === 'M' ? '<span class="asp-m">✖ Malo</span>' : '<span class="asp-b">✔ Bueno</span>')
-          + '</div>';
-      }).join('');
-
-      cuerpo.innerHTML =
-        '<div class="modal-section">'
-        + '<div class="modal-section-title">🏍 Datos del vehículo</div>'
-        + '<div class="modal-grid">'
-        + '<div class="modal-field"><div class="mf-label">Placa</div><div class="mf-val"><span class="placa-chip">' + d.placa + '</span></div></div>'
-        + '<div class="modal-field"><div class="mf-label">Tipo</div><div class="mf-val">' + (d.tipo_vehiculo === 'Carro' ? '🚗' : '🏍') + ' ' + d.tipo_vehiculo + '</div></div>'
-        + '<div class="modal-field"><div class="mf-label">Marca</div><div class="mf-val">' + (d.marca || '—') + '</div></div>'
-        + '<div class="modal-field"><div class="mf-label">Modelo / Motor</div><div class="mf-val">' + (d.modelo || '—') + ' · ' + (d.motor || '—') + 'cc</div></div>'
-        + '<div class="modal-field"><div class="mf-label">Gasolina</div><div class="mf-val">' + (d.gasolina || '—') + '</div></div>'
-        + '<div class="modal-field"><div class="mf-label">Proceso</div><div class="mf-val">' + d.proceso + '</div></div>'
-        + '<div class="modal-field full"><div class="mf-label">Ruta</div><div class="mf-val">' + d.desde + ' <span style="color:var(--amber)">→</span> ' + d.hasta + '</div></div>'
-        + '</div></div>'
-        + '<div class="modal-section">'
-        + '<div class="modal-section-title">📄 Documentos</div>'
-        + '<div class="modal-grid">'
-        + '<div class="modal-field"><div class="mf-label">Licencia N°</div><div class="mf-val">' + (d.licencia_num || '—') + '</div></div>'
-        + '<div class="modal-field"><div class="mf-label">Vencimiento</div><div class="mf-val">' + (d.licencia_venc || '—') + '</div></div>'
-        + '<div class="modal-field"><div class="mf-label">Tarjeta propiedad</div><div class="mf-val">' + (d.porte_propiedad || '—') + '</div></div>'
-        + '<div class="modal-field"><div class="mf-label">SOAT</div><div class="mf-val">' + (d.soat || '—') + '</div></div>'
-        + '<div class="modal-field"><div class="mf-label">Emisión gases</div><div class="mf-val">' + (d.certificado_emision || '—') + '</div></div>'
-        + '<div class="modal-field"><div class="mf-label">Póliza seguro</div><div class="mf-val">' + (d.poliza_seguro || '—') + '</div></div>'
-        + '</div></div>'
-        + '<div class="modal-section">'
-        + '<div class="modal-section-title">🔍 Aspectos revisados <span style="float:right;background:' + (malos > 0 ? 'rgba(235,102,8,0.12);color:var(--ember)' : 'rgba(40,200,120,0.1);color:#28c878') + ';padding:0.1rem 0.5rem;border-radius:12px;font-size:0.68rem;">' + (malos > 0 ? '⚠ ' + malos + ' en M' : '✓ Todo B') + '</span></div>'
-        + aspHtml
-        + '</div>'
-        + '<div class="modal-section"><div class="modal-section-title">📋 Condición general</div>'
-        + '<div class="modal-grid">'
-        + '<div class="modal-field"><div class="mf-label">¿Óptimas condiciones?</div><div class="mf-val">' + (d.condiciones_optimas === 'SI' ? '<span style="color:#28c878;font-weight:700;">✓ Sí</span>' : '<span style="color:#f07070;font-weight:700;">✕ No</span>') + '</div></div>'
-        + (d.observaciones ? '<div class="modal-field full"><div class="mf-label">Observaciones</div><div class="mf-val" style="line-height:1.5;">' + d.observaciones + '</div></div>' : '')
-        + '</div></div>';
-
-      btnDl.disabled = false;
-    } catch(err) {
-      cuerpo.innerHTML = '<div style="text-align:center;padding:2rem;color:#f07070;">Error cargando el detalle. Intenta de nuevo.</div>';
-    }
-  }
-
-  async function descargarPDF() {
-    if (!_inspeccionActual) return;
-    const btn = document.getElementById('btnDescarga');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-sm"></span>&nbsp;Generando...';
-    try {
-      const resp = await fetch('/inspecciones/detalle/' + _inspeccionActual + '?formato=pdf', {
-        headers: { "Authorization": 'Bearer ' + token }
-      });
-      if (!resp.ok) {
-        const err = await resp.json().catch(function(){ return {}; });
-        alert('Error: ' + (err.error || 'No se pudo generar el PDF'));
-        return;
+      try {
+          await fetch("/auth/logout", {
+              method: "POST",
+              credentials: "include"  // ✅ Usa cookie, no header manual
+          });
+      } catch(e) {}
+      finally {
+          localStorage.clear();
+          window.location.href = "/login";
       }
-      const blob = await resp.blob();
-      const url  = URL.createObjectURL(blob);
-      const a    = document.createElement('a');
-      const cd   = resp.headers.get('content-disposition') || '';
-      const m    = cd.match(/filename="?(.+?)"?$/);
-      a.href     = url;
-      a.download = m ? m[1] : 'inspeccion_' + _inspeccionActual + '.pdf';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    } catch(e) {
-      alert('Error de conexión al generar el PDF.');
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = '📄 Descargar PDF';
-    }
   }
-
+ 
+  let _inspeccionActual = null;
+ 
+  // ✅ Ver inspección con credentials:include
+  async function verInspeccion(id) {
+      const overlay = document.getElementById('modalOverlay');
+      const cuerpo  = document.getElementById('modalCuerpo');
+      const sub     = document.getElementById('modalSub');
+      const btnDl   = document.getElementById('btnDescarga');
+      cuerpo.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text3);">Cargando...</div>';
+      sub.textContent = '';
+      btnDl.disabled  = true;
+      overlay.classList.add('open');
+      try {
+          const resp = await fetch('/inspecciones/detalle/' + id + '?formato=json', {
+              credentials: "include"  // ✅ Envía cookie automáticamente
+          });
+          if (!resp.ok) throw new Error('Error ' + resp.status);
+          const d = await resp.json();
+          _inspeccionActual = id;
+          sub.textContent = d.fecha + '  ·  ' + d.tipo_vehiculo + '  ·  Placa: ' + d.placa;
+          const malos = d.aspectos.filter(function(a){ return a.valor === 'M'; }).length;
+ 
+          const aspHtml = d.aspectos.map(function(a) {
+              return '<div class="asp-row ' + (a.valor === 'M' ? 'malo' : 'bueno') + '">'
+                  + '<span class="asp-num">' + a.num + '</span>'
+                  + '<span class="asp-label">' + a.label + '</span>'
+                  + (a.valor === 'M' ? '<span class="asp-m">✖ Malo</span>' : '<span class="asp-b">✔ Bueno</span>')
+                  + '</div>';
+          }).join('');
+ 
+          cuerpo.innerHTML =
+              '<div class="modal-section">'
+              + '<div class="modal-section-title">🏍 Datos del vehículo</div>'
+              + '<div class="modal-grid">'
+              + '<div class="modal-field"><div class="mf-label">Placa</div><div class="mf-val"><span class="placa-chip">' + d.placa + '</span></div></div>'
+              + '<div class="modal-field"><div class="mf-label">Tipo</div><div class="mf-val">' + (d.tipo_vehiculo === 'Carro' ? '🚗' : '🏍') + ' ' + d.tipo_vehiculo + '</div></div>'
+              + '<div class="modal-field"><div class="mf-label">Marca</div><div class="mf-val">' + (d.marca || '—') + '</div></div>'
+              + '<div class="modal-field"><div class="mf-label">Modelo / Motor</div><div class="mf-val">' + (d.modelo || '—') + ' · ' + (d.motor || '—') + 'cc</div></div>'
+              + '<div class="modal-field"><div class="mf-label">Gasolina</div><div class="mf-val">' + (d.gasolina || '—') + '</div></div>'
+              + '<div class="modal-field"><div class="mf-label">Proceso</div><div class="mf-val">' + d.proceso + '</div></div>'
+              + '<div class="modal-field full"><div class="mf-label">Ruta</div><div class="mf-val">' + d.desde + ' <span style="color:var(--amber)">→</span> ' + d.hasta + '</div></div>'
+              + '</div></div>'
+              + '<div class="modal-section">'
+              + '<div class="modal-section-title">📄 Documentos</div>'
+              + '<div class="modal-grid">'
+              + '<div class="modal-field"><div class="mf-label">Licencia N°</div><div class="mf-val">' + (d.licencia_num || '—') + '</div></div>'
+              + '<div class="modal-field"><div class="mf-label">Vencimiento</div><div class="mf-val">' + (d.licencia_venc || '—') + '</div></div>'
+              + '<div class="modal-field"><div class="mf-label">Tarjeta propiedad</div><div class="mf-val">' + (d.porte_propiedad || '—') + '</div></div>'
+              + '<div class="modal-field"><div class="mf-label">SOAT</div><div class="mf-val">' + (d.soat || '—') + '</div></div>'
+              + '<div class="modal-field"><div class="mf-label">Emisión gases</div><div class="mf-val">' + (d.certificado_emision || '—') + '</div></div>'
+              + '<div class="modal-field"><div class="mf-label">Póliza seguro</div><div class="mf-val">' + (d.poliza_seguro || '—') + '</div></div>'
+              + '</div></div>'
+              + '<div class="modal-section">'
+              + '<div class="modal-section-title">🔍 Aspectos revisados <span style="float:right;background:' + (malos > 0 ? 'rgba(235,102,8,0.12);color:var(--ember)' : 'rgba(40,200,120,0.1);color:#28c878') + ';padding:0.1rem 0.5rem;border-radius:12px;font-size:0.68rem;">' + (malos > 0 ? '⚠ ' + malos + ' en M' : '✓ Todo B') + '</span></div>'
+              + aspHtml
+              + '</div>'
+              + '<div class="modal-section"><div class="modal-section-title">📋 Condición general</div>'
+              + '<div class="modal-grid">'
+              + '<div class="modal-field"><div class="mf-label">¿Óptimas condiciones?</div><div class="mf-val">' + (d.condiciones_optimas === 'SI' ? '<span style="color:#28c878;font-weight:700;">✓ Sí</span>' : '<span style="color:#f07070;font-weight:700;">✕ No</span>') + '</div></div>'
+              + (d.observaciones ? '<div class="modal-field full"><div class="mf-label">Observaciones</div><div class="mf-val" style="line-height:1.5;">' + d.observaciones + '</div></div>' : '')
+              + '</div></div>';
+ 
+          btnDl.disabled = false;
+      } catch(err) {
+          console.error("Error:", err);
+          cuerpo.innerHTML = '<div style="text-align:center;padding:2rem;color:#f07070;">Error cargando el detalle. Intenta de nuevo.</div>';
+      }
+  }
+ 
+  // ✅ Descargar PDF con credentials:include
+  async function descargarPDF() {
+      if (!_inspeccionActual) return;
+      const btn = document.getElementById('btnDescarga');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-sm"></span>&nbsp;Generando...';
+      try {
+          const resp = await fetch('/inspecciones/detalle/' + _inspeccionActual + '?formato=pdf', {
+              credentials: "include"  // ✅ Envía cookie automáticamente
+          });
+          if (!resp.ok) {
+              const err = await resp.json().catch(function(){ return {}; });
+              alert('Error: ' + (err.error || 'No se pudo generar el PDF'));
+              return;
+          }
+          const blob = await resp.blob();
+          const url  = URL.createObjectURL(blob);
+          const a    = document.createElement('a');
+          const cd   = resp.headers.get('content-disposition') || '';
+          const m    = cd.match(/filename="?(.+?)"?$/);
+          a.href     = url;
+          a.download = m ? m[1] : 'inspeccion_' + _inspeccionActual + '.pdf';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+      } catch(e) {
+          alert('Error de conexión al generar el PDF.');
+      } finally {
+          btn.disabled = false;
+          btn.innerHTML = '📄 Descargar PDF';
+      }
+  }
+ 
   function cerrarModal() {
-    document.getElementById('modalOverlay').classList.remove('open');
-    _inspeccionActual = null;
+      document.getElementById('modalOverlay').classList.remove('open');
+      _inspeccionActual = null;
   }
   document.getElementById('modalOverlay').addEventListener('click', function(e) {
-    if (e.target === e.currentTarget) cerrarModal();
+      if (e.target === e.currentTarget) cerrarModal();
   });
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') cerrarModal();
+      if (e.key === 'Escape') cerrarModal();
   });
+ 
+  // ✅ Inicializar al cargar
+  if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', verificarAutenticacion);
+  } else {
+      verificarAutenticacion();
+  }
   </script>
 </body>
 </html>

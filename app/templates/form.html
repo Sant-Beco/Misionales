@@ -382,7 +382,7 @@
               <div class="firma-upload-hint">JPG, PNG o WebP · Máximo 2MB</div>
               <input type="file" id="firmaImagenInput" accept="image/jpeg,image/png,image/webp" style="display:none;">
             </label>
-            <div id="imagenPreviewWrap" style="display:none;">
+            <div id="imagenPreviewWrap" class="hidden">
               <img id="imagenPreviewImg" src="" alt="Firma cargada">
               <button type="button" class="btn-limpiar" data-clear-image>✕ Quitar imagen</button>
             </div>
@@ -838,7 +838,7 @@
         const err = document.getElementById("error_firma");
         if (err) {
           err.textContent = "⚠ Dibuja tu firma primero";
-          err.style.display = "block";
+          err.style.display = "flex";
         }
         return;
       }
@@ -875,7 +875,7 @@
           ctx.drawImage(img, 0, 0, w, h);
           const dataURL = cv.toDataURL("image/png");
           document.getElementById("imagenPreviewImg").src = dataURL;
-          document.getElementById("imagenPreviewWrap").style.display = "block";
+          document.getElementById("imagenPreviewWrap").classList.remove("hidden");
           document.getElementById("firmaDataInput").value = dataURL;
           imagenFirmaCargada = true;
           document.getElementById("error_firma").style.display = "none";
@@ -887,6 +887,7 @@
             area.style.borderColor = "rgba(40,200,120,0.45)";
             area.style.borderStyle = "solid";
             area.style.background = "rgba(40,200,120,0.03)";
+            area.classList.add("has-image");
           }
         };
         img.src = e.target.result;
@@ -902,11 +903,16 @@
     function limpiarImagenFirma() {
       const input = document.getElementById("firmaImagenInput");
       if (input) input.value = "";
-      document.getElementById("imagenPreviewWrap").style.display = "none";
+      document.getElementById("imagenPreviewWrap").classList.add("hidden");
       document.getElementById("imagenPreviewImg").src = "";
       imagenFirmaCargada = false;
       const area = document.getElementById("firmaUploadArea");
-      if (area) area.style.borderColor = "";
+      if (area) {
+        area.style.borderColor = "";
+        area.style.borderStyle = "";
+        area.style.background = "";
+        area.classList.remove("has-image");
+      }
     }
  
     function limpiarFirmaCompleta() {

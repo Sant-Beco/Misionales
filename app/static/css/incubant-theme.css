@@ -1159,6 +1159,46 @@ body {
 .firma-tab.active { background: rgba(245,156,0,0.1); color: var(--amber); }
 .firma-tab:hover:not(.active) { color: var(--text2); background: var(--bg-4); }
 .firma-upload-area { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.4rem; padding: 2rem 1rem; border: 1.5px dashed rgba(245,156,0,0.25); border-radius: var(--r-lg); cursor: pointer; transition: all 0.2s; background: linear-gradient(135deg, rgba(245,156,0,0.02) 0%, transparent 60%); text-align: center; }
+/* Imagen subida — contenedor controlado */
+.hidden { display: none !important; }
+
+#imagenPreviewWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.75rem 1rem;
+  min-height: 80px;
+  background: linear-gradient(135deg, rgba(40,200,120,0.02) 0%, transparent 60%);
+  border: 1.5px solid rgba(40,200,120,0.25);
+  border-radius: var(--r-lg);
+  margin-top: 0.5rem;
+}
+
+#imagenPreviewImg {
+  max-width: 100%;
+  max-height: 150px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: var(--r-md);
+  border: 1px solid rgba(40,200,120,0.2);
+  display: block;
+  margin: 0 auto;
+}
+
+#imagenPreviewWrap .btn-limpiar {
+  align-self: center;
+  margin-top: 0.25rem;
+}
+
+/* Upload area compacta cuando ya hay imagen */
+.firma-upload-area.has-image {
+  padding: 0.65rem 1rem;
+}
+.firma-upload-area.has-image .firma-upload-icon { font-size: 1.1rem; opacity: 0.35; }
+.firma-upload-area.has-image .firma-upload-text { font-size: 0.7rem; }
+.firma-upload-area.has-image .firma-upload-hint { display: none; }
 .firma-upload-area:hover { border-color: rgba(245,156,0,0.5); background: rgba(245,156,0,0.04); }
 .firma-upload-area.drag-over { border-color: var(--amber); background: rgba(245,156,0,0.08); }
 .firma-upload-icon { font-size: 2rem; opacity: 0.5; }
