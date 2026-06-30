@@ -1,307 +1,493 @@
 <div align="center">
-
-<img src="app/static/img/Logotipo_01.png" alt="Incubant" height="72" />
-
+ 
 # Misionales · Sistema de Inspección Vehicular
-
+ 
 **Herramienta SST para conductores misionales de Incubant**  
 Inspecciones pre-operacionales digitales · Firma en canvas · PDFs automáticos · Panel de administración
-
-[![Python](https://img.shields.io/badge/Python-3.11.9-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.110-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=flat-square&logo=mysql&logoColor=white)](https://mysql.com)
-[![WeasyPrint](https://img.shields.io/badge/WeasyPrint-62.3-F59C00?style=flat-square)](https://weasyprint.org)
-
+ 
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0+-4479A1?style=flat-square&logo=mysql&logoColor=white)](https://mysql.com)
+[![WeasyPrint](https://img.shields.io/badge/WeasyPrint-60+-F59C00?style=flat-square)](https://weasyprint.org)
+[![License](https://img.shields.io/badge/License-Propietario-red?style=flat-square)](LICENSE)
+ 
 </div>
-
+ 
 ---
-
+ 
 ## ¿Qué es Misionales?
-
-Misionales es una plataforma web interna desarrollada para **Antioqueña de Incubación S.A.S.** que digitaliza y centraliza el proceso de inspección pre-operacional de vehículos de conductores misionales.
-
-Antes de cada desplazamiento, el conductor registra el estado de su vehículo (moto, carro o camión), firma digitalmente y el sistema genera el PDF oficial de manera automática — sin papel, sin traslado físico de documentos, sin pérdida de registros.
-
-El equipo SST accede al panel de administración para supervisar inspecciones en tiempo real, consultar historial, gestionar conductores y descargar reportes consolidados.
-
----
-
-## Características
-
-### Para el conductor
-- Formulario adaptado al tipo de vehículo: **Moto** (13 aspectos), **Automóvil** (15 aspectos), **Camión** (20 aspectos)
-- Selección de ruta con sugerencias inteligentes + escritura libre
-- **Firma digital** en canvas — funciona en móvil y escritorio
+ 
+Misionales es una plataforma web interna que digitaliza el proceso de inspección pre-operacional de vehículos para conductores misionales de **Antioqueña de Incubación S.A.S.**
+ 
+Antes de cada desplazamiento, el conductor registra el estado de su vehículo (moto, carro o camión), firma digitalmente y el sistema genera el PDF oficial automáticamente — **sin papel, sin traslado físico de documentos, sin pérdida de registros.**
+ 
+### Características principales
+ 
+**Para el conductor:**
+- Formulario adaptado al tipo de vehículo: **Moto** (13 aspectos), **Automóvil** (15 aspectos), **Camión** (50 aspectos)
+- Firma digital en canvas — funciona en móvil y escritorio
 - Descarga inmediata del PDF oficial al enviar
-- Historial personal de inspecciones con descarga individual
-- Reportes consolidados de 15 inspecciones generados automáticamente
-
-### Para el administrador
-- **Dashboard** con KPIs en tiempo real y gráficas comparativas por mes
-- Vista global de inspecciones con filtros por conductor, placa, tipo y fecha
-- Modal de detalle por inspección con todos los aspectos revisados
-- Gestión completa de usuarios (crear, editar, suspender, reactivar)
-- Log de auditoría de todas las acciones administrativas
-
-### Seguridad
+- Historial personal con descarga individual
+- Reportes consolidados cada 15 inspecciones generados automáticamente
+ 
+**Para el administrador:**
+- Dashboard con KPIs en tiempo real
+- Vista global de inspecciones con filtros
+- Gestión de usuarios (crear, editar, suspender)
+- Log de auditoría de todas las acciones
+- Descarga de reportes consolidados
+ 
+**Seguridad:**
 - Autenticación con usuario + PIN hasheado con **bcrypt**
-- Tokens JWT almacenados en cookie `httpOnly` + soporte Bearer header
-- Rate limiting: máximo 5 intentos fallidos por IP cada 5 minutos
-- Aislamiento de datos: cada conductor solo accede a sus propios registros
-- Rutas admin protegidas — conductores no pueden acceder al panel
-
+- Tokens JWT en cookie `httpOnly`
+- Rate limiting: máx 5 intentos fallidos por IP cada 5 minutos
+- Aislamiento de datos: cada conductor solo accede a sus registros
+- Rutas admin protegidas
+ 
 ---
-
-## Stack tecnológico
-
-| Capa | Tecnología |
-|------|-----------|
-| Backend | FastAPI 0.110 · Python 3.11.9 · SQLAlchemy 2.0 |
-| Base de datos | MySQL 8.0 / 5.7 · PyMySQL |
-| PDFs | WeasyPrint 62.3 · Jinja2 · Futura (tipografía) |
-| Frontend | HTML5 · CSS3 · JavaScript vanilla · Chart.js 4 |
-| Auth | JWT · bcrypt · rate limiting por IP |
-| Deploy | Uvicorn · systemd · Ubuntu 22.04/24.04 |
-
+ 
+## 📋 Tabla de Contenidos
+ 
+1. [Stack Tecnológico](#stack-tecnológico)
+2. [Requisitos Previos](#requisitos-previos)
+3. [Instalación Local](#instalación-local)
+4. [Configuración](#configuración)
+5. [Estructura del Proyecto](#estructura-del-proyecto)
+6. [Flujo de Inspección](#flujo-de-una-inspección)
+7. [API Endpoints](#api-endpoints)
+8. [Deploy en Producción](#deploy-en-producción)
+9. [Solución de Problemas](#solución-de-problemas)
+10. [Sostenibilidad](#sostenibilidad)
+11. [Historial de Cambios](#historial-de-cambios)
+ 
 ---
-
-## Instalación local
-
-### Requisitos previos
-
+ 
+## 🔧 Stack Tecnológico
+ 
+| Capa | Tecnología | Versión |
+|------|-----------|---------|
+| Backend | FastAPI | 0.110+ |
+| Base de datos | MySQL / MariaDB | 8.0+ / 5.7+ |
+| ORM | SQLAlchemy | 2.0+ |
+| Autenticación | JWT + bcrypt | — |
+| PDFs | WeasyPrint + Jinja2 | 60+ |
+| Frontend | HTML5 + CSS3 + JS vanilla | — |
+| Servidor | Uvicorn ASGI | — |
+| Deploy | systemd + Ubuntu 22.04+ | — |
+ 
+---
+ 
+## 🖥️ Requisitos Previos
+ 
 | Requisito | Versión | Notas |
 |-----------|---------|-------|
-| Python | **3.11.9 exacta** | [Descargar](https://www.python.org/ftp/python/3.11.9/python-3.11.9-amd64.exe) |
+| Python | **3.10+** | Recomendado 3.11.9 |
 | MySQL | 8.0 o 5.7 | — |
-| GTK3 Runtime | última | Solo Windows — requerido por WeasyPrint · [Descargar](https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases) |
+| GTK3 Runtime | última | **Solo Windows** — requerido por WeasyPrint |
 | Git | cualquiera | — |
-
-> ⚠️ **Windows:** instalar GTK3 y **reiniciar el equipo** antes de continuar.
-
+| pip | 21+ | — |
+ 
+### ⚠️ Nota importante para Windows
+ 
+**Instalar GTK3 Runtime y reiniciar el equipo antes de continuar:**
+1. Descargar desde [GitHub](https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases)
+2. Ejecutar instalador
+3. Reiniciar equipo
+4. Continuar con instalación de dependencias Python
+ 
 ---
-
-### Paso a paso
-
-**1. Clonar el repositorio**
+ 
+## 🚀 Instalación Local
+ 
+### Paso 1: Clonar repositorio
 ```bash
-git clone https://github.com/TU-USUARIO/misionales-fastapi.git
-cd misionales-fastapi
+git clone https://github.com/tu-usuario/misionales-incubant.git
+cd misionales-incubant
 ```
-
-**2. Crear y activar el entorno virtual**
+ 
+### Paso 2: Crear entorno virtual
 ```bash
 python -m venv venv
-
-# Windows PowerShell
+ 
+# Windows (PowerShell)
 venv\Scripts\activate
-
+ 
 # Linux / Mac
 source venv/bin/activate
-
-# Verificar versión (debe ser 3.11.9)
+ 
+# Verificar versión
 python --version
 ```
-
-**3. Instalar dependencias**
+ 
+### Paso 3: Instalar dependencias
 ```bash
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
-
-**4. Configurar variables de entorno**
+ 
+### Paso 4: Configurar variables de entorno
 ```bash
 cp .env.example .env
 ```
-
-Editar `.env` con los valores del entorno:
+ 
+Editar `.env`:
 ```env
 # Base de datos
-DB_HOST=localhost
-DB_USER=tu_usuario_mysql
-DB_PASSWORD=tu_password_seguro
-DB_NAME=misionales_db
-
-# Seguridad — generar clave única:
-# python -c "import secrets; print(secrets.token_hex(32))"
-SECRET_KEY=pega_aqui_la_clave_generada
-
-# CORS
-CORS_ORIGINS=http://localhost:8000
-
-# Producción (false para desarrollo local)
-HTTPS_ENABLED=false
-REGISTER_ENABLED=false
-DEBUG=false
+DATABASE_URL=mysql+pymysql://root:password@localhost:3306/misionales_incubant
+ 
+# Seguridad
+SECRET_KEY=tu-clave-secreta-aleatorea-64-caracteres-aqui
+ALGORITHM=HS256
+DEFAULT_TOKEN_EXPIRATION_HOURS=24
+ 
+# Server
+DEBUG=True
+HTTPS_ENABLED=False
+ALLOWED_ORIGINS=http://localhost:8000
+ 
+# Almacenamiento
+PDF_OUTPUT_DIR=app/data/generated_pdfs
+FIRMAS_OUTPUT_DIR=app/data/firmas
 ```
-
-**5. Crear la base de datos**
-```sql
-CREATE DATABASE misionales_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
-
-Las tablas se crean automáticamente al iniciar la aplicación por primera vez.
-
-> Si `usuarios` ya existía de una instalación anterior:
-> ```sql
-> ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS activo INT NOT NULL DEFAULT 1;
-> ```
-
-**6. Crear el primer administrador**
+ 
+**Para generar SECRET_KEY:**
 ```bash
-python admin_cli.py
+python -c "import secrets; print(secrets.token_hex(32))"
 ```
-
-El CLI solicita nombre de usuario, nombre completo, PIN y confirmación.
-
-**7. Iniciar el servidor**
+ 
+### Paso 5: Crear base de datos
+```bash
+mysql -u root -p
+> CREATE DATABASE misionales_incubant CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+> EXIT;
+```
+ 
+Las tablas se crean automáticamente al iniciar la aplicación.
+ 
+### Paso 6: Crear primer usuario admin
+```bash
+python -c "from app.database import Base, engine; Base.metadata.create_all(bind=engine)"
+```
+ 
+Luego acceder a `/admin` en el navegador y crear usuario.
+ 
+### Paso 7: Iniciar servidor
 ```bash
 # Desarrollo (con auto-reload)
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-
-# Producción
-uvicorn app.main:app --host 0.0.0.0 --port 8000
+python main.py
+# O: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+ 
+# Acceder a:
+# - App: http://localhost:8000
+# - Docs API: http://localhost:8000/docs
 ```
-
-Abrir en el navegador:
-- Aplicación: [http://localhost:8000](http://localhost:8000)
-- Documentación API: [http://localhost:8000/docs](http://localhost:8000/docs)
-
+ 
 ---
-
-## Deploy en producción (VPS Ubuntu)
-
-### Dependencias del sistema
+ 
+## ⚙️ Configuración
+ 
+### Variables de Entorno Críticas
+ 
+| Variable | Descripción | Desarrollo | Producción |
+|----------|-------------|-----------|-----------|
+| `SECRET_KEY` | Clave JWT | random | random (fija) |
+| `DEBUG` | Modo depuración | True | False |
+| `HTTPS_ENABLED` | Forzar HTTPS | False | True |
+| `DEFAULT_TOKEN_EXPIRATION_HOURS` | Expiración token | 24 | 24 |
+| `DATABASE_URL` | Conexión BD | localhost | IP remota |
+ 
+---
+ 
+## 📁 Estructura del Proyecto
+ 
+```
+misionales-incubant/
+├── app/
+│   ├── main.py                      # App principal, CORS, handlers
+│   ├── database.py                  # SQLAlchemy + MySQL
+│   ├── models.py                    # ORM: Usuario, Inspeccion, etc
+│   ├── security.py                  # JWT, bcrypt, autenticación
+│   ├── utils_pdf.py                 # WeasyPrint
+│   │
+│   ├── routes/
+│   │   ├── auth.py                  # /login, /logout, /verify, /me
+│   │   ├── inspecciones.py          # /submit, /mis-inspecciones, /detalle
+│   │   └── admin.py                 # /admin, /admin/usuarios, /admin/logs
+│   │
+│   ├── templates/
+│   │   ├── auth/login.html
+│   │   ├── inspecciones/
+│   │   │   ├── index.html           # Formulario
+│   │   │   └── lista_inspecciones.html
+│   │   ├── admin/
+│   │   │   ├── dashboard.html
+│   │   │   ├── inspecciones.html
+│   │   │   ├── usuarios.html
+│   │   │   └── logs.html
+│   │   ├── pdf_template.html        # PDF individual
+│   │   └── pdf_template_multiple.html # PDF consolidado
+│   │
+│   └── static/
+│       ├── css/incubant-theme.css
+│       ├── js/
+│       │   ├── session-check.js     # Verificador sesión
+│       │   └── form-validation.js
+│       └── img/logotipo_01.png      # ⚠️ minúscula obligatoria
+│
+├── data/                            # Generado automáticamente (NO Git)
+│   ├── generated_pdfs/usuarios/{id}/
+│   │   ├── inspecciones/
+│   │   └── reportes/
+│   └── firmas/usuarios/{id}/
+│
+├── requirements.txt
+├── .env.example
+├── .gitignore
+└── README.md
+```
+ 
+---
+ 
+## 🔄 Flujo de una Inspección
+ 
+```
+Conductor abre http://localhost:8000/
+        ↓
+Selecciona tipo de vehículo (Moto / Carro / Camión)
+        ↓
+Completa los 13-50 aspectos pre-operacionales (B / M)
+        ↓
+Ingresa datos del vehículo y documentos
+        ↓
+Firma digitalmente en canvas
+        ↓
+Envía → FastAPI valida 15 puntos críticos
+        ↓
+Backend genera PDF con WeasyPrint
+        ↓
+PDF descargado automáticamente
+        ↓
+Inspección guardada en BD + firma PNG en disco
+        ↓
+Conductor accede a /inspecciones/mis-inspecciones
+        ↓
+Visualiza historial (últimas 15) + modal con detalles
+        ↓
+Al completar 15 inspecciones → PDF consolidado generado automáticamente
+        ↓
+Contador reinicia: 0/15 (nuevo ciclo)
+```
+ 
+---
+ 
+## 🛣️ API Endpoints
+ 
+### Autenticación
+ 
+```
+GET  /login                 # Formulario login
+POST /auth/login            # Autenticar con cédula + PIN
+POST /auth/logout           # Cerrar sesión
+GET  /auth/me               # Datos usuario actual
+GET  /auth/verify           # Verificar token válido
+```
+ 
+### Inspecciones (Conductor)
+ 
+```
+GET  /                                      # Formulario
+POST /inspecciones/submit                   # Enviar inspección
+GET  /inspecciones/mis-inspecciones         # Historial (últimas 15)
+GET  /inspecciones/mis-inspecciones?formato=json
+GET  /inspecciones/detalle/{id}?formato=json
+GET  /inspecciones/detalle/{id}?formato=pdf
+GET  /inspecciones/reporte-consolidado/{id}  # Descargar consolidado
+```
+ 
+### Admin
+ 
+```
+GET  /admin                          # Dashboard
+GET  /admin/inspecciones            # Todas las inspecciones
+GET  /admin/usuarios                # Gestionar usuarios
+POST /admin/usuarios                # Crear usuario
+PUT  /admin/usuarios/{id}           # Editar usuario
+GET  /admin/logs                    # Auditoria
+```
+ 
+---
+ 
+## 🚀 Deploy en Producción
+ 
+### Dependencias del sistema (Ubuntu 22.04)
+ 
 ```bash
-sudo apt install libcairo2 libpango-1.0-0 libpangocairo-1.0-0
+sudo apt update
+sudo apt install -y python3.10 python3-pip mysql-server git nginx
+sudo apt install -y libcairo2 libpango-1.0-0 libpangocairo-1.0-0
 ```
-
-### Variables de entorno en producción
-```env
-CORS_ORIGINS=http://IP_DEL_VPS:8000
-HTTPS_ENABLED=true
-DEBUG=false
-```
-
-### Servicio systemd
-
+ 
+### Configuración systemd
+ 
 Crear `/etc/systemd/system/misionales.service`:
+ 
 ```ini
 [Unit]
-Description=Misionales FastAPI
+Description=Misionales Incubant
 After=network.target
-
+ 
 [Service]
+Type=notify
 User=www-data
-WorkingDirectory=/opt/misionales
-EnvironmentFile=/opt/misionales/.env
-ExecStart=/opt/misionales/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000
+WorkingDirectory=/home/app/misionales
+Environment="PATH=/home/app/misionales/venv/bin"
+ExecStart=/home/app/misionales/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000
 Restart=always
-RestartSec=3
-
+RestartSec=10
+ 
 [Install]
 WantedBy=multi-user.target
 ```
-
+ 
 ```bash
 sudo systemctl enable misionales
 sudo systemctl start misionales
 sudo systemctl status misionales
 ```
-
----
-
-## Estructura del proyecto
-
+ 
+### Nginx como proxy
+ 
+```nginx
+server {
+    listen 80;
+    server_name tu-dominio.com;
+    
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
 ```
-misionales-fastapi/
-│
-├── app/
-│   ├── main.py                         # App principal, CORS, exception handlers
-│   ├── database.py                     # Conexión SQLAlchemy + MySQL
-│   ├── models.py                       # ORM: Usuario, Inspeccion, Reporte, Log
-│   ├── security.py                     # JWT, bcrypt, rate limiting
-│   │
-│   ├── routes_auth.py                  # Login, logout, registro
-│   ├── routes_inspecciones.py          # Submit, historial, PDFs
-│   ├── routes_admin.py                 # Dashboard, usuarios, inspecciones, logs
-│   │
-│   ├── utils_pdf.py                    # Generación PDF con WeasyPrint
-│   ├── admin_cli.py                    # CLI para crear usuarios
-│   │
-│   ├── templates/
-│   │   ├── login.html
-│   │   ├── form.html                   # Formulario Moto / Carro / Camión
-│   │   ├── lista_inspecciones.html     # Historial del conductor
-│   │   ├── pdf_template.html           # PDF individual (A4)
-│   │   ├── pdf_template_multiple.html  # PDF consolidado 15 (A4 landscape)
-│   │   └── admin/
-│   │       ├── dashboard.html
-│   │       ├── inspecciones.html
-│   │       ├── usuarios.html
-│   │       ├── usuario_form.html
-│   │       └── logs.html
-│   │
-│   └── static/
-│       ├── css/incubant-theme.css
-│       ├── img/logotipo_01.png          # ⚠ nombre en minúscula obligatorio
-│       └── fonts/                       # Futura (4 variantes)
-│
-├── data/                               # Generado automáticamente — no se sube a Git
-│   ├── generated_pdfs/usuarios/{id}/
-│   │   ├── inspecciones/               # PDFs individuales
-│   │   └── reportes/                   # PDFs consolidados
-│   └── firmas/usuarios/{id}/           # PNGs de firmas digitales
-│
-├── requirements.txt
-├── .env.example
-├── .gitignore
-├── migration.sql                       # Script BD para primer deploy
-├── check_fonts.sh                      # Verificador de fonts para WeasyPrint
-└── README.md
+ 
+### SSL con Let's Encrypt
+ 
+```bash
+sudo apt install certbot python3-certbot-nginx
+sudo certbot certonly --nginx -d tu-dominio.com
 ```
-
+ 
 ---
-
-## Flujo de una inspección
-
-```
-Conductor abre el formulario
-        ↓
-Selecciona tipo de vehículo (Moto / Carro / Camión)
-        ↓
-Completa los aspectos pre-operacionales (B / M)
-        ↓
-Firma digitalmente en canvas
-        ↓
-Envía → FastAPI genera PDF con WeasyPrint
-        ↓
-PDF descargado automáticamente en el navegador
-        ↓
-Inspección guardada en BD
-        ↓
-Al llegar a 15 inspecciones → PDF consolidado generado
-        ↓
-Historial disponible en "Mis inspecciones"
-```
-
+ 
+## 🐛 Solución de Problemas
+ 
+| Síntoma | Causa | Solución |
+|---------|-------|----------|
+| **WeasyPrint falla (Windows)** | GTK3 no instalado | Instalar GTK3 Runtime y reiniciar |
+| **`No module named 'cairo'`** | GTK3 no detectado | Reinstalar GTK3, verificar PATH |
+| **Logo no aparece en PDF** | Nombre incorrecto | Archivo debe llamarse `logotipo_01.png` (minúscula) |
+| **Error conectar MySQL** | Credenciales inválidas | Verificar `DATABASE_URL` en `.env` |
+| **Contador 15 muestra 90** | Versión vieja | Actualizar a v2.1 |
+| **"Error cargando detalle"** | Falta `credentials: "include"` | Ya está arreglado en v2.1 |
+| **Sesión expira constantemente** | `SECRET_KEY` cambia en restart | Definir `SECRET_KEY` fija en `.env` |
+| **Base de datos lenta (1000+ registros)** | Faltan índices | Ejecutar: `ALTER TABLE inspecciones ADD INDEX idx_usuario_fecha (usuario_id, fecha DESC);` |
+ 
 ---
-
-## Solución de problemas
-
-| Síntoma | Causa probable | Solución |
-|---------|---------------|----------|
-| WeasyPrint no genera PDF (Windows) | GTK3 no instalado | Instalar GTK3 Runtime y reiniciar el equipo |
-| `No module named 'cairo'` | GTK3 no detectado | Reinstalar GTK3 y verificar PATH |
-| Logo no aparece en el PDF | Nombre de archivo incorrecto | El archivo debe llamarse `logotipo_01.png` en **minúscula** (Linux es sensible) |
-| Error al conectar MySQL | Credenciales incorrectas | Verificar `DB_USER`, `DB_PASSWORD` y `DB_NAME` en `.env` |
-| `Column activo doesn't exist` | Migración pendiente | Ejecutar `ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS activo INT NOT NULL DEFAULT 1;` |
-| Sesión expira constantemente | `SECRET_KEY` cambia en cada restart | Definir `SECRET_KEY` fija en `.env` |
-
+ 
+## 📈 Sostenibilidad
+ 
+### Crecimiento de Datos Estimado
+ 
+**100 conductores × 5 años:**
+- Inspecciones en BD: ~90,000 registros
+- PDFs individuales: ~27 GB
+- Firmas PNG: ~6.75 GB
+- PDFs consolidados: ~9 GB
+- **Total disco: ~45 GB** ✅ Sostenible en VPS con SSD 100GB
+ 
+### Recomendaciones por Período
+ 
+**Inmediato (0-6 meses):**
+- ✅ Mostrar solo últimas 15 inspecciones
+- ✅ Contador correcto (0-15)
+- ✅ No borrar inspecciones (auditoría)
+ 
+**Corto plazo (6-12 meses):**
+- Agregar índices en BD
+- Paginación en historial consolidados
+- Búsqueda en historial completo
+ 
+**Mediano plazo (1-2 años):**
+- Archivado automático (>2 años → tabla archivo)
+- Comprimir firmas antiguas
+- Resultado: 87 GB → 30 GB
+ 
+**Largo plazo (2+ años):**
+- Exportar a AWS S3 o Google Cloud Storage
+- Mantener últimas 15 en disco rápido
+- Acceso a histórico con latencia
+ 
+Ver [SOSTENIBILIDAD_Y_RECOMENDACIONES.md](./SOSTENIBILIDAD_Y_RECOMENDACIONES.md) para detalles.
+ 
 ---
-
-## Licencia y soporte
-
-Desarrollado por **SanWeb de Incubant · Antioqueña de Incubación S.A.S.**  
+ 
+## 📝 Historial de Cambios
+ 
+### v2.1 (2026-06-29) ✅ Actual
+- **Correcciones por Sostenibilidad**
+  - Limitar `/mis-inspecciones` a últimas 15 registros
+  - Arreglar contador de consolidado (0-15)
+  - Comentar borrado automático de inspecciones
+  - Documentación completa de sostenibilidad
+ 
+### v2.0 (2026-06-28)
+- Integración completa RBAC + PDFs
+- Admin: usuarios, logs, inspecciones
+- PDF consolidado cada 15 inspecciones
+- session-check.js mejorado
+ 
+### v1.5 (2026-06-25)
+- Migrar a httpOnly cookies
+- Endpoints retornan JSON para AJAX
+- `/auth/me` para verificar sesión
+ 
+### v1.0 (2026-05-25)
+- MVP funcional
+- Autenticación básica
+- Formulario inspección
+- PDF individual
+ 
+---
+ 
+## 📚 Documentación Adicional
+ 
+- [README.md](./README.md) — Documentación técnica completa
+- [INDICE_ARCHIVOS_FINALES.md](./INDICE_ARCHIVOS_FINALES.md) — Guía de aplicación
+- [SOSTENIBILIDAD_Y_RECOMENDACIONES.md](./SOSTENIBILIDAD_Y_RECOMENDACIONES.md) — Plan de mantenimiento
+ 
+---
+ 
+## 🤝 Equipo de Desarrollo
+ 
+Desarrollado por **SanWeb de Incubant**  
+**Antioqueña de Incubación S.A.S.**
+ 
+---
+ 
+## 📄 Licencia
+ 
 Sistema propietario para gestión SST de conductores misionales.
-
-Para soporte técnico contactar al equipo de desarrollo interno de Incubant.
+ 
+---
+ 
+## 📞 Soporte
+ 
+Para soporte técnico, contactar al equipo de desarrollo interno de Incubant.
+ 
+---
+ 
+**Última actualización:** 2026-06-29  
+**Versión actual:** v2.1  
+**Estado:** ✅ Estable y Sostenible
