@@ -1,5 +1,3 @@
-# app/routes/inspecciones.py - VERSIÓN CORREGIDA CON VALIDACIONES CRÍTICAS
- 
 from fastapi import APIRouter, Form, Depends, Request
 from fastapi.responses import FileResponse, JSONResponse, Response, HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -43,7 +41,7 @@ LEGACY_DIR = BASE_PDF_DIR
 # ✅ FIX: logotipo_01.png (lowercase, archivo correcto)
 LOGO_PATH = (_HERE / "static" / "img" / "logotipo_01.png").resolve()
  
-DELETE_AFTER_CONSOLIDATION = True
+DELETE_AFTER_CONSOLIDATION = False  # ✅ Mantener inspecciones después de consolidar
  
  
 # ===============================
@@ -709,11 +707,11 @@ async def submit_inspeccion(
                 output_path=str(reporte_path),
             )
  
-            # ✅ Verificar que el PDF existe y tiene contenido antes de borrar BD
+            # ✅ Verificar que el PDF existe y tiene contenido antes de guardar historial
             if not reporte_path.exists() or reporte_path.stat().st_size < 1000:
                 raise RuntimeError(f"PDF consolidado inválido: {reporte_path}")
  
-            # Solo si el PDF es válido → guardar historial
+            # ✅ Guardar historial del consolidado
             hist = models.ReporteInspeccion(
                 nombre_conductor=nombre_conductor,
                 fecha_reporte=datetime.now(),
@@ -723,7 +721,10 @@ async def submit_inspeccion(
             db.add(hist)
             db.commit()
  
-            # Solo si el PDF es válido → borrar inspecciones + firmas
+            # ✅ COMENTADO: No borrar inspecciones después de consolidar
+            # Las inspecciones se MANTIENEN en el historial para auditoría
+            # Si en el futuro necesitas borrarlas, descomentar el bloque abajo
+            """
             if DELETE_AFTER_CONSOLIDATION:
                 for r in registros:
                     try:
@@ -741,6 +742,7 @@ async def submit_inspeccion(
                         print(f"⚠️ Error eliminando registro: {e}")
                         
                 db.commit()
+            """
  
             return safe_return_pdf(reporte_path, reporte_filename)
  
@@ -820,7 +822,7 @@ async def generar_pdf15(
  
 # ==========================================================
 #   RUTA: MIS INSPECCIONES (historial del conductor)
-#   ✅ CORREGIDA: Soporte para ?formato=json
+#   ✅ OPTIMIZADA: Solo últimas 15 activas + historial consolidado
 # ==========================================================
  
 @router.get("/mis-inspecciones")
@@ -833,25 +835,32 @@ async def mis_inspecciones(
     """
     Historial de inspecciones del conductor autenticado.
     
+    OPTIMIZACIÓN PARA SOSTENIBILIDAD:
+    - Muestra solo las ÚLTIMAS 15 inspecciones sin consolidar (ciclo actual)
+    - Si hay 90 inspecciones, muestra solo las últimas 15 (ciclo 6)
+    - Los ciclos anteriores están en "Historial de consolidados"
+    
     Soporta dos formatos:
     - ?formato=html (defecto) → devuelve template lista_inspecciones.html
     - ?formato=json → devuelve JSON con registros + reportes
-    
-    ✅ CORREGIDO: Ahora soporta JSON para que lista_inspecciones.html pueda cargar datos
     """
     nombre_conductor = normalize_name(
         usuario_actual.nombre_visible or usuario_actual.nombre
     )
  
-    # ✅ Filtrar por usuario_id, no por nombre
-    registros = (
+    # ✅ OPTIMIZACIÓN: Solo últimas 15 inspecciones (ciclo actual)
+    # Ordenar DESC, limitar 15, luego invertir para mostrar cronológicamente
+    registros_raw = (
         db.query(models.Inspeccion)
         .filter(models.Inspeccion.usuario_id == usuario_actual.id)
-        .order_by(models.Inspeccion.fecha.asc())
+        .order_by(models.Inspeccion.fecha.desc())
+        .limit(15)  # ✅ MÁXIMO 15 en la vista principal
         .all()
     )
+    # Invertir para mostrar más antigua a más nueva
+    registros = list(reversed(registros_raw))
  
-    # Reportes consolidados
+    # Reportes consolidados (historial de PDFs generados)
     reportes_consolidados = (
         db.query(models.ReporteInspeccion)
         .filter(models.ReporteInspeccion.nombre_conductor == nombre_conductor)
@@ -859,10 +868,17 @@ async def mis_inspecciones(
         .all()
     )
  
+    # ✅ Contador correcto: len(registros) será siempre <= 15
+    # Si hay 90 inspecciones totales (6 ciclos), muestra 15 del ciclo actual
+    total_activas = len(registros)
+    puede_generar_pdf15 = total_activas >= 15
+ 
     # ✅ NUEVO: Soporte para JSON
     if formato.lower() == "json":
         return JSONResponse({
             "nombre_conductor": nombre_conductor,
+            "total_en_ciclo": total_activas,  # 0-15
+            "puede_generar_pdf15": puede_generar_pdf15,
             "registros": [
                 {
                     "id": r.id,
@@ -877,7 +893,6 @@ async def mis_inspecciones(
                 }
                 for r in registros
             ],
-            "puede_generar_pdf15": len(registros) >= 15,
             "reportes_consolidados": [
                 {
                     "id": rep.id,
@@ -895,7 +910,7 @@ async def mis_inspecciones(
             "request": request,
             "nombre_conductor": nombre_conductor,
             "registros": registros,
-            "puede_generar_pdf15": len(registros) >= 15,
+            "puede_generar_pdf15": puede_generar_pdf15,
             "reportes_consolidados": reportes_consolidados,
         },
     )
