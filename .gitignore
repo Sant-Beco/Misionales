@@ -1,13 +1,17 @@
 # ============================================
-# MISONALES - .gitignore
+# MISIONALES - .gitignore (v2.0 mejorado)
 # ============================================
 
 # ===== ARCHIVOS SENSIBLES =====
 .env
+.env.local
+.env.production
 *.db
 *.sqlite
 *.sqlite3
 *.sql
+*.dump
+backup_*.sql
 
 # ===== PYTHON =====
 __pycache__/
@@ -22,16 +26,19 @@ env/
 *.egg-info/
 dist/
 build/
+.eggs/
 
-# ===== DATOS GENERADOS =====
-data/generated_pdfs/**/*.pdf
-data/firmas/**/*.png
-
-# Mantener estructura de carpetas
+# ===== DATOS GENERADOS (Excluir contenido, mantener estructura) =====
+data/generated_pdfs/usuarios/
+data/firmas/usuarios/
+data/logs/
 !data/generated_pdfs/.gitkeep
 !data/firmas/.gitkeep
+!data/logs/.gitkeep
 
 # ===== BACKUPS =====
+backups/*.sql
+backups/*.dump
 *_OLD.py
 *_OLD.html
 *_BACKUP.*
@@ -39,27 +46,61 @@ backup_*/
 
 # ===== IDEs =====
 .vscode/
+.vscode/settings.json
 .idea/
 *.swp
 *.swo
 *~
+*.sublime-project
+*.sublime-workspace
+.project
+.pydevproject
 
 # ===== SISTEMA OPERATIVO =====
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 desktop.ini
 
 # ===== TESTS =====
 .pytest_cache/
 .coverage
+.coverage.*
 htmlcov/
 *.cover
+.tox/
+.hypothesis/
 
 # ===== TEMPORALES =====
 *.tmp
 *.temp
-*.log 
+*.log
+*.bak
+*.swp
+.cache/
 
-# Python compiled
+# ===== COMPILADOS PYTHON =====
 *.pyc
 *.pyo
+*.pyd
+*.so
+
+# ===== NODE (si se agrega frontend build) =====
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+# ===== DOCKER =====
+docker-compose.override.yml
+.dockerignore
+
+# ===== IDE VIRTUAL (venv en raíz) =====
+venv/
+.venv/
+env/
+ENV/
