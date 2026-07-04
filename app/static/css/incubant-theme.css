@@ -342,10 +342,8 @@ body {
 [data-theme="dark"] .theme-toggle-thumb  { transform: translateX(14px); }
  
 /* ══════════════════════════════════════════
-   INPUTS BASE (Login + formularios globales)
-   Los !important neutralizan autofill y
-   el cambio de fondo al tener valor en
-   Chrome/Edge/Safari/Brave.
+   INPUTS BASE (Login + formularios globales) Los !important neutralizan autofill y
+   el cambio de fondo al tener valor en Chrome/Edge/Safari/Brave.
    ══════════════════════════════════════════ */
 .form-group { margin-bottom: 1.25rem; }
 .form-label {
@@ -987,10 +985,8 @@ body.page-login {
 .field  { display: flex; flex-direction: column; }
  
 /* ══════════════════════════════════════════
-   CAMPOS f-input / f-select / f-textarea
-   Mismos principios que .form-input:
-   fondo siempre var(--input-bg), nunca
-   cambia con el valor ni con autofill.
+   CAMPOS f-input / f-select / f-textarea Mismos principios que .form-input:
+   fondo siempre var(--input-bg), nunca cambia con el valor ni con autofill.
    ══════════════════════════════════════════ */
 .f-label {
   font-size: 0.65rem;
