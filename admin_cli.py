@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 """
-CLI de administración de usuarios — Misionales v3.1
+CLI de administración de usuarios — Misionales v3.2
 =====================================================
-v3.1:
-  - Eliminado passlib completamente (incompatible con bcrypt 4.x)
-  - Usa hash_pin / verify_pin de app.security directamente
-  - PIN mínimo 4 dígitos (compatibilidad), recomendado 6+
-  - validate_pin actualizado para aceptar 4-20 dígitos
-  - Sistema de login basado en CÉDULA (5-12 dígitos numéricos)
+v3.2:
+  - Funciona desde cualquier ubicación (raíz o scripts/)
+  - Fixes dinámicos de sys.path y LOG_DIR
+  - Sin passlib (usa bcrypt 4.x compatible)
+  - PIN mínimo 4 dígitos, recomendado 6+
+  - Sistema de login basado en CÉDULA (5-12 dígitos)
  
-Uso (desde el repo raíz):
-  python admin_cli.py
-  python -m app.admin_cli
+Uso:
+  python admin_cli.py          # Desde raíz
+  python scripts/admin_cli.py  # Desde scripts/
+  cd scripts && python admin_cli.py
  
 Registra en: app/logs/admin.log
 """
@@ -21,30 +22,53 @@ import sys
 import logging
 import re
 from getpass import getpass
+from pathlib import Path
 from typing import Optional
  
-# ─── Importar hash/verify desde security.py (sin passlib) ──────────────────
-from app.security import hash_pin, verify_pin, validar_pin
-from app.database import SessionLocal
-from app.models import Usuario
+# ════════════════════════════════════════════════════════════════════════════
+# ✅ FIX DINÁMICO: Encontrar raíz del proyecto y agregar a sys.path
+# ════════════════════════════════════════════════════════════════════════════
+ 
+_current_dir = Path(__file__).resolve().parent
+_is_in_scripts = _current_dir.name == "scripts"
+_root_dir = _current_dir.parent if _is_in_scripts else _current_dir
+ 
+# Agregar raíz al path de Python para importar app/
+sys.path.insert(0, str(_root_dir))
+ 
+# ─── Importar módulos (ahora funciona desde cualquier ubicación) ──────────────────
+try:
+    from app.security import hash_pin, verify_pin, validar_pin
+    from app.database import SessionLocal
+    from app.models import Usuario
+except ImportError as e:
+    print(f"❌ Error importando módulos de app/: {e}")
+    print(f"   Asegúrate de ejecutar desde la raíz del proyecto o desde scripts/")
+    sys.exit(1)
 # ────────────────────────────────────────────────────────────────────────────
  
-# ─── Logging ────────────────────────────────────────────────────────────────
-LOG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app", "logs")
-os.makedirs(LOG_DIR, exist_ok=True)
-LOG_FILE = os.path.join(LOG_DIR, "admin.log")
+# ════════════════════════════════════════════════════════════════════════════
+# ✅ LOGGING DINÁMICO
+# ════════════════════════════════════════════════════════════════════════════
+ 
+LOG_DIR = _root_dir / "app" / "logs"
+LOG_DIR.mkdir(parents=True, exist_ok=True)
+LOG_FILE = LOG_DIR / "admin.log"
  
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
     handlers=[
-        logging.FileHandler(LOG_FILE, encoding="utf-8"),
+        logging.FileHandler(str(LOG_FILE), encoding="utf-8"),
         logging.StreamHandler(sys.stdout),
     ],
 )
 logger = logging.getLogger("admin_cli")
  
-# ─── Colores consola ────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────────────────────
+# Colores consola
+# ────────────────────────────────────────────────────────────────────────────
+ 
 G  = "\033[92m"
 R  = "\033[91m"
 Y  = "\033[93m"
@@ -63,12 +87,7 @@ def info(msg): print(f"{C}ℹ️  {msg}{RST}")
 # ════════════════════════════════════════════════════════════════════════════
  
 def validate_pin_cli(pin: str) -> tuple[bool, str]:
-    """
-    Validación de PIN para el CLI.
-    Delega en security.validar_pin() para consistencia total.
-    Si el PIN tiene 4-5 dígitos (compatibilidad con usuarios existentes)
-    también lo acepta aunque security.py prefiera 6+.
-    """
+    """Validación de PIN para el CLI."""
     if not pin or not pin.isdigit():
         return False, "El PIN solo debe contener dígitos (0-9)."
     if len(pin) < 4:
@@ -77,7 +96,6 @@ def validate_pin_cli(pin: str) -> tuple[bool, str]:
         return False, "El PIN no puede superar 20 dígitos."
     if len(set(pin)) == 1:
         return False, "El PIN no puede tener todos los dígitos iguales."
-    # Aviso (no error) si es corto
     return True, ""
  
 def validate_nombre_visible(nombre: str) -> bool:
@@ -106,13 +124,7 @@ def get_stats() -> dict:
     finally:
         db.close()
  
- 
-def create_user_db(
-    cedula: str,
-    nombre_visible: str,
-    pin: str,
-    rol: str = "user",
-) -> Optional[Usuario]:
+def create_user_db(cedula: str, nombre_visible: str, pin: str, rol: str = "conductor") -> Optional[Usuario]:
     db = SessionLocal()
     try:
         existing = db.query(Usuario).filter(Usuario.cedula == cedula).first()
@@ -120,7 +132,6 @@ def create_user_db(
             warn(f"La cédula '{cedula}' ya está registrada.")
             return None
  
-        # ▸ Usa hash_pin de security.py (SHA-256 + bcrypt, sin passlib)
         pin_hash = hash_pin(pin)
  
         nuevo = Usuario(
@@ -144,7 +155,6 @@ def create_user_db(
     finally:
         db.close()
  
- 
 def list_users_db() -> list:
     db = SessionLocal()
     try:
@@ -154,7 +164,6 @@ def list_users_db() -> list:
         return []
     finally:
         db.close()
- 
  
 def delete_user_db(user_id: int) -> bool:
     db = SessionLocal()
@@ -175,7 +184,6 @@ def delete_user_db(user_id: int) -> bool:
     finally:
         db.close()
  
- 
 def update_pin_db(user_id: int, new_pin: str) -> bool:
     db = SessionLocal()
     try:
@@ -183,7 +191,6 @@ def update_pin_db(user_id: int, new_pin: str) -> bool:
         if not u:
             warn(f"No existe usuario con id={user_id}")
             return False
-        # ▸ Usa hash_pin de security.py
         u.pin_hash = hash_pin(new_pin)
         db.commit()
         logger.info("PIN actualizado: id=%s cedula=%s", user_id, u.cedula)
@@ -194,7 +201,6 @@ def update_pin_db(user_id: int, new_pin: str) -> bool:
         return False
     finally:
         db.close()
- 
  
 def update_nombre_visible_db(user_id: int, nombre_visible: str) -> bool:
     db = SessionLocal()
@@ -213,7 +219,6 @@ def update_nombre_visible_db(user_id: int, nombre_visible: str) -> bool:
         return False
     finally:
         db.close()
- 
  
 def update_rol_db(user_id: int, nuevo_rol: str) -> bool:
     db = SessionLocal()
@@ -234,7 +239,6 @@ def update_rol_db(user_id: int, nuevo_rol: str) -> bool:
     finally:
         db.close()
  
- 
 def toggle_activo_db(user_id: int) -> Optional[bool]:
     db = SessionLocal()
     try:
@@ -252,7 +256,6 @@ def toggle_activo_db(user_id: int) -> Optional[bool]:
         return None
     finally:
         db.close()
- 
  
 # ════════════════════════════════════════════════════════════════════════════
 # HELPERS DE UI
@@ -280,19 +283,15 @@ def mostrar_tabla_usuarios(usuarios: list):
     print(f"\n{DIM}{'ID':>4}  {'Cédula':15}  {'Nombre Visible':28}  {'Rol':8}  {'Activo'}{RST}")
     separador("-", 70)
     for u in usuarios:
-        rol_icon = f"{Y}👑 admin{RST}" if u.rol == "admin" else f"{C}👤 user{RST} "
+        rol_icon = f"{Y}👑 admin{RST}" if u.rol == "admin" else f"{C}👤 conductor{RST} "
         activo   = f"{G}✓{RST}" if getattr(u, 'activo', True) else f"{R}✗{RST}"
         nv = (u.nombre_visible or "")[:28]
         print(f"{u.id:>4}  {u.cedula:15}  {nv:28}  {rol_icon}  {activo}")
     separador("-", 70)
     print(f"  Total: {len(usuarios)} usuarios\n")
  
- 
 def pedir_pin(prompt="Nuevo PIN: ") -> Optional[str]:
-    """
-    Pide y valida el PIN con confirmación.
-    Acepta 4-20 dígitos. Muestra aviso si es menor a 6.
-    """
+    """Pide y valida el PIN con confirmación."""
     for intento in range(3):
         pin  = getpass(f"🔐 {prompt}").strip()
         pin2 = getpass("🔐 Confirmar PIN: ").strip()
@@ -306,26 +305,23 @@ def pedir_pin(prompt="Nuevo PIN: ") -> Optional[str]:
             err(mensaje)
             continue
  
-        # Aviso de seguridad para PINs cortos (no bloquea)
         if len(pin) < 6:
-            warn(f"PIN de {len(pin)} dígitos aceptado, pero se recomienda 6 o más para mayor seguridad.")
+            warn(f"PIN de {len(pin)} dígitos aceptado, pero se recomienda 6 o más.")
  
         return pin
  
     err("Demasiados intentos. Operación cancelada.")
     return None
  
- 
-def pedir_rol(default="user") -> str:
+def pedir_rol(default="conductor") -> str:
     print(f"\n{W}👥 Selecciona el rol:{RST}")
-    print(f"  1) {C}👤 user{RST}  — Solo puede crear inspecciones")
+    print(f"  1) {C}👤 conductor{RST}  — Solo puede crear inspecciones")
     print(f"  2) {Y}👑 admin{RST} — Puede gestionar usuarios y ver todo")
     while True:
-        choice = input(f"Opción (1/2, Enter = {default}): ").strip() or ("1" if default == "user" else "2")
-        if choice == "1": return "user"
+        choice = input(f"Opción (1/2, Enter = {default}): ").strip() or ("1" if default == "conductor" else "2")
+        if choice == "1": return "conductor"
         if choice == "2": return "admin"
         err("Opción inválida.")
- 
  
 # ════════════════════════════════════════════════════════════════════════════
 # ACCIONES DEL MENÚ
@@ -369,7 +365,7 @@ def prompt_create_user(force_admin=False):
     print(f"\n{W}📋 Resumen:{RST}")
     print(f"   Cédula : {C}{cedula}{RST}")
     print(f"   Nombre : {nombre_visible}")
-    print(f"   Rol    : {Y if rol == 'admin' else C}{'👑 admin' if rol == 'admin' else '👤 user'}{RST}")
+    print(f"   Rol    : {Y if rol == 'admin' else C}{'👑 admin' if rol == 'admin' else '👤 conductor'}{RST}")
     print(f"   PIN    : {'*' * len(pin)}")
  
     conf = input(f"\n{W}¿Crear usuario? (S/n): {RST}").strip().lower()
@@ -383,11 +379,9 @@ def prompt_create_user(force_admin=False):
     else:
         err("No se pudo crear el usuario. Revisa app/logs/admin.log")
  
- 
 def prompt_list_users():
     titulo("📋  LISTA DE USUARIOS")
     mostrar_tabla_usuarios(list_users_db())
- 
  
 def prompt_delete_user():
     titulo("🗑️   BORRAR USUARIO")
@@ -411,7 +405,6 @@ def prompt_delete_user():
  
     ok("Usuario borrado.") if delete_user_db(uid) else err("No se pudo borrar.")
  
- 
 def prompt_change_pin():
     titulo("🔐  CAMBIAR PIN")
     mostrar_tabla_usuarios(list_users_db())
@@ -431,7 +424,6 @@ def prompt_change_pin():
     if pin is None: return
  
     ok("PIN actualizado.") if update_pin_db(uid, pin) else err("No se pudo actualizar.")
- 
  
 def prompt_change_nombre():
     titulo("📛  CAMBIAR NOMBRE VISIBLE")
@@ -457,7 +449,6 @@ def prompt_change_nombre():
         return
  
     ok("Nombre actualizado.") if update_nombre_visible_db(uid, nv.title()) else err("No se pudo actualizar.")
- 
  
 def prompt_change_rol():
     titulo("👥  CAMBIAR ROL")
@@ -487,7 +478,6 @@ def prompt_change_rol():
         return
  
     ok(f"Rol actualizado a '{nuevo_rol}'.") if update_rol_db(uid, nuevo_rol) else err("No se pudo actualizar.")
- 
  
 def prompt_toggle_activo():
     titulo("🔛  ACTIVAR / DESACTIVAR USUARIO")
@@ -520,7 +510,6 @@ def prompt_toggle_activo():
     else:
         warn(f"Usuario cédula '{u.cedula}' DESACTIVADO. No podrá iniciar sesión.")
  
- 
 # ════════════════════════════════════════════════════════════════════════════
 # MENÚ PRINCIPAL
 # ════════════════════════════════════════════════════════════════════════════
@@ -540,7 +529,7 @@ def show_header():
     stats = get_stats()
     print(f"\n{W}")
     separador("═")
-    print(f"  🔧  MISIONALES — Admin CLI  v3.1")
+    print(f"  🔧  MISIONALES — Admin CLI  v3.2")
     separador("─", 60)
     print(f"  {C}Usuarios: {stats['total']}{RST}  |  "
           f"  {Y}Admins: {stats['admins']}{RST}  |  "
@@ -572,7 +561,6 @@ def main_menu():
                     err(f"Error inesperado: {e}")
         else:
             err("Opción inválida.")
- 
  
 # ════════════════════════════════════════════════════════════════════════════
 # PUNTO DE ENTRADA
