@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -6,7 +6,7 @@
   <style>
     @page {
       size: A4 landscape;
-      margin: 5mm 7mm 5mm 7mm;
+      margin: 8mm 10mm 10mm 10mm;
     }
  
     @media print {
@@ -17,349 +17,497 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
  
     body {
-      font-family: Arial, sans-serif;
-      font-size: 8px;
-      line-height: 1.25;
+      font-family: DejaVu Sans, Arial, sans-serif;
+      font-size: 9px;
+      line-height: 1.3;
       color: #000;
       background: #fff;
     }
  
-    /* ══ ENCABEZADO COMPACTO ══ */
-    .header {
+    :root {
+      --azul: #003366;
+      --gris: #f4f4f4;
+      --gris-oscuro: #e8e8e8;
+      --gris-borde: #999;
+      --naranja: #f59c00;
+    }
+ 
+    /* ══════════════════════════════════════════════════════════ */
+    /* ENCABEZADO (Estilo similar a inspección individual)       */
+    /* ══════════════════════════════════════════════════════════ */
+    
+    .encabezado {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 3px 0 4px;
-      border-bottom: 1.5px solid #000;
-      margin-bottom: 3px;
-      gap: 6px;
+      border-bottom: 2px solid var(--azul);
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+      gap: 12px;
     }
  
     .logo {
-      width: 40px;
-      height: 40px;
+      width: 80px;
+      height: 80px;
       flex-shrink: 0;
       object-fit: contain;
     }
  
-    .title {
+    .titulo-seccion {
       flex: 1;
       text-align: center;
     }
  
-    .title-main {
-      font-size: 11px;
+    .titulo-principal {
+      font-size: 16px;
       font-weight: 700;
+      color: var(--azul);
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      margin-bottom: 2px;
     }
  
-    .title-sub {
-      font-size: 6.5px;
-      color: #555;
-      margin-top: 1px;
+    .titulo-subtitulo {
+      font-size: 10px;
+      color: #666;
+      margin-bottom: 4px;
     }
  
-    .info {
+    /* ═══════════════════════════════════════════════════════════ */
+    /* METADATA (Código, Versión, Fecha, etc) - MEJORADO         */
+    /* ═══════════════════════════════════════════════════════════ */
+ 
+    .info-header {
       display: flex;
       flex-direction: column;
-      gap: 1px;
-      font-size: 7px;
-      text-align: right;
+      gap: 6px;
       flex-shrink: 0;
+      background: var(--azul);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 4px;
+      text-align: left;
+      min-width: 160px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
  
     .info-item {
       display: flex;
-      justify-content: flex-end;
-      gap: 3px;
+      flex-direction: column;
+      gap: 1px;
     }
  
-    .info-label { font-weight: 700; min-width: 30px; }
-    .info-value { text-align: left; }
- 
-    /* ══ DATOS CONDUCTOR ══ */
-    .conductor {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr 1fr;
-      gap: 2px 8px;
+    .info-label {
+      font-weight: 700;
       font-size: 7.5px;
-      padding: 3px;
-      background: #f5f5f5;
-      border: 0.5px solid #ccc;
-      border-radius: 2px;
-      margin-bottom: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #e0e0e0;
+    }
+ 
+    .info-valor {
+      font-weight: 700;
+      font-size: 11px;
+      color: #fff;
+      line-height: 1.2;
+    }
+ 
+    .info-valor.codigo {
+      font-size: 13px;
+      color: #ffd700;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.1em;
+    }
+ 
+    /* ══════════════════════════════════════════════════════════ */
+    /* DATOS CONDUCTOR (Card estilo)                             */
+    /* ══════════════════════════════════════════════════════════ */
+    
+    .datos-conductor {
+      background: var(--gris);
+      border: 1px solid var(--gris-borde);
+      border-radius: 4px;
+      padding: 8px;
+      margin-bottom: 10px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      font-size: 9px;
     }
  
     .conductor-field {
       display: flex;
+      flex-direction: column;
       gap: 2px;
     }
  
     .conductor-label {
       font-weight: 700;
-      min-width: 45px;
+      color: var(--azul);
+      font-size: 8px;
     }
  
-    .conductor-value {
-      flex: 1;
-      border-bottom: 0.5px solid #999;
-      padding: 0 2px;
-    }
- 
-    /* ══ TABLA DOCUMENTOS ══ */
-    .docs-title {
-      font-size: 7px;
-      font-weight: 700;
-      background: #333;
-      color: #fff;
+    .conductor-valor {
+      border-bottom: 1px solid #999;
       padding: 2px 4px;
-      margin-bottom: 1px;
+      min-height: 16px;
     }
  
-    table.docs {
+    /* ══════════════════════════════════════════════════════════ */
+    /* TABLA DOCUMENTOS                                           */
+    /* ══════════════════════════════════════════════════════════ */
+    
+    .seccion-titulo {
+      font-size: 9px;
+      font-weight: 700;
+      background: var(--azul);
+      color: white;
+      padding: 4px 6px;
+      margin-top: 10px;
+      margin-bottom: 4px;
+      border-radius: 3px;
+    }
+ 
+    table.documentos {
       width: 100%;
       border-collapse: collapse;
-      font-size: 7px;
-      margin-bottom: 3px;
+      margin-bottom: 10px;
+      font-size: 8.5px;
     }
  
-    table.docs th {
-      background: #e0e0e0;
-      padding: 1.5px 2px;
+    table.documentos th {
+      background: var(--gris-oscuro);
+      color: var(--azul);
+      padding: 4px 5px;
       text-align: left;
       font-weight: 700;
-      border: 0.5px solid #999;
+      border: 1px solid var(--gris-borde);
+      font-size: 8px;
     }
  
-    table.docs td {
-      padding: 1.5px 2px;
-      border: 0.5px solid #ddd;
+    table.documentos td {
+      padding: 4px 5px;
+      border: 1px solid #ddd;
     }
  
-    table.docs td:nth-child(1) {
-      font-weight: 700;
+    table.documentos tr:nth-child(even) {
       background: #fafafa;
-      min-width: 120px;
     }
  
-    /* ══ TABLA ASPECTOS ══ */
-    .aspectos-title {
-      font-size: 7px;
-      font-weight: 700;
-      background: #f59c00;
-      color: #fff;
-      padding: 2px 4px;
-      margin-bottom: 1px;
-    }
- 
+    /* ══════════════════════════════════════════════════════════ */
+    /* TABLA ASPECTOS (Principal)                                */
+    /* ══════════════════════════════════════════════════════════ */
+    
     table.aspectos {
       width: 100%;
       border-collapse: collapse;
-      font-size: 7px;
+      font-size: 8px;
+      margin-bottom: 8px;
     }
  
     table.aspectos th {
-      background: #e8e8e8;
-      padding: 1px;
+      background: var(--gris-oscuro);
+      padding: 3px 2px;
       text-align: center;
       font-weight: 700;
-      border: 0.5px solid #999;
-      font-size: 6.5px;
+      border: 1px solid var(--gris-borde);
+      font-size: 7px;
+    }
+ 
+    table.aspectos th.aspecto-nombre {
+      text-align: left;
+      padding-left: 4px;
+      background: var(--azul);
+      color: white;
     }
  
     table.aspectos td {
-      padding: 1px;
-      border: 0.5px solid #ccc;
+      padding: 2px 1px;
+      border: 1px solid #ddd;
       text-align: center;
-      height: 12px;
+      height: 14px;
+      font-weight: 600;
     }
  
     table.aspectos td:first-child {
       text-align: left;
-      padding-left: 3px;
-      font-size: 7px;
-      font-weight: 600;
-      background: #f9f9f9;
-      border: 0.5px solid #999;
-      min-width: 100px;
+      padding-left: 4px;
+      background: var(--gris);
+      font-weight: 700;
+      border: 1px solid var(--gris-borde);
     }
  
+    table.aspectos tr:nth-child(even) td:first-child {
+      background: #f5f5f5;
+    }
+ 
+    /* Caja para B/M */
     .box {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 10px;
-      height: 10px;
-      border: 0.5px solid #333;
-      font-size: 7px;
+      width: 12px;
+      height: 12px;
+      border: 1px solid #333;
+      font-size: 8px;
       font-weight: 700;
       background: #fff;
+      line-height: 1;
     }
  
-    .total-m {
+    .box.malo {
+      background: #ffe8e8;
+    }
+ 
+    /* Columna de totales Malo */
+    .total-malo {
       background: #fff9e6;
       font-weight: 700;
-      border: 0.5px solid #f59c00;
-      min-width: 12px;
+      border: 1px solid var(--naranja);
+      color: var(--naranja);
+      min-width: 18px;
     }
  
-    /* ══ FOOTER ══ */
+    /* ══════════════════════════════════════════════════════════ */
+    /* FOOTER CON FIRMA                                           */
+    /* ══════════════════════════════════════════════════════════ */
+    
     .footer {
       display: flex;
-      gap: 8px;
-      padding: 2px;
-      border-top: 0.5px solid #ccc;
-      margin-top: 2px;
+      gap: 12px;
+      padding: 8px;
+      border-top: 1.5px solid var(--azul);
+      margin-top: 10px;
       align-items: flex-start;
     }
  
     .firma-box {
       display: flex;
       flex-direction: column;
-      gap: 1px;
+      gap: 2px;
       align-items: center;
-      font-size: 6px;
+      font-size: 8px;
       text-align: center;
       flex-shrink: 0;
     }
  
-    .firma-space {
-      width: 55px;
-      height: 22px;
-      border: 0.5px solid #999;
-      border-top: none;
+    .firma-etiqueta {
+      font-weight: 700;
+      color: var(--azul);
+    }
+ 
+    .firma-espacio {
+      width: 70px;
+      height: 30px;
+      border: 1px solid var(--gris-borde);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 5px;
+      font-size: 7px;
       color: #bbb;
+      background: #fafafa;
     }
  
     .firma-img {
-      max-width: 55px;
-      max-height: 22px;
-      border: 0.5px solid #999;
+      max-width: 70px;
+      max-height: 30px;
+      border: 1px solid var(--gris-borde);
+      background: white;
     }
  
-    .firma-label {
-      font-weight: 700;
-      border-bottom: 0.5px solid #000;
-      padding-bottom: 0px;
-      font-size: 6px;
+    .firma-nombre {
+      font-size: 7px;
+      margin-top: 2px;
+      border-top: 1px solid #000;
+      padding-top: 2px;
+      min-width: 70px;
+      font-weight: 600;
     }
  
-    .firma-name {
-      font-size: 5.5px;
-      margin-top: 14px;
-      border-top: 0.5px solid #000;
-      padding-top: 1px;
-      min-width: 55px;
-    }
- 
-    .note {
-      font-size: 6.5px;
-      line-height: 1.3;
+    .nota-footer {
+      font-size: 8px;
+      line-height: 1.4;
       color: #333;
       flex: 1;
+      padding: 4px;
+      background: #f9f9f9;
+      border-radius: 2px;
     }
  
-    .note strong { font-weight: 700; }
+    .nota-footer strong { 
+      font-weight: 700;
+      color: var(--azul);
+    }
+ 
+    /* Salto de página para mejor presentación */
+    .page-break {
+      page-break-after: always;
+    }
+ 
+    /* Resumen al final */
+    .resumen {
+      margin-top: 8px;
+      padding: 6px;
+      background: var(--gris);
+      border: 1px solid var(--azul);
+      border-radius: 3px;
+      font-size: 8.5px;
+    }
+ 
+    .resumen-titulo {
+      font-weight: 700;
+      color: var(--azul);
+      margin-bottom: 4px;
+      border-bottom: 1px solid var(--azul);
+      padding-bottom: 2px;
+    }
+ 
+    .resumen-items {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      font-size: 8px;
+    }
+ 
+    .resumen-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 2px 4px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 2px;
+    }
+ 
+    .resumen-item-label {
+      font-weight: 600;
+    }
+ 
+    .resumen-item-valor {
+      font-weight: 700;
+      color: var(--naranja);
+    }
  
   </style>
 </head>
  
 <body>
  
-  <!-- ENCABEZADO -->
-  <div class="header">
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- ENCABEZADO                                              -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  
+  <div class="encabezado">
     <img class="logo" src="{{ logo_path }}" alt="Logo">
-    <div class="title">
-      <div class="title-main">Inspección Pre Operacional</div>
-      <div class="title-sub">Sistema de Inspecciones Vehicular SST · Incubant</div>
+    
+    <div class="titulo-seccion">
+      <div class="titulo-principal">Inspecciones Pre Operacionales</div>
+      <div class="titulo-subtitulo">Reporte Consolidado — Ciclo de 15 Inspecciones</div>
+      <div class="titulo-subtitulo" style="font-size: 8px; color: #888;">Sistema SST · Incubant</div>
     </div>
-    <div class="info">
-      <div class="info-item"><span class="info-label">Código:</span> <span class="info-value">{{ codigo }}</span></div>
-      <div class="info-item"><span class="info-label">Versión:</span> <span class="info-value">{{ version }}</span></div>
-      <div class="info-item"><span class="info-label">Fecha:</span> <span class="info-value">{{ fecha }}</span></div>
-      <div class="info-item"><span class="info-label">Registros:</span> <span class="info-value">{{ registros|length }}/15</span></div>
+ 
+    <!-- METADATA MEJORADA -->
+    <div class="info-header">
+      <div class="info-item">
+        <span class="info-label">Código Reporte:</span>
+        <span class="info-valor codigo">{{ codigo }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Versión:</span>
+        <span class="info-valor">{{ version }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Fecha:</span>
+        <span class="info-valor">{{ fecha }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Total:</span>
+        <span class="info-valor">{{ registros|length }}/15</span>
+      </div>
     </div>
   </div>
  
-  <!-- DATOS CONDUCTOR -->
-  <div class="conductor">
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- DATOS DEL CONDUCTOR (Primera inspección)               -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  
+  {% if registros|length > 0 %}
+  <div class="datos-conductor">
     <div class="conductor-field">
-      <span class="conductor-label">Conductor:</span>
-      <span class="conductor-value">{{ registros[0].nombre_conductor }}</span>
+      <span class="conductor-label">👤 Conductor</span>
+      <span class="conductor-valor">{{ registros[0].nombre_conductor }}</span>
     </div>
     <div class="conductor-field">
-      <span class="conductor-label">Placa:</span>
-      <span class="conductor-value">{{ registros[0].placa }}</span>
+      <span class="conductor-label">🚗 Placa</span>
+      <span class="conductor-valor">{{ registros[0].placa }}</span>
     </div>
     <div class="conductor-field">
-      <span class="conductor-label">Proceso:</span>
-      <span class="conductor-value">{{ registros[0].proceso }}</span>
+      <span class="conductor-label">📋 Proceso</span>
+      <span class="conductor-valor">{{ registros[0].proceso }}</span>
     </div>
     <div class="conductor-field">
-      <span class="conductor-label">Marca:</span>
-      <span class="conductor-value">{{ registros[0].marca }}</span>
+      <span class="conductor-label">🏷️ Marca</span>
+      <span class="conductor-valor">{{ registros[0].marca }}</span>
     </div>
     <div class="conductor-field">
-      <span class="conductor-label">Gasolina:</span>
-      <span class="conductor-value">{{ registros[0].gasolina }}</span>
+      <span class="conductor-label">⛽ Gasolina</span>
+      <span class="conductor-valor">{{ registros[0].gasolina }}</span>
     </div>
     <div class="conductor-field">
-      <span class="conductor-label">Modelo:</span>
-      <span class="conductor-value">{{ registros[0].modelo }}</span>
+      <span class="conductor-label">📦 Modelo</span>
+      <span class="conductor-valor">{{ registros[0].modelo }}</span>
     </div>
     <div class="conductor-field">
-      <span class="conductor-label">Tipo:</span>
-      <span class="conductor-value">{{ registros[0].tipo_vehiculo or 'Moto' }}</span>
+      <span class="conductor-label">🏍️ Tipo</span>
+      <span class="conductor-valor">{{ registros[0].tipo_vehiculo or 'Moto' }}</span>
     </div>
     <div class="conductor-field">
-      <span class="conductor-label">Línea:</span>
-      <span class="conductor-value">{{ registros[0].linea }}</span>
+      <span class="conductor-label">📍 Línea</span>
+      <span class="conductor-valor">{{ registros[0].linea }}</span>
     </div>
   </div>
+  {% endif %}
  
-  <!-- DOCUMENTOS -->
-  <div class="docs-title">📋 Revisión de Documentos</div>
-  <table class="docs">
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- DOCUMENTOS REQUERIDOS                                   -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  
+  <div class="seccion-titulo">📋 Revisión de Documentos Requeridos</div>
+  
+  <table class="documentos">
     <thead>
       <tr>
         <th>Documento</th>
-        <th>Número</th>
+        <th>Número/Detalle</th>
         <th>Vencimiento</th>
-        <th>Obs.</th>
+        <th>Observaciones</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td>Licencia de Conducción</td>
+        <td><strong>Licencia de Conducción</strong></td>
         <td>{{ registros[0].licencia_num or '—' }}</td>
         <td>{{ registros[0].licencia_venc or '—' }}</td>
         <td></td>
       </tr>
       <tr>
-        <td>Porte Tarjeta Propiedad</td>
+        <td><strong>Porte Tarjeta Propiedad</strong></td>
         <td>{{ registros[0].porte_propiedad or '—' }}</td>
         <td></td>
         <td></td>
       </tr>
       <tr>
-        <td>Seguro Obligatorio SOAT</td>
+        <td><strong>Seguro Obligatorio SOAT</strong></td>
         <td>{{ registros[0].soat or '—' }}</td>
         <td></td>
         <td></td>
       </tr>
       <tr>
-        <td>Certificado Emisión Gases Tóxicos</td>
+        <td><strong>Certificado Emisión Gases</strong></td>
         <td>{{ registros[0].certificado_emision or '—' }}</td>
         <td></td>
         <td></td>
       </tr>
       <tr>
-        <td>Póliza Seguro del Vehículo</td>
+        <td><strong>Póliza Seguro del Vehículo</strong></td>
         <td>{{ registros[0].poliza_seguro or '—' }}</td>
         <td></td>
         <td></td>
@@ -367,62 +515,64 @@
     </tbody>
   </table>
  
-  <!-- TABLA ASPECTOS -->
-  <div class="aspectos-title">✓ Aspectos a Revisar (B: Bueno | M: Malo)</div>
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- TABLA DE ASPECTOS (15 inspecciones)                     -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  
+  <div class="seccion-titulo">✓ Matriz de Aspectos (B: Bueno | M: Malo)</div>
+  
   <table class="aspectos">
-    
-    <!-- Números de registro -->
+    <!-- ENCABEZADO: Números de inspección -->
     <tr>
-      <th rowspan="2">Aspecto</th>
+      <th class="aspecto-nombre">Aspecto a Revisar</th>
       {% for i in range(1, 16) %}
         {% if i <= registros|length %}
-          <th colspan="2" style="font-size:6px;min-width:18px;">{{ i }}</th>
+          <th colspan="2" style="background: var(--azul); color: white;">{{ i }}</th>
         {% else %}
-          <th colspan="2" style="font-size:6px;color:#bbb;background:#f5f5f5;">{{ i }}</th>
+          <th colspan="2" style="background: #ddd; color: #bbb;">{{ i }}</th>
         {% endif %}
       {% endfor %}
-      <th rowspan="2" style="background:#f59c00;color:#fff;min-width:12px;">M</th>
+      <th class="total-malo">Total M</th>
     </tr>
  
-    <!-- B / M -->
+    <!-- SUB-ENCABEZADO: B / M -->
     <tr>
+      <th style="background: var(--azul); color: white;">—</th>
       {% for i in range(15) %}
-        <th style="width:7px;">B</th>
-        <th style="width:7px;">M</th>
+        <th style="background: #e8e8e8; color: var(--azul);">B</th>
+        <th style="background: #e8e8e8; color: var(--azul);">M</th>
       {% endfor %}
+      <th style="background: #e8e8e8; color: var(--azul);">—</th>
     </tr>
  
-    <!-- Aspectos -->
+    <!-- FILAS DE ASPECTOS -->
     {% for item in aspectos_lista %}
     {% set idx = item.indice if item is mapping else loop.index|string %}
     {% set nombre = item.nombre if item is mapping else item %}
     {% set total = item.total_m if item is mapping else 0 %}
+    
     <tr>
-      <td>{{ nombre }}</td>
+      <td><strong>{{ nombre }}</strong></td>
  
       {% for i in range(15) %}
         {% set reg = registros[i] if i < registros|length else None %}
         {% set val = (reg.aspectos_parsed or {}).get(idx, '') if reg else '' %}
  
-        <td>{% if val == 'B' %}<span class="box">✓</span>{% elif reg %}<span class="box"></span>{% else %}—{% endif %}</td>
-        <td>{% if val == 'M' %}<span class="box">✖</span>{% elif reg %}<span class="box"></span>{% else %}—{% endif %}</td>
-      {% endfor %}
- 
-      <td class="total-m">{{ total if total > 0 else '—' }}</td>
-    </tr>
-    {% endfor %}
- 
-    <!-- Óptimas -->
-    <tr>
-      <td><strong>Óptimas (SI/NO)</strong></td>
- 
-      {% for i in range(15) %}
-        {% set reg = registros[i] if i < registros|length else None %}
-        <td colspan="2">
-          {% if reg and reg.condiciones_optimas == 'SI' %}
+        <!-- Celda B (Bueno) -->
+        <td>
+          {% if val == 'B' %}
             <span class="box">✓</span>
-          {% elif reg and reg.condiciones_optimas == 'NO' %}
-            <span class="box">✖</span>
+          {% elif reg %}
+            <span class="box"></span>
+          {% else %}
+            —
+          {% endif %}
+        </td>
+ 
+        <!-- Celda M (Malo) -->
+        <td>
+          {% if val == 'M' %}
+            <span class="box malo">✖</span>
           {% elif reg %}
             <span class="box"></span>
           {% else %}
@@ -431,28 +581,90 @@
         </td>
       {% endfor %}
  
-      <td class="total-m">
-        {% set no = registros|selectattr('condiciones_optimas','equalto','NO')|list|length %}
-        {{ no if no > 0 else '—' }}
+      <!-- Total de Malos para este aspecto -->
+      <td class="total-malo">{{ total if total > 0 else '—' }}</td>
+    </tr>
+    {% endfor %}
+ 
+    <!-- FILA: Condiciones Óptimas (SI/NO) -->
+    <tr style="background: #f0f0f0;">
+      <td><strong>⭐ Óptimas (SI/NO)</strong></td>
+ 
+      {% for i in range(15) %}
+        {% set reg = registros[i] if i < registros|length else None %}
+        
+        <td colspan="2" style="text-align: center;">
+          {% if reg and reg.condiciones_optimas == 'SI' %}
+            <span class="box">✓</span>
+          {% elif reg and reg.condiciones_optimas == 'NO' %}
+            <span class="box malo">✖</span>
+          {% elif reg %}
+            <span class="box"></span>
+          {% else %}
+            —
+          {% endif %}
+        </td>
+      {% endfor %}
+ 
+      <!-- Total de NO en condiciones óptimas -->
+      <td class="total-malo">
+        {% set no_count = registros|selectattr('condiciones_optimas','equalto','NO')|list|length %}
+        {{ no_count if no_count > 0 else '—' }}
       </td>
     </tr>
- 
   </table>
  
-  <!-- FOOTER -->
-  <div class="footer">
-    <div class="firma-box">
-      <div class="firma-label">Firma Conductor</div>
-      {% if primera_firma %}
-        <img class="firma-img" src="{{ primera_firma }}" alt="Firma">
-      {% else %}
-        <div class="firma-space">(sin firma)</div>
-      {% endif %}
-      <div class="firma-name">{{ registros[0].nombre_conductor }}</div>
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- RESUMEN ESTADÍSTICO                                     -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  
+  <div class="resumen">
+    <div class="resumen-titulo">📊 Resumen del Ciclo de Inspecciones</div>
+    <div class="resumen-items">
+      <div class="resumen-item">
+        <span class="resumen-item-label">Total Inspecciones:</span>
+        <span class="resumen-item-valor">{{ registros|length }}/15</span>
+      </div>
+      <div class="resumen-item">
+        <span class="resumen-item-label">Período:</span>
+        <span class="resumen-item-valor">{{ desde }} → {{ hasta }}</span>
+      </div>
+      <div class="resumen-item">
+        <span class="resumen-item-label">Conductor:</span>
+        <span class="resumen-item-valor">{{ registros[0].nombre_conductor if registros else '—' }}</span>
+      </div>
     </div>
+  </div>
  
-    <div class="note">
-      <strong>Instrucciones:</strong> Marque <strong>B</strong> si está en óptimas condiciones o <strong>M</strong> si hay defecto. Si hay M: notifique al responsable. No circule hasta corrección. <strong>Período:</strong> {{ desde }} → {{ hasta }}
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- FOOTER CON FIRMA                                        -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  
+  <div class="footer">
+    <!-- FIRMA -->
+    {% if registros and registros[0] %}
+    <div class="firma-box">
+      <div class="firma-etiqueta">Firma Conductor</div>
+      
+      {% if registros[0].firma_base64 %}
+        <img class="firma-img" src="{{ registros[0].firma_base64 }}" alt="Firma">
+      {% elif registros[0].firma_path %}
+        <img class="firma-img" src="{{ registros[0].firma_path }}" alt="Firma">
+      {% else %}
+        <div class="firma-espacio">(sin firma)</div>
+      {% endif %}
+      
+      <div class="firma-nombre">{{ registros[0].nombre_conductor }}</div>
+    </div>
+    {% endif %}
+ 
+    <!-- NOTA IMPORTANTE -->
+    <div class="nota-footer">
+      <strong>⚠️ Instrucciones Importantes:</strong><br>
+      Marque <strong>B</strong> si el aspecto está en óptimas condiciones o <strong>M</strong> si presenta algún defecto. 
+      <strong>Si hay defectos (M):</strong> Notifique inmediatamente al responsable de mantenimiento. 
+      <strong>No circule</strong> hasta que se corrijan todos los defectos identificados. 
+      Este reporte documenta el estado del vehículo durante el período indicado.
     </div>
   </div>
  
