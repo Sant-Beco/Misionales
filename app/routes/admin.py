@@ -1,5 +1,5 @@
-# app/routes/admin.py — VERSIÓN FINAL COMPLETA
- 
+# app/routes/admin.py
+
 """
 Panel de administración para gestionar:
 - Usuarios
@@ -7,42 +7,44 @@ Panel de administración para gestionar:
 - Logs de auditoría
 - Dashboard con gráficas
 """
- 
+
 from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc, extract, and_, cast, Date as SADate, case
 from datetime import datetime, date, timedelta
- 
+
 from app.database import SessionLocal
 from app import models
 from app.security import get_current_user, hash_pin
- 
+from app.routes.inspecciones import ASPECTOS_POR_TIPO
+
 router = APIRouter()
- 
+
 from fastapi.templating import Jinja2Templates as _J2T
 _templates_admin = _J2T(directory=str(Path(__file__).resolve().parent.parent / "templates"))
- 
+
+
 # ═══════════════════════════════════════════════════════════════════
 # DEPENDENCIA: Solo administradores
 # ═══════════════════════════════════════════════════════════════════
- 
+
 def require_admin(usuario_actual: models.Usuario = Depends(get_current_user)):
     """Valida que el usuario sea admin"""
     if usuario_actual.rol != "admin":
         raise HTTPException(status_code=403, detail="No tienes permisos de administrador")
     return usuario_actual
- 
- 
+
+
 def get_db():
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
- 
- 
+
+
 def registrar_accion(db: Session, admin_id: int, accion: str, detalles: str):
     """Registra una acción en los logs de auditoría"""
     log = models.LogAuditoria(
@@ -53,12 +55,47 @@ def registrar_accion(db: Session, admin_id: int, accion: str, detalles: str):
     )
     db.add(log)
     db.commit()
- 
- 
+
+
+def get_aspectos_enriquecidos(inspeccion) -> dict:
+    """
+    Devuelve una copia enriquecida de aspectos_dict SIN tocar el objeto ORM.
+    aspectos_dict es @property de solo lectura — nunca se le asigna.
+
+    Formato antiguo en BD: {"1": "B", "2": "M"}
+    Formato nuevo en BD:   {"1": {"valor": "B", "label": "Llantas — estado..."}}
+
+    Siempre retorna formato nuevo, usando ASPECTOS_POR_TIPO para
+    los registros que no tienen label guardado.
+    """
+    asp = inspeccion.aspectos_dict
+    if not asp:
+        return {}
+
+    # Early-return: todos los valores ya tienen formato nuevo con label
+    if all(isinstance(v, dict) and "label" in v for v in asp.values()):
+        return asp
+
+    tipo = inspeccion.tipo_vehiculo or "Moto"
+    labels = ASPECTOS_POR_TIPO.get(tipo, ASPECTOS_POR_TIPO["Moto"])
+
+    enriquecido = {}
+    for k, v in asp.items():
+        if isinstance(v, dict) and "label" in v:
+            enriquecido[k] = v
+        else:
+            valor = v.get("valor", "") if isinstance(v, dict) else str(v)
+            idx = int(k) - 1  # claves son 1-based
+            label = labels[idx] if 0 <= idx < len(labels) else f"Aspecto {k}"
+            enriquecido[k] = {"valor": valor, "label": label}
+
+    return enriquecido
+
+
 # ═══════════════════════════════════════════════════════════════════
 # DASHBOARD
 # ═══════════════════════════════════════════════════════════════════
- 
+
 @router.get("/admin", response_class=HTMLResponse)
 async def admin_dashboard(
     request: Request,
@@ -67,10 +104,10 @@ async def admin_dashboard(
 ):
     """Dashboard admin con gráficas y KPIs"""
     templates = _templates_admin
-    
+
     total_usuarios = db.query(models.Usuario).count()
     total_inspecciones = db.query(models.Inspeccion).count()
-    
+
     # Top 5 conductores
     usuarios_activos = (
         db.query(
@@ -89,11 +126,11 @@ async def admin_dashboard(
         .limit(5)
         .all()
     )
-    
+
     # Inspecciones por día (últimos 90 días)
     hoy = date.today()
     hace_90_dias = hoy - timedelta(days=90)
-    
+
     rows = (
         db.query(
             cast(models.Inspeccion.fecha, SADate).label("dia"),
@@ -104,7 +141,7 @@ async def admin_dashboard(
         .order_by("dia")
         .all()
     )
-    
+
     totales_dia = {r.dia: r.total for r in rows}
     inspecciones_por_dia = []
     for i in range(90):
@@ -113,7 +150,7 @@ async def admin_dashboard(
             "fecha": fecha.strftime("%d/%m/%y"),
             "total": totales_dia.get(fecha, 0)
         })
-    
+
     # Inspecciones por mes/año
     rows_anual = (
         db.query(
@@ -125,7 +162,7 @@ async def admin_dashboard(
         .order_by("anio", "mes")
         .all()
     )
-    
+
     anual_dict = {}
     for row in rows_anual:
         anio = int(row.anio)
@@ -133,12 +170,12 @@ async def admin_dashboard(
         if anio not in anual_dict:
             anual_dict[anio] = [0] * 12
         anual_dict[anio][mes - 1] = int(row.total)
-    
+
     inspecciones_anual = [
         {"anio": anio, "meses": anual_dict[anio]}
         for anio in sorted(anual_dict.keys(), reverse=True)
     ]
-    
+
     return templates.TemplateResponse("admin/dashboard.html", {
         "request": request,
         "admin": usuario_admin,
@@ -148,12 +185,12 @@ async def admin_dashboard(
         "inspecciones_por_dia": inspecciones_por_dia,
         "inspecciones_anual": inspecciones_anual,
     })
- 
- 
+
+
 # ═══════════════════════════════════════════════════════════════════
 # LISTA DE INSPECCIONES
 # ═══════════════════════════════════════════════════════════════════
- 
+
 @router.get("/admin/inspecciones", response_class=HTMLResponse)
 async def admin_inspecciones(
     request: Request,
@@ -172,7 +209,7 @@ async def admin_inspecciones(
     q = db.query(models.Inspeccion, models.Usuario).join(
         models.Usuario, models.Inspeccion.usuario_id == models.Usuario.id
     )
- 
+
     if conductor.strip():
         q = q.filter(models.Inspeccion.nombre_conductor.ilike(f"%{conductor.strip()}%"))
     if placa.strip():
@@ -190,24 +227,33 @@ async def admin_inspecciones(
             q = q.filter(models.Inspeccion.fecha < limite)
         except ValueError:
             pass
- 
+
     resultados = q.order_by(models.Inspeccion.fecha.desc()).limit(300).all()
+
+    # Construir dict enriquecido por inspeccion.id SIN tocar el ORM
+    # (aspectos_dict es @property de solo lectura)
+    aspectos_map = {
+        inspeccion.id: get_aspectos_enriquecidos(inspeccion)
+        for inspeccion, _ in resultados
+    }
+
     total_activas = db.query(models.Inspeccion).count()
     conductores_unicos = db.query(models.Inspeccion.usuario_id).distinct().count()
- 
+
     def _tiene_malo(inspeccion):
-        for v in (inspeccion.aspectos_dict or {}).values():
+        for v in aspectos_map.get(inspeccion.id, {}).values():
             val = v.get("valor") if isinstance(v, dict) else v
             if val == "M":
                 return True
         return False
- 
-    con_malo = sum(1 for r, u in resultados if _tiene_malo(r))
- 
+
+    con_malo = sum(1 for r, _ in resultados if _tiene_malo(r))
+
     return _templates_admin.TemplateResponse("admin/inspecciones.html", {
         "request": request,
         "admin": usuario_admin,
         "resultados": resultados,
+        "aspectos_map": aspectos_map,
         "total_activas": total_activas,
         "con_malo": con_malo,
         "conductores_unicos": conductores_unicos,
@@ -221,8 +267,8 @@ async def admin_inspecciones(
             "fecha_hasta": fecha_hasta,
         },
     })
- 
- 
+
+
 @router.get("/api/admin/inspecciones")
 async def api_inspecciones(
     usuario_admin: models.Usuario = Depends(require_admin),
@@ -230,7 +276,7 @@ async def api_inspecciones(
 ):
     """API JSON para obtener TODAS las inspecciones"""
     inspecciones = db.query(models.Inspeccion).order_by(desc(models.Inspeccion.fecha)).all()
-    
+
     return {
         "success": True,
         "total": len(inspecciones),
@@ -247,12 +293,12 @@ async def api_inspecciones(
             for insp in inspecciones
         ]
     }
- 
- 
+
+
 # ═══════════════════════════════════════════════════════════════════
 # MIS INSPECCIONES (para admin ver las suyas)
 # ═══════════════════════════════════════════════════════════════════
- 
+
 @router.get("/admin/mis-inspecciones", response_class=HTMLResponse)
 async def admin_mis_inspecciones(
     request: Request,
@@ -263,8 +309,8 @@ async def admin_mis_inspecciones(
         "request": request,
         "admin": usuario_admin,
     })
- 
- 
+
+
 @router.get("/api/admin/mis-inspecciones")
 async def api_admin_mis_inspecciones(
     usuario_admin: models.Usuario = Depends(require_admin),
@@ -277,7 +323,7 @@ async def api_admin_mis_inspecciones(
         .order_by(desc(models.Inspeccion.fecha))
         .all()
     )
-    
+
     return {
         "success": True,
         "total": len(inspecciones),
@@ -294,12 +340,12 @@ async def api_admin_mis_inspecciones(
             for insp in inspecciones
         ]
     }
- 
- 
+
+
 # ═══════════════════════════════════════════════════════════════════
 # USUARIOS — LISTAR
 # ═══════════════════════════════════════════════════════════════════
- 
+
 @router.get("/admin/usuarios", response_class=HTMLResponse)
 async def admin_usuarios_list(
     request: Request,
@@ -315,19 +361,19 @@ async def admin_usuarios_list(
         .group_by(models.Inspeccion.usuario_id)
         .all()
     )
-    
+
     return _templates_admin.TemplateResponse("admin/usuarios.html", {
         "request": request,
         "admin": usuario_admin,
         "usuarios": usuarios,
         "stats": stats,
     })
- 
- 
+
+
 # ═══════════════════════════════════════════════════════════════════
 # USUARIOS — CREAR
 # ═══════════════════════════════════════════════════════════════════
- 
+
 @router.get("/admin/usuarios/nuevo", response_class=HTMLResponse)
 async def admin_usuario_nuevo_form(
     request: Request,
@@ -339,8 +385,8 @@ async def admin_usuario_nuevo_form(
         "modo": "crear",
         "usuario": None,
     })
- 
- 
+
+
 @router.post("/admin/usuarios/crear")
 async def admin_usuario_crear(
     usuario_admin: models.Usuario = Depends(require_admin),
@@ -351,22 +397,22 @@ async def admin_usuario_crear(
     rol: str = Form("user")
 ):
     cedula_clean = cedula.strip()
-    
+
     if not cedula_clean.isdigit() or not (5 <= len(cedula_clean) <= 12):
         raise HTTPException(400, "Cédula inválida (5-12 dígitos numéricos)")
-    
+
     if len(pin) < 6:
         raise HTTPException(400, "PIN debe tener al menos 6 dígitos")
-    
+
     if rol not in ["user", "admin"]:
         raise HTTPException(400, "Rol inválido")
-    
+
     existe = db.query(models.Usuario).filter(
         models.Usuario.cedula == cedula_clean
     ).first()
     if existe:
         raise HTTPException(400, f"La cédula '{cedula_clean}' ya está registrada")
-    
+
     nuevo_usuario = models.Usuario(
         cedula=cedula_clean,
         nombre_visible=nombre_visible.strip(),
@@ -376,19 +422,19 @@ async def admin_usuario_crear(
     db.add(nuevo_usuario)
     db.commit()
     db.refresh(nuevo_usuario)
-    
+
     registrar_accion(
         db, usuario_admin.id, "CREAR_USUARIO",
         f"Cédula '{cedula_clean}' creada con rol '{rol}'"
     )
-    
+
     return RedirectResponse(url="/admin/usuarios?mensaje=Usuario creado exitosamente", status_code=303)
- 
- 
+
+
 # ═══════════════════════════════════════════════════════════════════
 # USUARIOS — EDITAR
 # ═══════════════════════════════════════════════════════════════════
- 
+
 @router.get("/admin/usuarios/{usuario_id}/editar", response_class=HTMLResponse)
 async def admin_usuario_editar_form(
     request: Request,
@@ -399,15 +445,15 @@ async def admin_usuario_editar_form(
     usuario = db.query(models.Usuario).filter_by(id=usuario_id).first()
     if not usuario:
         raise HTTPException(404, "Usuario no encontrado")
-    
+
     return _templates_admin.TemplateResponse("admin/usuario_form.html", {
         "request": request,
         "admin": usuario_admin,
         "modo": "editar",
         "usuario": usuario,
     })
- 
- 
+
+
 @router.post("/admin/usuarios/{usuario_id}/actualizar")
 async def admin_usuario_actualizar(
     usuario_id: int,
@@ -420,38 +466,38 @@ async def admin_usuario_actualizar(
     usuario = db.query(models.Usuario).filter_by(id=usuario_id).first()
     if not usuario:
         raise HTTPException(404, "Usuario no encontrado")
-    
+
     if usuario.id == usuario_admin.id and rol != "admin":
         raise HTTPException(400, "No puedes quitarte permisos de admin")
-    
+
     cambios = []
     if nombre_visible.strip() != usuario.nombre_visible:
         usuario.nombre_visible = nombre_visible.strip()
         cambios.append("nombre_visible")
-    
+
     if rol != usuario.rol:
         usuario.rol = rol
         cambios.append(f"rol → {rol}")
-    
+
     if pin and len(pin) >= 6:
         usuario.pin_hash = hash_pin(pin)
         cambios.append("PIN")
-    
+
     db.commit()
-    
+
     if cambios:
         registrar_accion(
             db, usuario_admin.id, "EDITAR_USUARIO",
             f"Cédula '{usuario.cedula}': {', '.join(cambios)}"
         )
-    
+
     return RedirectResponse(url="/admin/usuarios?mensaje=Usuario actualizado", status_code=303)
- 
- 
+
+
 # ═══════════════════════════════════════════════════════════════════
 # USUARIOS — ELIMINAR
 # ═══════════════════════════════════════════════════════════════════
- 
+
 @router.post("/admin/usuarios/{usuario_id}/eliminar")
 async def admin_usuario_eliminar(
     usuario_id: int,
@@ -461,32 +507,32 @@ async def admin_usuario_eliminar(
     usuario = db.query(models.Usuario).filter_by(id=usuario_id).first()
     if not usuario:
         raise HTTPException(404, "Usuario no encontrado")
-    
+
     if usuario.id == usuario_admin.id:
         raise HTTPException(400, "No puedes eliminarte a ti mismo")
-    
+
     tiene_inspecciones = db.query(models.Inspeccion).filter_by(usuario_id=usuario_id).first()
     if tiene_inspecciones:
         raise HTTPException(400, "No se puede eliminar: el usuario tiene inspecciones registradas")
-    
+
     cedula_eliminada = usuario.cedula
     usuario.token = None
     usuario.token_expira = None
     db.delete(usuario)
     db.commit()
-    
+
     registrar_accion(
         db, usuario_admin.id, "ELIMINAR_USUARIO",
         f"Cédula '{cedula_eliminada}' eliminada"
     )
-    
+
     return RedirectResponse(url="/admin/usuarios?mensaje=Usuario eliminado", status_code=303)
- 
- 
+
+
 # ═══════════════════════════════════════════════════════════════════
 # USUARIOS — SUSPENDER / REACTIVAR
 # ═══════════════════════════════════════════════════════════════════
- 
+
 @router.post("/admin/usuarios/{usuario_id}/suspender")
 async def admin_usuario_suspender(
     usuario_id: int,
@@ -496,23 +542,23 @@ async def admin_usuario_suspender(
     usuario = db.query(models.Usuario).filter_by(id=usuario_id).first()
     if not usuario:
         raise HTTPException(404, "Usuario no encontrado")
-    
+
     if usuario.id == usuario_admin.id:
         raise HTTPException(400, "No puedes suspenderte a ti mismo")
-    
+
     usuario.activo = 0
     usuario.token = None
     usuario.token_expira = None
     db.commit()
-    
+
     registrar_accion(
         db, usuario_admin.id, "SUSPENDER_USUARIO",
         f"Cédula '{usuario.cedula}' suspendida"
     )
-    
+
     return RedirectResponse(url="/admin/usuarios?mensaje=Usuario suspendido", status_code=303)
- 
- 
+
+
 @router.post("/admin/usuarios/{usuario_id}/reactivar")
 async def admin_usuario_reactivar(
     usuario_id: int,
@@ -522,22 +568,22 @@ async def admin_usuario_reactivar(
     usuario = db.query(models.Usuario).filter_by(id=usuario_id).first()
     if not usuario:
         raise HTTPException(404, "Usuario no encontrado")
-    
+
     usuario.activo = 1
     db.commit()
-    
+
     registrar_accion(
         db, usuario_admin.id, "REACTIVAR_USUARIO",
         f"Cédula '{usuario.cedula}' reactivada"
     )
-    
+
     return RedirectResponse(url="/admin/usuarios?mensaje=Usuario reactivado", status_code=303)
- 
- 
+
+
 # ═══════════════════════════════════════════════════════════════════
 # LOGS DE AUDITORÍA
 # ═══════════════════════════════════════════════════════════════════
- 
+
 @router.get("/admin/logs", response_class=HTMLResponse)
 async def admin_logs(
     request: Request,
@@ -550,29 +596,27 @@ async def admin_logs(
         .limit(100)
         .all()
     )
-    
+
     for log in logs:
         admin = db.query(models.Usuario).filter_by(id=log.admin_id).first()
         if admin:
-            # ✅ Asignar nombre (con prioridad)
             log.admin_nombre = admin.nombre_visible or admin.nombre or admin.cedula
-            # ✅ Asignar cédula del admin
             log.admin_cedula = admin.cedula
         else:
             log.admin_nombre = "Desconocido"
             log.admin_cedula = "---"
-    
+
     return _templates_admin.TemplateResponse("admin/logs.html", {
         "request": request,
         "admin": usuario_admin,
         "logs": logs,
     })
- 
- 
+
+
 # ═══════════════════════════════════════════════════════════════════
 # API REST: VALIDAR CÉDULA
 # ═══════════════════════════════════════════════════════════════════
- 
+
 @router.get("/api/admin/validar-cedula")
 async def validar_cedula(
     cedula: str,
@@ -581,21 +625,21 @@ async def validar_cedula(
 ):
     """Verifica si una cédula ya existe"""
     cedula_clean = cedula.strip()
-    
+
     if not cedula_clean.isdigit() or not (5 <= len(cedula_clean) <= 12):
         return JSONResponse({"error": "Cédula inválida"}, status_code=400)
-    
+
     existe = db.query(models.Usuario).filter(
         models.Usuario.cedula == cedula_clean
     ).first()
-    
+
     return JSONResponse({"existe": existe is not None, "cedula": cedula_clean})
- 
- 
+
+
 # ═══════════════════════════════════════════════════════════════════
 # API REST: LISTAR USUARIOS
 # ═══════════════════════════════════════════════════════════════════
- 
+
 @router.get("/api/admin/usuarios")
 async def api_usuarios_list(
     usuario_admin: models.Usuario = Depends(require_admin),
